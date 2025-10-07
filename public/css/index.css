@@ -1,0 +1,106 @@
+@import url('https://fonts.googleapis.com/css2?family=Black+Ops+One&family=Bungee+Spice&family=Carter+One&family=Chango&family=Cinzel:wght@400..900&family=El+Messiri:wght@400..700&family=Grechen+Fuemen&family=Griffy&family=Hubot+Sans:ital,wght@0,200..900;1,200..900&family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=Lacquer&family=Lato:ital,wght@0,100;0,300;0,400;0,700;0,900;1,100;1,300;1,400;1,700;1,900&family=Lily+Script+One&family=Merriweather+Sans:ital,wght@0,300..800;1,300..800&family=Monomakh&family=Montserrat:ital,wght@0,100..900;1,100..900&family=Noto+Sans:ital,wght@0,100..900;1,100..900&family=Oleo+Script:wght@400;700&family=Orbitron:wght@400..900&family=Outfit:wght@100..900&family=Philosopher:ital,wght@0,400;0,700;1,400;1,700&family=Playfair+Display:ital,wght@0,400..900;1,400..900&family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&family=Saira:ital,wght@0,100..900;1,100..900&family=Slackey&family=Space+Grotesk:wght@300..700&family=Spicy+Rice&family=Tinos:ital,wght@0,400;0,700;1,400;1,700&family=Wallpoet&display=swap');
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+
+/* Reset and body style */
+body, html {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+/* Background with overlay */
+.site-container {
+  background: url('/images/MG_4179-Editsmall1.jpg') no-repeat center center/cover;
+  position: relative;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  overflow: hidden;
+}
+
+/* Black overlay */
+.site-container::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+  width: 100%;
+  background-color: rgba(0, 0, 0, 0.5); /* Slight black overlay */
+  z-index: 0;
+}
+
+/* Content positioning */
+.main-content,
+.top-nav {
+  position: relative;
+  z-index: 1;
+}
+
+/* Top navigation */
+.top-nav {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+}
+
+.btn {
+  padding: 10px 20px;
+  margin-left: 10px;
+  border: none;
+  border-radius: 5px;
+  text-decoration: none;
+  color: #fff;
+  font-weight: bold;
+  transition: background-color 0.3s ease;
+}
+
+.donate-btn {
+  background-color: #007bff;
+}
+
+.ticket-btn {
+  background-color: #28a745;
+}
+
+.btn:hover {
+  opacity: 0.8;
+}
+
+/* Logo */
+.nus-logo {
+  max-width: 250px;
+  margin-bottom: 20px;
+}
+
+/* Heading */
+.main-content h1 {
+  font-size: 7.5rem;
+  color: #fff;
+  font-family: "Lato", sans-serif;
+  font-weight: 900;
+  font-style: normal;
+}
+.site-footer {
+  position: absolute;
+  bottom: 10px;
+  width: 100%;
+  text-align: center;
+  z-index: 1;
+}
+
+.site-footer p {
+  color: #fff;
+  font-size: 0.9rem;
+  margin: 0;
+  opacity: 0.8;
+}

@@ -1,0 +1,428 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>View Imaging Request</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+ 
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {  background-color: #f8f9fa; }
+       .request-container {
+    background-color: #fff;
+    border-radius: 12px;
+    padding: 30px;
+    margin-top: -100px;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
+    max-width: 1000px;
+    margin: 40px auto;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.request-header {
+    margin-bottom: 30px;
+    border-bottom: 2px solid #f1f1f1;
+    padding-bottom: 15px;
+}
+
+.request-header h1 {
+    font-size: 1.75rem;
+    font-weight: 600;
+    color: #333;
+}
+
+.request-header p {
+    font-size: 0.95rem;
+    margin-top: 4px;
+    color: #666;
+}
+
+.status-badge {
+    font-size: 0.85rem;
+    padding: 6px 12px;
+    border-radius: 20px;
+    float: right;
+    margin-top: -35px;
+}
+
+.detail-row {
+    display: flex;
+    margin-bottom: 16px;
+    flex-wrap: wrap;
+}
+
+.detail-label {
+    flex: 0 0 180px;
+    font-weight: 600;
+    color: #444;
+}
+
+.detail-value {
+    flex: 1;
+    color: #333;
+}
+
+.text-area-value {
+    white-space: pre-wrap;
+    background: #f9f9f9;
+    padding: 10px 15px;
+    border-radius: 8px;
+    border: 1px solid #eee;
+}
+
+.badge {
+    padding: 6px 10px;
+    font-size: 0.85rem;
+    font-weight: 500;
+    border-radius: 12px;
+}
+
+.bg-success {
+    background-color: #28a745 !important;
+    color: #fff;
+}
+
+.bg-danger {
+    background-color: #dc3545 !important;
+    color: #fff;
+}
+
+.bg-warning {
+    background-color: #ffc107 !important;
+    color: #212529;
+}
+
+.mt-4 {
+    margin-top: 2rem !important;
+}
+
+.btn {
+    border-radius: 8px;
+    padding: 10px 20px;
+    font-size: 0.95rem;
+    font-weight: 500;
+    transition: all 0.3s ease-in-out;
+}
+
+.btn-primary {
+    background-color: #007bff;
+    border: none;
+    color: #fff;
+}
+
+.btn-primary:hover {
+    background-color: #0056b3;
+}
+
+.btn-warning {
+    background-color: #07daff;
+    border: none;
+    color: #212529;
+}
+
+.btn-warning:hover {
+    background-color: #e0a800;
+}
+body {
+    font-family: 'Inter', sans-serif;
+    margin: 0;
+    background: #f8f9fc;
+    color: #333;
+    display: flex;
+}
+
+main {
+    margin-left: 240px; /* enough space for sidebar */
+    padding: 40px;
+    width: 100%;
+    box-sizing: border-box;
+}
+.sidebar {
+    position: fixed;
+    left: 0;
+    top: 0;
+    height: 100%;
+    width: 220px;
+    background-color: #000435;
+    display: flex;
+    flex-direction: column;
+    padding: 20px 0;
+    border-top-right-radius: 15px;
+    border-bottom-right-radius: 15px;
+    color: white;
+  }
+  
+  .logo-text {
+    text-align: center;
+    font-size: 28px;
+    font-weight: bold;
+    margin-bottom: 50px;
+    color: #0050db; /* Stylish purple */
+    letter-spacing: 2px;
+  }
+  
+  .nav-links {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+  
+  .nav-links li {
+    margin: 22px 0; /* More spacing between items */
+  }
+  
+  .nav-links li a {
+    text-decoration: none;
+    color: white;
+    font-size: 11px;
+    margin-top: 50px;
+    padding: 12px 20px;
+    display: flex;
+    align-items: center;
+    border-radius: 10px;
+    transition:  0.3s;
+  }
+  
+  .nav-links li a:hover
+  {
+    background-color: #0066ff;
+  }
+  
+  .sidebar .nav-links li a {
+    display: flex;
+    align-items: center;
+    margin-left: 5px;
+  }
+  
+  .sidebar .nav-links li a i {
+    margin-right: 11px;
+  } 
+     
+/* Heading */
+h2 {
+    font-size: 24px;
+    color: #212529;
+    font-weight: 600;
+    margin-bottom: 20px;
+}
+
+/* Table Container */
+.table-container {
+    width: 60%; /* Decreased from 70% */
+    max-width: 800px; /* Slightly reduced max width */
+    margin: 0 auto;
+    
+    padding: 16px; /* Reduced padding */
+    border-radius: 8px;
+    margin-left: -30px; /* Adjusted margin if needed */
+}
+
+/* Table Styles */
+table {
+    width: 45%; /* Slightly narrower */
+    border-collapse: collapse;
+    background: white;
+    border-radius: 8px;
+    overflow: hidden;
+    margin: 0 auto;
+}
+
+/* Table Header */
+th {
+    background: #000435;
+    color: white;
+    padding: 10px; /* Reduced padding */
+    text-align: left;
+    font-weight: 600;
+    font-size: 12px; /* Reduced font size */
+    text-transform: uppercase;
+    border-bottom: 2px solid #000435;
+    white-space: nowrap;
+}
+
+/* Table Data */
+td {
+    padding: 10px; /* Reduced padding */
+    border-bottom: 1px solid #ddd;
+    font-size: 12px; /* Reduced font size */
+    color: #333;
+    white-space: nowrap;
+}
+
+/* Alternating Row Colors */
+tbody tr:nth-child(even) {
+    background: #f8f9fc;
+}
+
+/* Hover Effect */
+tbody tr:hover {
+    background: #e9ecef;
+    transition: 0.3s;
+}
+
+
+/* Buttons */
+button, a {
+    display: inline-block;
+    padding: 8px 12px;
+    border: none;
+    cursor: pointer;
+    font-size: 14px;
+    text-align: center;
+    border-radius: 4px;
+    transition: 0.3s;
+    text-decoration: none;
+    font-weight: 500;
+}
+
+/* Edit Button */
+a.edit-btn {
+    background: #28a745;
+    color: white;
+}
+
+a.edit-btn:hover {
+    background: #218838;
+}
+
+/* Delete Button */
+button.delete-btn {
+    background: #dc3545;
+    color: white;
+}
+
+button.delete-btn:hover {
+    background: #c82333;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    table {
+        font-size: 12px;
+    }
+
+    th, td {
+        padding: 10px;
+    }
+
+    button, a {
+        padding: 6px 10px;
+        font-size: 12px;
+    }
+}
+
+    </style>
+</head>
+<body>
+    <div class="sidebar">
+        <div class="logo">
+            <img src="/images/Group-1.svg" alt="LKCNHM Logo" style="width: 200px; height: auto; margin-left:10px;" />
+          </div>
+        <ul class="nav-links">
+            <li class="active"><a href="/user-dashboard"><i class="fas fa-chart-line"></i><span>Dashboard</span></a></li>
+            <li><a href="/imagingUser"><i class="fas fa-users"></i><span>Imaging User Management</span></a></li>
+            <li><a href="/user/imaging-requests"><i class="fas fa-file-medical"></i><span>Imaging Request Management</span></a></li>
+            <li><a href="/change-password"><i class="fas fa-key"></i><span>Change Password</span></a></li>
+            <!-- <li><a href="/imaging-request-user"><i class="fas fa-file-medical"></i><span>Imaging Request Form</span></a></li> -->
+
+            <!-- <li><a href="/imaging-requests"><i class="fas fa-key"></i><span>View Imaging Req</span></a></li> -->
+            <li><a href="/auth/logout"><i class="fas fa-sign-out-alt"></i><span>Logout</span></a></li>
+        </ul>
+    </div>
+      <main>
+    <div class="container request-container">
+        <div class="request-header">
+            <h1 class="h3 mb-0">Imaging Request #<%= request.ImagingRequestID %></h1>
+            <p class="text-muted mb-0">Created on <%= request.CreatedDate %> by <%= request.creator_name || 'System' %></p>
+            <% if (request.UpdatedDate) { %>
+                <p class="text-muted">Last updated on <%= request.UpdatedDate %> by <%= request.updater_name || 'System' %></p>
+            <% } %>
+            <span class="badge <%= request.IsDelete === 'Yes' ? 'bg-danger' : 'bg-success' %> status-badge">
+                <%= request.IsDelete === 'Yes' ? 'Deleted' : 'Active' %>
+            </span>
+        </div>
+
+        <div class="row">
+            <div class="col-md-6">
+                <div class="detail-row">
+                    <div class="detail-label">Requestor</div>
+                    <div class="detail-value"><%= request.requestor_name %></div>
+                </div>
+                
+                <div class="detail-row">
+                    <div class="detail-label">Photographer</div>
+                    <div class="detail-value"><%= request.photographer_name %></div>
+                </div>
+                
+                <div class="detail-row">
+                    <div class="detail-label">Status</div>
+                    <div class="detail-value">
+                        <span class="badge bg-<%= request.status_name === 'Approved' ? 'success' : request.status_name === 'Rejected' ? 'danger' : 'warning' %>">
+                            <%= request.status_name %>
+                        </span>
+                    </div>
+                </div>
+
+                <div class="detail-row">
+                    <div class="detail-label">Request Date</div>
+                    <div class="detail-value"><%= request.DateofRequest %></div>
+                </div>
+            </div>
+            
+            <div class="col-md-6">
+                <div class="detail-row">
+                    <div class="detail-label">Imaging Period</div>
+                    <div class="detail-value">
+                        <%= request.ImagingStartDate %> to <%= request.ImagingEndDate %>
+                    </div>
+                </div>
+                
+                <div class="detail-row">
+                    <div class="detail-label">Location</div>
+                    <div class="detail-value"><%= request.SpecimenLocationName || 'Not specified' %></div>
+                </div>
+
+                <div class="detail-row">
+                    <div class="detail-label">Imaging Platform</div>
+                    <div class="detail-value"><%= request.ImagingPlatform || 'Not specified' %></div>
+                </div>
+
+                <div class="detail-row">
+                    <div class="detail-label">Reason for Status</div>
+                    <div class="detail-value"><%= request.ReasonforRequestStatus || 'Not specified' %></div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="detail-row">
+            <div class="detail-label">Project Summary</div>
+            <div class="detail-value text-area-value"><%= request.SummaryofProject || 'Not specified' %></div>
+        </div>
+        
+        <div class="detail-row">
+            <div class="detail-label">Specimen Details</div>
+            <div class="detail-value text-area-value"><%= request.SpecimenDetails || 'Not specified' %></div>
+        </div>
+        
+        <% if (request.Comments) { %>
+        <div class="detail-row">
+            <div class="detail-label">Additional Comments</div>
+            <div class="detail-value text-area-value"><%= request.Comments || 'Not specified' %></div>
+        </div>
+        <% } %>
+
+        <div class="mt-4 d-flex justify-content-between">
+            <a href="/user/imaging-requests" class="btn btn-primary">
+                <i class="fas fa-arrow-left"></i> Back to Imaging Requests
+            </a>
+           
+        </div>
+    </div>
+</main>
+    <!-- Font Awesome for icons -->
+ 
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

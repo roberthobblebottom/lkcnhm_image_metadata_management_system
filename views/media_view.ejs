@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>📷 Media File Details - ID: <%= mediaId %></title>
+  <link rel="stylesheet" href="/css/admin.css" />
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      padding: 2rem;
+      background: #f0f2f5;
+    }
+    /* Main Container */
+.main_con {
+    display: flex;
+    width: 900px;
+    min-height: 100vh;
+    text-align: center;
+    margin-left: 350px;
+    background-color: #f5f7fa;
+}
+
+/* Media Container */
+.media-container {
+    flex: 1;
+    padding: 2rem;
+    margin: 20px;
+    background: white;
+    border-radius: 15px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+}
+
+.media-container h2 {
+    color: #2c3e50;
+    margin-bottom: 2rem;
+    padding-bottom: 1rem;
+    border-bottom: 2px solid #eceef1;
+    font-size: 1.8rem;
+}
+
+/* Media Details */
+.media-details {
+    display: grid;
+    gap: 1.2rem;
+    padding: 1rem;
+}
+
+.detail-row {
+    display: flex;
+    padding: 1rem;
+    background: #f8fafc;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+}
+
+.detail-row:hover {
+    background: #eef2f7;
+    transform: translateX(5px);
+}
+
+.detail-label {
+    flex: 0 0 200px;
+    color: #64748b;
+    font-weight: 600;
+    padding-right: 1rem;
+}
+
+.detail-value {
+    flex: 1;
+    color: #334155;
+}
+
+/* Media Preview Section */
+.media-preview {
+    margin-top: 2rem;
+    padding: 1.5rem;
+    background: #f8fafc;
+    border-radius: 12px;
+    border: 2px dashed #e2e8f0;
+}
+
+.media-preview img {
+    max-width: 100%;
+    height: auto;
+    border-radius: 8px;
+    margin-top: 1rem;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .detail-row {
+        flex-direction: column;
+    }
+    
+    .detail-label {
+        margin-bottom: 0.5rem;
+    }
+    
+    .media-container {
+        padding: 1rem;
+        margin: 10px;
+    }
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+    width: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: #f1f1f1;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #888;
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #555;
+}
+
+/* Animations */
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.media-details {
+    animation: fadeIn 0.5s ease-out;
+}
+  </style>
+</head>
+<body>
+    <div class="main_con">
+        <%- include('partials/sidenav') %>
+  <div class="media-container">
+    <h2>📸 Media File Details - ID: <%= mediaId %></h2>
+
+    <div class="media-details">
+      <div class="detail-row">
+        <div class="detail-label">File Name:</div>
+        <div class="detail-value"><%= media.MediaFileName || '-' %></div>
+      </div>
+      
+      <div class="detail-row">
+        <div class="detail-label">File Path:</div>
+        <div class="detail-value"><%= media.FilePath || '-' %></div>
+      </div>
+      
+      <div class="detail-row">
+        <div class="detail-label">Imaging Request ID:</div>
+        <div class="detail-value"><%= media.ImagingRequestID %></div>
+      </div>
+      
+      <div class="detail-row">
+        <div class="detail-label">Catalog ID:</div>
+        <div class="detail-value"><%= media.CatalogID || '-' %></div>
+      </div>
+      
+      <div class="detail-row">
+        <div class="detail-label">Imaging Date:</div>
+        <div class="detail-value"><%= media.ImagingDate?.toISOString().slice(0, 10) || '-' %></div>
+      </div>
+      
+      <div class="detail-row">
+        <div class="detail-label">Resolution:</div>
+        <div class="detail-value"><%= media.Resolution || '-' %></div>
+      </div>
+      
+      <div class="detail-row">
+        <div class="detail-label">File Size:</div>
+        <div class="detail-value"><%= media.FileSize || '-' %></div>
+      </div>
+      
+      <div class="detail-row">
+        <div class="detail-label">File Format:</div>
+        <div class="detail-value"><%= media.FileFormat || '-' %></div>
+      </div>
+      
+      <div class="detail-row">
+        <div class="detail-label">Camera Model:</div>
+        <div class="detail-value"><%= media.CameraModel || '-' %></div>
+      </div>
+      
+      <div class="detail-row">
+        <div class="detail-label">Description:</div>
+        <div class="detail-value"><%= media.Description || '-' %></div>
+      </div>
+      
+      <div class="detail-row">
+        <div class="detail-label">Image Editing Tool:</div>
+        <div class="detail-value"><%= media.ImageEditingTool || '-' %></div>
+      </div>
+      
+      <div class="detail-row">
+        <div class="detail-label">Comments:</div>
+        <div class="detail-value"><%= media.Comments || '-' %></div>
+      </div>
+      
+      <div class="detail-row">
+        <div class="detail-label">Created By:</div>
+        <div class="detail-value"><%= media.created_by_name || 'Unknown' %></div>
+      </div>
+      
+      <div class="detail-row">
+        <div class="detail-label">Created Date:</div>
+        <div class="detail-value"><%= media.CreatedDate?.toISOString().slice(0, 10) %></div>
+      </div>
+      
+      <% if (media.UpdatedBy) { %>
+      <div class="detail-row">
+        <div class="detail-label">Updated By:</div>
+        <div class="detail-value"><%= media.updated_by_name || 'Unknown' %></div>
+      </div>
+      
+      <div class="detail-row">
+        <div class="detail-label">Updated Date:</div>
+        <div class="detail-value"><%= media.UpdatedDate?.toISOString().slice(0, 10) %></div>
+      </div>
+      <% } %>
+      
+      <% if (['.jpg', '.jpeg', '.png', '.gif'].some(ext => media.FilePath.toLowerCase().endsWith(ext))) { %>
+      <div class="media-preview">
+        <div class="detail-label">Preview:</div>
+        <img src="<%= media.FilePath %>" alt="Media preview">
+      </div>
+      <% } %>
+    </div>
+  </div>
+</div>
+</body>
+</html>

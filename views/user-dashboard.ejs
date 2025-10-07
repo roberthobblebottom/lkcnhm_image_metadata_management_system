@@ -1,0 +1,163 @@
+<%- include('partials/sidenav_user') %>
+    <main>
+        <style>
+            body {
+                font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+                background: #ffffff;
+                margin: 0;
+                padding: 0;
+            }
+        
+            .dashboard-container {
+                padding: 30px 20px;
+                max-width: 1400px;
+                margin: 0 auto;
+                margin-top: -50px;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+            }
+        
+            .welcome-section {
+                text-align: center;
+                margin-bottom: 40px;
+            }
+        
+            .welcome-title {
+                color: #143f4c;
+                font-size: 2.4em;
+                margin-bottom: 15px;
+            }
+        
+            .welcome-description {
+                color: #555;
+                font-size: 1.1em;
+                line-height: 1.6;
+                max-width: 700px;
+                margin: 0 auto;
+            }
+        
+            .content-wrapper {
+                display: flex;
+                flex-direction: column;
+                gap: 40px;
+                margin-top: 20px;
+               
+            }
+        
+            .features-section, .impact-section {
+                background: #ffffff;
+                padding: 25px;
+                border-radius: 12px;
+               
+            }
+        
+            .section-title {
+                color: #143f4c;
+                font-size: 1.8em;
+                margin-bottom: 25px;
+                text-align: center;
+                margin-top: -20px;
+            }
+        
+            .features-grid {
+                display: grid;
+                grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+                gap: 20px;
+            }
+        
+            .feature-card {
+                background: linear-gradient(145deg, #ffffff, #f1f1f1);
+                padding: 20px;
+                border-radius: 10px;
+                transition: transform 0.3s ease, box-shadow 0.3s ease;
+                box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+            }
+        
+            .feature-card:hover {
+                transform: translateY(-5px);
+                box-shadow: 0 6px 20px rgba(0,0,0,0.15);
+            }
+        
+            .feature-card h4 {
+                color: #0077cc;
+                font-size: 1.2em;
+                margin-bottom: 10px;
+            }
+        
+            .feature-card p {
+                color: #555;
+                font-size: 0.95em;
+                line-height: 1.5;
+            }
+        
+            .impact-card {
+                background: #eaf6f9;
+                padding: 25px;
+                border-radius: 10px;
+                text-align: center;
+                box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            }
+        
+            .impact-card p {
+                color: #333;
+                font-size: 1em;
+                line-height: 1.6;
+                margin: 0;
+            }
+        
+            @media (max-width: 768px) {
+                .content-wrapper {
+                    flex-direction: column;
+                }
+            }
+        </style>
+        <div class="dashboard-container">
+            <div class="welcome-section">
+                <h2 class="welcome-title">Welcome to Imaging Workflow System</h2>
+                <p class="welcome-description">
+                    This system ensures efficient, transparent, and seamless handling of imaging requests, empowering stakeholders while preserving the museum's invaluable collection.
+                </p>
+            </div>
+        
+            <div class="content-wrapper">
+                <div class="features-section">
+                    <h3 class="section-title">✨ Features of the System</h3>
+                    <div class="features-grid" style="grid-template-columns: repeat(3, 1fr); max-width: 1000px; margin: 0 auto;">
+                        <div class="feature-card">
+                            <h4>📌 Centralized Request Platform</h4>
+                            <p>All imaging requests are managed centrally, ensuring clarity, consistency, and ease of use.</p>
+                        </div>
+                        <div class="feature-card">
+                            <h4>🎯 Customizable Requests</h4>
+                            <p>Specify imaging needs—resolution, format, annotations, or focus areas, tailored to your request.</p>
+                        </div>
+                        <div class="feature-card">
+                            <h4>🔍 Transparent Workflow</h4>
+                            <p>Track every request from submission to fulfilment with real-time project status updates.</p>
+                        </div>
+                    </div>
+                    <div class="features-grid" style="grid-template-columns: repeat(2, 1fr); max-width: 700px; margin: 20px auto 0;">
+                        <div class="feature-card">
+                            <h4>⏱️ Prioritization & Scheduling</h4>
+                            <p>Efficiently allocate resources based on urgency, complexity, and potential impact.</p>
+                        </div>
+                        <div class="feature-card">
+                            <h4>🔐 Secure Data Management</h4>
+                            <p>Ensure confidentiality and secure storage of user data and all imaging outputs.</p>
+                        </div>
+                    </div>
+                </div>
+        
+                <div class="impact-section">
+                    <h3 class="section-title">🌍 Impact of Our Work</h3>
+                    <div class="impact-card">
+                        <p>By digitizing and sharing our collection, we bridge the gap between the natural world and science, promoting biodiversity awareness.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    <!-- <a href="/form">Form</a>
+    <a href="/auth/logout">Logout</a> -->
+</main>
+

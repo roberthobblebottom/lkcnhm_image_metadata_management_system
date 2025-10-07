@@ -1,0 +1,118 @@
+
+  <title>Sign Up</title>
+  <link rel="stylesheet" href="/css/login.css">
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+
+
+  <div class="background">
+    <div class="login-container">
+      <h2>Sign Up</h2>
+      <form id="registerForm">
+        <input type="email" 
+               id="email" 
+               name="email" 
+               placeholder="Email" 
+               required
+               pattern="^[a-zA-Z0-9](\.?[a-zA-Z0-9_-])*[a-zA-Z0-9]@[a-zA-Z0-9-]+\.[a-zA-Z]{2,}$" 
+               title="Enter a valid email address (e.g. test@example.com)">
+
+        <div style="position: relative;">
+          <input type="password" 
+                 id="password" 
+                 name="password" 
+                 placeholder="Password" 
+                 required
+                 pattern="(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{8,}" 
+                 title="Password must be at least 8 characters long and include an uppercase letter, a number, and a symbol."
+                 style="padding-right: 40px;" />
+          <span id="togglePassword" 
+                style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); cursor: pointer;">
+            👁️
+          </span>
+        </div>
+
+        <div class="social-login">
+          <!-- Social icons here if needed -->
+        </div>
+
+        <button type="submit">Sign Up</button>
+      </form>
+      <p class="signup-text">
+        Already have an account? <a href="/login">Login</a>
+      </p>
+    </div>
+  </div>
+
+  <p id="message"></p>
+
+  <script>
+    document.addEventListener("DOMContentLoaded", function () {
+      const registerForm = document.getElementById("registerForm");
+  
+      registerForm.addEventListener("submit", function (e) {
+        e.preventDefault();
+  
+        const email = document.getElementById("email").value.trim();
+        const password = document.getElementById("password").value;
+        const messageEl = document.getElementById("message");
+  
+        const emailRegex = /^[a-zA-Z0-9](\.?[a-zA-Z0-9_-])*[a-zA-Z0-9]@[a-zA-Z0-9-]+\.[a-zA-Z]{2,}$/;
+  
+        if (!emailRegex.test(email)) {
+          Swal.fire({
+            icon: 'error',
+            title: 'Invalid Email',
+            text: 'Please enter a valid email address. e.g. test@gmail.com'
+          });
+          return;
+        }
+  
+        messageEl.innerText = "⏳ Processing registration...";
+  
+        fetch("/auth/register", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ email, password })
+        })
+        .then(res => {
+          if (!res.ok) {
+            return res.text().then(text => { throw new Error(text); });
+          }
+          return res.text();
+        })
+        .then(data => {
+          Swal.fire({
+            icon: 'success',
+            title: 'Registration Successful!',
+            text: 'You have been registered successfully.',
+            confirmButtonText: 'OK'
+          }).then(() => {
+            window.location.href = "/login";
+          });
+  
+          messageEl.innerText = "✅ Registered successfully!";
+          console.log("Response from server:", data);
+        })
+        .catch(err => {
+          Swal.fire({
+            icon: 'error',
+            title: 'Registration Failed',
+            text: err.message
+          });
+          messageEl.innerText = "";
+          console.error("❌ Registration failed:", err.message);
+        });
+      });
+  
+      document.getElementById("togglePassword").addEventListener("click", function () {
+        const passwordInput = document.getElementById("password");
+        const type = passwordInput.getAttribute("type") === "password" ? "text" : "password";
+        passwordInput.setAttribute("type", type);
+        this.textContent = type === "password" ? "👁️" : "🙈";
+      });
+    });
+  </script>
+  
+
+

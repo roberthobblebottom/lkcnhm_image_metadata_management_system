@@ -1,0 +1,205 @@
+<%- include('partials/sidenav_user') %>
+<body>
+    <div class="sidebar">
+        <div class="logo">
+            <img src="/images/Group-1.svg" alt="LKCNHM Logo" style="width: 200px; height: auto; margin-left:10px;" />
+          </div>
+        <ul class="nav-links">
+          <li class="active"><a href="/admin-dashboard"><i class="fas fa-chart-line"></i><span>Dashboard</span></a></li>
+            <li><a href="/admin-users"><i class="fas fa-users"></i><span>Login Details Management</span></a></li>
+            <li><a href="/admin/UserRequest"><i class="fas fa-file-alt"></i><span>Imaging User Management</span></a></li>
+            
+            <li><a href="/admin/imaging-requests"><i class="fas fa-file-medical"></i><span>Imaging Request Management</span></a></li> 
+            <li><a href="/admin/media"><i class="fas fa-image"></i><span>Media Management</span></a></li>
+            <li><a href="/change-password-admin"><i class="fas fa-key"></i><span>Change Password</span></a></li>
+            
+            <li><a href="/auth/logout"><i class="fas fa-sign-out-alt"></i><span>Logout</span></a></li>
+        </ul>
+      </div>
+ 
+
+
+  <main>
+   
+  <h2 style="text-align: center; z-index: -1;">Imaging User Management</h2>
+  <a href="/form" class="btn form-btn" style="display: inline-block; padding: 10px 20px; background-color: #4CAF50; color: white; text-decoration: none; border-radius: 5px; margin: 10px; font-weight: bold; border: none; cursor: pointer; float: right;">Add User</a>
+  <table>
+      <thead>
+          <tr>
+              <th>ID</th>
+              <th>Name</th>
+              <th>Email</th>
+              <th>Contact Number</th>
+              <th>Organisation</th>
+              <th>User Type</th>
+          
+              <th>Date of Request</th>
+              <th>Request Status</th>
+            
+              
+              <th>Actions</th>
+          </tr>
+      </thead>
+      <tbody id="userTableBody">
+          <!-- Data will be inserted here dynamically -->
+      </tbody>
+  </table>
+  <h2>Deleted Users</h2>
+<table>
+  <thead>
+      <tr>
+          <th>ID</th>
+          <th>Name</th>
+          <th>Email</th>
+          <th>Contact Number</th>
+          <th>Organisation</th>
+          <th>User Type</th>
+          
+          <th>Date of Request</th>
+          <th>Request Status</th>
+       
+          
+          <th>Actions</th>
+      </tr>
+  </thead>
+  <tbody id="deletedUserTableBody">
+      <!-- Deleted users will go here -->
+  </tbody>
+</table>
+</main>
+  
+  <script>
+//     async function fetchUsers() {
+//   try {
+//       const response = await fetch('/api/users');
+//       const users = await response.json();
+//       const tableBody = document.getElementById('userTableBody');
+//       const deletedTableBody = document.getElementById('deletedUserTableBody');
+
+//       // Clear existing content
+//       tableBody.innerHTML = '';
+//       deletedTableBody.innerHTML = '';
+
+//       users.forEach(user => {
+//           const row = document.createElement('tr');
+//           row.innerHTML = `
+//               <td>${user.id}</td>
+//               <td>${user.username}</td>
+//               <td>${user.email}</td>
+//               <td>${user.contact_number}</td>
+//               <td>${user.organisation}</td>
+//               <td>${user.user_type}</td>
+              
+//               <td>${user.date_of_req.slice(0, 10)}</td>
+//               <td style="font-weight: bold; color: ${user.request_status === 'Approved' ? 'green' : user.request_status === 'Rejected' ? 'red' : 'black'};">${user.request_status}</td>
+           
+             
+//               <td>
+//                   <a href="/view/${user.id}" class="action-btn view-btn">View</a>
+//                   <a href="/edit/${user.id}" class="action-btn edit-btn">Edit</a>
+//                   ${user.is_delete == 0
+//                   ? `<a href="/delete/${user.id}" class="action-btn delete-btn" onclick="return confirm('Are you sure you want to delete?');">Delete</a>`
+//                   : `<a href="/recover/${user.id}" class="action-btn recover-btn" onclick="return confirm('Are you sure you want to recover?');">Recover</a>`
+//                   }
+//               </td>
+                  
+              
+//           `;
+
+//           if (user.is_delete === 0) {
+//               tableBody.appendChild(row); // Active users
+//           } else {
+//               deletedTableBody.appendChild(row); // Deleted users
+//           }
+//       });
+//   } catch (error) {
+//       console.error('Error fetching users:', error);
+//   }
+// }
+
+
+
+async function fetchUsers() {
+  try {
+    const response = await fetch('/api/users');
+    const users = await response.json();
+
+    const tableBody = document.getElementById('userTableBody');
+    const deletedTableBody = document.getElementById('deletedUserTableBody');
+
+    // Clear old content
+    tableBody.innerHTML = '';
+    deletedTableBody.innerHTML = '';
+
+    let activeCount = 0;
+    let deletedCount = 0;
+
+    users.forEach(user => {
+      const row = document.createElement('tr');
+      row.innerHTML = `
+        <td>${user.id}</td>
+        <td>${user.username}</td>
+        <td>${user.email}</td>
+        <td>${user.contact_number}</td>
+        <td>${user.organisation}</td>
+        <td>${user.user_type}</td>
+        <td>${user.date_of_req?.slice(0, 10)}</td>
+        <td style="font-weight: bold; color: ${user.request_status === 'Approved' ? 'green' : user.request_status === 'Rejected' ? 'red' : 'black'};">
+          ${user.request_status}
+        </td>
+        <td>
+          <a href="/view/${user.id}" class="action-btn view-btn">View</a>
+          <a href="/edit/${user.id}" class="action-btn edit-btn">Edit</a>
+          ${
+            user.is_delete == 0
+              ? `<a href="/delete/${user.id}" class="action-btn delete-btn" onclick="return confirm('Are you sure you want to delete?');">Delete</a>`
+              : `<a href="/recover/${user.id}" class="action-btn recover-btn" onclick="return confirm('Are you sure you want to recover?');">Recover</a>`
+          }
+        </td>
+      `;
+
+      if (user.is_delete == 0) {
+        tableBody.appendChild(row);
+        activeCount++;
+      } else {
+        deletedTableBody.appendChild(row);
+        deletedCount++;
+      }
+    });
+
+    // Add message if no active users
+    if (activeCount === 0) {
+      tableBody.innerHTML = `
+        <tr><td colspan="9" style="text-align:center; color: gray;">No active users found.</td></tr>
+      `;
+    }
+
+    // Add message if no deleted users
+    if (deletedCount === 0) {
+      deletedTableBody.innerHTML = `
+        <tr><td colspan="9" style="text-align:center; color: gray;">No deleted users found.</td></tr>
+      `;
+    }
+
+  } catch (error) {
+    console.error('Error fetching users:', error);
+  }
+}
+
+
+      
+      document.addEventListener('DOMContentLoaded', fetchUsers);
+  </script>
+</body>
+</html>
+<!-- app.get("/api/users", (req, res) => {
+    db.query("SELECT * FROM users WHERE id = 1", (err, result) => {
+        if (err) {
+            console.error(err);
+            return res.status(500).json({ error: "Error fetching user data" });
+        }
+        console.log("📄 User Data Fetched:", result);
+        users = result[0];
+        res.json(result[0]); // Send user data as JSON
+    });
+}); -->
