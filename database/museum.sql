@@ -1,3 +1,4 @@
+DROP DATABASE IF EXISTS museum;
 CREATE DATABASE museum;
 USE museum;
 
@@ -13,9 +14,11 @@ CREATE TABLE LoginUser (
     IsDelete BOOLEAN NULL DEFAULT 0
 );
 
-UPDATE LoginUser 
-SET LoginUserType = 'admin' 
-WHERE LoginUserName = 'admin@gmail.com';
+-- UPDATE LoginUser 
+-- SET LoginUserType = 'admin' 
+-- WHERE LoginUserName = 'admin@gmail.com';
 
-SELECT * FROM LoginUser;
-DESC LoginUser;
+-- DESC LoginUser;
+
+INSERT INTO LoginUser (LoginUserName,Password,LoginUserType) VALUES ('admin@gmail.com','password','admin');
+SELECT * FROM LoginUser WHERE LoginUserName = 'admin@gmail.com';
