@@ -489,13 +489,7 @@ app.post('/submit', isAuthenticated, (req, res) => {
 // API Route to Get All Users (deleted + active)
 app.get("/api/users", isAuthenticated, isAdmin, (req, res) => {
     const query = `
-        SELECT 
-            u.*, 
-            ut.UserTypeName AS user_type,
-            u.RequestStatus AS request_status
-        FROM users u
-        LEFT JOIN UserType ut ON u.UserTypeID = ut.UserTypeID
-        LEFT JOIN RequestStatus rs ON u.RequestStatusID = rs.RequestStatusID
+        SELECT * FROM User 
     `;
 
     db.query(query, (err, results) => {
@@ -1603,7 +1597,6 @@ app.get('/admin/select-user-for-media', isAuthenticated, isAdmin, (req, res) => 
             u.Email,
             u.ContactNumber,
             u.Organisation,
-            u.RequestStatus,
             u2.Email AS photographer_name,
             ir.ImagingStartDate,
             ir.ImagingEndDate

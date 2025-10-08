@@ -84,7 +84,7 @@ CREATE TABLE Media (
 );
 
 -- Test Data, do not use them for production
-INSERT INTO User (Email,Password,UserType,Name) VALUES ('admin@gmail.com','password','admin',"jeff");
+INSERT INTO User (Email,Password,UserType,Name) VALUES ('admin@gmail.com','1','admin',"jeff");
 INSERT INTO ImagingRequest (ImagingRequestorID ,DateOfRequest ,ImagingStartDate ,ImagingEndDate ,CreatedDate ,UpdatedDate ,RequestStatus) 
 VALUES (1,NOW(),NOW(),NOW(),NOW(),NOW(),'approved');
 SELECT * FROM User WHERE Email = 'admin@gmail.com';
