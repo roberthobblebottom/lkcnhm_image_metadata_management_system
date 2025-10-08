@@ -14,7 +14,7 @@ const isAuthenticated = (req, res, next) => {
 };
 
 const isAdmin = (req, res, next) => {
-    if (!req.session.user || req.session.user.user_type !== "admin") {
+    if (!req.session.user || req.session.user.UserType !== "admin") {
         console.log("🚫 Forbidden: User is not an admin", req.session.user);
         return res.redirect("/login"); // 🔁 Send to login page if not admin
     }

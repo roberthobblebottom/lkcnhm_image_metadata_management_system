@@ -8,6 +8,7 @@ CREATE TABLE User (
     Password VARCHAR(50) NOT NULL,
     TemporaryPassword VARCHAR(50) NULL,
     UserType VARCHAR(50) NOT NULL DEFAULT 'Non-admin',
+    Name VARCHAR(255),
     RegisteredDate DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     LastLoginDate DATETIME NULL,
     UpdatedDate DATETIME NULL,
@@ -74,6 +75,7 @@ CREATE TABLE Media (
         CreatedByID INT,
         UpdatedDate DATETIME,
         UpdatedByID INT,
+        IsDeleted BOOL NOT NULL DEFAULT 0,
         FOREIGN KEY (ImagingRequestID) REFERENCES ImagingRequest(ImagingRequestID),
         FOREIGN KEY (photographerID) REFERENCES User(UserID),
         FOREIGN KEY (UpdatedByID) REFERENCES User(UserID),
@@ -82,7 +84,7 @@ CREATE TABLE Media (
 );
 
 -- Test Data, do not use them for production
-INSERT INTO User (Email,Password,UserType) VALUES ('admin@gmail.com','password','admin');
+INSERT INTO User (Email,Password,UserType,Name) VALUES ('admin@gmail.com','password','admin',"jeff");
 INSERT INTO ImagingRequest (ImagingRequestorID ,DateOfRequest ,ImagingStartDate ,ImagingEndDate ,CreatedDate ,UpdatedDate ,RequestStatus) 
 VALUES (1,NOW(),NOW(),NOW(),NOW(),NOW(),'approved');
 SELECT * FROM User WHERE Email = 'admin@gmail.com';

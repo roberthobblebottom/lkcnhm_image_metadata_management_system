@@ -6,7 +6,7 @@ router.post("/register", (req, res) => {
     const { email, password } = req.body;
     console.log(`🔹 Register Attempt: ${email}`);
 
-    const checkEmailQuery = "SELECT * FROM User WHERE UserName = ?";
+    const checkEmailQuery = "SELECT * FROM User WHERE Email = ?";
     db.query(checkEmailQuery, [email], (err, result) => {
         if (err) {
             console.error("❌ Database Error:", err);
@@ -20,7 +20,7 @@ router.post("/register", (req, res) => {
 
         const insertUserQuery = `
             INSERT INTO User 
-            (UserName, Password, TempPassword, UserType, RegisteredDate, LastLoginDate, UpdatedDate, IsDelete) 
+            (Email, Password, TempPassword, UserType, RegisteredDate, LastLoginDate, UpdatedDate, IsDelete) 
             VALUES (?, ?, NULL, ?, NOW(), NULL, NULL, 0)`;
 
         db.query(insertUserQuery, [email, password, "Non-admin"], (err) => {
@@ -48,7 +48,7 @@ router.post("/login", (req, res) => {
         return res.status(400).json({ error: "Email and password required" });
     }
 
-    const query = "SELECT * FROM User WHERE UserName = ?";
+    const query = "SELECT * FROM User WHERE Email = ?";
     db.query(query, [email], (err, result) => {
         if (err) {
             console.error("❌ Database Error:", err);
@@ -63,7 +63,7 @@ router.post("/login", (req, res) => {
         }
 
         const user = result[0];
-        console.log("🆔 Found User:", user.LoginUserName);
+        console.log("🆔 Found User:", user.Email);
 
         if (password !== user.Password) {
             console.log("❌ Invalid Password");
@@ -73,7 +73,7 @@ router.post("/login", (req, res) => {
         // ✅ Store Session Data
         req.session.user = {
             UserID: user.UserID,
-            UserName: user.UserName,
+            Email: user.Email,
             UserType: user.UserType
         };
 
@@ -93,7 +93,7 @@ router.post("/login", (req, res) => {
                     return res.status(500).json({ error: "Session error" });
                 }
 
-                // console.log("✅ Login Successful! User:", req.session.user.LoginUserName,);
+                // console.log("✅ Login Successful! User:", req.session.user.LoginEmail,);
 
                 return res.json({
                     success: true,
@@ -116,7 +116,7 @@ router.get("/logout", (req, res) => {
             return res.redirect('/');
         }
 
-        console.log(`🔹 Logout Attempt: ${req.session.user.UserName}`);
+        console.log(`🔹 Logout Attempt: ${req.session.user.Email}`);
 
         req.session.destroy((err) => {
             if (err) {
@@ -141,7 +141,7 @@ router.get("/user", (req, res) => {
         return res.status(401).json({ error: "Not logged in" });
     }
 
-    console.log(`🔹 User Info Requested: ${req.session.user.UserName}`);
+    console.log(`🔹 User Info Requested: ${req.session.user.Email}`);
     res.json({ user: req.session.user });
 });
 
