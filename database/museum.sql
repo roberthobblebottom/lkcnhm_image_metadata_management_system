@@ -17,8 +17,8 @@ CREATE TABLE User (
     Organisation VARCHAR(255), 
     Comments VARCHAR(255), 
     ReasonForRequest VARCHAR(255), 
-    UpdatedByID INT, 
-    CreatedByID INT,
+    UpdatedByID INT NOT NULL, 
+    CreatedByID INT NOT NULL,
     FOREIGN KEY (UpdatedByID) REFERENCES User(UserID),
     FOREIGN KEY (CreatedByID) REFERENCES User(UserID)
 );
@@ -35,9 +35,9 @@ CREATE TABLE ImagingRequest (
         ImagingPlatform VARCHAR(255),
         Comments VARCHAR(255),
         CreatedDate DATETIME NOT NULL ,
-        CreatedByID INT,
+        CreatedByID INT NOT NULL,
         UpdatedDate DATETIME NOT NULL,
-        UpdatedByID INT,
+        UpdatedByID INT NOT NULL,
         IsDeleted BOOL NOT NULL DEFAULT 0,
         RequestStatus VARCHAR(255),
         FOREIGN KEY (ImagingRequestorID) REFERENCES User(UserID),
@@ -72,9 +72,9 @@ CREATE TABLE Media (
         ImageEditingTool VARCHAR(255),
         Comments VARCHAR(255),
         CreatedDate DATETIME,
-        CreatedByID INT,
+        CreatedByID INT NOT NULL,
         UpdatedDate DATETIME,
-        UpdatedByID INT,
+        UpdatedByID INT NOT NULL,
         IsDeleted BOOL NOT NULL DEFAULT 0,
         FOREIGN KEY (ImagingRequestID) REFERENCES ImagingRequest(ImagingRequestID),
         FOREIGN KEY (photographerID) REFERENCES User(UserID),
@@ -84,9 +84,9 @@ CREATE TABLE Media (
 );
 
 -- Test Data, do not use them for production
-INSERT INTO User (Email,Password,UserType,Name) VALUES ('admin@gmail.com','1','admin',"jeff");
-INSERT INTO ImagingRequest (ImagingRequestorID ,DateOfRequest ,ImagingStartDate ,ImagingEndDate ,CreatedDate ,UpdatedDate ,RequestStatus) 
-VALUES (1,NOW(),NOW(),NOW(),NOW(),NOW(),'approved');
+INSERT INTO User (Email,Password,UserType,Name,CreatedByID,UpdatedByID) VALUES ('admin@gmail.com','1','admin',"jeff",'1','1');
+INSERT INTO ImagingRequest (ImagingRequestorID ,DateOfRequest ,ImagingStartDate ,ImagingEndDate ,CreatedDate ,UpdatedDate ,RequestStatus,CreatedByID,UpdatedByID) 
+VALUES (1,NOW(),NOW(),NOW(),NOW(),NOW(),'approved','1','1');
 INSERT INTO ImagingRequestUserPhotographyLink (ImagingRequestID,PhotographerID) VALUES ("1",'1'); 
 -- SELECT * FROM User WHERE Email = 'admin@gmail.com';
 -- SELECT * FROM ImagingRequest;

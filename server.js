@@ -101,7 +101,10 @@ app.get("/admin-dashboard", isAuthenticated, isAdmin, (req, res) => {
 
 app.get('/api/current-user', (req, res) => {
     if (req.session && req.session.user) {
-        res.json({ name: req.session.user.Email });
+        res.json({
+            email: req.session.user.Email,
+            UserType: req.session.user.UserType
+        });
     } else {
         res.status(401).json({ error: "Not logged in" });
     }
@@ -122,7 +125,7 @@ app.get("/edit-user", isAuthenticated, isAdmin, (req, res) => {
 //✅ API to Fetch All Users
 app.get("/admin-users", isAuthenticated, isAdmin, (req, res) => {
     console.log("Route /admin-users hit"); // Debug log 1
-    const query = "SELECT UserID,Password,TempPassword,Email,RegisteredDate,UpdatedDate,LastLoginDate, UserType, IsDelete FROM User";
+    const query = "SELECT UserID,Password,TempPassword,Email,RegisteredDate,UpdatedDate,LastLoginDate, UserType, IsDeleted FROM User";
 
     db.query(query, (err, result) => {
         console.log("Query executed", { err, result }); // Debug log 2
@@ -189,18 +192,18 @@ app.get("/edit-users/:id", isAuthenticated, isAdmin, (req, res) => {
 // Handle form submission (support both singular and plural URLs)
 app.post(["/update-user/:id", "/update-users/:id"], isAuthenticated, isAdmin, (req, res) => {
     const userId = req.params.id;
-    const { TempPassword, UserType, IsDelete } = req.body;
+    const { TempPassword, UserType, IsDeleted } = req.body;
 
     const query = `
         UPDATE User 
         SET TempPassword = ?, 
             UserType = ?, 
-            IsDelete = ?,
+            IsDeleted = ?,
             UpdatedDate = NOW()
         WHERE UserID = ? 
     `;
 
-    db.query(query, [TempPassword, UserType, IsDelete, userId], (err, result) => {
+    db.query(query, [TempPassword, UserType, IsDeleted, userId], (err, result) => {
         if (err) {
             console.error("❌ Database Error:", err);
             return res.status(500).json({
@@ -226,7 +229,7 @@ app.post(["/update-user/:id", "/update-users/:id"], isAuthenticated, isAdmin, (r
 // ✅ API to Fetch a Single User by ID
 app.get("/api/admin-users/:id", isAuthenticated, isAdmin, (req, res) => {
     const userId = req.params.id;
-    const query = "SELECT UserID, Email, Password, TempPassword FROM User WHERE UserID = ? AND IsDelete = 0";
+    const query = "SELECT UserID, Email, Password, TempPassword FROM User WHERE UserID = ? AND IsDeleted = 0";
 
     db.query(query, [userId], (err, result) => {
         if (err) {
@@ -250,7 +253,7 @@ app.put("/api/admin-users/:id", isAuthenticated, isAdmin, (req, res) => {
     const query = `
         UPDATE User 
         SET Email = ?, Password = ?, TempPassword = ?, UpdatedDate = NOW() 
-        WHERE UserID = ? AND IsDelete = 0
+        WHERE UserID = ? AND IsDeleted = 0
     `;
 
     db.query(query, [Email, Password, TempPassword, userId], (err, result) => {
@@ -263,10 +266,10 @@ app.put("/api/admin-users/:id", isAuthenticated, isAdmin, (req, res) => {
     });
 });
 
-// ✅ Delete User (Soft Delete - Update IsDelete to 1)
+// ✅ Delete User (Soft Delete - Update IsDeleted to 1)
 app.put("/api/delete-user/:id", (req, res) => {
     const userId = req.params.id;
-    const query = "UPDATE User SET IsDelete = 1 WHERE UserID = ?";
+    const query = "UPDATE User SET IsDeleted = 1 WHERE UserID = ?";
 
     db.query(query, [userId], (err, result) => {
         if (err) {
@@ -305,10 +308,10 @@ app.get("/imagingUser", isAuthenticated, (req, res) => {
 
     const query = `
         SELECT u.*, ut.UserTypeName, u.RequestStatus
-        FROM users u
+        FROM User u
         LEFT JOIN UserType ut ON u.UserTypeID = ut.UserTypeID
         LEFT JOIN RequestStatus rs ON u.RequestStatusID = rs.RequestStatusID
-        WHERE u.CreatedBy = ? AND u.is_delete = 0
+        WHERE u.CreatedByID = ? AND u.IsDeleted = 0
     `;
 
     db.query(query, [userId], (err, results) => {
@@ -369,10 +372,10 @@ app.get("/form", isAuthenticated, (req, res) => {
         // Check if the user has registered already as Internal/External User
         const userCheckQuery = `
             SELECT u.*, u.RequestStatus, ut.UserTypeName
-            FROM users u
+            FROM User u
             JOIN RequestStatus rs ON u.RequestStatusID = rs.RequestStatusID
             JOIN UserType ut ON u.UserTypeID = ut.UserTypeID
-            WHERE u.CreatedBy = ? AND ut.UserTypeName IN ('Internal User', 'External User') AND u.is_delete = 0
+            WHERE u.CreatedByID = ? AND ut.UserTypeName IN ('Internal User', 'External User') AND u.IsDeleted = 0
             LIMIT 1
         `;
 
@@ -428,7 +431,7 @@ app.get("/check-email", (req, res) => {
     const { email } = req.query;
     if (!email) return res.status(400).json({ error: "Email is required" });
 
-    const query = `SELECT id FROM users WHERE email = ? AND is_delete = 0`;
+    const query = `SELECT id FROM User WHERE email = ? AND IsDeleted = 0`;
     db.query(query, [email], (err, results) => {
         if (err) {
             console.error("❌ DB Error while checking email:", err);
@@ -443,16 +446,16 @@ app.get("/check-email", (req, res) => {
 
 
 app.post('/submit', isAuthenticated, (req, res) => {
-    const { username, email, contact_number, organisation, user_type, comments } = req.body;
+    const { email, ContactNumber, organisation, UserType, comments } = req.body;
 
 
     const created_by = req.session.user.UserID;
     const date_of_req = new Date().toISOString().slice(0, 19).replace("T", " ");
     const reason_for_req = null;
-    const is_delete = 0;
+    const IsDeleted = 0;
     const RequestStatusID = 1; // 'New' status from RequestStatus table
     const CreatedDate = date_of_req; // Assuming CreatedDate is the same as date_of_req
-    const checkQuery = `SELECT id FROM users WHERE email = ? AND is_delete = 0`;
+    const checkQuery = `SELECT UserID FROM User WHERE Email = ? AND IsDeleted = 0`;
 
     db.query(checkQuery, [email], (err, results) => {
         if (err) {
@@ -465,12 +468,12 @@ app.post('/submit', isAuthenticated, (req, res) => {
         }
 
         const insertQuery = `
-            INSERT INTO users 
-            (username, email, contact_number, organisation, UserTypeID, RequestStatusID, comments, date_of_req, reason_for_req, is_delete, CreatedBy, CreatedDate)
+            INSERT INTO User 
+            (Email, ContactNumber, Organisation, UserType, RequestStatus, Comments, date_of_req, ReasonForRequest IsDeleted, CreatedByID, CreatedDate)
             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         `;
 
-        const values = [username, email, contact_number, organisation, user_type, RequestStatusID, comments, date_of_req, reason_for_req, is_delete, created_by, CreatedDate];
+        const values = [email, ContactNumber, organisation, UserType, RequestStatusID, comments, date_of_req, reason_for_req, IsDeleted, created_by, CreatedDate];
 
         db.query(insertQuery, values, (err) => {
             if (err) {
@@ -514,12 +517,12 @@ app.get('/view/:user_id', isAuthenticated, (req, res) => {
             updater.Email AS UpdatedByName,
             ut.UserTypeName,
             u.RequestStatus
-        FROM users u
-        LEFT JOIN User creator ON u.CreatedBy = creator.UserID
+        FROM User u
+        LEFT JOIN User creator ON u.CreatedByID = creator.UserID
         LEFT JOIN User updater ON u.updated_by = updater.UserID
         LEFT JOIN UserType ut ON u.UserTypeID = ut.UserTypeID
         LEFT JOIN RequestStatus rs ON u.RequestStatusID = rs.RequestStatusID
-        WHERE u.id = ? AND u.is_delete = 0
+        WHERE u.UserID = ? AND u.IsDeleted = 0
     `;
 
     db.query(query, [user_id], (err, results) => {
@@ -541,7 +544,7 @@ app.get('/view/:user_id', isAuthenticated, (req, res) => {
 // Delete User Route
 app.get("/delete/:id", isAuthenticated, isAdmin, (req, res) => {
     const { id } = req.params;
-    db.query("UPDATE users SET is_delete = 1 WHERE id = ?", [id], (err, result) => {
+    db.query("UPDATE User SET IsDeleted = 1 WHERE id = ?", [id], (err, result) => {
         if (err) {
             console.error(err);
             return res.status(500).json({ error: "Error deleting user" });
@@ -555,7 +558,7 @@ app.get("/delete/:id", isAuthenticated, isAdmin, (req, res) => {
 
 app.get("/recover/:id", isAuthenticated, isAdmin, (req, res) => {
     const { id } = req.params;
-    db.query("UPDATE users SET is_delete = 0 WHERE id = ?", [id], (err, result) => {
+    db.query("UPDATE User SET IsDeleted = 0 WHERE id = ?", [id], (err, result) => {
         if (err) {
             console.error(err);
             return res.status(500).json({ error: "Error recovering user" });
@@ -575,12 +578,10 @@ app.get("/edit/:user_id", isAuthenticated, isAdmin, (req, res) => {
     const query = `
         SELECT 
             u.*, 
-            ut.UserTypeName, 
+            u.UserType, 
             u.RequestStatus 
-        FROM users u
-        LEFT JOIN UserType ut ON u.UserTypeID = ut.UserTypeID
-        LEFT JOIN RequestStatus rs ON u.RequestStatusID = rs.RequestStatusID
-        WHERE u.id = ?
+        FROM User u
+        WHERE u.UserID = ?
     `;
 
     const getUserTypes = `SELECT * FROM UserType`;
@@ -617,11 +618,10 @@ app.get("/edit/:user_id", isAuthenticated, isAdmin, (req, res) => {
 app.post("/edit/:user_id", isAuthenticated, isAdmin, (req, res) => {
     const { user_id } = req.params;
     const {
-        username,
         email,
-        contact_number,
+        ContactNumber,
         organisation,
-        user_type,           // This is the UserTypeID from the form
+        UserType,           // This is the UserTypeID from the form
         request_status,      // This is the RequestStatusID from the form
         comments,
         reason_for_req
@@ -631,11 +631,10 @@ app.post("/edit/:user_id", isAuthenticated, isAdmin, (req, res) => {
     const updated_by = req.session.user.UserID;
 
     const query = `
-        UPDATE users 
+        UPDATE User 
         SET 
-            username = ?, 
             email = ?, 
-            contact_number = ?, 
+            ContactNumber = ?, 
             organisation = ?, 
             UserTypeID = ?, 
             RequestStatusID = ?, 
@@ -647,11 +646,10 @@ app.post("/edit/:user_id", isAuthenticated, isAdmin, (req, res) => {
     `;
 
     const values = [
-        username,
         email,
-        contact_number,
+        ContactNumber,
         organisation,
-        user_type,
+        UserType,
         request_status,
         comments,
         reason_for_req,
@@ -847,21 +845,21 @@ app.post('/change-password-admin', isAuthenticated, (req, res) => {
 // ---------------------------- Revamped Admin Form Table ---------------------------- //
 app.get('/imaging-request-admin', isAuthenticated, isAdmin, (req, res) => {
     const getRequestors = `
-      SELECT u.id, u.username 
-      FROM users u
+      SELECT u.UserID, u.Email 
+      FROM User u
       JOIN RequestStatus rs ON u.RequestStatusID = rs.RequestStatusID
       WHERE u.UserTypeID IN (1, 2) 
         AND u.RequestStatus = 'Approved'
-        AND u.is_delete = 0
+        AND u.IsDeleted = 0
     `;
 
     const getPhotographers = `
-      SELECT u.id, u.username 
-      FROM users u
+      SELECT u.UserID, u.Email 
+      FROM User u
       JOIN RequestStatus rs ON u.RequestStatusID = rs.RequestStatusID
       WHERE u.UserTypeID IN (3, 4) 
         AND u.RequestStatus = 'Approved'
-        AND u.is_delete = 0
+        AND u.IsDeleted = 0
     `;
 
     db.query(getRequestors, (err1, requestors) => {
@@ -886,9 +884,9 @@ app.get('/imaging-request-admin', isAuthenticated, isAdmin, (req, res) => {
 });
 
 
-app.get('/get-users', isAuthenticated, (req, res) => {
-    const getRequestors = "SELECT id, username FROM users WHERE UserTypeID IN (1, 2)";
-    const getPhotographers = "SELECT id, username FROM users WHERE UserTypeID IN (3, 4)";
+app.get('/get-user', isAuthenticated, (req, res) => {
+    const getRequestors = "SELECT id, Email FROM User WHERE UserTypeID IN (1, 2)";
+    const getPhotographers = "SELECT id, Email FROM User WHERE UserTypeID IN (3, 4)";
 
     db.query(getRequestors, (err1, requestors) => {
         if (err1) {
@@ -985,10 +983,10 @@ app.post('/submit-imaging-request', isAuthenticated, async (req, res) => {
         ImagingPlatform,
         Comments,
         CreatedDate,
-        CreatedBy,
+        CreatedByID,
         UpdatedDate,
-        UpdatedBy,
-        IsDelete,
+        UpdatedByID,
+        IsDeleted,
         RequestStatusID
       ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW(), ?, NULL, NULL, 0, ?)
     `;
@@ -1039,17 +1037,15 @@ app.get('/admin/imaging-requests', isAuthenticated, isAdmin, (req, res) => {
         SELECT 
             ir.*,
             r.Name AS requestor_name,
-            p.username AS photographer_name,
-            u.RequestStatus AS status_name,
-            cb.username AS created_by_name,
-            ub.username AS updated_by_name
+            p.Email AS photographer_name,
+            cb.Email AS created_by_name,
+            ub.Email AS updated_by_name
         FROM ImagingRequest ir
-        LEFT JOIN User r ON ir.ImagingRequestorID = r.id
-        LEFT JOIN User p ON ir.PhotographerID = p.id
-        LEFT JOIN RequestStatus rs ON ir.RequestStatusID = rs.RequestStatusID
-        LEFT JOIN User cb ON ir.CreatedBy = cb.id
-        LEFT JOIN User ub ON ir.UpdatedBy = ub.id
-        WHERE ir.IsDelete = 0
+        LEFT JOIN User r ON ir.ImagingRequestorID = r.UserID
+        LEFT JOIN User p ON ir.PhotographerID = p.UserID
+        LEFT JOIN User cb ON ir.CreatedByID = cb.UserID
+        LEFT JOIN User ub ON ir.UpdatedByID = ub.UserID
+        WHERE ir.IsDeleted = 0
         ORDER BY ir.CreatedDate DESC
     `;
 
@@ -1089,13 +1085,13 @@ app.get('/user/imaging-requests', isAuthenticated, (req, res) => {
     const loginUserId = req.session.user.UserID;
 
     const findUserQuery = `
-      SELECT u.id AS userId, u.RequestStatus, ut.UserTypeName
-      FROM users u
+      SELECT u.UserID AS userId, u.RequestStatus, ut.UserTypeName
+      FROM User u
       JOIN RequestStatus rs ON u.RequestStatusID = rs.RequestStatusID
       JOIN UserType ut ON u.UserTypeID = ut.UserTypeID
-      WHERE u.CreatedBy = ? 
+      WHERE u.CreatedByID = ? 
         AND ut.UserTypeName IN ('Internal User', 'External User')
-        AND u.is_delete = 0
+        AND u.IsDeleted = 0
       LIMIT 1
     `;
 
@@ -1123,13 +1119,13 @@ app.get('/user/imaging-requests', isAuthenticated, (req, res) => {
           SELECT 
               ir.*,
               r.Name AS requestor_name,
-              p.username AS photographer_name,
+              p.Email AS photographer_name,
               u.RequestStatus AS RequestStatusName
           FROM ImagingRequest ir
-          LEFT JOIN User r ON ir.ImagingRequestorID = r.id
-          LEFT JOIN User p ON ir.PhotographerID = p.id
+          LEFT JOIN User r ON ir.ImagingRequestorID = r.UserID
+          LEFT JOIN User p ON ir.PhotographerID = p.UserID
           LEFT JOIN RequestStatus rs ON ir.RequestStatusID = rs.RequestStatusID
-          WHERE ir.IsDelete = 0 AND ir.ImagingRequestorID = ?
+          WHERE ir.IsDeleted = 0 AND ir.ImagingRequestorID = ?
           ORDER BY ir.CreatedDate DESC
         `;
 
@@ -1164,16 +1160,16 @@ app.get('/admin/view-imaging-request/:id', isAuthenticated, isAdmin, (req, res) 
         SELECT 
             ir.*,
             r.Name AS requestor_name,
-            p.username AS photographer_name,
+            p.Email AS photographer_name,
             u.RequestStatus AS status_name,
             creator.Email AS creator_name,
             updater.Email AS updater_name
         FROM ImagingRequest ir
-        LEFT JOIN User r ON ir.ImagingRequestorID = r.id
-        LEFT JOIN User p ON ir.PhotographerID = p.id
+        LEFT JOIN User r ON ir.ImagingRequestorID = r.UserID
+        LEFT JOIN User p ON ir.PhotographerID = p.UserID
         LEFT JOIN RequestStatus rs ON ir.RequestStatusID = rs.RequestStatusID
-        LEFT JOIN User creator ON ir.CreatedBy = creator.UserID
-        LEFT JOIN User updater ON ir.UpdatedBy = updater.UserID
+        LEFT JOIN User creator ON ir.CreatedByID = creator.UserID
+        LEFT JOIN User updater ON ir.UpdatedByID = updater.UserID
         WHERE ir.ImagingRequestID = ?
     `;
 
@@ -1200,7 +1196,7 @@ app.get('/admin/view-imaging-request/:id', isAuthenticated, isAdmin, (req, res) 
             ImagingEndDate: formatDate(results[0].ImagingEndDate),
             CreatedDate: formatDate(results[0].CreatedDate),
             UpdatedDate: results[0].UpdatedDate ? formatDate(results[0].UpdatedDate) : null,
-            IsDelete: results[0].IsDelete ? 'Yes' : 'No'
+            IsDeleted: results[0].IsDeleted ? 'Yes' : 'No'
         };
 
         res.render('view-imaging-request', {
@@ -1220,16 +1216,16 @@ app.get('/user/view-imaging-request/:id', isAuthenticated, (req, res) => {
         SELECT 
             ir.*,
             r.Name AS requestor_name,
-            p.username AS photographer_name,
+            p.Email AS photographer_name,
             u.RequestStatus AS status_name,
             creator.Email AS creator_name,
             updater.Email AS updater_name
         FROM ImagingRequest ir
-        LEFT JOIN User r ON ir.ImagingRequestorID = r.id
-        LEFT JOIN User p ON ir.PhotographerID = p.id
+        LEFT JOIN User r ON ir.ImagingRequestorID = r.UserID
+        LEFT JOIN User p ON ir.PhotographerID = p.UserID
         LEFT JOIN RequestStatus rs ON ir.RequestStatusID = rs.RequestStatusID
-        LEFT JOIN User creator ON ir.CreatedBy = creator.UserID
-        LEFT JOIN User updater ON ir.UpdatedBy = updater.UserID
+        LEFT JOIN User creator ON ir.CreatedByID = creator.UserID
+        LEFT JOIN User updater ON ir.UpdatedByID = updater.UserID
         WHERE ir.ImagingRequestID = ?
     `;
 
@@ -1256,7 +1252,7 @@ app.get('/user/view-imaging-request/:id', isAuthenticated, (req, res) => {
             ImagingEndDate: formatDate(results[0].ImagingEndDate),
             CreatedDate: formatDate(results[0].CreatedDate),
             UpdatedDate: results[0].UpdatedDate ? formatDate(results[0].UpdatedDate) : null,
-            IsDelete: results[0].IsDelete ? 'Yes' : 'No'
+            IsDeleted: results[0].IsDeleted ? 'Yes' : 'No'
         };
 
         res.render('imaging_request_view_user', {
@@ -1277,8 +1273,8 @@ app.post('/admin/delete-imaging-request/:id', isAuthenticated, isAdmin, (req, re
     const query = `
         UPDATE ImagingRequest 
         SET 
-            IsDelete = 1,
-            UpdatedBy = ?,
+            IsDeleted = 1,
+            UpdatedByID = ?,
             UpdatedDate = NOW()
         WHERE ImagingRequestID = ?
     `;
@@ -1305,13 +1301,13 @@ app.get('/admin/edit-imaging-request/:id', isAuthenticated, isAdmin, async (req,
             SELECT 
                 ir.*,
                 requestor.Name AS requestor_name,
-                requestor.id AS requestor_id,
+                requestor.UserID AS requestor_id,
                 photographer.Name AS photographer_name,
-                photographer.id AS photographer_id,
+                photographer.UserID AS photographer_id,
                 u.RequestStatus
             FROM ImagingRequest ir
-            LEFT JOIN User requestor ON ir.ImagingRequestorID = requestor.id
-            LEFT JOIN User photographer ON ir.PhotographerID = photographer.id
+            LEFT JOIN User requestor ON ir.ImagingRequestorID = requestor.UserID
+            LEFT JOIN User photographer ON ir.PhotographerID = photographer.UserID
             LEFT JOIN RequestStatus rs ON ir.RequestStatusID = rs.RequestStatusID
             WHERE ir.ImagingRequestID = ?
         `;
@@ -1319,9 +1315,9 @@ app.get('/admin/edit-imaging-request/:id', isAuthenticated, isAdmin, async (req,
         // Get all needed data in parallel for better performance
         const [requestResults, photographerResults, statusResults, requestorResults] = await Promise.all([
             db.promise().query(requestQuery, [imagingRequestID]),
-            db.promise().query("SELECT id, username FROM User WHERE UserTypeID IN (3, 4) ORDER BY username"),
+            db.promise().query("SELECT id, Email FROM User WHERE UserTypeID IN (3, 4) ORDER BY Email"),
             db.promise().query("SELECT * FROM RequestStatus ORDER BY RequestStatusName"),
-            db.promise().query("SELECT id, username FROM User WHERE UserTypeID IN (1, 2) ORDER BY username")
+            db.promise().query("SELECT id, Email FROM User WHERE UserTypeID IN (1, 2) ORDER BY Email")
         ]);
 
         if (requestResults[0].length === 0) {
@@ -1408,7 +1404,7 @@ app.post('/admin/edit-imaging-request/:id', isAuthenticated, isAdmin, (req, res)
             ImagingPlatform = ?,
             RequestStatusID = ?,
             ReasonforRequestStatus = ?,
-            UpdatedBy = ?,
+            UpdatedByID = ?,
             UpdatedDate = NOW()
         WHERE ImagingRequestID = ?
     `;
@@ -1462,11 +1458,11 @@ app.get('/imaging-request-user', isAuthenticated, (req, res) => {
 
         // ✅ Get requestor that matches this login user's approved user record
         const getRequestorQuery = `
-            SELECT id, username 
-            FROM users 
-            WHERE CreatedBy = ? 
+            SELECT id, Email 
+            FROM User 
+            WHERE CreatedByID = ? 
               AND UserTypeID IN (1, 2) 
-              AND is_delete = 0
+              AND IsDeleted = 0
               AND RequestStatusID = (
                 SELECT RequestStatusID FROM RequestStatus WHERE RequestStatusName = 'Approved'
               )
@@ -1475,11 +1471,11 @@ app.get('/imaging-request-user', isAuthenticated, (req, res) => {
 
         // ✅ Get photographers created by this user, and are approved
         const getPhotographersQuery = `
-            SELECT id, username 
-            FROM users 
-            WHERE CreatedBy = ? 
+            SELECT id, Email 
+            FROM User 
+            WHERE CreatedByID = ? 
               AND UserTypeID IN (3, 4)
-              AND is_delete = 0
+              AND IsDeleted = 0
               AND RequestStatusID = (
                 SELECT RequestStatusID FROM RequestStatus WHERE RequestStatusName = 'Approved'
               )
@@ -1624,7 +1620,6 @@ app.get('/admin/media-form/:imagingRequestId', isAuthenticated, isAdmin, (req, r
       SELECT 
         ir.ImagingRequestID,
         ir.ImagingRequestorID,
-        ir.PhotographerID,
         r.Name AS requestor_name,
         u2.email AS photographer_name
       FROM ImagingRequest ir
@@ -1727,9 +1722,9 @@ app.post('/admin/submit-media', isAuthenticated, isAdmin, async (req, res) => {
         ImageEditingTool,
         Comments,
         CreatedDate,
-        CreatedBy,
+        CreatedByID,
         UpdatedDate,
-        UpdatedBy
+        UpdatedByID
       ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW(), ?, NULL, NULL)
     `;
 
@@ -1779,8 +1774,8 @@ app.get('/admin/media/view/:mediaId', isAuthenticated, isAdmin, (req, res) => {
         u1.email AS created_by_name,
         u2.email AS updated_by_name
       FROM Media m
-      LEFT JOIN User u1 ON m.CreatedBy = u1.id
-      LEFT JOIN User u2 ON m.UpdatedBy = u2.id
+      LEFT JOIN User u1 ON m.CreatedByID = u1.UserID
+      LEFT JOIN User u2 ON m.UpdatedByID = u2.UserID
       WHERE m.MediaID = ? AND m.IsDeleted = 0
       ORDER BY m.CreatedDate DESC
     `;
@@ -1821,7 +1816,7 @@ app.get('/admin/media/edit/:mediaId', isAuthenticated, isAdmin, (req, res) => {
                    u2.Email AS photographer_name
             FROM Media m
             JOIN ImagingRequest ir ON m.ImagingRequestID = ir.ImagingRequestID
-            LEFT JOIN User u1 ON ir.ImagingRequestorID = u1.id
+            LEFT JOIN User u1 ON ir.ImagingRequestorID = u1.UserID
             JOIN ImagingRequestUserPhotographyLink p ON ir.ImagingRequestID = p.ImagingRequestID
             JOIN User u2 ON p.PhotographerID = u2.UserID  
 
@@ -1885,7 +1880,7 @@ app.post('/admin/media/save', isAuthenticated, isAdmin, (req, res) => {
                 ImageEditingTool = ?,
                 Comments = ?,
                 UpdatedDate = NOW(),
-                UpdatedBy = ?
+                UpdatedByID = ?
             WHERE MediaID = ?
         `;
         const updatedBy = req.session.user.UserID;
@@ -1922,7 +1917,7 @@ app.post('/admin/media/save', isAuthenticated, isAdmin, (req, res) => {
                 ImagingRequestID, PhotographerID, MediaFileName, FilePath,
                 CatalogID, MorphoID, ClusterID, ImagingDate, Resolution,
                 ColorDepth, FileSize, FileFormat, Description, CameraModel,
-                ImageEditingTool, Comments, CreatedBy, CreatedDate
+                ImageEditingTool, Comments, CreatedByID, CreatedDate
             ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW())
         `;
 
@@ -1963,7 +1958,7 @@ app.post('/admin/media/delete/:mediaId', isAuthenticated, isAdmin, (req, res) =>
     const userId = req.session.user.UserID;
 
     // First verify the media exists and isn't already deleted
-    const checkQuery = 'SELECT * FROM Media WHERE MediaID = ? AND IsDelete = 0';
+    const checkQuery = 'SELECT * FROM Media WHERE MediaID = ? AND IsDeleted = 0';
 
     db.promise().query(checkQuery, [mediaId])
         .then(([results]) => {
@@ -1975,8 +1970,8 @@ app.post('/admin/media/delete/:mediaId', isAuthenticated, isAdmin, (req, res) =>
             // Perform soft delete
             const updateQuery = `
                 UPDATE Media 
-                SET IsDelete = 1, 
-                    UpdatedBy = ?, 
+                SET IsDeleted = 1, 
+                    UpdatedByID = ?, 
                     UpdatedDate = NOW() 
                 WHERE MediaID = ?
             `;

@@ -12,6 +12,7 @@
       <img src="/images/Group-1.svg" alt="LKCNHM Logo" style="width: 200px; height: auto; margin-left:10px;" />
     </div>
     <ul class="nav-links">
+      <li><div id="userGreeting"></div></li>
       <li class="active"><a href="/admin-dashboard"><i class="fas fa-chart-line"></i><span>Dashboard</span></a></li>
       <li><a href="/admin-users"><i class="fas fa-users"></i><span>Login Details Management</span></a></li>
       <li><a href="/admin/UserRequest"><i class="fas fa-file-alt"></i><span>Imaging User Management</span></a></li>
@@ -22,5 +23,24 @@
       <li><a href="/auth/logout"><i class="fas fa-sign-out-alt"></i><span>Logout</span></a></li>
     </ul>
   </div>
+<script>
+        document.addEventListener("DOMContentLoaded", function () {
+
+
+            fetch("/api/current-user")
+            .then(res => res.json())
+            .then(data => {
+                const email = data.email; // trim after @
+                const UserType = data.UserType;
+                document.getElementById("userGreeting").textContent = `Logged in as: ${email}\nRole: ${UserType}`;
+            })
+            .catch(() => {
+                document.getElementById("userGreeting").textContent = "Welcome";
+            });
+        });
+
+      
+    </script>
 </body>
+ 
 </html>

@@ -88,7 +88,7 @@
 //               <td>${user.email}</td>
 //               <td>${user.contact_number}</td>
 //               <td>${user.organisation}</td>
-//               <td>${user.user_type}</td>
+//               <td>${user.UserType}</td>
               
 //               <td>${user.date_of_req.slice(0, 10)}</td>
 //               <td style="font-weight: bold; color: ${user.request_status === 'Approved' ? 'green' : user.request_status === 'Rejected' ? 'red' : 'black'};">${user.request_status}</td>
@@ -140,9 +140,9 @@ async function fetchUsers() {
         <td>${user.id}</td>
         <td>${user.username}</td>
         <td>${user.email}</td>
-        <td>${user.contact_number}</td>
+        <td>${user.ContactNumber}</td>
         <td>${user.organisation}</td>
-        <td>${user.user_type}</td>
+        <td>${user.UserType}</td>
         <td>${user.date_of_req?.slice(0, 10)}</td>
         <td style="font-weight: bold; color: ${user.request_status === 'Approved' ? 'green' : user.request_status === 'Rejected' ? 'red' : 'black'};">
           ${user.request_status}

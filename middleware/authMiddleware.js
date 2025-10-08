@@ -6,7 +6,7 @@ function isAuthenticated(req, res, next) {
 }
 
 function isAdmin(req, res, next) {
-    if (req.session && req.session.user && req.session.user.user_type === "admin") {
+    if (req.session && req.session.user && req.session.user.UserType === "admin") {
         return next();
     }
     res.status(403).json({ error: "Forbidden: Admin access required" });

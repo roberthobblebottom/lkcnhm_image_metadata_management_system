@@ -159,34 +159,34 @@
 
     <script>
         document.addEventListener("DOMContentLoaded", function () {
-            // Fetch user data
-            fetch("/api/users")
-                .then(response => response.json())
-                .then(users => {
-                    document.getElementById("totalUsers").textContent = users.length;
-                })
-                .catch(error => console.error("Error loading user data:", error));
+        //     // Fetch user data
+        //     fetch("/api/users")
+        //         .then(response => response.json())
+        //         .then(users => {
+        //             document.getElementById("totalUsers").textContent = users.length;
+        //         })
+        //         .catch(error => console.error("Error loading user data:", error));
 
-            // Fetch additional stats
-            fetch("/api/stats")
-                .then(response => response.json())
-                .then(stats => {
-                    document.getElementById("totalCountries").textContent = stats.totalCountries;
-                    document.getElementById("totalUsage").textContent = stats.totalUsage;
-                    document.getElementById("activity").textContent = stats.activity;
-                })
-                .catch(error => console.error("Error loading stats:", error));
+        //     // Fetch additional stats
+        //     fetch("/api/stats")
+        //         .then(response => response.json())
+        //         .then(stats => {
+        //             document.getElementById("totalCountries").textContent = stats.totalCountries;
+        //             document.getElementById("totalUsage").textContent = stats.totalUsage;
+        //             document.getElementById("activity").textContent = stats.activity;
+        //         })
+        //         .catch(error => console.error("Error loading stats:", error));
 
 
-                fetch("/api/current-user")
-            .then(res => res.json())
-            .then(data => {
-                const name = data.name.split("@")[0]; // trim after @
-                document.querySelector("h1").textContent = `Welcome, ${name}`;
-            })
-            .catch(() => {
-                document.querySelector("h1").textContent = "Welcome";
-            });
+        //     fetch("/api/current-user")
+        //     .then(res => res.json())
+        //     .then(data => {
+        //         const name = data.name; // trim after @
+        //         document.querySelector("h2").textContent = `Welcome, ${name}`;
+        //     })
+        //     .catch(() => {
+        //         document.querySelector("h2").textContent = "Welcome";
+        //     });
         });
 
       

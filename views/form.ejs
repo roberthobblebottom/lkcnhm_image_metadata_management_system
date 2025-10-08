@@ -129,8 +129,8 @@
   
       <div class="form-row">
         <div class="form-group">
-          <label for="contact_number">Contact Number:</label>
-          <input type="text" id="contact_number" name="contact_number" required />
+          <label for="ContactNumber">Contact Number:</label>
+          <input type="text" id="ContactNumber" name="ContactNumber" required />
         </div>
   
         <div class="form-group">
@@ -141,8 +141,8 @@
   
       <div class="form-row">
         <div class="form-group">
-          <label for="user_type">User Type:</label>
-          <select id="user_type" name="user_type" required>
+          <label for="UserType">User Type:</label>
+          <select id="UserType" name="UserType" required>
             <option value="">-- Select Type --</option>
             <% userTypes.forEach(type => { %>
               <option value="<%= type.UserTypeID %>"><%= type.UserTypeName %></option>
@@ -195,9 +195,9 @@ emailInput.addEventListener("blur", async () => {
         const formData = {
             username: document.getElementById("username").value,
             email: document.getElementById("email").value,
-            contact_number: document.getElementById("contact_number").value,
+            ContactNumber: document.getElementById("ContactNumber").value,
             organisation: document.getElementById("organisation").value,
-            user_type: document.getElementById("user_type").value,
+            UserType: document.getElementById("UserType").value,
             comments: document.getElementById("comments").value
         };
         
@@ -216,7 +216,7 @@ emailInput.addEventListener("blur", async () => {
       }
 
 
-        if (!formData.user_type) {
+        if (!formData.UserType) {
     Swal.fire({
         icon: "warning",
         title: "Missing Field",

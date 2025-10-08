@@ -124,8 +124,8 @@ button[type="submit"]:hover {
             </div>
             <div class="form-group">
                 <div>
-                    <label for="contact_number">Contact Number:</label>
-                    <input type="text" id="contact_number" name="contact_number" value="<%= user.contact_number %>" required>
+                    <label for="ContactNumber">Contact Number:</label>
+                    <input type="text" id="ContactNumber" name="ContactNumber" value="<%= user.ContactNumber %>" required>
                 </div>
                 <div>
                     <label for="organisation">Organisation:</label>
@@ -134,8 +134,8 @@ button[type="submit"]:hover {
             </div>
             <div class="form-group">
                 <div>
-                    <label for="user_type">User Type:</label>
-                    <select id="user_type" name="user_type" required>
+                    <label for="UserType">User Type:</label>
+                    <select id="UserType" name="UserType" required>
                         <% userTypes.forEach(type => { %>
                           <option value="<%= type.UserTypeID %>" <%= user.UserTypeID === type.UserTypeID ? "selected" : "" %>>
                             <%= type.UserTypeName %>
