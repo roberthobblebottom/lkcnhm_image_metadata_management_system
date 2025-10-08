@@ -1037,12 +1037,13 @@ app.get('/admin/imaging-requests', isAuthenticated, isAdmin, (req, res) => {
         SELECT 
             ir.*,
             r.Name AS requestor_name,
-            p.Email AS photographer_name,
+            photographer.Email AS photographer_name,
             cb.Email AS created_by_name,
             ub.Email AS updated_by_name
         FROM ImagingRequest ir
         LEFT JOIN User r ON ir.ImagingRequestorID = r.UserID
-        LEFT JOIN User p ON ir.PhotographerID = p.UserID
+        JOIN ImagingRequestUserPhotographyLink irupl ON irupl.ImagingRequestID = ir.ImagingRequestID
+        JOIN User photographer on irupl.PhotographerID = photographer.UserID
         LEFT JOIN User cb ON ir.CreatedByID = cb.UserID
         LEFT JOIN User ub ON ir.UpdatedByID = ub.UserID
         WHERE ir.IsDeleted = 0
@@ -1119,12 +1120,13 @@ app.get('/user/imaging-requests', isAuthenticated, (req, res) => {
           SELECT 
               ir.*,
               r.Name AS requestor_name,
-              p.Email AS photographer_name,
+              photographer.Email AS photographer_name,
               u.RequestStatus AS RequestStatusName
           FROM ImagingRequest ir
           LEFT JOIN User r ON ir.ImagingRequestorID = r.UserID
-          LEFT JOIN User p ON ir.PhotographerID = p.UserID
-          LEFT JOIN RequestStatus rs ON ir.RequestStatusID = rs.RequestStatusID
+          JOIN ImagingRequestUserPhotographyLink irupl ON irupl.ImagingRequestID = ir.ImagingRequestID
+          JOIN User photographer on irupl.PhotographerID = photographer.UserID
+
           WHERE ir.IsDeleted = 0 AND ir.ImagingRequestorID = ?
           ORDER BY ir.CreatedDate DESC
         `;
@@ -1160,14 +1162,15 @@ app.get('/admin/view-imaging-request/:id', isAuthenticated, isAdmin, (req, res) 
         SELECT 
             ir.*,
             r.Name AS requestor_name,
-            p.Email AS photographer_name,
+            photographer.Email AS photographer_name,
             u.RequestStatus AS status_name,
             creator.Email AS creator_name,
             updater.Email AS updater_name
         FROM ImagingRequest ir
         LEFT JOIN User r ON ir.ImagingRequestorID = r.UserID
-        LEFT JOIN User p ON ir.PhotographerID = p.UserID
-        LEFT JOIN RequestStatus rs ON ir.RequestStatusID = rs.RequestStatusID
+        JOIN ImagingRequestUserPhotographyLink irupl ON irupl.ImagingRequestID = ir.ImagingRequestID
+        JOIN User photographer on irupl.PhotographerID = photographer.UserID
+
         LEFT JOIN User creator ON ir.CreatedByID = creator.UserID
         LEFT JOIN User updater ON ir.UpdatedByID = updater.UserID
         WHERE ir.ImagingRequestID = ?
@@ -1216,14 +1219,14 @@ app.get('/user/view-imaging-request/:id', isAuthenticated, (req, res) => {
         SELECT 
             ir.*,
             r.Name AS requestor_name,
-            p.Email AS photographer_name,
+            photographer.Email AS photographer_name,
             u.RequestStatus AS status_name,
             creator.Email AS creator_name,
             updater.Email AS updater_name
         FROM ImagingRequest ir
         LEFT JOIN User r ON ir.ImagingRequestorID = r.UserID
-        LEFT JOIN User p ON ir.PhotographerID = p.UserID
-        LEFT JOIN RequestStatus rs ON ir.RequestStatusID = rs.RequestStatusID
+        JOIN ImagingRequestUserPhotographyLink irupl ON irupl.ImagingRequestID = ir.ImagingRequestID
+        JOIN User photographer on irupl.PhotographerID = photographer.UserID
         LEFT JOIN User creator ON ir.CreatedByID = creator.UserID
         LEFT JOIN User updater ON ir.UpdatedByID = updater.UserID
         WHERE ir.ImagingRequestID = ?
