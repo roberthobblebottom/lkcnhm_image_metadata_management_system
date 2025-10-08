@@ -2,85 +2,88 @@ DROP DATABASE IF EXISTS museum;
 CREATE DATABASE museum;
 USE museum;
 
-CREATE TABLE user (
-    user_id INT AUTO_INCREMENT PRIMARY KEY,
-    email VARCHAR(255) UNIQUE NOT NULL,
-    password VARCHAR(50) NOT NULL,
-    temporary_password VARCHAR(50) NULL,
-    user_type VARCHAR(50) NOT NULL DEFAULT 'Non-admin',
-    registered_date DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    last_login_date DATETIME NULL,
-    updated_date DATETIME NULL,
-    is_deleted BOOLEAN NULL DEFAULT 0,
-    contact_number VARCHAR(255), 
-    organisation VARCHAR(255), 
-    comments VARCHAR(255), 
-    reason_for_request VARCHAR(255), 
-    updated_by_id INT, 
-    created_by_id INT,
-    FOREIGN KEY (updated_by_id) REFERENCES user(user_id),
-    FOREIGN KEY (created_by_id) REFERENCES user(user_id)
+CREATE TABLE User (
+    UserID INT AUTO_INCREMENT PRIMARY KEY,
+    Email VARCHAR(255) UNIQUE NOT NULL,
+    Password VARCHAR(50) NOT NULL,
+    TemporaryPassword VARCHAR(50) NULL,
+    UserType VARCHAR(50) NOT NULL DEFAULT 'Non-admin',
+    RegisteredDate DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    LastLoginDate DATETIME NULL,
+    UpdatedDate DATETIME NULL,
+    IsDeleted BOOLEAN NULL DEFAULT 0,
+    ContactNumber VARCHAR(255), 
+    Organisation VARCHAR(255), 
+    Comments VARCHAR(255), 
+    ReasonForRequest VARCHAR(255), 
+    UpdatedByID INT, 
+    CreatedByID INT,
+    FOREIGN KEY (UpdatedByID) REFERENCES User(UserID),
+    FOREIGN KEY (CreatedByID) REFERENCES User(UserID)
 );
 
-CREATE TABLE imaging_request (
-        imaging_request_id INT AUTO_INCREMENT PRIMARY KEY,
-        imaging_requestor_id INT NOT NULL,
-        date_of_request DATETIME NOT NULL,
-        imaging_start_date DATETIME NOT NULL,
-        imaging_end_date DATETIME NOT NULL,
-        summary_of_project VARCHAR(255),
-        specimen_details VARCHAR(255),
-        specimen_location_name VARCHAR(255),
-        imaging_platform VARCHAR(255),
-        comments VARCHAR(255),
-        created_date DATETIME NOT NULL ,
-        created_by_id INT,
-        updated_date DATETIME NOT NULL,
-        updated_by_id INT,
-        is_deleted BOOL NOT NULL DEFAULT 0,
-        request_status VARCHAR(255),
-        FOREIGN KEY (imaging_requestor_id) REFERENCES user(user_id),
-        FOREIGN KEY (updated_by_id) REFERENCES user(user_id),
-        FOREIGN KEY (created_by_id) REFERENCES user(user_id)
+CREATE TABLE ImagingRequest (
+        ImagingRequestID INT AUTO_INCREMENT PRIMARY KEY,
+        ImagingRequestorID INT NOT NULL,
+        DateOfRequest DATETIME NOT NULL,
+        ImagingStartDate DATETIME NOT NULL,
+        ImagingEndDate DATETIME NOT NULL,
+        SummaryOfProject VARCHAR(255),
+        SpecimenDetails VARCHAR(255),
+        SpecimenLocationName VARCHAR(255),
+        ImagingPlatform VARCHAR(255),
+        Comments VARCHAR(255),
+        CreatedDate DATETIME NOT NULL ,
+        CreatedByID INT,
+        UpdatedDate DATETIME NOT NULL,
+        UpdatedByID INT,
+        IsDeleted BOOL NOT NULL DEFAULT 0,
+        RequestStatus VARCHAR(255),
+        FOREIGN KEY (ImagingRequestorID) REFERENCES User(UserID),
+        FOREIGN KEY (UpdatedByID) REFERENCES User(UserID),
+        FOREIGN KEY (CreatedByID) REFERENCES User(UserID)
 );
 
-CREATE TABLE imaging_request_user_photographer_link (
-   id INT AUTO_INCREMENT PRIMARY KEY,
-   imaging_requestor_id INT NOT NULL,
-   photographer_id INT NOT NULL,
-   FOREIGN KEY (imaging_requestor_id) REFERENCES user(user_id), 
-   FOREIGN KEY (photographer_id) REFERENCES user(user_id) 
+CREATE TABLE ImagingRequestUserPhotographylink (
+   ID INT AUTO_INCREMENT PRIMARY KEY,
+   ImagingRequestorID INT NOT NULL,
+   PhotographerID INT NOT NULL,
+   FOREIGN KEY (ImagingRequestorID) REFERENCES User(UserID), 
+   FOREIGN KEY (PhotographerID) REFERENCES User(UserID) 
 );
 
 CREATE TABLE Media (
-        media_id INT AUTO_INCREMENT PRIMARY KEY,
-        imaging_request_id INT NOT NULL,
-        photographer_id INT NOT NULL,
-        media_file_Name VARCHAR(255),
-        file_path VARCHAR(255),
-        catalog_id INT,
-        morpho_id INT,
-        cluster_id INT,
-        imaging_date DATETIME,
-        resolution VARCHAR(255),
-        color_depth VARCHAR(255),
-        file_size_bytes VARCHAR(50),
-        file_format VARCHAR(50),
-        description VARCHAR(225),
-        camera_model VARCHAR(255),
-        image_editing_tool VARCHAR(255),
-        comments VARCHAR(255),
-        created_date DATETIME,
-        created_by_id INT,
-        updated_date DATETIME,
-        updated_by_id INT,
-        FOREIGN KEY (imaging_request_id) REFERENCES imaging_request(imaging_request_id),
-        FOREIGN KEY (photographer_id) REFERENCES user(user_id),
-        FOREIGN KEY (updated_by_id) REFERENCES user(user_id),
-        FOREIGN KEY (created_by_id) REFERENCES user(user_id)
+        MediaID INT AUTO_INCREMENT PRIMARY KEY,
+        ImagingRequestID INT NOT NULL,
+        photographerID INT NOT NULL,
+        MediaFileName VARCHAR(255),
+        FilePath VARCHAR(255),
+        CatalogID INT,
+        MorphoID INT,
+        ClusterID INT,
+        ImagingDate DATETIME,
+        Resolution VARCHAR(255),
+        ColorDepth VARCHAR(255),
+        FileSizeBytes VARCHAR(50),
+        FileFormat VARCHAR(50),
+        Description VARCHAR(225),
+        CameraModel VARCHAR(255),
+        ImageEditingTool VARCHAR(255),
+        Comments VARCHAR(255),
+        CreatedDate DATETIME,
+        CreatedByID INT,
+        UpdatedDate DATETIME,
+        UpdatedByID INT,
+        FOREIGN KEY (ImagingRequestID) REFERENCES ImagingRequest(ImagingRequestID),
+        FOREIGN KEY (photographerID) REFERENCES User(UserID),
+        FOREIGN KEY (UpdatedByID) REFERENCES User(UserID),
+        FOREIGN KEY (CreatedByID) REFERENCES User(UserID)
 
 );
 
--- Test Data, do not use them for production.
-INSERT INTO user (email,password,user_type) VALUES ('admin@gmail.com','password','admin');
-SELECT * FROM user WHERE email = 'admin@gmail.com';
+-- Test Data, do not use them for production
+INSERT INTO User (Email,Password,UserType) VALUES ('admin@gmail.com','password','admin');
+INSERT INTO ImagingRequest (ImagingRequestorID ,DateOfRequest ,ImagingStartDate ,ImagingEndDate ,CreatedDate ,UpdatedDate ,RequestStatus) 
+VALUES (1,NOW(),NOW(),NOW(),NOW(),NOW(),'approved');
+SELECT * FROM User WHERE Email = 'admin@gmail.com';
+SELECT * FROM ImagingRequest;
