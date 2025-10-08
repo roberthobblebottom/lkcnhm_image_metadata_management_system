@@ -1545,11 +1545,12 @@ app.get('/admin/media', isAuthenticated, isAdmin, (req, res) => {
         m.CreatedDate,
         ir.ImagingRequestID,
         r.Name AS requestor_name,
-        p.Email AS photographer_name
+        u2.Email AS photographer_name
       FROM Media m
       JOIN ImagingRequest ir ON m.ImagingRequestID = ir.ImagingRequestID
-      JOIN User r ON ir.ImagingRequestorID = r.id
-      JOIN User p ON ir.PhotographerID = p.id
+      JOIN User r ON ir.ImagingRequestorID = r.UserID
+      JOIN ImagingRequestUserPhotographylink p ON ir.ImagingRequestID = p.ImagingRequestID
+      JOIN User u2 ON p.PhotographerID = u2.UserID  
       WHERE m.IsDeleted = 0
       ORDER BY m.CreatedDate DESC
     `;
@@ -1603,12 +1604,14 @@ app.get('/admin/select-user-for-media', isAuthenticated, isAdmin, (req, res) => 
             u.ContactNumber,
             u.Organisation,
             u.RequestStatus,
-            p.Email AS photographer_name,
+            u2.Email AS photographer_name,
             ir.ImagingStartDate,
             ir.ImagingEndDate
         FROM ImagingRequest ir
-        JOIN User u ON ir.ImagingRequestorID = u.id
-        JOIN User p ON ir.PhotographerID = p.id
+        JOIN User u ON ir.ImagingRequestorID = u.UserID
+        JOIN ImagingRequestUserPhotographylink p ON ir.ImagingRequestID = p.ImagingRequestID
+        JOIN User u2 ON p.PhotographerID = u2.UserID  
+
         WHERE 
             ir.RequestStatus = 'approved' AND
             u.IsDeleted = 0 AND 
@@ -1640,10 +1643,13 @@ app.get('/admin/media-form/:imagingRequestId', isAuthenticated, isAdmin, (req, r
         ir.ImagingRequestorID,
         ir.PhotographerID,
         r.Name AS requestor_name,
-        p.email AS photographer_name
+        u2.email AS photographer_name
       FROM ImagingRequest ir
-      JOIN User r ON ir.ImagingRequestorID = r.id
-      JOIN User p ON ir.PhotographerID = p.id
+      JOIN User r ON ir.ImagingRequestorID = r.UserID
+      JOIN ImagingRequestUserPhotographylink p ON ir.ImagingRequestID = p.ImagingRequestID
+      JOIN User u2 ON p.PhotographerID = u2.UserID  
+
+
       WHERE ir.ImagingRequestID = ? AND ir.IsDeleted = 0
     `;
 
@@ -1833,7 +1839,9 @@ app.get('/admin/media/edit/:mediaId', isAuthenticated, isAdmin, (req, res) => {
             FROM Media m
             JOIN ImagingRequest ir ON m.ImagingRequestID = ir.ImagingRequestID
             LEFT JOIN User u1 ON ir.ImagingRequestorID = u1.id
-            LEFT JOIN User u2 ON m.PhotographerID = u2.id
+            OIN ImagingRequestUserPhotographylink p ON ir.ImagingRequestID = p.ImagingRequestID
+            JOIN User u2 ON p.PhotographerID = u2.UserID  
+
             WHERE m.MediaID = ? AND m.IsDeleted = 0
         `;
 
