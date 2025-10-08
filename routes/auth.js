@@ -6,7 +6,7 @@ router.post("/register", (req, res) => {
     const { email, password } = req.body;
     console.log(`🔹 Register Attempt: ${email}`);
 
-    const checkEmailQuery = "SELECT * FROM LoginUser WHERE LoginUserName = ?";
+    const checkEmailQuery = "SELECT * FROM user WHERE email = ?";
     db.query(checkEmailQuery, [email], (err, result) => {
         if (err) {
             console.error("❌ Database Error:", err);
@@ -19,11 +19,11 @@ router.post("/register", (req, res) => {
         }
 
         const insertUserQuery = `
-            INSERT INTO LoginUser 
-            (LoginUserName, Password, TempPassword, LoginUserType, RegisteredDate, LastLoginDate, UpdatedDate, IsDelete) 
+            INSERT INTO user 
+            (email, password, temp_password, user_type, registered_date, last_login_date, updated_date, is_deleted) 
             VALUES (?, ?, NULL, ?, NOW(), NULL, NULL, 0)`;
 
-        db.query(insertUserQuery, [email, password, "Non-admin"], (err) => {
+        db.query(insertUserQuery, [email, password, "requestor"], (err) => {
             if (err) {
                 console.error("❌ Error Registering User:", err);
                 return res.status(500).send("Error Registering User");
@@ -48,7 +48,7 @@ router.post("/login", (req, res) => {
         return res.status(400).json({ error: "Email and password required" });
     }
 
-    const query = "SELECT * FROM LoginUser WHERE LoginUserName = ?";
+    const query = "SELECT * FROM user WHERE email = ?";
     db.query(query, [email], (err, result) => {
         if (err) {
             console.error("❌ Database Error:", err);
@@ -63,28 +63,28 @@ router.post("/login", (req, res) => {
         }
 
         const user = result[0];
-        console.log("🆔 Found User:", user.LoginUserName);
+        console.log("🆔 Found User:", user.email);
 
-        if (password !== user.Password) {
+        if (password !== user.password) {
             console.log("❌ Invalid Password");
             return res.status(400).json({ error: "Invalid email or password" });
         }
 
         // ✅ Store Session Data
         req.session.user = {
-            LoginUserID: user.LoginUserID,
-            LoginUserName: user.LoginUserName,
-            LoginUserType: user.LoginUserType
+            user_id: user.user_id,
+            email: user.email,
+            user_type: user.user_type
         };
 
-        // 🔄 Update LastLoginDate
-        const updateQuery = "UPDATE LoginUser SET LastLoginDate = NOW() WHERE LoginUserID = ?";
-        db.query(updateQuery, [user.LoginUserID], (updateErr) => {
+        // 🔄 Update last_login_date
+        const updateQuery = "UPDATE user SET last_login_date = NOW() WHERE user_id = ?";
+        db.query(updateQuery, [user.user_id], (updateErr) => {
             if (updateErr) {
-                console.error("❌ Failed to update LastLoginDate:", updateErr);
+                console.error("❌ Failed to update last_login_date:", updateErr);
                 // Not blocking login if date update fails
             } else {
-                console.log("🕓 LastLoginDate updated");
+                console.log("🕓 last_login_date updated");
             }
 
             req.session.save(err => {
@@ -93,11 +93,11 @@ router.post("/login", (req, res) => {
                     return res.status(500).json({ error: "Session error" });
                 }
 
-                // console.log("✅ Login Successful! User:", req.session.user.LoginUserName,);
+                // console.log("✅ Login Successful! User:", req.session.user.email,);
 
                 return res.json({
                     success: true,
-                    redirect: user.LoginUserType === "admin" ? "/admin-dashboard" : "/user-dashboard"
+                    redirect: user.user_type === "admin" ? "/admin-dashboard" : "/user-dashboard"
                 });
             });
         });
@@ -111,12 +111,12 @@ router.post("/login", (req, res) => {
 // Logout User
 router.get("/logout", (req, res) => {
     try {
-        if (!req.session.user || !req.session.user.LoginUserID) {
+        if (!req.session.user || !req.session.user.user_id) {
             console.warn("⚠️ Logout Attempt Without Login");
             return res.redirect('/');
         }
 
-        console.log(`🔹 Logout Attempt: ${req.session.user.LoginUserName}`);
+        console.log(`🔹 Logout Attempt: ${req.session.user.email}`);
 
         req.session.destroy((err) => {
             if (err) {
@@ -140,8 +140,8 @@ router.get("/user", (req, res) => {
         console.warn("⚠️ Unauthorized User Info Request");
         return res.status(401).json({ error: "Not logged in" });
     }
-    
-    console.log(`🔹 User Info Requested: ${req.session.user.LoginUserName}`);
+
+    console.log(`🔹 User Info Requested: ${req.session.user.email}`);
     res.json({ user: req.session.user });
 });
 

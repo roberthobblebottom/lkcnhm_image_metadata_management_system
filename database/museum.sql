@@ -4,7 +4,7 @@ USE museum;
 
 CREATE TABLE user (
     user_id INT AUTO_INCREMENT PRIMARY KEY,
-    username VARCHAR(255) UNIQUE NOT NULL,
+    email VARCHAR(255) UNIQUE NOT NULL,
     password VARCHAR(50) NOT NULL,
     temporary_password VARCHAR(50) NULL,
     user_type VARCHAR(50) NOT NULL DEFAULT 'Non-admin',
@@ -12,15 +12,12 @@ CREATE TABLE user (
     last_login_date DATETIME NULL,
     updated_date DATETIME NULL,
     is_deleted BOOLEAN NULL DEFAULT 0,
-
-            email VARCHAR(255) UNIQUE NOT NULL, 
-            contact_number VARCHAR(255) , 
-            organisation VARCHAR(255) , 
-            comments VARCHAR(255), 
-            reason_for_request VARCHAR(255), 
-            updated_by INT, 
-            created_by INT,
-
+    contact_number VARCHAR(255), 
+    organisation VARCHAR(255), 
+    comments VARCHAR(255), 
+    reason_for_request VARCHAR(255), 
+    updated_by INT, 
+    created_by INT
 )
 
 -- CREATE TABLE requestStatus(
