@@ -45,7 +45,7 @@ CREATE TABLE ImagingRequest (
         FOREIGN KEY (CreatedByID) REFERENCES User(UserID)
 );
 
-CREATE TABLE ImagingRequestUserPhotographylink (
+CREATE TABLE ImagingRequestUserPhotographyLink (
    ID INT AUTO_INCREMENT PRIMARY KEY,
    ImagingRequestID INT NOT NULL,
    PhotographerID INT NOT NULL,
@@ -87,5 +87,7 @@ CREATE TABLE Media (
 INSERT INTO User (Email,Password,UserType,Name) VALUES ('admin@gmail.com','1','admin',"jeff");
 INSERT INTO ImagingRequest (ImagingRequestorID ,DateOfRequest ,ImagingStartDate ,ImagingEndDate ,CreatedDate ,UpdatedDate ,RequestStatus) 
 VALUES (1,NOW(),NOW(),NOW(),NOW(),NOW(),'approved');
-SELECT * FROM User WHERE Email = 'admin@gmail.com';
-SELECT * FROM ImagingRequest;
+INSERT INTO ImagingRequestUserPhotographyLink (ImagingRequestID,PhotographerID) VALUES ("1",'1'); 
+-- SELECT * FROM User WHERE Email = 'admin@gmail.com';
+-- SELECT * FROM ImagingRequest;
+SELECT * FROM ImagingRequestUserPhotographyLink;

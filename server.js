@@ -1543,7 +1543,7 @@ app.get('/admin/media', isAuthenticated, isAdmin, (req, res) => {
       FROM Media m
       JOIN ImagingRequest ir ON m.ImagingRequestID = ir.ImagingRequestID
       JOIN User r ON ir.ImagingRequestorID = r.UserID
-      JOIN ImagingRequestUserPhotographylink p ON ir.ImagingRequestID = p.ImagingRequestID
+      JOIN ImagingRequestUserPhotographyLink p ON ir.ImagingRequestID = p.ImagingRequestID
       JOIN User u2 ON p.PhotographerID = u2.UserID  
       WHERE m.IsDeleted = 0
       ORDER BY m.CreatedDate DESC
@@ -1578,39 +1578,29 @@ app.get('/admin/media', isAuthenticated, isAdmin, (req, res) => {
 
 
 app.get('/admin/select-user-for-media', isAuthenticated, isAdmin, (req, res) => {
-    // const query = `
-    //   SELECT DISTINCT u.id, u.username, u.email, ut.UserTypeName
-    //   FROM ImagingRequest ir
-    //   JOIN User u ON ir.ImagingRequestorID = u.id
-    //   JOIN UserType ut ON u.UserTypeID = ut.UserTypeID
-    //   JOIN RequestStatus rs ON ir.RequestStatusID = rs.RequestStatusID
-    //   WHERE ut.UserTypeName IN ('Internal User', 'External User')
-    //     AND u.RequestStatus = 'Accepted'
-    //     AND ir.IsDelete = 0
-    //     AND u.is_delete = 0
-    // `;
     const query = `
-        SELECT 
-            ir.ImagingRequestID,
-            u.UserID AS user_id,
-            u.Email AS requestor_name,
-            u.Email,
-            u.ContactNumber,
-            u.Organisation,
-            u2.Email AS photographer_name,
-            ir.ImagingStartDate,
-            ir.ImagingEndDate
-        FROM ImagingRequest ir
-        JOIN User u ON ir.ImagingRequestorID = u.UserID
-        JOIN ImagingRequestUserPhotographylink p ON ir.ImagingRequestID = p.ImagingRequestID
-        JOIN User u2 ON p.PhotographerID = u2.UserID  
+            SELECT 
+                ir.ImagingRequestID,
+                u.UserID AS user_id,
+                u.Email AS requestor_name,
+                u.Email,
+                u.ContactNumber,
+                u.Organisation,
+                u2.Email AS photographer_name,
+                ir.ImagingStartDate,
+                ir.ImagingEndDate
+            FROM ImagingRequest ir
+            JOIN User u ON ir.ImagingRequestorID = u.UserID
+            JOIN ImagingRequestUserPhotographyLink p ON ir.ImagingRequestID = p.ImagingRequestID
+            JOIN User u2 ON p.PhotographerID = u2.UserID  
 
-        WHERE 
-            ir.RequestStatus = 'approved' AND
-            u.IsDeleted = 0 AND 
-            ir.IsDeleted = 0;
+            WHERE 
+                ir.RequestStatus = 'approved' AND
+                u.IsDeleted = 0 AND 
+                ir.IsDeleted = 0;
 
-  `;
+      `;
+
 
     db.query(query, (err, users) => {
         if (err) {
@@ -1639,7 +1629,7 @@ app.get('/admin/media-form/:imagingRequestId', isAuthenticated, isAdmin, (req, r
         u2.email AS photographer_name
       FROM ImagingRequest ir
       JOIN User r ON ir.ImagingRequestorID = r.UserID
-      JOIN ImagingRequestUserPhotographylink p ON ir.ImagingRequestID = p.ImagingRequestID
+      JOIN ImagingRequestUserPhotographyLink p ON ir.ImagingRequestID = p.ImagingRequestID
       JOIN User u2 ON p.PhotographerID = u2.UserID  
 
 
@@ -1832,7 +1822,7 @@ app.get('/admin/media/edit/:mediaId', isAuthenticated, isAdmin, (req, res) => {
             FROM Media m
             JOIN ImagingRequest ir ON m.ImagingRequestID = ir.ImagingRequestID
             LEFT JOIN User u1 ON ir.ImagingRequestorID = u1.id
-            OIN ImagingRequestUserPhotographylink p ON ir.ImagingRequestID = p.ImagingRequestID
+            JOIN ImagingRequestUserPhotographyLink p ON ir.ImagingRequestID = p.ImagingRequestID
             JOIN User u2 ON p.PhotographerID = u2.UserID  
 
             WHERE m.MediaID = ? AND m.IsDeleted = 0
