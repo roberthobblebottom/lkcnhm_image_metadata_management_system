@@ -16,19 +16,15 @@ CREATE TABLE user (
     organisation VARCHAR(255), 
     comments VARCHAR(255), 
     reason_for_request VARCHAR(255), 
-    updated_by INT, 
-    created_by INT
-)
+    updated_by_id INT, 
+    created_by_id INT,
+    FOREIGN KEY (updated_by_id) REFERENCES user(user_id),
+    FOREIGN KEY (created_by_id) REFERENCES user(user_id)
+);
 
--- CREATE TABLE requestStatus(
---     requestStatusid INT AUTO_INCREMENT PRIMARY KEY,
---     requestStatusName VARCHAR(50)  NOT NULL,
--- )
-
-CREATE TABLE imaging_request(
-        
-        imaging_requestor_id INT,
-        photographer_id INT,
+CREATE TABLE imaging_request (
+        imaging_request_id INT AUTO_INCREMENT PRIMARY KEY,
+        imaging_requestor_id INT NOT NULL,
         date_of_request DATETIME NOT NULL,
         imaging_start_date DATETIME NOT NULL,
         imaging_end_date DATETIME NOT NULL,
@@ -42,12 +38,24 @@ CREATE TABLE imaging_request(
         updated_date DATETIME NOT NULL,
         updated_by_id INT,
         is_deleted BOOL NOT NULL DEFAULT 0,
-        request_status VARCHAR(255)
-)
-CREATE TABLE Media(
+        request_status VARCHAR(255),
+        FOREIGN KEY (imaging_requestor_id) REFERENCES user(user_id),
+        FOREIGN KEY (updated_by_id) REFERENCES user(user_id),
+        FOREIGN KEY (created_by_id) REFERENCES user(user_id)
+);
+
+CREATE TABLE imaging_request_user_photographer_link (
+   id INT AUTO_INCREMENT PRIMARY KEY,
+   imaging_requestor_id INT NOT NULL,
+   photographer_id INT NOT NULL,
+   FOREIGN KEY (imaging_requestor_id) REFERENCES user(user_id), 
+   FOREIGN KEY (photographer_id) REFERENCES user(user_id) 
+);
+
+CREATE TABLE Media (
         media_id INT AUTO_INCREMENT PRIMARY KEY,
-        imaging_request_id INT,
-        photographer_id INT,
+        imaging_request_id INT NOT NULL,
+        photographer_id INT NOT NULL,
         media_file_Name VARCHAR(255),
         file_path VARCHAR(255),
         catalog_id INT,
@@ -56,7 +64,6 @@ CREATE TABLE Media(
         imaging_date DATETIME,
         resolution VARCHAR(255),
         color_depth VARCHAR(255),
-
         file_size_bytes VARCHAR(50),
         file_format VARCHAR(50),
         description VARCHAR(225),
@@ -64,19 +71,16 @@ CREATE TABLE Media(
         image_editing_tool VARCHAR(255),
         comments VARCHAR(255),
         created_date DATETIME,
-        created_by INT,
+        created_by_id INT,
         updated_date DATETIME,
-        updated_by INT
-)
--- end of new tables to be created
+        updated_by_id INT,
+        FOREIGN KEY (imaging_request_id) REFERENCES imaging_request(imaging_request_id),
+        FOREIGN KEY (photographer_id) REFERENCES user(user_id),
+        FOREIGN KEY (updated_by_id) REFERENCES user(user_id),
+        FOREIGN KEY (created_by_id) REFERENCES user(user_id)
 
--- UPDATE LoginUser 
--- SET LoginUserType = 'admin' 
--- WHERE LoginUserName = 'admin@gmail.com';
-
--- DESC LoginUser;
-
+);
 
 -- Test Data, do not use them for production.
-INSERT INTO user (user,password,user_type) VALUES ('admin@gmail.com','password','admin');
-SELECT * FROM user WHERE user = 'admin@gmail.com';
+INSERT INTO user (email,password,user_type) VALUES ('admin@gmail.com','password','admin');
+SELECT * FROM user WHERE email = 'admin@gmail.com';
