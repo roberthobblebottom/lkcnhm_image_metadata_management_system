@@ -49,7 +49,7 @@ const db = require("./db"); // This now imports the promise-based version
 //             specimenLocation: specimenLocation || null,
 //             imagingPlatform: imagingPlatform || null,
 //             comments: comments || null,
-//             status: "Pending"
+//             status: "pending"
 //         };
 
 //         // Execute query with promise
@@ -59,7 +59,7 @@ const db = require("./db"); // This now imports the promise-based version
 //         );
 
 //         console.log('✅ Successfully inserted imaging request with ID:', result.insertId);
-        
+
 //         res.status(201).json({
 //             success: true,
 //             message: "Imaging request submitted successfully",

@@ -115,8 +115,8 @@
               <td><%= request.DateofRequest?.toISOString().slice(0, 10) %></td>
               <td><%= request.ImagingStartDate?.toISOString().slice(0, 10) %></td>
               <td><%= request.ImagingEndDate?.toISOString().slice(0, 10) %></td>
-              <td class="<%= request.status_name === 'Approved' ? 'status-approved' : request.status_name === 'Rejected' ? 'status-rejected' : '-' %>">
-                <%= request.status_name || 'Pending' %>
+              <td class="<%= request.RequestStatus === 'approved' ? 'status-approved' : request.RequestStatus === 'rejected' ? 'status-rejected' : '-' %>">
+                <%= request.RequestStatus || 'pending' %>
               </td>
               
               <td>

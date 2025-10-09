@@ -125,7 +125,7 @@
               <td><%= req.DateofRequest?.toISOString().slice(0, 10) %></td>
               <td><%= req.ImagingStartDate?.toISOString().slice(0, 10) %></td>
               <td><%= req.ImagingEndDate?.toISOString().slice(0, 10) %></td>
-              <td class="<%= req.RequestStatusName === 'Approved' ? 'status-approved' : req.RequestStatusName === 'Rejected' ? 'status-rejected' : '' %>">
+              <td class="<%= req.RequestStatusName === 'approved' ? 'status-approved' : req.RequestStatusName === 'rejected' ? 'status-rejected' : '' %>">
                 <%= req.RequestStatusName || '-' %>
               </td>
               <td>

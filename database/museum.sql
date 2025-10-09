@@ -16,6 +16,7 @@ CREATE TABLE User (
     ContactNumber VARCHAR(255), 
     Organisation VARCHAR(255), 
     Comments VARCHAR(255), 
+    RequestStatus VARCHAR(255),
     ReasonForRequest VARCHAR(255), 
     UpdatedByID INT NOT NULL, 
     CreatedByID INT NOT NULL,
@@ -84,7 +85,9 @@ CREATE TABLE Media (
 );
 
 -- Test Data, do not use them for production
-INSERT INTO User (Email,Password,UserType,Name,CreatedByID,UpdatedByID) VALUES ('admin@gmail.com','1','admin',"jeff",'1','1');
+INSERT INTO User (Email,Password,UserType,Name,CreatedByID,UpdatedByID,RequestStatus) VALUES ('admin@gmail.com','1','admin',"jeff",'1','1','approved');
+INSERT INTO User (Email,Password,UserType,Name,CreatedByID,UpdatedByID,RequestStatus) VALUES ('r1@gmail.com','1','requestor',"Zesty",'2','2','approved');
+INSERT INTO User (Email,Password,UserType,Name,CreatedByID,UpdatedByID,RequestStatus) VALUES ('p1@gmail.com','1','photographer',"Ron",'3','3','approved');
 INSERT INTO ImagingRequest (ImagingRequestorID ,DateOfRequest ,ImagingStartDate ,ImagingEndDate ,CreatedDate ,UpdatedDate ,RequestStatus,CreatedByID,UpdatedByID) 
 VALUES (1,NOW(),NOW(),NOW(),NOW(),NOW(),'approved','1','1');
 INSERT INTO ImagingRequestUserPhotographyLink (ImagingRequestID,PhotographerID) VALUES ("1",'1'); 

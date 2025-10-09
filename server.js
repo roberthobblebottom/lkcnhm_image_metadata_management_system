@@ -125,7 +125,7 @@ app.get("/edit-user", isAuthenticated, isAdmin, (req, res) => {
 //✅ API to Fetch All Users
 app.get("/admin-users", isAuthenticated, isAdmin, (req, res) => {
     console.log("Route /admin-users hit"); // Debug log 1
-    const query = "SELECT UserID,Password,TempPassword,Email,RegisteredDate,UpdatedDate,LastLoginDate, UserType, IsDeleted FROM User";
+    const query = "SELECT UserID,Password,TemporaryPassword,Email,RegisteredDate,UpdatedDate,LastLoginDate, UserType, IsDeleted FROM User";
 
     db.query(query, (err, result) => {
         console.log("Query executed", { err, result }); // Debug log 2
@@ -192,18 +192,18 @@ app.get("/edit-users/:id", isAuthenticated, isAdmin, (req, res) => {
 // Handle form submission (support both singular and plural URLs)
 app.post(["/update-user/:id", "/update-users/:id"], isAuthenticated, isAdmin, (req, res) => {
     const userId = req.params.id;
-    const { TempPassword, UserType, IsDeleted } = req.body;
+    const { TemporaryPassword, UserType, IsDeleted } = req.body;
 
     const query = `
         UPDATE User 
-        SET TempPassword = ?, 
+        SET TemporaryPassword = ?, 
             UserType = ?, 
             IsDeleted = ?,
             UpdatedDate = NOW()
         WHERE UserID = ? 
     `;
 
-    db.query(query, [TempPassword, UserType, IsDeleted, userId], (err, result) => {
+    db.query(query, [TemporaryPassword, UserType, IsDeleted, userId], (err, result) => {
         if (err) {
             console.error("❌ Database Error:", err);
             return res.status(500).json({
@@ -229,7 +229,7 @@ app.post(["/update-user/:id", "/update-users/:id"], isAuthenticated, isAdmin, (r
 // ✅ API to Fetch a Single User by ID
 app.get("/api/admin-users/:id", isAuthenticated, isAdmin, (req, res) => {
     const userId = req.params.id;
-    const query = "SELECT UserID, Email, Password, TempPassword FROM User WHERE UserID = ? AND IsDeleted = 0";
+    const query = "SELECT UserID, Email, Password, TemporaryPassword FROM User WHERE UserID = ? AND IsDeleted = 0";
 
     db.query(query, [userId], (err, result) => {
         if (err) {
@@ -248,15 +248,15 @@ app.get("/api/admin-users/:id", isAuthenticated, isAdmin, (req, res) => {
 // ✅ API to Edit User Details
 app.put("/api/admin-users/:id", isAuthenticated, isAdmin, (req, res) => {
     const userId = req.params.id;
-    const { Email, Password, TempPassword } = req.body;
+    const { Email, Password, TemporaryPassword } = req.body;
 
     const query = `
         UPDATE User 
-        SET Email = ?, Password = ?, TempPassword = ?, UpdatedDate = NOW() 
+        SET Email = ?, Password = ?, TemporaryPassword = ?, UpdatedDate = NOW() 
         WHERE UserID = ? AND IsDeleted = 0
     `;
 
-    db.query(query, [Email, Password, TempPassword, userId], (err, result) => {
+    db.query(query, [Email, Password, TemporaryPassword, userId], (err, result) => {
         if (err) {
             console.error("❌ Database Error:", err);
             return res.status(500).json({ error: "Database error" });
@@ -307,10 +307,9 @@ app.get("/imagingUser", isAuthenticated, (req, res) => {
     const userId = req.session.user.UserID;
 
     const query = `
-        SELECT u.*, ut.UserTypeName, u.RequestStatus
+        SELECT u.*, ut.UserTypeName
         FROM User u
         LEFT JOIN UserType ut ON u.UserTypeID = ut.UserTypeID
-        LEFT JOIN RequestStatus rs ON u.RequestStatusID = rs.RequestStatusID
         WHERE u.CreatedByID = ? AND u.IsDeleted = 0
     `;
 
@@ -328,7 +327,7 @@ app.get("/imagingUser", isAuthenticated, (req, res) => {
         // ✅ Check if primary user request exists and is not approved
         let showPendingAlert = false;
 
-        if (userRequests.length > 0 && userRequests[0].RequestStatusName !== "Approved") {
+        if (userRequests.length > 0 && userRequests[0].RequestStatusName !== "approved") {
             showPendingAlert = true;
         }
 
@@ -371,13 +370,11 @@ app.get("/form", isAuthenticated, (req, res) => {
 
         // Check if the user has registered already as Internal/External User
         const userCheckQuery = `
-            SELECT u.*, u.RequestStatus, ut.UserTypeName
+            SELECT u.*, u.RequestStatus, ut.UserType
             FROM User u
-            JOIN RequestStatus rs ON u.RequestStatusID = rs.RequestStatusID
-            JOIN UserType ut ON u.UserTypeID = ut.UserTypeID
             WHERE u.CreatedByID = ? AND ut.UserTypeName IN ('Internal User', 'External User') AND u.IsDeleted = 0
             LIMIT 1
-        `;
+        `; // TODO Wrong Filter
 
         db.query(userCheckQuery, [loginUserId], (err, results) => {
             if (err) {
@@ -400,7 +397,7 @@ app.get("/form", isAuthenticated, (req, res) => {
                 });
             }
 
-            if (user.RequestStatusName !== "Approved") {
+            if (user.RequestStatusName !== "approved") {
                 return res.redirect("/user/UserRequest?status=pending");
             }
 
@@ -521,7 +518,6 @@ app.get('/view/:user_id', isAuthenticated, (req, res) => {
         LEFT JOIN User creator ON u.CreatedByID = creator.UserID
         LEFT JOIN User updater ON u.updated_by = updater.UserID
         LEFT JOIN UserType ut ON u.UserTypeID = ut.UserTypeID
-        LEFT JOIN RequestStatus rs ON u.RequestStatusID = rs.RequestStatusID
         WHERE u.UserID = ? AND u.IsDeleted = 0
     `;
 
@@ -686,13 +682,13 @@ app.get("/forgot-password", (req, res) => {
 
 // Handle forgot password
 app.post("/forgot-password", (req, res) => {
-    const { userId, tempPassword, newPassword } = req.body;
+    const { userId, Password, newPassword } = req.body;
 
     console.log("🟢 Forgot Password Request:", req.body);
 
-    // Step 1: Verify userId and tempPassword
-    const selectQuery = "SELECT * FROM User WHERE Email = ? AND TempPassword = ?";
-    db.query(selectQuery, [userId, tempPassword], (err, results) => {
+    // Step 1: Verify userId and Password
+    const selectQuery = "SELECT * FROM User WHERE Email = ? AND TemporaryPassword = ?";
+    db.query(selectQuery, [userId, Password], (err, results) => {
         if (err) {
             console.error("DB error:", err);
             return res.status(500).json({ success: false, error: "Server error" });
@@ -703,7 +699,7 @@ app.post("/forgot-password", (req, res) => {
         }
 
         // Step 2: Update the password
-        const updateQuery = "UPDATE User SET Password = ?, TempPassword = NULL WHERE Email = ?";
+        const updateQuery = "UPDATE User SET Password = ?, TemporaryPassword = NULL WHERE Email = ?";
         db.query(updateQuery, [newPassword, userId], (err2, result) => {
             if (err2) {
                 console.error("DB error:", err2);
@@ -847,20 +843,18 @@ app.get('/imaging-request-admin', isAuthenticated, isAdmin, (req, res) => {
     const getRequestors = `
       SELECT u.UserID, u.Email 
       FROM User u
-      JOIN RequestStatus rs ON u.RequestStatusID = rs.RequestStatusID
-      WHERE u.UserTypeID IN (1, 2) 
-        AND u.RequestStatus = 'Approved'
+      WHERE u.UserType = 'requestor'
+        AND u.RequestStatus = 'approved'
         AND u.IsDeleted = 0
-    `;
+    `; // TODO wrong usertypeid filter
 
     const getPhotographers = `
       SELECT u.UserID, u.Email 
       FROM User u
-      JOIN RequestStatus rs ON u.RequestStatusID = rs.RequestStatusID
-      WHERE u.UserTypeID IN (3, 4) 
-        AND u.RequestStatus = 'Approved'
+      WHERE u.UserType = 'photographer' 
+        AND u.RequestStatus = 'approved'
         AND u.IsDeleted = 0
-    `;
+    `; // todo wrong user type id filter these are hard coded.
 
     db.query(getRequestors, (err1, requestors) => {
         if (err1) {
@@ -1038,8 +1032,8 @@ app.get('/admin/imaging-requests', isAuthenticated, isAdmin, (req, res) => {
             ir.*,
             r.Name AS requestor_name,
             photographer.Email AS photographer_name,
-            cb.Email AS created_by_name,
-            ub.Email AS updated_by_name
+            cb.Email AS CreatedByName,
+            ub.Email AS UpdatedByName
         FROM ImagingRequest ir
         LEFT JOIN User r ON ir.ImagingRequestorID = r.UserID
         JOIN ImagingRequestUserPhotographyLink irupl ON irupl.ImagingRequestID = ir.ImagingRequestID
@@ -1070,6 +1064,7 @@ app.get('/admin/imaging-requests', isAuthenticated, isAdmin, (req, res) => {
                 message: 'No imaging requests found'
             });
         }
+        console.log(results)
 
         res.render('imaging-request-view-admin', {
             imagingRequests: results,
@@ -1106,7 +1101,7 @@ app.get('/user/imaging-requests', isAuthenticated, (req, res) => {
         }
 
         // No such user created OR not approved
-        if (!userResult[0] || userResult[0].RequestStatusName !== "Approved") {
+        if (!userResult[0] || userResult[0].RequestStatusName !== "approved") {
             console.log("🔒 User not approved or not registered as Internal/External");
             return res.render("imaging_request_index", {
                 imagingRequests: [],
@@ -1126,7 +1121,6 @@ app.get('/user/imaging-requests', isAuthenticated, (req, res) => {
           LEFT JOIN User r ON ir.ImagingRequestorID = r.UserID
           JOIN ImagingRequestUserPhotographyLink irupl ON irupl.ImagingRequestID = ir.ImagingRequestID
           JOIN User photographer on irupl.PhotographerID = photographer.UserID
-
           WHERE ir.IsDeleted = 0 AND ir.ImagingRequestorID = ?
           ORDER BY ir.CreatedDate DESC
         `;
@@ -1161,16 +1155,15 @@ app.get('/admin/view-imaging-request/:id', isAuthenticated, isAdmin, (req, res) 
     const query = `
         SELECT 
             ir.*,
-            r.Name AS requestor_name,
+            r.Email AS requestor_name,
             photographer.Email AS photographer_name,
-            u.RequestStatus AS status_name,
+            r.RequestStatus AS status_name,
             creator.Email AS creator_name,
             updater.Email AS updater_name
         FROM ImagingRequest ir
         LEFT JOIN User r ON ir.ImagingRequestorID = r.UserID
         JOIN ImagingRequestUserPhotographyLink irupl ON irupl.ImagingRequestID = ir.ImagingRequestID
         JOIN User photographer on irupl.PhotographerID = photographer.UserID
-
         LEFT JOIN User creator ON ir.CreatedByID = creator.UserID
         LEFT JOIN User updater ON ir.UpdatedByID = updater.UserID
         WHERE ir.ImagingRequestID = ?
@@ -1220,7 +1213,7 @@ app.get('/user/view-imaging-request/:id', isAuthenticated, (req, res) => {
             ir.*,
             r.Name AS requestor_name,
             photographer.Email AS photographer_name,
-            u.RequestStatus AS status_name,
+            r.RequestStatus AS status_name,
             creator.Email AS creator_name,
             updater.Email AS updater_name
         FROM ImagingRequest ir
@@ -1307,11 +1300,11 @@ app.get('/admin/edit-imaging-request/:id', isAuthenticated, isAdmin, async (req,
                 requestor.UserID AS requestor_id,
                 photographer.Name AS photographer_name,
                 photographer.UserID AS photographer_id,
-                u.RequestStatus
+                requestor.RequestStatus
             FROM ImagingRequest ir
             LEFT JOIN User requestor ON ir.ImagingRequestorID = requestor.UserID
-            LEFT JOIN User photographer ON ir.PhotographerID = photographer.UserID
-            LEFT JOIN RequestStatus rs ON ir.RequestStatusID = rs.RequestStatusID
+            JOIN ImagingRequestUserPhotographyLink p ON ir.ImagingRequestID = p.ImagingRequestID
+            JOIN User photographer ON p.PhotographerID = requestor.UserID  
             WHERE ir.ImagingRequestID = ?
         `;
 
@@ -1467,7 +1460,7 @@ app.get('/imaging-request-user', isAuthenticated, (req, res) => {
               AND UserTypeID IN (1, 2) 
               AND IsDeleted = 0
               AND RequestStatusID = (
-                SELECT RequestStatusID FROM RequestStatus WHERE RequestStatusName = 'Approved'
+                SELECT RequestStatusID FROM RequestStatus WHERE RequestStatusName = 'approved'
               )
             LIMIT 1
         `;
@@ -1480,7 +1473,7 @@ app.get('/imaging-request-user', isAuthenticated, (req, res) => {
               AND UserTypeID IN (3, 4)
               AND IsDeleted = 0
               AND RequestStatusID = (
-                SELECT RequestStatusID FROM RequestStatus WHERE RequestStatusName = 'Approved'
+                SELECT RequestStatusID FROM RequestStatus WHERE RequestStatusName = 'approved'
               )
         `;
 
@@ -1624,7 +1617,7 @@ app.get('/admin/media-form/:imagingRequestId', isAuthenticated, isAdmin, (req, r
         ir.ImagingRequestID,
         ir.ImagingRequestorID,
         r.Name AS requestor_name,
-        u2.email AS photographer_name
+        u2.Email AS photographer_name
       FROM ImagingRequest ir
       JOIN User r ON ir.ImagingRequestorID = r.UserID
       JOIN ImagingRequestUserPhotographyLink p ON ir.ImagingRequestID = p.ImagingRequestID
@@ -1774,8 +1767,8 @@ app.get('/admin/media/view/:mediaId', isAuthenticated, isAdmin, (req, res) => {
     const query = `
       SELECT 
         m.*,
-        u1.email AS created_by_name,
-        u2.email AS updated_by_name
+        u1.Email AS CreatedByName,
+        u2.Email AS UpdatedByName
       FROM Media m
       LEFT JOIN User u1 ON m.CreatedByID = u1.UserID
       LEFT JOIN User u2 ON m.UpdatedByID = u2.UserID

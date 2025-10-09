@@ -358,7 +358,7 @@ button.delete-btn:hover {
                 <div class="detail-row">
                     <div class="detail-label">Status</div>
                     <div class="detail-value">
-                        <span class="badge bg-<%= request.status_name === 'Approved' ? 'success' : request.status_name === 'Rejected' ? 'danger' : 'warning' %>">
+                        <span class="badge bg-<%= request.status_name === 'approved' ? 'success' : request.status_name === 'rejected' ? 'danger' : 'warning' %>">
                             <%= request.status_name %>
                         </span>
                     </div>
