@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8" />
   <title>Media Management</title>
@@ -38,7 +39,7 @@
     }
 
     table {
-     
+
       width: 100%;
       border-collapse: collapse;
       background: white;
@@ -48,7 +49,8 @@
       margin-top: 30px;
     }
 
-    th, td {
+    th,
+    td {
       padding: 12px 15px;
       border-bottom: 1px solid #eee;
       text-align: left;
@@ -72,9 +74,20 @@
       cursor: pointer;
     }
 
-    .btn-view { background-color: #17a2b8; color: #fff; }
-    .btn-edit { background-color: #ffc107; color: #000; }
-    .btn-delete { background-color: #dc3545; color: #fff; }
+    .btn-view {
+      background-color: #17a2b8;
+      color: #fff;
+    }
+
+    .btn-edit {
+      background-color: #ffc107;
+      color: #000;
+    }
+
+    .btn-delete {
+      background-color: #dc3545;
+      color: #fff;
+    }
 
     .no-data {
       text-align: center;
@@ -83,52 +96,69 @@
     }
   </style>
 </head>
+
 <body>
   <div class="main_con">
-    <%- include('partials/sidenav') %>
+    <%- include('partials/sidenav_admin') %>
 
-    <a href="/admin/select-user-for-media" class="btn">Add Media</a>
+      <a href="/admin/select-user-for-media" class="btn">Add Media</a>
 
-    <h2>Media Records</h2>
+      <h2>Media Records</h2>
 
-    <% if (mediaRecords.length === 0) { %>
-      <p class="no-data">No media records found.</p>
-    <% } else { %>
-      <table>
-        <thead>
-          <tr>
-            <th>Media ID</th>
-            <th>Imaging Request ID</th>
-            <th>Requestor</th>
-            <th>Photographer</th>
-            <th>File Name</th>
-            <th>Catalog ID</th>
-            <th>Imaging Date</th>
-            <th>Actions</th>
-          </tr>
-        </thead>
-        <tbody>
-          <% mediaRecords.forEach(record => { %>
-            <tr>
-              <td><%= record.MediaID || 'Not specified' %></td>
-              <td><%= record.ImagingRequestID || 'Not specified' %></td>
-              <td><%= record.requestor_name || 'Not specified' %></td>
-              <td><%= record.photographer_name || 'Not specified' %></td>
-              <td><%= record.MediaFileName  || 'Not specified' %></td>
-              <td><%= record.CatalogID || '-' %></td>
-              <td><%= record.ImagingDate?.toISOString().slice(0, 10) %></td>
-              <td class="action-btns">
-                <a href="/admin/media/view/<%= record.MediaID %>"><button class="btn-view">View</button></a>
-                <a href="/admin/media/edit/<%= record.MediaID %>"><button class="btn-edit">Edit</button></a>
-                <form action="/admin/media/delete/<%= record.MediaID %>" method="POST" style="display:inline;" onsubmit="return confirm('Are you sure you want to delete this media record?');">
-                  <button type="submit" class="btn-delete">Delete</button>
-                </form>
-              </td>
-            </tr>
-          <% }) %>
-        </tbody>
-      </table>
-    <% } %>
+      <% if (mediaRecords.length===0) { %>
+        <p class="no-data">No media records found.</p>
+        <% } else { %>
+          <table>
+            <thead>
+              <tr>
+                <th>Media ID</th>
+                <th>Imaging Request ID</th>
+                <th>Requestor</th>
+                <th>Photographer</th>
+                <th>File Name</th>
+                <th>Catalog ID</th>
+                <th>Imaging Date</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              <% mediaRecords.forEach(record=> { %>
+                <tr>
+                  <td>
+                    <%= record.MediaID || 'Not specified' %>
+                  </td>
+                  <td>
+                    <%= record.ImagingRequestID || 'Not specified' %>
+                  </td>
+                  <td>
+                    <%= record.requestor_name || 'Not specified' %>
+                  </td>
+                  <td>
+                    <%= record.photographer_name || 'Not specified' %>
+                  </td>
+                  <td>
+                    <%= record.MediaFileName || 'Not specified' %>
+                  </td>
+                  <td>
+                    <%= record.CatalogID || '-' %>
+                  </td>
+                  <td>
+                    <%= record.ImagingDate?.toISOString().slice(0, 10) %>
+                  </td>
+                  <td class="action-btns">
+                    <a href="/admin/media/view/<%= record.MediaID %>"><button class="btn-view">View</button></a>
+                    <a href="/admin/media/edit/<%= record.MediaID %>"><button class="btn-edit">Edit</button></a>
+                    <form action="/admin/media/delete/<%= record.MediaID %>" method="POST" style="display:inline;"
+                      onsubmit="return confirm('Are you sure you want to delete this media record?');">
+                      <button type="submit" class="btn-delete">Delete</button>
+                    </form>
+                  </td>
+                </tr>
+                <% }) %>
+            </tbody>
+          </table>
+          <% } %>
   </div>
 </body>
+
 </html>

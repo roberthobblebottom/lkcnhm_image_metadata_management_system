@@ -1,488 +1,488 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <title>Imaging Request Management</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <!-- Add this in your <head> section -->
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-<link rel="stylesheet" href="/css/admin-users.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <link rel="stylesheet" href="/css/admin-users.css">
   <style>
     body {
       font-family: Arial, sans-serif;
       margin: 40px;
       background: #f9f9f9;
     }
-   /* Reset some basic elements */
-* {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
-}
 
-body {
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  background-color: #f4f6f8;
-  padding: 2rem;
-}
+    /* Reset some basic elements */
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
 
-h2 {
-  text-align: center;
-  margin-bottom: 2rem;
-  color: #2c3e50;
-  margin-top: -60px;
-}
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: #f4f6f8;
+      padding: 2rem;
+    }
 
-/* Form Styles */
-form#imagingRequestForm {
-  max-width: 700px;
-  margin: auto;
-  padding: 2rem;
-  background-color: #ffffff;
-  
-  border-radius: 12px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-}
+    h2 {
+      text-align: center;
+      margin-bottom: 2rem;
+      color: #2c3e50;
+      margin-top: -60px;
+    }
 
-.form-group {
-  margin-bottom: 1.5rem;
-}
+    /* Form Styles */
+    form#imagingRequestForm {
+      max-width: 700px;
+      margin: auto;
+      padding: 2rem;
+      background-color: #ffffff;
 
-label {
-  display: block;
-  font-weight: 600;
-  margin-bottom: 0.5rem;
-  color: #34495e;
-}
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
 
-input[type="text"],
-input[type="datetime-local"],
-select,
-textarea {
-  width: 100%;
-  padding: 0.75rem;
-  border: 1px solid #ccc;
-  border-radius: 8px;
-  font-size: 1rem;
-  background-color: #fefefe;
-  transition: border-color 0.2s;
-}
+    .form-group {
+      margin-bottom: 1.5rem;
+    }
 
-input:focus,
-textarea:focus,
-select:focus {
-  border-color: #007bff;
-  outline: none;
-}
+    label {
+      display: block;
+      font-weight: 600;
+      margin-bottom: 0.5rem;
+      color: #34495e;
+    }
 
-textarea {
-  resize: vertical;
-  min-height: 100px;
-}
+    input[type="text"],
+    input[type="datetime-local"],
+    select,
+    textarea {
+      width: 100%;
+      padding: 0.75rem;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      font-size: 1rem;
+      background-color: #fefefe;
+      transition: border-color 0.2s;
+    }
 
-.error-message {
-  font-size: 0.9rem;
-  color: #e74c3c;
-  display: none;
-  margin-top: 0.3rem;
-}
+    input:focus,
+    textarea:focus,
+    select:focus {
+      border-color: #007bff;
+      outline: none;
+    }
 
-/* Button Styles */
-.buttons {
-  text-align: center;
-}
+    textarea {
+      resize: vertical;
+      min-height: 100px;
+    }
 
-button[type="submit"] {
-  background-color: #007bff;
-  color: #fff;
-  border: none;
-  padding: 0.75rem 2rem;
-  font-size: 1rem;
-  border-radius: 8px;
-  cursor: pointer;
-  transition: background-color 0.3s ease;
-}
+    .error-message {
+      font-size: 0.9rem;
+      color: #e74c3c;
+      display: none;
+      margin-top: 0.3rem;
+    }
 
-button[type="submit"]:hover {
-  background-color: #0056b3;
-}
+    /* Button Styles */
+    .buttons {
+      text-align: center;
+    }
 
-button i {
-  margin-right: 8px;
-}
+    button[type="submit"] {
+      background-color: #007bff;
+      color: #fff;
+      border: none;
+      padding: 0.75rem 2rem;
+      font-size: 1rem;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
 
-/* Responsive Enhancements */
-@media (max-width: 600px) {
-  form#imagingRequestForm {
-    padding: 1.5rem;
-  }
+    button[type="submit"]:hover {
+      background-color: #0056b3;
+    }
 
-  h2 {
-    font-size: 1.5rem;
-  }
-}
+    button i {
+      margin-right: 8px;
+    }
 
+    /* Responsive Enhancements */
+    @media (max-width: 600px) {
+      form#imagingRequestForm {
+        padding: 1.5rem;
+      }
+
+      h2 {
+        font-size: 1.5rem;
+      }
+    }
   </style>
 </head>
+
 <body>
-  <div class="sidebar">
-    <div class="logo">
-        <img src="/images/Group-1.svg" alt="LKCNHM Logo" style="width: 200px; height: auto; margin-left:10px;" />
-      </div>
-    <ul class="nav-links">
-        <li class="active"><a href="/admin-dashboard"><i class="fas fa-chart-line"></i><span>Dashboard</span></a></li>
-        <li><a href="/admin-users"><i class="fas fa-users"></i><span>Login Details Management</span></a></li>
-        <li><a href="/admin/UserRequest"><i class="fas fa-file-alt"></i><span>Imaging User Management</span></a></li>
-        <li><a href="/admin/imaging-requests"><i class="fas fa-file-medical"></i><span>Imaging Request Management</span></a></li> 
-        <li><a href="/admin/media"><i class="fas fa-image"></i><span>Media Management</span></a></li>
-        <li><a href="/change-password-admin"><i class="fas fa-key"></i><span>Change Password</span></a></li>
-        <li><a href="/auth/logout"><i class="fas fa-sign-out-alt"></i><span>Logout</span></a></li>
-    </ul>
-</div>
-  <main>
-<h2>Imaging Request Form</h2>
 
-<form id="imagingRequestForm">
-  <div class="form-group">
-    <label for="requestor">Requestor Name</label>
-    <select id="requestor" name="requestor" required>
-      <option value="">Select Requestor</option>
-      <% requestors.forEach(user => { %>
-        <option value="<%= user.id %>"><%= user.username %></option>
-      <% }) %>
-    </select>
-    <div id="requestor-error" class="error-message">Please select a requestor</div>
-  </div>
+  <% if (request.UserType=='admin' ) {%>
+    <%- include('partials/sidenav_admin') %>
+      <% } else { %>
+        <%- include('partials/sidenav_user') %>
+          <% }%>
 
-  <div class="form-group">
-    <label for="photographer">Photographer Name</label>
-    <select id="photographer" name="photographer" required>
-      <option value="">Select Photographer</option>
-      <% photographers.forEach(user => { %>
-        <option value="<%= user.id %>"><%= user.username %></option>
-      <% }) %>
-    </select>
-    <div id="photographer-error" class="error-message">Please select a photographer</div>
-  </div>
+            <main>
+              <h2>Imaging Request Form</h2>
 
-  <div class="form-group">
-    <label for="requestDate">Date of Request</label>
-    <input type="datetime-local" id="requestDate" name="requestDate" required readonly>
-  </div>
+              <form id="imagingRequestForm">
+                <div class="form-group">
+                  <label for="requestor">Requestor Name</label>
+                  <select id="requestor" name="requestor" required>
+                    <option value="">Select Requestor</option>
+                    <% requestors.forEach(user=> { %>
+                      <option value="<%= user.id %>">
+                        <%= user.username %>
+                      </option>
+                      <% }) %>
+                  </select>
+                  <div id="requestor-error" class="error-message">Please select a requestor</div>
+                </div>
 
-  <div class="form-group">
-    <label for="startDate">Imaging Start Date</label>
-    <input type="datetime-local" id="startDate" name="startDate" required>
-    <div id="startDate-error" class="error-message">Start date must be after request date</div>
-  </div>
+                <div class="form-group">
+                  <label for="photographer">Photographer Name</label>
+                  <select id="photographer" name="photographer" required>
+                    <option value="">Select Photographer</option>
+                    <% photographers.forEach(user=> { %>
+                      <option value="<%= user.id %>">
+                        <%= user.username %>
+                      </option>
+                      <% }) %>
+                  </select>
+                  <div id="photographer-error" class="error-message">Please select a photographer</div>
+                </div>
 
-  <div class="form-group">
-    <label for="endDate">Imaging End Date</label>
-    <input type="datetime-local" id="endDate" name="endDate" required>
-    <div id="endDate-error" class="error-message">End date must be after start date</div>
-  </div>
+                <div class="form-group">
+                  <label for="requestDate">Date of Request</label>
+                  <input type="datetime-local" id="requestDate" name="requestDate" required readonly>
+                </div>
 
-  <div class="form-group">
-    <label for="summary">Summary of Project</label>
-    <textarea id="summary" name="summary" required></textarea>
-    <div id="summary-error" class="error-message">Please provide a project summary</div>
-  </div>
+                <div class="form-group">
+                  <label for="startDate">Imaging Start Date</label>
+                  <input type="datetime-local" id="startDate" name="startDate" required>
+                  <div id="startDate-error" class="error-message">Start date must be after request date</div>
+                </div>
 
-  <div class="form-group">
-    <label for="specimenDetails">Specimen Details</label>
-    <textarea id="specimenDetails" name="specimenDetails" required></textarea>
-    <div id="specimenDetails-error" class="error-message">Please provide specimen details</div>
-  </div>
+                <div class="form-group">
+                  <label for="endDate">Imaging End Date</label>
+                  <input type="datetime-local" id="endDate" name="endDate" required>
+                  <div id="endDate-error" class="error-message">End date must be after start date</div>
+                </div>
 
-  <div class="form-group">
-    <label for="location">Specimen Location Name</label>
-    <input type="text" id="location" name="location" required>
-    <div id="location-error" class="error-message">Please specify the location</div>
-  </div>
+                <div class="form-group">
+                  <label for="summary">Summary of Project</label>
+                  <textarea id="summary" name="summary" required></textarea>
+                  <div id="summary-error" class="error-message">Please provide a project summary</div>
+                </div>
 
-  <div class="form-group">
-    <label for="platform">Imaging Platform</label>
-    <input type="text" id="platform" name="platform">
-  </div>
+                <div class="form-group">
+                  <label for="specimenDetails">Specimen Details</label>
+                  <textarea id="specimenDetails" name="specimenDetails" required></textarea>
+                  <div id="specimenDetails-error" class="error-message">Please provide specimen details</div>
+                </div>
 
-  <div class="form-group">
-    <label for="comments">Comments</label>
-    <textarea id="comments" name="comments"></textarea>
-  </div>
+                <div class="form-group">
+                  <label for="location">Specimen Location Name</label>
+                  <input type="text" id="location" name="location" required>
+                  <div id="location-error" class="error-message">Please specify the location</div>
+                </div>
 
-  <div class="buttons">
-    <button type="submit" class="new"><i class="fas fa-paper-plane"></i> Submit</button>
-  </div>
-</form>
-</main>
-<script>
-    // Initialize form with current datetime
-    document.addEventListener('DOMContentLoaded', function() {
-      // Set current datetime to requestDate field
-      const requestDateField = document.getElementById('requestDate');
-      requestDateField.value = new Date().toISOString().slice(0,16);
-      
-      // Set min attributes for date fields
-      updateDateConstraints();
-      
-      // Load users for dropdowns
-      // loadUsers();
-      
-      // Setup form validation
-      setupFormValidation();
-    });
-  
-    // Update date constraints when dates change
-    function updateDateConstraints() {
-      const requestDate = document.getElementById('requestDate').value;
-      const startDate = document.getElementById('startDate').value;
-      
-      // Set minimum start date to be after request date
-      document.getElementById('startDate').min = requestDate;
-      
-      // Set minimum end date to be after start date (if start date is selected)
-      if (startDate) {
-        document.getElementById('endDate').min = startDate;
-      } else {
-        document.getElementById('endDate').min = requestDate;
-      }
-    }
-  
-    // Function to load users for dropdowns
-    // function loadUsers() {
-    //   fetch('/get-users')
-    //     .then(res => {
-    //       if (!res.ok) {
-    //         throw new Error('Network response was not ok');
-    //       }
-    //       return res.json();
-    //     })
-    //     .then(data => {
-    //       if (data.requestors && Array.isArray(data.requestors)) {
-    //         const requestorSelect = document.getElementById('requestor');
-    //         data.requestors.forEach(user => {
-    //           const option = document.createElement('option');
-    //           option.value = user.id;
-    //           option.textContent = user.username;
-    //           requestorSelect.appendChild(option);
-    //         });
-    //       }
-          
-    //       if (data.photographers && Array.isArray(data.photographers)) {
-    //         const photographerSelect = document.getElementById('photographer');
-    //         data.photographers.forEach(user => {
-    //           const option = document.createElement('option');
-    //           option.value = user.id;
-    //           option.textContent = user.username;
-    //           photographerSelect.appendChild(option);
-    //         });
-    //       }
-    //     })
-    //     .catch(err => {
-    //       console.error("Failed to load users:", err);
-    //       Swal.fire({
-    //         title: 'Error!',
-    //         text: 'Failed to load user data. Please refresh the page.',
-    //         icon: 'error',
-    //         confirmButtonText: 'OK'
-    //       });
-    //     });
-    // }
-  
-    // Function to setup form validation
-    function setupFormValidation() {
-      const form = document.getElementById('imagingRequestForm');
-      
-      // Add event listeners for date changes
-      document.getElementById('requestDate').addEventListener('change', function() {
-        updateDateConstraints();
-        validateDates();
-      });
-      
-      document.getElementById('startDate').addEventListener('change', function() {
-        updateDateConstraints();
-        validateDates();
-      });
-      
-      document.getElementById('endDate').addEventListener('change', validateDates);
-      
-      // Validate on submit
-      form.addEventListener('submit', async function(e) {
-        e.preventDefault();
-        
-        // Reset error messages
-        document.querySelectorAll('.error-message').forEach(el => {
-          el.style.display = 'none';
-        });
-        
-        // Validate required fields
-        let isValid = true;
-        
-        // Check dropdowns
-        if (!form.requestor.value) {
-          document.getElementById('requestor-error').style.display = 'block';
-          isValid = false;
-        }
-        
-        if (!form.photographer.value) {
-          document.getElementById('photographer-error').style.display = 'block';
-          isValid = false;
-        }
-        
-        // Check text areas
-        if (!form.summary.value.trim()) {
-          document.getElementById('summary-error').style.display = 'block';
-          isValid = false;
-        }
-        
-        if (!form.specimenDetails.value.trim()) {
-          document.getElementById('specimenDetails-error').style.display = 'block';
-          isValid = false;
-        }
-        
-        // Check location
-        if (!form.location.value.trim()) {
-          document.getElementById('location-error').style.display = 'block';
-          isValid = false;
-        }
-        
-        // Validate dates
-        validateDates();
-        if (!form.checkValidity()) {
-          isValid = false;
-          form.querySelector(':invalid').scrollIntoView({ behavior: 'smooth', block: 'center' });
-        }
-        
-        if (!isValid) {
-          return;
-        }
-        
-        // Submit form if valid
-        await submitForm(form);
-      });
-    }
-  
-    // Date validation function
-    function validateDates() {
-      const requestDate = new Date(document.getElementById('requestDate').value);
-      const startDate = new Date(document.getElementById('startDate').value);
-      const endDate = new Date(document.getElementById('endDate').value);
-      
-      const startDateError = document.getElementById('startDate-error');
-      const endDateError = document.getElementById('endDate-error');
-      
-      // Reset displays
-      startDateError.style.display = 'none';
-      endDateError.style.display = 'none';
-      document.getElementById('startDate').setCustomValidity('');
-      document.getElementById('endDate').setCustomValidity('');
-      
-      // Validate start date
-      if (document.getElementById('startDate').value && startDate < requestDate) {
-        startDateError.style.display = 'block';
-        document.getElementById('startDate').setCustomValidity('Start date must be after request date');
-      }
-      
-      // Validate end date
-      if (document.getElementById('endDate').value && endDate < startDate) {
-        endDateError.style.display = 'block';
-        document.getElementById('endDate').setCustomValidity('End date must be after start date');
-      }
-    }
-  
-    // Function to handle form submission
-    async function submitForm(form) {
-      const submitBtn = form.querySelector('button[type="submit"]');
-      const originalBtnText = submitBtn.innerHTML;
-      
-      try {
-        // Show loading state
-        submitBtn.classList.add('loading');
-        submitBtn.innerHTML = '<i class="fas fa-spinner"></i> Submitting...';
-        submitBtn.disabled = true;
-        
-        // Create a plain object from form data
-        const formData = {
-          requestor: form.requestor.value,
-          photographer: form.photographer.value,
-          requestDate: form.requestDate.value,
-          startDate: form.startDate.value,
-          endDate: form.endDate.value,
-          summary: form.summary.value,
-          specimenDetails: form.specimenDetails.value,
-          location: form.location.value,
-          platform: form.platform.value || null,
-          comments: form.comments.value || null
-        };
+                <div class="form-group">
+                  <label for="platform">Imaging Platform</label>
+                  <input type="text" id="platform" name="platform">
+                </div>
 
-        
-        
-        const response = await fetch('/submit-imaging-request', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify(formData)
-        });
-        
-        if (!response.ok) {
-          const errorData = await response.json();
-          throw new Error(errorData.message || "Submission failed with status " + response.status);
-        }
-        
-       
-       const data = await response.json();
+                <div class="form-group">
+                  <label for="comments">Comments</label>
+                  <textarea id="comments" name="comments"></textarea>
+                </div>
 
-    if (!data.success) {
-      throw new Error(data.message || "Submission failed");
-    }
+                <div class="buttons">
+                  <button type="submit" class="new"><i class="fas fa-paper-plane"></i> Submit</button>
+                </div>
+              </form>
+            </main>
+            <script>
+              // Initialize form with current datetime
+              document.addEventListener('DOMContentLoaded', function () {
+                // Set current datetime to requestDate field
+                const requestDateField = document.getElementById('requestDate');
+                requestDateField.value = new Date().toISOString().slice(0, 16);
 
-    // Show success message
-    await Swal.fire({
-      title: 'Success!',
-      text: 'Imaging request submitted successfully!',
-      icon: 'success',
-      confirmButtonText: 'OK',
-      confirmButtonColor: '#28a745',
-      timer: 3000,
-      timerProgressBar: true
-    });
+                // Set min attributes for date fields
+                updateDateConstraints();
 
-    // Redirect if URL is provided
-    if (data.redirectUrl) {
-      window.location.href = data.redirectUrl;
-      return; // Stop further execution
-    }
+                // Load users for dropdowns
+                // loadUsers();
 
-    // Reset form (if no redirection)
-    form.reset();
+                // Setup form validation
+                setupFormValidation();
+              });
 
-    // Reset request date to current time
-    const requestDateField = document.getElementById('requestDate');
-    if (requestDateField) {
-      requestDateField.value = new Date().toISOString().slice(0,16);
-      updateDateConstraints();
-    }
+              // Update date constraints when dates change
+              function updateDateConstraints() {
+                const requestDate = document.getElementById('requestDate').value;
+                const startDate = document.getElementById('startDate').value;
 
-        
-      } catch (error) {
-        console.error("Submission error:", error);
-        await Swal.fire({
-          title: 'Error!',
-          text: error.message,
-          icon: 'error',
-          confirmButtonText: 'OK',
-          confirmButtonColor: '#dc3545'
-        });
-      } finally {
-        // Reset button state
-        submitBtn.classList.remove('loading');
-        submitBtn.innerHTML = originalBtnText;
-        submitBtn.disabled = false;
-      }
-    }
-  </script>
+                // Set minimum start date to be after request date
+                document.getElementById('startDate').min = requestDate;
+
+                // Set minimum end date to be after start date (if start date is selected)
+                if (startDate) {
+                  document.getElementById('endDate').min = startDate;
+                } else {
+                  document.getElementById('endDate').min = requestDate;
+                }
+              }
+
+              // Function to load users for dropdowns
+              // function loadUsers() {
+              //   fetch('/get-users')
+              //     .then(res => {
+              //       if (!res.ok) {
+              //         throw new Error('Network response was not ok');
+              //       }
+              //       return res.json();
+              //     })
+              //     .then(data => {
+              //       if (data.requestors && Array.isArray(data.requestors)) {
+              //         const requestorSelect = document.getElementById('requestor');
+              //         data.requestors.forEach(user => {
+              //           const option = document.createElement('option');
+              //           option.value = user.id;
+              //           option.textContent = user.username;
+              //           requestorSelect.appendChild(option);
+              //         });
+              //       }
+
+              //       if (data.photographers && Array.isArray(data.photographers)) {
+              //         const photographerSelect = document.getElementById('photographer');
+              //         data.photographers.forEach(user => {
+              //           const option = document.createElement('option');
+              //           option.value = user.id;
+              //           option.textContent = user.username;
+              //           photographerSelect.appendChild(option);
+              //         });
+              //       }
+              //     })
+              //     .catch(err => {
+              //       console.error("Failed to load users:", err);
+              //       Swal.fire({
+              //         title: 'Error!',
+              //         text: 'Failed to load user data. Please refresh the page.',
+              //         icon: 'error',
+              //         confirmButtonText: 'OK'
+              //       });
+              //     });
+              // }
+
+              // Function to setup form validation
+              function setupFormValidation() {
+                const form = document.getElementById('imagingRequestForm');
+
+                // Add event listeners for date changes
+                document.getElementById('requestDate').addEventListener('change', function () {
+                  updateDateConstraints();
+                  validateDates();
+                });
+
+                document.getElementById('startDate').addEventListener('change', function () {
+                  updateDateConstraints();
+                  validateDates();
+                });
+
+                document.getElementById('endDate').addEventListener('change', validateDates);
+
+                // Validate on submit
+                form.addEventListener('submit', async function (e) {
+                  e.preventDefault();
+
+                  // Reset error messages
+                  document.querySelectorAll('.error-message').forEach(el => {
+                    el.style.display = 'none';
+                  });
+
+                  // Validate required fields
+                  let isValid = true;
+
+                  // Check dropdowns
+                  if (!form.requestor.value) {
+                    document.getElementById('requestor-error').style.display = 'block';
+                    isValid = false;
+                  }
+
+                  if (!form.photographer.value) {
+                    document.getElementById('photographer-error').style.display = 'block';
+                    isValid = false;
+                  }
+
+                  // Check text areas
+                  if (!form.summary.value.trim()) {
+                    document.getElementById('summary-error').style.display = 'block';
+                    isValid = false;
+                  }
+
+                  if (!form.specimenDetails.value.trim()) {
+                    document.getElementById('specimenDetails-error').style.display = 'block';
+                    isValid = false;
+                  }
+
+                  // Check location
+                  if (!form.location.value.trim()) {
+                    document.getElementById('location-error').style.display = 'block';
+                    isValid = false;
+                  }
+
+                  // Validate dates
+                  validateDates();
+                  if (!form.checkValidity()) {
+                    isValid = false;
+                    form.querySelector(':invalid').scrollIntoView({ behavior: 'smooth', block: 'center' });
+                  }
+
+                  if (!isValid) {
+                    return;
+                  }
+
+                  // Submit form if valid
+                  await submitForm(form);
+                });
+              }
+
+              // Date validation function
+              function validateDates() {
+                const requestDate = new Date(document.getElementById('requestDate').value);
+                const startDate = new Date(document.getElementById('startDate').value);
+                const endDate = new Date(document.getElementById('endDate').value);
+
+                const startDateError = document.getElementById('startDate-error');
+                const endDateError = document.getElementById('endDate-error');
+
+                // Reset displays
+                startDateError.style.display = 'none';
+                endDateError.style.display = 'none';
+                document.getElementById('startDate').setCustomValidity('');
+                document.getElementById('endDate').setCustomValidity('');
+
+                // Validate start date
+                if (document.getElementById('startDate').value && startDate < requestDate) {
+                  startDateError.style.display = 'block';
+                  document.getElementById('startDate').setCustomValidity('Start date must be after request date');
+                }
+
+                // Validate end date
+                if (document.getElementById('endDate').value && endDate < startDate) {
+                  endDateError.style.display = 'block';
+                  document.getElementById('endDate').setCustomValidity('End date must be after start date');
+                }
+              }
+
+              // Function to handle form submission
+              async function submitForm(form) {
+                const submitBtn = form.querySelector('button[type="submit"]');
+                const originalBtnText = submitBtn.innerHTML;
+
+                try {
+                  // Show loading state
+                  submitBtn.classList.add('loading');
+                  submitBtn.innerHTML = '<i class="fas fa-spinner"></i> Submitting...';
+                  submitBtn.disabled = true;
+
+                  // Create a plain object from form data
+                  const formData = {
+                    requestor: form.requestor.value,
+                    photographer: form.photographer.value,
+                    requestDate: form.requestDate.value,
+                    startDate: form.startDate.value,
+                    endDate: form.endDate.value,
+                    summary: form.summary.value,
+                    specimenDetails: form.specimenDetails.value,
+                    location: form.location.value,
+                    platform: form.platform.value || null,
+                    comments: form.comments.value || null
+                  };
+
+
+
+                  const response = await fetch('/submit-imaging-request', {
+                    method: 'POST',
+                    headers: {
+                      'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(formData)
+                  });
+
+                  if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.message || "Submission failed with status " + response.status);
+                  }
+
+
+                  const data = await response.json();
+
+                  if (!data.success) {
+                    throw new Error(data.message || "Submission failed");
+                  }
+
+                  // Show success message
+                  await Swal.fire({
+                    title: 'Success!',
+                    text: 'Imaging request submitted successfully!',
+                    icon: 'success',
+                    confirmButtonText: 'OK',
+                    confirmButtonColor: '#28a745',
+                    timer: 3000,
+                    timerProgressBar: true
+                  });
+
+                  // Redirect if URL is provided
+                  if (data.redirectUrl) {
+                    window.location.href = data.redirectUrl;
+                    return; // Stop further execution
+                  }
+
+                  // Reset form (if no redirection)
+                  form.reset();
+
+                  // Reset request date to current time
+                  const requestDateField = document.getElementById('requestDate');
+                  if (requestDateField) {
+                    requestDateField.value = new Date().toISOString().slice(0, 16);
+                    updateDateConstraints();
+                  }
+
+
+                } catch (error) {
+                  console.error("Submission error:", error);
+                  await Swal.fire({
+                    title: 'Error!',
+                    text: error.message,
+                    icon: 'error',
+                    confirmButtonText: 'OK',
+                    confirmButtonColor: '#dc3545'
+                  });
+                } finally {
+                  // Reset button state
+                  submitBtn.classList.remove('loading');
+                  submitBtn.innerHTML = originalBtnText;
+                  submitBtn.disabled = false;
+                }
+              }
+            </script>
 
 </body>
+
 </html>

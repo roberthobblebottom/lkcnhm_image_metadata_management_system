@@ -6,6 +6,7 @@ const db = require("./routes/db");
 const authRoutes = require("./routes/auth");
 const imagingRoutes = require("./routes/imagingRequest");
 const { isAuthenticated, isAdmin } = require("./middleware/auth");
+const { requestStatusTuple } = require("./request_status_tuple");
 const moment = require('moment');
 
 
@@ -1206,7 +1207,7 @@ app.get('/admin/view-imaging-request/:id', isAuthenticated, isAdmin, (req, res) 
 
 
 // View Request (GET)
-app.get('/user/view-imaging-request/:id', isAuthenticated, (req, res) => {
+app.get('/user/view-imaging-request/:id', isAuthenticated, isAdmin, (req, res) => {
     const imagingRequestID = req.params.id;
     const query = `
         SELECT 
@@ -1250,11 +1251,12 @@ app.get('/user/view-imaging-request/:id', isAuthenticated, (req, res) => {
             UpdatedDate: results[0].UpdatedDate ? formatDate(results[0].UpdatedDate) : null,
             IsDeleted: results[0].IsDeleted ? 'Yes' : 'No'
         };
-
+        console.log(isAdmin)
         res.render('imaging_request_view_user', {
             request: request,
             currentUser: req.user,
-            title: "User View Imaging Request" // Add title here
+            title: "User View Imaging Request", // Add title here
+            isAdmin: isAdmin
         });
     });
 });
@@ -1309,11 +1311,10 @@ app.get('/admin/edit-imaging-request/:id', isAuthenticated, isAdmin, async (req,
         `;
 
         // Get all needed data in parallel for better performance
-        const [requestResults, photographerResults, statusResults, requestorResults] = await Promise.all([
+        const [requestResults, photographerResults, requestorResults] = await Promise.all([
             db.promise().query(requestQuery, [imagingRequestID]),
-            db.promise().query("SELECT id, Email FROM User WHERE UserTypeID IN (3, 4) ORDER BY Email"),
-            db.promise().query("SELECT * FROM RequestStatus ORDER BY RequestStatusName"),
-            db.promise().query("SELECT id, Email FROM User WHERE UserTypeID IN (1, 2) ORDER BY Email")
+            db.promise().query("SELECT UserID, Email FROM User WHERE UserType = 'photographer' ORDER BY Email"),
+            db.promise().query("SELECT UserID, Email FROM User WHERE UserType = 'requestor' ORDER BY Email")
         ]);
 
         if (requestResults[0].length === 0) {
@@ -1331,10 +1332,11 @@ app.get('/admin/edit-imaging-request/:id', isAuthenticated, isAdmin, async (req,
         res.render('edit-imaging-request', {
             request: request,
             photographers: photographerResults[0],
-            statuses: statusResults[0],
+            statuses: requestStatusTuple(),
             requestors: requestorResults[0],
             currentUser: req.user,
-            title: "Edit Imaging Request" // Add title here
+            title: "Edit Imaging Request", // Add title here
+            isAdmin: isAdmin
         });
 
     } catch (err) {

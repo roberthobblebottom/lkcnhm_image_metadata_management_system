@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <link rel="stylesheet" href="/css/admin-users.css">
@@ -9,344 +10,335 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Edit Imaging Request</title>
     <style>
-     body {
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    background: #f4f7f9;
-    margin: 0;
-    padding: 20px;
-}
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f4f7f9;
+            margin: 0;
+            padding: 20px;
+        }
 
-h1 {
-    text-align: center;
-    color: #333;
-    margin-bottom: 30px;
-    margin-top: -50px;
-}
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 30px;
+            margin-top: -50px;
+        }
 
-form {
-    max-width: 750px;
-    margin: auto;
-    background: #fff;
-    padding: 30px;
-    border-radius: 12px;
-    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
-}
+        form {
+            max-width: 750px;
+            margin: auto;
+            background: #fff;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+        }
 
-.form-group {
-    margin-bottom: 20px;
-}
+        .form-group {
+            margin-bottom: 20px;
+        }
 
-label {
-    display: block;
-    margin-bottom: 8px;
-    font-weight: 600;
-    color: #444;
-}
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #444;
+        }
 
-input[type="text"],
-input[type="date"],
-select,
-textarea {
-    width: 95%;
-    padding: 12px 15px;
-    border: 1px solid #ccc;
-    border-radius: 8px;
-    font-size: 15px;
-    transition: border-color 0.3s ease;
-}
+        input[type="text"],
+        input[type="date"],
+        select,
+        textarea {
+            width: 95%;
+            padding: 12px 15px;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            font-size: 15px;
+            transition: border-color 0.3s ease;
+        }
 
-input:focus,
-select:focus,
-textarea:focus {
-    border-color: #007bff;
-    outline: none;
-}
+        input:focus,
+        select:focus,
+        textarea:focus {
+            border-color: #007bff;
+            outline: none;
+        }
 
-textarea {
-    resize: vertical;
-    min-height: 100px;
-}
+        textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
 
-.form-control-plaintext {
-    background-color: #f8f9fa;
-    border: none;
-    padding: 10px 15px;
-    font-size: 16px;
-    color: #555;
-}
+        .form-control-plaintext {
+            background-color: #f8f9fa;
+            border: none;
+            padding: 10px 15px;
+            font-size: 16px;
+            color: #555;
+        }
 
-.btn {
-    padding: 10px 18px;
-    font-size: 16px;
-    font-weight: 500;
-    border-radius: 8px;
-    cursor: pointer;
-    border: none;
-    transition: background 0.3s ease;
-}
+        .btn {
+            padding: 10px 18px;
+            font-size: 16px;
+            font-weight: 500;
+            border-radius: 8px;
+            cursor: pointer;
+            border: none;
+            transition: background 0.3s ease;
+        }
 
-.btn-primary {
-    background-color: #007bff;
-    color: white;
-}
+        .btn-primary {
+            background-color: #007bff;
+            color: white;
+        }
 
-.btn-primary:hover {
-    background-color: #0056b3;
-}
+        .btn-primary:hover {
+            background-color: #0056b3;
+        }
 
-.btn-secondary {
-    background-color: #452dff;
-    color: white;
-    margin-top: 0px;
-    margin-bottom: 10px;
-    
-}
+        .btn-secondary {
+            background-color: #452dff;
+            color: white;
+            margin-top: 0px;
+            margin-bottom: 10px;
 
-.btn-secondary:hover {
-    background-color: #431eff;
-}
+        }
 
-a button {
-    display: block;
-    margin: 0 auto;
-}
+        .btn-secondary:hover {
+            background-color: #431eff;
+        }
 
+        a button {
+            display: block;
+            margin: 0 auto;
+        }
     </style>
 </head>
+
 <body>
-    <div class="sidebar">
-        <div class="logo">
-            <img src="/images/Group-1.svg" alt="LKCNHM Logo" style="width: 200px; height: auto; margin-left:10px;" />
-          </div>
-        <ul class="nav-links">
-            <li class="active"><a href="/admin-dashboard"><i class="fas fa-chart-line"></i><span>Dashboard</span></a></li>
-            <li><a href="/admin-users"><i class="fas fa-users"></i><span>Login Details Management</span></a></li>
-            <li><a href="/admin/UserRequest"><i class="fas fa-file-alt"></i><span>Imaging User Management</span></a></li>
-            <li><a href="/admin/imaging-requests"><i class="fas fa-file-medical"></i><span>Imaging Request Management</span></a></li> 
-            <li><a href="/admin/media"><i class="fas fa-image"></i><span>Media Management</span></a></li>
-            <li><a href="/change-password-admin"><i class="fas fa-key"></i><span>Change Password</span></a></li>
-            <li><a href="/auth/logout"><i class="fas fa-sign-out-alt"></i><span>Logout</span></a></li>
-        </ul>
-    </div>
-      <main>
-        <a href="/admin/imaging-requests"><button class="btn btn-secondary">Back to Imaging Requests</button></a>
-    <h1>Edit Imaging Request</h1>
-   
-    <form action="/admin/edit-imaging-request/<%= request.ImagingRequestID %>" method="POST">
-        <div class="form-group">
-            <label>Requestor</label>
-            <p class="form-control-static">
-                <%= request.requestor_name || 'Not specified' %>
-            </p>
-        </div>
-        
-        <div class="form-group">
-            <label for="PhotographerID">Photographer:</label>
-            <select name="PhotographerID" id="PhotographerID" class="form-control">
-                <option value="">-- Select Photographer --</option>
-                <% photographers.forEach(photographer => { %>
-                    <option value="<%= photographer.id %>" 
-                        <%= request.PhotographerID == photographer.id ? 'selected' : '' %>>
-                        <%= photographer.username %>
-                    </option>
-                <% }) %>
-            </select>
-        </div>
+    <%- include(isAdmin ? 'partials/sidenav_admin.ejs' : 'partials/sidenav_user' ) %>
+        <main>
+            <a href="/admin/imaging-requests"><button class="btn btn-secondary">Back to Imaging
+                    Requests</button></a>
+            <h1>Edit Imaging Request</h1>
+
+            <form action="/admin/edit-imaging-request/<%= request.ImagingRequestID %>" method="POST">
+                <div class="form-group">
+                    <label>Requestor</label>
+                    <p class="form-control-static">
+                        <%= request.requestor_name || 'Not specified' %>
+                    </p>
+                </div>
+
+                <div class="form-group">
+                    <label for="PhotographerID">Photographer:</label>
+                    <select name="PhotographerID" id="PhotographerID" class="form-control">
+                        <option value="">-- Select Photographer --</option>
+                        <% photographers.forEach(photographer=> { %>
+                            <option value="<%= photographer.UserID %>" <%=request.PhotographerID==photographer.UserID
+                                ? 'selected' : '' %>>
+                                <%= photographer.Email %>
+                            </option>
+                            <% }) %>
+                    </select>
+                </div>
 
 
-        <div class="form-group">
-            <label for="DateofRequest">Date of Request:</label>
-            <input type="date" id="DateofRequest" name="DateofRequest" 
-                   value="<%= request.DateofRequest %>" readonly class="form-control-plaintext">
-        </div>
-        
-        <div class="form-group">
-            <label for="ImagingStartDate">Imaging Start Date:</label>
-            <input type="date" id="ImagingStartDate" name="ImagingStartDate" 
-                   value="<%= request.ImagingStartDate %>" class="form-control" required>
-        </div>
+                <div class="form-group">
+                    <label for="DateofRequest">Date of Request:</label>
+                    <input type="date" id="DateofRequest" name="DateofRequest" value="<%= request.DateofRequest %>"
+                        readonly class="form-control-plaintext">
+                </div>
 
-        <div class="form-group">
-            <label for="ImagingEndDate">Imaging End Date:</label>
-            <input type="date" id="ImagingEndDate" name="ImagingEndDate" 
-                   value="<%= request.ImagingEndDate %>" class="form-control" required>
-        </div>
+                <div class="form-group">
+                    <label for="ImagingStartDate">Imaging Start Date:</label>
+                    <input type="date" id="ImagingStartDate" name="ImagingStartDate"
+                        value="<%= request.ImagingStartDate %>" class="form-control" required>
+                </div>
 
-        <div class="form-group">
-            <label for="SummaryofProject">Summary of Project:</label>
-            <textarea id="SummaryofProject" name="SummaryofProject" class="form-control" required><%= request.SummaryofProject %></textarea>
-        </div>
+                <div class="form-group">
+                    <label for="ImagingEndDate">Imaging End Date:</label>
+                    <input type="date" id="ImagingEndDate" name="ImagingEndDate" value="<%= request.ImagingEndDate %>"
+                        class="form-control" required>
+                </div>
 
-        <div class="form-group">
-            <label for="SpecimenDetails">Specimen Details:</label>
-            <textarea id="SpecimenDetails" name="SpecimenDetails" class="form-control" required><%= request.SpecimenDetails %></textarea>
-        </div>
+                <div class="form-group">
+                    <label for="SummaryofProject">Summary of Project:</label>
+                    <textarea id="SummaryofProject" name="SummaryofProject" class="form-control"
+                        required><%= request.SummaryofProject %></textarea>
+                </div>
 
-        <div class="form-group">
-            <label for="SpecimenLocationName">Specimen Location Name:</label>
-            <input type="text" id="SpecimenLocationName" name="SpecimenLocationName" 
-                   value="<%= request.SpecimenLocationName %>" class="form-control" required>
-        </div>
+                <div class="form-group">
+                    <label for="SpecimenDetails">Specimen Details:</label>
+                    <textarea id="SpecimenDetails" name="SpecimenDetails" class="form-control"
+                        required><%= request.SpecimenDetails %></textarea>
+                </div>
 
-        <div class="form-group">
-            <label for="ImagingPlatform">Imaging Platform:</label>
-            <input type="text" id="ImagingPlatform" name="ImagingPlatform" 
-                   value="<%= request.ImagingPlatform || '' %>" class="form-control">
-        </div>
+                <div class="form-group">
+                    <label for="SpecimenLocationName">Specimen Location Name:</label>
+                    <input type="text" id="SpecimenLocationName" name="SpecimenLocationName"
+                        value="<%= request.SpecimenLocationName %>" class="form-control" required>
+                </div>
 
-        <div class="form-group">
-            <label for="RequestStatusID">Status:</label>
-            <select name="RequestStatusID" id="RequestStatusID" class="form-control" required>
-                <option value="">-- Select Type --</option>
-                <% statuses.forEach(status => { %>
-                    <option value="<%= status.RequestStatusID %>" 
-                        <%= request.RequestStatusID == status.RequestStatusID ? 'selected' : '' %>>
-                        <%= status.RequestStatusName %>
-                    </option>
-                <% }) %>
-            </select>
-        </div>
+                <div class="form-group">
+                    <label for="ImagingPlatform">Imaging Platform:</label>
+                    <input type="text" id="ImagingPlatform" name="ImagingPlatform"
+                        value="<%= request.ImagingPlatform || '' %>" class="form-control">
+                </div>
 
-        <div class="form-group">
-            <label for="ReasonforRequestStatus">Reason for Status Change:</label>
-            <textarea id="ReasonforRequestStatus" name="ReasonforRequestStatus" class="form-control"><%= request.ReasonforRequestStatus || '' %></textarea>
-        </div>
+                <div class="form-group">
+                    <label for="RequestStatusID">Status:</label>
+                    <select name="RequestStatusID" id="RequestStatusID" class="form-control" required>
+                        <option value="">-- Select Type --</option>
+                        <% statuses.forEach(status=> { %>
+                            <option value="<%= status %>" <%=request.RequestStatus==status ? 'selected' : '' %>>
+                                <%= status%>
+                            </option>
+                            <% }) %>
+                    </select>
+                </div>
 
-        <button type="submit" class="btn btn-primary">Save Changes</button>
-    </form>
+                <div class="form-group">
+                    <label for="ReasonforRequestStatus">Reason for Status Change:</label>
+                    <textarea id="ReasonforRequestStatus" name="ReasonforRequestStatus"
+                        class="form-control"><%= request.ReasonforRequestStatus || '' %></textarea>
+                </div>
 
-    <br>
- 
-</main>
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const form = document.querySelector('form');
-            const requestDate = new Date('<%= request.DateofRequest %>');
-            const startDateInput = document.getElementById('ImagingStartDate');
-            const endDateInput = document.getElementById('ImagingEndDate');
-            const statusSelect = document.getElementById('RequestStatusID');
-            const reasonField = document.getElementById('ReasonforRequestStatus');
-        
-            // Set minimum dates
-            startDateInput.min = '<%= request.DateofRequest %>';
-            endDateInput.min = '<%= request.ImagingStartDate %>';
-        
-            // Real-time validation
-            startDateInput.addEventListener('change', function() {
-                const startDate = new Date(this.value);
-                endDateInput.min = this.value;
-                
-                if (startDate < requestDate) {
-                    Swal.fire({
-                        icon: 'error',
-                        title: 'Invalid Date',
-                        text: 'Start date must be on or after request date'
-                    });
-                    this.value = '<%= request.ImagingStartDate %>';
-                }
-            });
-        
-            endDateInput.addEventListener('change', function() {
-                const startDate = new Date(startDateInput.value);
-                const endDate = new Date(this.value);
-                
-                if (endDate < startDate) {
-                    Swal.fire({
-                        icon: 'error',
-                        title: 'Invalid Date',
-                        text: 'End date must be on or after start date'
-                    });
-                    this.value = '<%= request.ImagingEndDate %>';
-                }
-            });
-    
-            // Form submission handler
-            form.addEventListener('submit', async function(e) {
-                e.preventDefault();
-                
-                // Validate dates
-                const startDate = new Date(startDateInput.value);
-                const endDate = new Date(endDateInput.value);
-                
-                if (startDate < requestDate) {
-                    Swal.fire({
-                        icon: 'error',
-                        title: 'Invalid Date',
-                        text: 'Start date must be on or after request date'
-                    });
-                    return;
-                }
-                
-                if (endDate < startDate) {
-                    Swal.fire({
-                        icon: 'error',
-                        title: 'Invalid Date',
-                        text: 'End date must be on or after start date'
-                    });
-                    return;
-                }
-    
-                // Validate reason if status changed
-                if (statusSelect.value !== '<%= request.RequestStatusID %>' && !reasonField.value.trim()) {
-                    Swal.fire({
-                        icon: 'error',
-                        title: 'Missing Reason',
-                        text: 'Please provide a reason for status change'
-                    });
-                    return;
-                }
-                // Validate that a valid status is selected
-            if (statusSelect.value === '') {
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Invalid Status',
-                    text: 'Please select a valid status.'
-                });
-                return;
-            }
-    
-                // Submit form via AJAX
-                try {
-                    const formData = new FormData(form);
-                    const response = await fetch(form.action, {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json'
-                        },
-                        body: JSON.stringify(Object.fromEntries(formData))
-                    });
-                    
-                    const result = await response.json();
-                    
-                    if (result.success) {
+                <button type="submit" class="btn btn-primary">Save Changes</button>
+            </form>
+
+            <br>
+
+        </main>
+        <script>
+            document.addEventListener('DOMContentLoaded', function () {
+                const form = document.querySelector('form');
+                const requestDate = new Date('<%= request.DateofRequest %>');
+                const startDateInput = document.getElementById('ImagingStartDate');
+                const endDateInput = document.getElementById('ImagingEndDate');
+                const statusSelect = document.getElementById('RequestStatusID');
+                const reasonField = document.getElementById('ReasonforRequestStatus');
+
+                // Set minimum dates
+                startDateInput.min = '<%= request.DateofRequest %>';
+                endDateInput.min = '<%= request.ImagingStartDate %>';
+
+                // Real-time validation
+                startDateInput.addEventListener('change', function () {
+                    const startDate = new Date(this.value);
+                    endDateInput.min = this.value;
+
+                    if (startDate < requestDate) {
                         Swal.fire({
-                            icon: 'success',
-                            title: 'Success!',
-                            text: result.message,
-                            timer: 2000,
-                            showConfirmButton: false
-                        }).then(() => {
-                            window.location.href = result.redirectUrl;
+                            icon: 'error',
+                            title: 'Invalid Date',
+                            text: 'Start date must be on or after request date'
                         });
-                    } else {
+                        this.value = '<%= request.ImagingStartDate %>';
+                    }
+                });
+
+                endDateInput.addEventListener('change', function () {
+                    const startDate = new Date(startDateInput.value);
+                    const endDate = new Date(this.value);
+
+                    if (endDate < startDate) {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Invalid Date',
+                            text: 'End date must be on or after start date'
+                        });
+                        this.value = '<%= request.ImagingEndDate %>';
+                    }
+                });
+
+                // Form submission handler
+                form.addEventListener('submit', async function (e) {
+                    e.preventDefault();
+
+                    // Validate dates
+                    const startDate = new Date(startDateInput.value);
+                    const endDate = new Date(endDateInput.value);
+
+                    if (startDate < requestDate) {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Invalid Date',
+                            text: 'Start date must be on or after request date'
+                        });
+                        return;
+                    }
+
+                    if (endDate < startDate) {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Invalid Date',
+                            text: 'End date must be on or after start date'
+                        });
+                        return;
+                    }
+
+                    // Validate reason if status changed
+                    if (statusSelect.value !== '<%= request.RequestStatusID %>' && !reasonField.value.trim()) {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Missing Reason',
+                            text: 'Please provide a reason for status change'
+                        });
+                        return;
+                    }
+                    // Validate that a valid status is selected
+                    if (statusSelect.value === '') {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Invalid Status',
+                            text: 'Please select a valid status.'
+                        });
+                        return;
+                    }
+
+                    // Submit form via AJAX
+                    try {
+                        const formData = new FormData(form);
+                        const response = await fetch(form.action, {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json'
+                            },
+                            body: JSON.stringify(Object.fromEntries(formData))
+                        });
+
+                        const result = await response.json();
+
+                        if (result.success) {
+                            Swal.fire({
+                                icon: 'success',
+                                title: 'Success!',
+                                text: result.message,
+                                timer: 2000,
+                                showConfirmButton: false
+                            }).then(() => {
+                                window.location.href = result.redirectUrl;
+                            });
+                        } else {
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Error',
+                                text: result.message
+                            });
+                        }
+                    } catch (error) {
+                        console.error('Error:', error);
                         Swal.fire({
                             icon: 'error',
                             title: 'Error',
-                            text: result.message
+                            text: 'An error occurred while updating the request'
                         });
                     }
-                } catch (error) {
-                    console.error('Error:', error);
-                    Swal.fire({
-                        icon: 'error',
-                        title: 'Error',
-                        text: 'An error occurred while updating the request'
-                    });
-                }
+                });
             });
-        });
-    </script>
+        </script>
 
 
 </body>
+
 </html>
