@@ -163,18 +163,19 @@
 
         <div class="form-group">
           <label for="requestDate">Date of Request</label>
-          <input type="datetime-local" id="requestDate" name="requestDate" required readonly>
+          <!-- <input type="datetime-local" id="requestDate" name="requestDate" required readonly> -->
+          <input type="date" id="requestDate" name="requestDate" required readonly>
         </div>
 
         <div class="form-group">
           <label for="startDate">Imaging Start Date</label>
-          <input type="datetime-local" id="startDate" name="startDate" required>
+          <input type="date" id="startDate" name="startDate" required>
           <div id="startDate-error" class="error-message">Start date must be after request date</div>
         </div>
 
         <div class="form-group">
           <label for="endDate">Imaging End Date</label>
-          <input type="datetime-local" id="endDate" name="endDate" required>
+          <input type="date" id="endDate" name="endDate" required>
           <div id="endDate-error" class="error-message">End date must be after start date</div>
         </div>
 
@@ -215,9 +216,14 @@
       // Initialize form with current datetime
       document.addEventListener('DOMContentLoaded', function () {
         // Set current datetime to requestDate field
-        const requestDateField = document.getElementById('requestDate');
-        requestDateField.value = new Date().toISOString().slice(0, 16);
-        console.log("dom content loaded", requestDateField)
+        document.getElementById('requestDate').value = new Date().toISOString().slice(0, 16).split('T')[0];
+        // document.getElementById('startDate').value = ((new Date()).getDate() + 1).toISOString().slice(0, 16).split('T')[0];
+        const now = new Date()
+        now.setDate(new Date().getDate() + 1)
+        document.getElementById('startDate').value = now.toISOString().slice(0, 16).split('T')[0]
+        now.setDate(now.getDate() + 7)
+        document.getElementById('endDate').value = now.toISOString().slice(0, 16).split('T')[0]
+        // document.getElementById('startDate').value.setDate(document.getElementById('startDate').value.getDate() + 1);
         // Set min attributes for date fields
         updateDateConstraints();
 
@@ -232,7 +238,6 @@
       function updateDateConstraints() {
         const requestDate = document.getElementById('requestDate').value;
         const startDate = document.getElementById('startDate').value;
-        console.log("updateDateConstraints" + requestDate)
         // Set minimum start date to be after request date
         document.getElementById('startDate').min = requestDate;
 
@@ -361,7 +366,6 @@
       // Date validation function
       function validateDates() {
         const requestDate = new Date(document.getElementById('requestDate').value);
-        console.log("validateDates", requestDate)
         const startDate = new Date(document.getElementById('startDate').value);
         const endDate = new Date(document.getElementById('endDate').value);
 
