@@ -233,7 +233,7 @@
                     <%= editing ? 'Edit Media File' : 'Submit New Media File' %>
                 </h2>
 
-                <form id="mediaForm" action="/admin/media/save" method="POST">
+                <form id="mediaForm" action="/admin/view-all-media/save" method="POST">
                     <!-- Hidden IDs -->
                     <% if (editing) { %>
                         <input type="hidden" name="MediaID" value="<%= media.MediaID %>">
@@ -467,7 +467,7 @@
                 window.location.href = '/admin/media';
             } else {
                 // For new media, redirect to edit page
-                window.location.href = `/admin/media/edit/${result.mediaId}`;
+                window.location.href = `/admin/view-all-media/edit/${result.mediaId}`;
             }
         } else {
             await Swal.fire({

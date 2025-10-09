@@ -5,10 +5,8 @@ const session = require("express-session");
 const db = require("./routes/db");
 const authRoutes = require("./routes/auth");
 const imagingRoutes = require("./routes/imagingRequest");
-const adminRoutes = require('./routes/admin');
+const adminRoutes = require('./routes/admin/admin');
 const { isAuthenticated, isAdmin } = require("./middleware/auth");
-const { requestStatusTuple } = require("./request_status_tuple");
-const moment = require('moment');
 
 
 
@@ -30,29 +28,11 @@ app.use(
     })
 );
 
-// Date formatting helper function (place this BEFORE your route handler)
-function formatDate(dateString) {
-    if (!dateString) return 'Not specified';
-    const date = new Date(dateString);
-    return date.toLocaleString('en-US', {
-        year: 'numeric',
-        month: 'short',
-        day: 'numeric',
-        hour: '2-digit',
-        minute: '2-digit'
-    });
-}
 app.use("/imaging", imagingRoutes);
 // ✅ API Routes
 app.use("/auth", authRoutes);
-app.use("/admin", adminRoutes)
-// // ✅ Debug Session Middleware
-// app.use((req, res, next) => {
-//     console.log("🟢 Current Session Data:", req.session);
-//     next();
-// });
-
-
+app.use("/admin", adminRoutes);
+// app.use("/admin/media", adminMediaRoutes);
 
 
 // ✅ Serve HTML pages
@@ -62,8 +42,6 @@ const serveHTML = (route, file) => {
     });
 };
 
-// serveHTML("/", "index.html");
-// serveHTML("/register", "register.html");
 
 app.get("/", (req, res) => {
     res.render("index", { title: "register" });
@@ -79,8 +57,6 @@ app.get("/login", (req, res) => {
 });
 
 
-
-
 // ✅ User Dashboard (Protected)
 app.get("/user-dashboard", isAuthenticated, (req, res) => {
     res.render("user-dashboard", {
@@ -90,12 +66,6 @@ app.get("/user-dashboard", isAuthenticated, (req, res) => {
         // Add other data
     });
 });
-
-
-
-
-
-
 
 app.get('/api/current-user', (req, res) => {
     if (req.session && req.session.user) {
@@ -297,9 +267,6 @@ app.listen(PORT, () => {
 
 
 /// This is the Main Buisness Logic Starts so Don't touch it ///
-
-
-
 
 app.get("/imagingUser", isAuthenticated, (req, res) => {
     const userId = req.session.user.UserID;
@@ -673,10 +640,6 @@ app.get("/forgot-password", (req, res) => {
         redirectPath: "/login" // redirect after success
     });
 });
-
-
-
-
 
 // Handle forgot password
 app.post("/forgot-password", (req, res) => {
@@ -1103,97 +1066,4 @@ app.get('/imaging-request-user', isAuthenticated, (req, res) => {
             error: process.env.NODE_ENV === 'development' ? err : null
         });
     }
-});
-
-// Media Request
-// ✅ Admin Media Management Main Page Controller
-app.get('/admin/media', isAuthenticated, isAdmin, (req, res) => {
-    const query = `
-      SELECT 
-        m.MediaID,
-        m.MediaFileName,
-        m.FilePath,
-        m.CatalogID,
-        m.ImagingDate,
-        m.Description,
-        m.FileFormat,
-        m.CreatedDate,
-        ir.ImagingRequestID,
-        r.Name AS requestor_name,
-        u2.Email AS photographer_name
-      FROM Media m
-      JOIN ImagingRequest ir ON m.ImagingRequestID = ir.ImagingRequestID
-      JOIN User r ON ir.ImagingRequestorID = r.UserID
-      JOIN ImagingRequestUserPhotographyLink p ON ir.ImagingRequestID = p.ImagingRequestID
-      JOIN User u2 ON p.PhotographerID = u2.UserID  
-      WHERE m.IsDeleted = 0
-      ORDER BY m.CreatedDate DESC
-    `;
-
-    db.query(query, (err, results) => {
-        if (err) {
-            console.error("Database error:", err);
-            // Render the media page with empty results and error message
-            return res.render('media_managment_index', {
-                title: "Media Management - Error",
-                mediaRecords: [],
-                errorMessage: "Failed to load media data. Please try again later."
-            });
-        }
-
-        // Successful query
-        res.render('media_managment_index', {
-            title: "Media Management",
-            mediaRecords: results,
-            message: req.session.message || null,
-            title: "Admin Media "   // For success messages
-        });
-
-        // Clear session message if it exists
-        if (req.session.message) {
-            delete req.session.message;
-        }
-    });
-});
-
-
-
-app.get('/admin/select-user-for-media', isAuthenticated, isAdmin, (req, res) => {
-    const query = `
-            SELECT 
-                ir.ImagingRequestID,
-                u.UserID AS user_id,
-                u.Email AS requestor_name,
-                u.Email,
-                u.ContactNumber,
-                u.Organisation,
-                u2.Email AS photographer_name,
-                ir.ImagingStartDate,
-                ir.ImagingEndDate
-            FROM ImagingRequest ir
-            JOIN User u ON ir.ImagingRequestorID = u.UserID
-            JOIN ImagingRequestUserPhotographyLink p ON ir.ImagingRequestID = p.ImagingRequestID
-            JOIN User u2 ON p.PhotographerID = u2.UserID  
-
-            WHERE 
-                ir.RequestStatus = 'approved' AND
-                u.IsDeleted = 0 AND 
-                ir.IsDeleted = 0;
-
-      `;
-
-
-    db.query(query, (err, users) => {
-        if (err) {
-            console.error("❌ Failed to fetch eligible users for media:", err);
-            return res.status(500).render('error', { message: 'Failed to load users for media upload' });
-        }
-
-        console.log(`📋 Found ${users.length} eligible users`);
-        // console.log("📋 User:", users);
-        res.render('media-user-list', {
-            users,
-            title: 'Media Image List'
-        });
-    });
 });
