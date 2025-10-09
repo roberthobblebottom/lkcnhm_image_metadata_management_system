@@ -649,7 +649,7 @@ app.post('/submit-imaging-request', isAuthenticated, async (req, res) => {
          ImagingRequestID)
          VALUES (?,?)
         `;
-        console.log('level 0')
+        // console.log('level 0')
         // console.log(req.body)
         // console.log(createdBy)
         // console.log(requestStatus)
@@ -666,27 +666,18 @@ app.post('/submit-imaging-request', isAuthenticated, async (req, res) => {
             createdBy,
             createdBy,
             requestStatus
-        ], (err, result) => {
-            if (err) {
-                console.error('❌ Error updating request:', err);
-                return res.status(500).json({
-                    success: false,
-                    message: 'Server error during update',
-                    details: process.env.NODE_ENV === 'development' ? err.message : null
-                });
-            }
-        });
+        ]);
         const r2 = await db.promise().query(
             "SELECT ImagingRequestID FROM ImagingRequest ORDER BY ImagingRequestID DESC LIMIT 1",
             [])
-        console.log("r2", r2)
+        // console.log("r2", r2)
         imagingRequestID2 = r2[0][0].ImagingRequestID
         const r3 = await db.promise().query(updateQuery2, [
             req.body.photographer,
             imagingRequestID2
         ])
-        console.log('r3', r3)
-        // console.log('📸 Imaging request inserted with RequestStatus =', requestStatus, ' UserID:', result.insertId);
+        // console.log('r3', r3)
+        console.log('📸 Imaging request inserted with RequestStatus =', requestStatus, ' UserID:', imagingRequestID2;
 
         const role = req.session.user.UserType; // Example: 'Admin' or 'User'
         const redirectUrl = role === 'admin'
@@ -698,14 +689,6 @@ app.post('/submit-imaging-request', isAuthenticated, async (req, res) => {
             message: 'Imaging request submitted successfully',
             redirectUrl: redirectUrl
         });
-
-        // res.json({
-        //     success: true,
-        //     message: "Imaging request submitted successfully!",
-        //     requestId: result.insertId,
-        //     redirectUrl // 💥 include this in the response
-        // });
-
 
     } catch (err) {
         console.error("❌ Error in submitImagingRequest:", err);
