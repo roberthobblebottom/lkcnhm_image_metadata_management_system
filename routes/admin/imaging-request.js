@@ -116,11 +116,11 @@ router.get('/view-imaging-request/:id', isAuthenticated, isAdmin, (req, res) => 
                 message: 'Imaging request not found'
             });
         }
-
+        console.log("dddddd" + results[0].DateOfRequest)
         // Format dates for display
         const request = {
             ...results[0],
-            DateofRequest: formatDate(results[0].DateofRequest),
+            DateOfRequest: formatDate(results[0].DateOfRequest),
             ImagingStartDate: formatDate(results[0].ImagingStartDate),
             ImagingEndDate: formatDate(results[0].ImagingEndDate),
             CreatedDate: formatDate(results[0].CreatedDate),
@@ -187,11 +187,9 @@ router.get('/edit-imaging-request/:id', isAuthenticated, isAdmin, async (req, re
             db.promise().query("SELECT UserID, Email FROM User WHERE UserType = 'photographer' ORDER BY Email"),
             db.promise().query("SELECT UserID, Email FROM User WHERE UserType = 'requestor' ORDER BY Email")
         ]);
-        console.log(requestResults)
         if (requestResults[0].length === 0) {
             return res.status(404).render('error', { message: 'Request not found' });
         }
-        console.log("c")
         // Format dates for display
         const request = {
             ...requestResults[0][0],
@@ -199,7 +197,10 @@ router.get('/edit-imaging-request/:id', isAuthenticated, isAdmin, async (req, re
             ImagingStartDate: formatDisplayDate(requestResults[0][0].ImagingStartDate),
             ImagingEndDate: formatDisplayDate(requestResults[0][0].ImagingEndDate)
         };
-        console.log("---")
+        console.log("---" + Object.keys(request))
+        console.log("---" + Object.values(request))
+        console.log(request.RequestStatus)
+
         res.render(`admin/edit-imaging-request`, {
             request: request,
             photographers: photographerResults[0],
@@ -211,7 +212,7 @@ router.get('/edit-imaging-request/:id', isAuthenticated, isAdmin, async (req, re
         });
 
     } catch (err) {
-        console.error('------Error:', err);
+        console.error('Error:', err);
         res.status(500).render('error', { message: 'Server error' });
     }
 });
@@ -241,7 +242,7 @@ router.post('/edit-imaging-request/:id', isAuthenticated, isAdmin, async (req, r
     } = req.body;
 
     // === 1. VALIDATION ===
-    if (!ImagingStartDate || !ImagingEndDate || !RequestStatusID) {
+    if (!ImagingStartDate || !ImagingEndDate || !RequestStatus) {
         return res.status(400).json({ success: false, message: 'Missing required fields' });
     }
 

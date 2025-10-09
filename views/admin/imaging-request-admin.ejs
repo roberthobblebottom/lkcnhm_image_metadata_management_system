@@ -217,7 +217,7 @@
         // Set current datetime to requestDate field
         const requestDateField = document.getElementById('requestDate');
         requestDateField.value = new Date().toISOString().slice(0, 16);
-
+        console.log("dom content loaded", requestDateField)
         // Set min attributes for date fields
         updateDateConstraints();
 
@@ -232,7 +232,7 @@
       function updateDateConstraints() {
         const requestDate = document.getElementById('requestDate').value;
         const startDate = document.getElementById('startDate').value;
-
+        console.log("updateDateConstraints" + requestDate)
         // Set minimum start date to be after request date
         document.getElementById('startDate').min = requestDate;
 
@@ -361,6 +361,7 @@
       // Date validation function
       function validateDates() {
         const requestDate = new Date(document.getElementById('requestDate').value);
+        console.log("validateDates", requestDate)
         const startDate = new Date(document.getElementById('startDate').value);
         const endDate = new Date(document.getElementById('endDate').value);
 
@@ -396,7 +397,6 @@
           submitBtn.classList.add('loading');
           submitBtn.innerHTML = '<i class="fas fa-spinner"></i> Submitting...';
           submitBtn.disabled = true;
-
           // Create a plain object from form data
           const formData = {
             requestor: form.requestor.value,
@@ -412,7 +412,7 @@
           };
 
 
-          console.log('before response')
+          console.log('before response ' + formData)
           const response = await fetch('../../submit-imaging-request', {
             method: 'POST',
             headers: {
@@ -420,13 +420,11 @@
             },
             body: JSON.stringify(formData)
           });
-          console.log("a")
           if (!response.ok) {
             const errorData = await response.json();
             throw new Error(errorData.message || "Submission failed with status " + response.status);
           }
 
-          console.log("b")
           const data = await response.json();
           console.log('c')
           if (!data.success) {

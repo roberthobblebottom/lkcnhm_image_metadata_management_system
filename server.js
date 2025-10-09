@@ -591,7 +591,7 @@ app.post('/submit-imaging-request', isAuthenticated, async (req, res) => {
         const requestDate = new Date(req.body.requestDate);
         const startDate = new Date(req.body.startDate);
         const endDate = new Date(req.body.endDate);
-
+        console.log('requestDate' + requestDate)
         if (isNaN(requestDate.getTime()) || isNaN(startDate.getTime()) || isNaN(endDate.getTime())) {
             return res.status(400).json({
                 success: false,
