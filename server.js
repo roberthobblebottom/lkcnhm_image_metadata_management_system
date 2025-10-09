@@ -6,6 +6,8 @@ const db = require("./routes/db");
 const authRoutes = require("./routes/auth");
 const imagingRoutes = require("./routes/imagingRequest");
 const adminRoutes = require('./routes/admin/admin');
+const adminMediaRoutes = require('./routes/admin/media');
+const adminImagingRequestRoutes = require('./routes/admin/imaging_request');
 const { isAuthenticated, isAdmin } = require("./middleware/auth");
 
 
@@ -32,6 +34,8 @@ app.use("/imaging", imagingRoutes);
 // ✅ API Routes
 app.use("/auth", authRoutes);
 app.use("/admin", adminRoutes);
+app.use("/admin/media", adminMediaRoutes);
+app.use("/admin/imaging-request", adminImagingRequestRoutes);
 // app.use("/admin/media", adminMediaRoutes);
 
 

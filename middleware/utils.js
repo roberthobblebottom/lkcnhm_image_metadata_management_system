@@ -11,5 +11,7 @@ const formatDate = (dateString) => {
         minute: '2-digit'
     });
 };
-
-module.exports = { formatDate };
+const formatDisplayDate = (date) => {
+    return date ? new Date(date).toISOString().split('T')[0] : null;
+}
+module.exports = { formatDate, formatDisplayDate };
