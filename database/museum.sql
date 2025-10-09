@@ -41,6 +41,7 @@ CREATE TABLE ImagingRequest (
         UpdatedByID INT NOT NULL,
         IsDeleted BOOL NOT NULL DEFAULT 0,
         RequestStatus VARCHAR(255),
+        ReasonForRequest VARCHAR(255),
         FOREIGN KEY (ImagingRequestorID) REFERENCES User(UserID),
         FOREIGN KEY (UpdatedByID) REFERENCES User(UserID),
         FOREIGN KEY (CreatedByID) REFERENCES User(UserID)
