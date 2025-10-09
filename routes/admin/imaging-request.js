@@ -9,7 +9,7 @@ router.get('/add-new-imaging-request', isAuthenticated, isAdmin, async (req, res
     const getRequestors = `
       SELECT u.UserID, u.Email 
       FROM User u
-      WHERE u.UserType IN ['requestor','admin')
+      WHERE u.UserType IN ('requestor','admin')
         AND u.RequestStatus = 'approved'
         AND u.IsDeleted = 0
     `; // TODO wrong usertypeid filter
@@ -21,9 +21,15 @@ router.get('/add-new-imaging-request', isAuthenticated, isAdmin, async (req, res
         AND u.IsDeleted = 0
     `; // todo wrong user type id filter these are hard coded.
 
-    await db.promise().query(getRequestors);
-    await db.promise().query(getPhotographers);
-
+    const [requestors] = await db.promise().query(getRequestors);
+    const [photographers] = await db.promise().query(getPhotographers);
+    console.log(requestors)
+    res.render('admin/imaging-request-admin', {
+        requestors,
+        photographers,
+        title: "Imaging Request Form",
+        isAdmin: isAdmin
+    });
 });
 
 
