@@ -1,11 +1,10 @@
 const isAuthenticated = (req, res, next) => {
     console.log("Checking Auth:", req.session.user);
     if (req.session.user) {
-        // console.log("✅ User is authenticated:", req.session.user);
+        console.log("✅ User is authenticated:", req.session.user);
         return next(); // ✅ User is logged in
     }
     else {
-
         return res.redirect("/login"); // 🔁 Redirect to login
     }
 };

@@ -51,7 +51,7 @@ CREATE TABLE ImagingRequestUserPhotographyLink (
    ID INT AUTO_INCREMENT PRIMARY KEY,
    ImagingRequestID INT NOT NULL,
    PhotographerID INT NOT NULL,
-   FOREIGN KEY (ImagingRequestID) REFERENCES User(UserID), 
+   FOREIGN KEY (ImagingRequestID) REFERENCES ImagingRequest(ImagingRequestID), 
    FOREIGN KEY (PhotographerID) REFERENCES User(UserID) 
 );
 

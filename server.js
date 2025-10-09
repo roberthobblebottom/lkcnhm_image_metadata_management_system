@@ -508,7 +508,6 @@ app.post("/forgot-password", (req, res) => {
 
 
 //change [password] route
-
 // app.get("/user-dashboard",isAuthenticated,(req, res) => {
 //     res.sendFile(path.resolve(__dirname, "views", "user-dashboard.html"));
 // });
@@ -519,7 +518,6 @@ app.get('/change-password', isAuthenticated, (req, res) => {
 
     res.render('change-password', { user: req.session.user.Email, title: "Change Password" }); // ✅ pass `user` to EJS
 });
-
 
 app.post('/change-password', isAuthenticated, (req, res) => {
     const email = req.session.user.Email;
@@ -571,16 +569,9 @@ app.post('/change-password', isAuthenticated, (req, res) => {
 });
 
 
-
-
-
-
-
-
-
-
-
+// may be for both admin and non admin
 app.post('/submit-imaging-request', isAuthenticated, async (req, res) => {
+    console.log("in /submit-imaging-request")
     try {
         const requiredFields = [
             'requestor', 'photographer', 'requestDate',
@@ -631,12 +622,11 @@ app.post('/submit-imaging-request', isAuthenticated, async (req, res) => {
             });
         }
 
-        const requestStatusId = 1; // Hardcoded for now – represents 'New'
+        const requestStatus = "pending"; // Hardcoded for now – represents 'New'
 
         const insertQuery = `
       INSERT INTO ImagingRequest (
         ImagingRequestorID,
-        PhotographerID,
         DateofRequest,
         ImagingStartDate,
         ImagingEndDate,
@@ -650,13 +640,21 @@ app.post('/submit-imaging-request', isAuthenticated, async (req, res) => {
         UpdatedDate,
         UpdatedByID,
         IsDeleted,
-        RequestStatusID
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW(), ?, NULL, NULL, 0, ?)
-    `;
-
-        const [result] = await db.promise().query(insertQuery, [
+        RequestStatus
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, NOW(), ?, NOW(), ?, 0, ?)
+        `;
+        const updateQuery2 = `
+        INSERT INTO ImagingRequestUserPhotographyLink(
+         PhotographerID,
+         ImagingRequestID)
+         VALUES (?,?)
+        `;
+        console.log('level 0')
+        // console.log(req.body)
+        // console.log(createdBy)
+        // console.log(requestStatus)
+        const result = await db.promise().query(insertQuery, [
             req.body.requestor,
-            req.body.photographer,
             req.body.requestDate,
             req.body.startDate,
             req.body.endDate,
@@ -666,22 +664,47 @@ app.post('/submit-imaging-request', isAuthenticated, async (req, res) => {
             req.body.platform || null,
             req.body.comments || null,
             createdBy,
-            requestStatusId
-        ]);
-
-        console.log('📸 Imaging request inserted with RequestStatusID =', requestStatusId, ' ID:', result.insertId);
+            createdBy,
+            requestStatus
+        ], (err, result) => {
+            if (err) {
+                console.error('❌ Error updating request:', err);
+                return res.status(500).json({
+                    success: false,
+                    message: 'Server error during update',
+                    details: process.env.NODE_ENV === 'development' ? err.message : null
+                });
+            }
+        });
+        const r2 = await db.promise().query(
+            "SELECT ImagingRequestID FROM ImagingRequest ORDER BY ImagingRequestID DESC LIMIT 1",
+            [])
+        console.log("r2", r2)
+        imagingRequestID2 = r2[0][0].ImagingRequestID
+        const r3 = await db.promise().query(updateQuery2, [
+            req.body.photographer,
+            imagingRequestID2
+        ])
+        console.log('r3', r3)
+        // console.log('📸 Imaging request inserted with RequestStatus =', requestStatus, ' UserID:', result.insertId);
 
         const role = req.session.user.UserType; // Example: 'Admin' or 'User'
         const redirectUrl = role === 'admin'
-            ? `/admin/view-imaging-request/${result.insertId}`
-            : `/user/view-imaging-request/${result.insertId}`;
-
+            ? `/admin/imaging-request/view-imaging-request/${imagingRequestID2}`
+            : `/user/view-imaging-request/${imagingRequestID2}`;
+        // Return success response
         res.json({
             success: true,
-            message: "Imaging request submitted successfully!",
-            requestId: result.insertId,
-            redirectUrl // 💥 include this in the response
+            message: 'Imaging request submitted successfully',
+            redirectUrl: redirectUrl
         });
+
+        // res.json({
+        //     success: true,
+        //     message: "Imaging request submitted successfully!",
+        //     requestId: result.insertId,
+        //     redirectUrl // 💥 include this in the response
+        // });
 
 
     } catch (err) {

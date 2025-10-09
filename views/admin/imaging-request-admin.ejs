@@ -130,7 +130,7 @@
 <body>
 
 
-  <%- include(isAdmin ? 'partials/sidenav_admin.ejs' : 'partials/sidenav_user' ) %>
+  <%- include(isAdmin ? '../partials/sidenav_admin.ejs' : '../partials/sidenav_user' ) %>
     <main>
       <h2>Imaging Request Form</h2>
 
@@ -140,8 +140,8 @@
           <select id="requestor" name="requestor" required>
             <option value="">Select Requestor</option>
             <% requestors.forEach(user=> { %>
-              <option value="<%= user.id %>">
-                <%= user.username %>
+              <option value="<%= user.UserID %>">
+                <%= user.Email %>
               </option>
               <% }) %>
           </select>
@@ -153,8 +153,8 @@
           <select id="photographer" name="photographer" required>
             <option value="">Select Photographer</option>
             <% photographers.forEach(user=> { %>
-              <option value="<%= user.id %>">
-                <%= user.username %>
+              <option value="<%= user.UserID %>">
+                <%= user.Email %>
               </option>
               <% }) %>
           </select>
@@ -412,23 +412,23 @@
           };
 
 
-
-          const response = await fetch('/submit-imaging-request', {
+          console.log('before response')
+          const response = await fetch('../../submit-imaging-request', {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json'
             },
             body: JSON.stringify(formData)
           });
-
+          console.log("a")
           if (!response.ok) {
             const errorData = await response.json();
             throw new Error(errorData.message || "Submission failed with status " + response.status);
           }
 
-
+          console.log("b")
           const data = await response.json();
-
+          console.log('c')
           if (!data.success) {
             throw new Error(data.message || "Submission failed");
           }

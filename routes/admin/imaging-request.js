@@ -9,7 +9,7 @@ router.get('/add-new-imaging-request', isAuthenticated, isAdmin, (req, res) => {
     const getRequestors = `
       SELECT u.UserID, u.Email 
       FROM User u
-      WHERE u.UserType = 'requestor'
+      WHERE u.UserType IN ('requestor','admin')
         AND u.RequestStatus = 'approved'
         AND u.IsDeleted = 0
     `; // TODO wrong usertypeid filter
@@ -17,8 +17,7 @@ router.get('/add-new-imaging-request', isAuthenticated, isAdmin, (req, res) => {
     const getPhotographers = `
       SELECT u.UserID, u.Email 
       FROM User u
-      WHERE u.UserType = 'photographer' 
-        AND u.RequestStatus = 'approved'
+        WHERE u.RequestStatus = 'approved'
         AND u.IsDeleted = 0
     `; // todo wrong user type id filter these are hard coded.
 
@@ -34,7 +33,7 @@ router.get('/add-new-imaging-request', isAuthenticated, isAdmin, (req, res) => {
                 return res.status(500).render('error', { message: "Error loading photographers" });
             }
 
-            res.render('imaging-request-admin', {
+            res.render('admin/imaging-request-admin', {
                 requestors,
                 photographers,
                 title: "Imaging Request Form",
@@ -79,13 +78,13 @@ router.get('/view-all-imaging-requests', isAuthenticated, isAdmin, (req, res) =>
         // console.log(results)
 
         if (results.length === 0) {
-            return res.render('imaging-request-view-admin', {
+            return res.render('admin/imaging-request-view-admin', {
                 imagingRequests: [],
                 message: 'No imaging requests found'
             });
         }
 
-        res.render('imaging-request-view-admin', {
+        res.render('admin/imaging-request-view-admin', {
             imagingRequests: results,
             currentUser: req.user,
             title: "Imaging Requests Dashboard" // Add title here
@@ -212,7 +211,7 @@ router.get('/edit-imaging-request/:id', isAuthenticated, isAdmin, async (req, re
             ImagingStartDate: formatDisplayDate(requestResults[0][0].ImagingStartDate),
             ImagingEndDate: formatDisplayDate(requestResults[0][0].ImagingEndDate)
         };
-        res.render('edit-imaging-request', {
+        res.render('admin/edit-imaging-request', {
             request: request,
             photographers: photographerResults[0],
             statuses: requestStatusTuple(),
