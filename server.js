@@ -1276,8 +1276,8 @@ app.post('/admin/delete-imaging-request/:id', isAuthenticated, isAdmin, (req, re
             UpdatedDate = NOW()
         WHERE ImagingRequestID = ?
     `;
-
-    db.query(query, [req.user, imagingRequestID], (err, results) => {
+    console.log(req.user)
+    db.query(query, [req.session.user.UserID, imagingRequestID], (err, results) => {
         if (err) {
             console.error('Error soft deleting request:', err);
             return res.status(500).send('Error marking request as deleted.');
