@@ -3,13 +3,13 @@ const router = express.Router();
 const db = require("../db"); // Database connection
 const { isAuthenticated, isAdmin } = require("../../middleware/auth"); // Middleware
 
-const { formatDate, formatDisplayDate } = require("../../middleware/utils");
+const { formatDate, formatDisplayDate, requestStatusTuple } = require("../../middleware/utils");
 
-router.get('/add-new-imaging-request', isAuthenticated, isAdmin, (req, res) => {
+router.get('/add-new-imaging-request', isAuthenticated, isAdmin, async (req, res) => {
     const getRequestors = `
       SELECT u.UserID, u.Email 
       FROM User u
-      WHERE u.UserType IN ('requestor','admin')
+      WHERE u.UserType IN ['requestor','admin')
         AND u.RequestStatus = 'approved'
         AND u.IsDeleted = 0
     `; // TODO wrong usertypeid filter
@@ -21,26 +21,9 @@ router.get('/add-new-imaging-request', isAuthenticated, isAdmin, (req, res) => {
         AND u.IsDeleted = 0
     `; // todo wrong user type id filter these are hard coded.
 
-    db.query(getRequestors, (err1, requestors) => {
-        if (err1) {
-            console.error("❌ Error loading requestors:", err1);
-            return res.status(500).render('error', { message: "Error loading requestors" });
-        }
+    await db.promise().query(getRequestors);
+    await db.promise().query(getPhotographers);
 
-        db.query(getPhotographers, (err2, photographers) => {
-            if (err2) {
-                console.error("❌ Error loading photographers:", err2);
-                return res.status(500).render('error', { message: "Error loading photographers" });
-            }
-
-            res.render('admin/imaging-request-admin', {
-                requestors,
-                photographers,
-                title: "Imaging Request Form",
-                isAdmin: isAdmin
-            });
-        });
-    });
 });
 
 
@@ -176,7 +159,6 @@ router.post('/delete-imaging-request/:id', isAuthenticated, isAdmin, (req, res) 
 router.get('/edit-imaging-request/:id', isAuthenticated, isAdmin, async (req, res) => {
     try {
         const imagingRequestID = req.params.id;
-
         // Get imaging request with joined data
         const requestQuery = `
             SELECT 
@@ -187,23 +169,23 @@ router.get('/edit-imaging-request/:id', isAuthenticated, isAdmin, async (req, re
                 photographer.UserID AS photographer_id,
                 requestor.RequestStatus
             FROM ImagingRequest ir
-            LEFT JOIN User requestor ON ir.ImagingRequestorID = requestor.UserID
-            JOIN ImagingRequestUserPhotographyLink p ON ir.ImagingRequestID = p.ImagingRequestID
-            JOIN User photographer ON p.PhotographerID = requestor.UserID  
-            WHERE ir.ImagingRequestID = ?
+            JOIN User requestor ON ir.ImagingRequestorID = requestor.UserID
+            JOIN ImagingRequestUserPhotographyLink i ON ir.ImagingRequestID = i.ImagingRequestID
+            JOIN User photographer ON i.PhotographerID = photographer.UserID 
+            WHERE ir.ImagingRequestID = ?;
         `;
-
+        console.log('imaging request id ' + imagingRequestID)
         // Get all needed data in parallel for better performance
         const [requestResults, photographerResults, requestorResults] = await Promise.all([
             db.promise().query(requestQuery, [imagingRequestID]),
             db.promise().query("SELECT UserID, Email FROM User WHERE UserType = 'photographer' ORDER BY Email"),
             db.promise().query("SELECT UserID, Email FROM User WHERE UserType = 'requestor' ORDER BY Email")
         ]);
-
+        console.log(requestResults)
         if (requestResults[0].length === 0) {
             return res.status(404).render('error', { message: 'Request not found' });
         }
-
+        console.log("c")
         // Format dates for display
         const request = {
             ...requestResults[0][0],
@@ -211,10 +193,11 @@ router.get('/edit-imaging-request/:id', isAuthenticated, isAdmin, async (req, re
             ImagingStartDate: formatDisplayDate(requestResults[0][0].ImagingStartDate),
             ImagingEndDate: formatDisplayDate(requestResults[0][0].ImagingEndDate)
         };
-        res.render('admin/edit-imaging-request', {
+        console.log("---")
+        res.render(`admin/edit-imaging-request`, {
             request: request,
             photographers: photographerResults[0],
-            statuses: requestStatusTuple(),
+            statuses: Object.values(requestStatusTuple()),
             requestors: requestorResults[0],
             currentUser: req.user,
             title: "Edit Imaging Request", // Add title here
@@ -231,7 +214,7 @@ router.get('/edit-imaging-request/:id', isAuthenticated, isAdmin, async (req, re
 
 
 
-router.post('/edit-imaging-request/:id', isAuthenticated, isAdmin, (req, res) => {
+router.post('/edit-imaging-request/:id', isAuthenticated, isAdmin, async (req, res) => {
     // === 0. SESSION VALIDATION ===
     if (!req.session.user || !req.session.user.UserID) {
         console.error("❌ No user in session");
@@ -247,7 +230,7 @@ router.post('/edit-imaging-request/:id', isAuthenticated, isAdmin, (req, res) =>
         SpecimenDetails,
         SpecimenLocationName,
         ImagingPlatform,
-        RequestStatusID,
+        RequestStatus,
         ReasonforRequest
     } = req.body;
 
@@ -291,14 +274,15 @@ router.post('/edit-imaging-request/:id', isAuthenticated, isAdmin, (req, res) =>
         SET PhotographerID = ?
         WHERE ImagingRequestID = ?
         `;
-    db.query(updateQuery, [
+    console.log("a")
+    const results = await db.promise().query(updateQuery, [
         startDate,
         endDate,
         SummaryofProject || null,
         SpecimenDetails || null,
         SpecimenLocationName || null,
         ImagingPlatform || null,
-        RequestStatusID,
+        RequestStatus,
         ReasonforRequest || null,
         req.session.user.UserID,
         imagingRequestID
@@ -315,36 +299,34 @@ router.post('/edit-imaging-request/:id', isAuthenticated, isAdmin, (req, res) =>
         if (result.affectedRows === 0) {
             return res.status(404).json({ success: false, message: 'Request not found or no changes made' });
         }
-        db.query(updateQuery2, [
-            PhotographerID,
-            imagingRequestID
-        ], (err, result) => {
-            if (err) {
-                console.error('❌ Error updating request:', err);
-                return res.status(500).json({
-                    success: false,
-                    message: 'Server error during update',
-                    details: process.env.NODE_ENV === 'development' ? err.message : null
-                });
-            }
 
-            if (result.affectedRows === 0) {
-                return res.status(404).json({ success: false, message: 'Request not found or no changes made' });
-            }
-
-            // Return success response
-            res.json({
-                success: true,
-                message: 'Imaging request updated successfully',
-                redirectUrl: `/admin/imaging-request/view-imaging-request/${imagingRequestID}`
+    });
+    console.log('b')
+    console.log(results)
+    const r2 = await db.promise().query(updateQuery2, [
+        PhotographerID,
+        imagingRequestID
+    ], (err, result) => {
+        if (err) {
+            console.error('❌ Error updating request:', err);
+            return res.status(500).json({
+                success: false,
+                message: 'Server error during update',
+                details: process.env.NODE_ENV === 'development' ? err.message : null
             });
-        });
-        // Return success response
-        // res.json({
-        //     success: true,
-        //     message: 'Imaging request updated successfully',
-        //     redirectUrl: `/admin/view-imaging-request/${imagingRequestID}`
-        // });
+        }
+
+        if (result.affectedRows === 0) {
+            return res.status(404).json({ success: false, message: 'Request not found or no changes made' });
+        }
+    });
+    console.log("c")
+    console.log(r2)
+    // Return success response
+    res.json({
+        success: true,
+        message: 'Imaging request updated successfully',
+        redirectUrl: `/admin/imaging-request/view-imaging-request/${imagingRequestID}`
     });
 });
 

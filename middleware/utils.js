@@ -14,4 +14,9 @@ const formatDate = (dateString) => {
 const formatDisplayDate = (date) => {
     return date ? new Date(date).toISOString().split('T')[0] : null;
 }
-module.exports = { formatDate, formatDisplayDate };
+
+const requestStatusTuple = () => {
+    return { approved: 'approved', rejected: 'rejected', pending: 'pending' }
+};
+
+module.exports = { formatDate, formatDisplayDate, requestStatusTuple };

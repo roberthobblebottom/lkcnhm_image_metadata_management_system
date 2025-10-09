@@ -677,7 +677,7 @@ app.post('/submit-imaging-request', isAuthenticated, async (req, res) => {
             imagingRequestID2
         ])
         // console.log('r3', r3)
-        console.log('📸 Imaging request inserted with RequestStatus =', requestStatus, ' UserID:', imagingRequestID2;
+        console.log('📸 Imaging request inserted with RequestStatus =', requestStatus, ' UserID:', imagingRequestID2);
 
         const role = req.session.user.UserType; // Example: 'Admin' or 'User'
         const redirectUrl = role === 'admin'
