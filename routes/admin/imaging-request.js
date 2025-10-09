@@ -38,10 +38,12 @@ router.get('/view-all-imaging-requests', isAuthenticated, isAdmin, (req, res) =>
     const query = `
         SELECT 
             ir.*,
-            r.Name AS requestor_name,
-            photographer.Email AS photographer_name,
-            cb.Email AS CreatedByName,
-            ub.Email AS UpdatedByName
+            r.Name AS requestorName,
+            r.Email,
+            photographer.Name AS photographerName,
+            photographer.Email AS photographerEmail,
+            cb.Name AS CreatedByName,
+            ub.Name AS UpdatedByName
         FROM ImagingRequest ir
         LEFT JOIN User r ON ir.ImagingRequestorID = r.UserID
         JOIN ImagingRequestUserPhotographyLink irupl ON irupl.ImagingRequestID = ir.ImagingRequestID
@@ -193,7 +195,7 @@ router.get('/edit-imaging-request/:id', isAuthenticated, isAdmin, async (req, re
         // Format dates for display
         const request = {
             ...requestResults[0][0],
-            DateofRequest: formatDisplayDate(requestResults[0][0].DateofRequest),
+            DateOfRequest: formatDisplayDate(requestResults[0][0].DateofRequest),
             ImagingStartDate: formatDisplayDate(requestResults[0][0].ImagingStartDate),
             ImagingEndDate: formatDisplayDate(requestResults[0][0].ImagingEndDate)
         };

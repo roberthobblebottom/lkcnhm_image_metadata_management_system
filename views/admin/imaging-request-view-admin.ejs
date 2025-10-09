@@ -125,13 +125,14 @@
                     <%= request.ImagingRequestID || 'Not specified' %>
                   </td>
                   <td>
-                    <%= request.requestor_name || 'Not specified' %>
+                    <%= request.requestorName || 'Not specified' %>, <%= request.Email || 'Not specified' %>
                   </td>
                   <td>
-                    <%= request.photographer_name || 'Not specified' %>
+                    <%= request.photographerName || 'Not specified' %>, <%= request.photographerEmail || 'Not specified'
+                        %>
                   </td>
                   <td>
-                    <%= request.DateofRequest?.toISOString().slice(0, 10) %>
+                    <%= request.DateOfRequest?.toISOString().slice(0, 10) %>
                   </td>
                   <td>
                     <%= request.ImagingStartDate?.toISOString().slice(0, 10) %>
