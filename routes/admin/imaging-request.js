@@ -4,6 +4,47 @@ const db = require("../db"); // Database connection
 const { isAuthenticated, isAdmin } = require("../../middleware/auth"); // Middleware
 
 const { formatDate, formatDisplayDate } = require("../../middleware/utils");
+
+router.get('/add-new-imaging-request', isAuthenticated, isAdmin, (req, res) => {
+    const getRequestors = `
+      SELECT u.UserID, u.Email 
+      FROM User u
+      WHERE u.UserType = 'requestor'
+        AND u.RequestStatus = 'approved'
+        AND u.IsDeleted = 0
+    `; // TODO wrong usertypeid filter
+
+    const getPhotographers = `
+      SELECT u.UserID, u.Email 
+      FROM User u
+      WHERE u.UserType = 'photographer' 
+        AND u.RequestStatus = 'approved'
+        AND u.IsDeleted = 0
+    `; // todo wrong user type id filter these are hard coded.
+
+    db.query(getRequestors, (err1, requestors) => {
+        if (err1) {
+            console.error("❌ Error loading requestors:", err1);
+            return res.status(500).render('error', { message: "Error loading requestors" });
+        }
+
+        db.query(getPhotographers, (err2, photographers) => {
+            if (err2) {
+                console.error("❌ Error loading photographers:", err2);
+                return res.status(500).render('error', { message: "Error loading photographers" });
+            }
+
+            res.render('imaging-request-admin', {
+                requestors,
+                photographers,
+                title: "Imaging Request Form",
+                isAdmin: isAdmin
+            });
+        });
+    });
+});
+
+
 // Route to view imaging requests
 router.get('/view-all-imaging-requests', isAuthenticated, isAdmin, (req, res) => {
     const query = `

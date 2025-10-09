@@ -75,7 +75,7 @@
     <script>
         function deleteUser(userID) {
             if (confirm("Are you sure you want to delete this user?")) {
-                fetch(`/api/delete-user/${userID}`, {
+                fetch(`/admin/user-maangement/delete-user/${userID}`, {
                     method: "PUT",
                     headers: {
                         'Content-Type': 'application/json',

@@ -85,49 +85,9 @@ router.post('/change-password', isAuthenticated, (req, res) => {
     });
 });
 
-router.get('/add-new-imaging-request', isAuthenticated, isAdmin, (req, res) => {
-    const getRequestors = `
-      SELECT u.UserID, u.Email 
-      FROM User u
-      WHERE u.UserType = 'requestor'
-        AND u.RequestStatus = 'approved'
-        AND u.IsDeleted = 0
-    `; // TODO wrong usertypeid filter
-
-    const getPhotographers = `
-      SELECT u.UserID, u.Email 
-      FROM User u
-      WHERE u.UserType = 'photographer' 
-        AND u.RequestStatus = 'approved'
-        AND u.IsDeleted = 0
-    `; // todo wrong user type id filter these are hard coded.
-
-    db.query(getRequestors, (err1, requestors) => {
-        if (err1) {
-            console.error("❌ Error loading requestors:", err1);
-            return res.status(500).render('error', { message: "Error loading requestors" });
-        }
-
-        db.query(getPhotographers, (err2, photographers) => {
-            if (err2) {
-                console.error("❌ Error loading photographers:", err2);
-                return res.status(500).render('error', { message: "Error loading photographers" });
-            }
-
-            res.render('imaging-request-admin', {
-                requestors,
-                photographers,
-                title: "Imaging Request Form",
-                isAdmin: isAdmin
-            });
-        });
-    });
-});
-
-
 router.get('/get-user', isAuthenticated, (req, res) => {
-    const getRequestors = "SELECT id, Email FROM User WHERE UserTypeID IN (1, 2)";
-    const getPhotographers = "SELECT id, Email FROM User WHERE UserTypeID IN (3, 4)";
+    const getRequestors = "SELECT UserID, Email FROM User WHERE UserType = 'photographer'";
+    const getPhotographers = "SELECT UserID, Email FROM User WHERE UserType = 'requestor'";
 
     db.query(getRequestors, (err1, requestors) => {
         if (err1) {

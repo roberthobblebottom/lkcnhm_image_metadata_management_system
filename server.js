@@ -7,7 +7,8 @@ const authRoutes = require("./routes/auth");
 const imagingRoutes = require("./routes/imagingRequest");
 const adminRoutes = require('./routes/admin/admin');
 const adminMediaRoutes = require('./routes/admin/media');
-const adminImagingRequestRoutes = require('./routes/admin/imaging_request');
+const adminImagingRequestRoutes = require('./routes/admin/imaging-request');
+const adminUserManagementRoutes = require('./routes/admin/user-management');
 const { isAuthenticated, isAdmin } = require("./middleware/auth");
 
 
@@ -36,7 +37,7 @@ app.use("/auth", authRoutes);
 app.use("/admin", adminRoutes);
 app.use("/admin/media", adminMediaRoutes);
 app.use("/admin/imaging-request", adminImagingRequestRoutes);
-// app.use("/admin/media", adminMediaRoutes);
+app.use("/admin/user-management", adminUserManagementRoutes);
 
 
 // ✅ Serve HTML pages
@@ -81,178 +82,6 @@ app.get('/api/current-user', (req, res) => {
         res.status(401).json({ error: "Not logged in" });
     }
 });
-
-
-// ✅ Serve edit-user.html
-app.get("/edit-user", isAuthenticated, isAdmin, (req, res) => {
-    res.render("edit-user", {
-        title: "Edit User",
-        user: {}, // Default empty object (or fetch from DB if needed)
-        message: {} // Optional: for flash messages
-    });
-});
-
-
-
-//✅ API to Fetch All Users
-app.get("/admin-users", isAuthenticated, isAdmin, (req, res) => {
-    console.log("Route /admin-users hit"); // Debug log 1
-    const query = "SELECT UserID,Password,TemporaryPassword,Email,RegisteredDate,UpdatedDate,LastLoginDate, UserType, IsDeleted FROM User";
-
-    db.query(query, (err, result) => {
-        console.log("Query executed", { err, result }); // Debug log 2
-        if (err) {
-            console.error("❌ Database Error:", err);
-            return res.status(500).json({ error: "Database error" });
-        }
-
-        console.log("Rendering template"); // Debug log 3
-        res.render("admin-users", {
-            users: result,
-            title: "User Management"
-        });
-    });
-});
-
-
-//update user details
-// Handle form submission from edit page
-// Render edit user page (support both singular and plural URLs)
-app.get("/edit-users/:id", isAuthenticated, isAdmin, (req, res) => {
-    const userId = req.params.id;
-    const query = "SELECT * FROM User WHERE UserID = ?";
-
-    db.query(query, [userId], (err, result) => {
-        if (err) {
-            console.error("❌ Database Error:", err);
-            return res.status(500).render("edit-user", {
-                title: "Error",
-                message: {
-                    type: 'error',
-                    text: 'Database error occurred'
-                },
-                user: null
-            });
-        }
-
-        if (result.length === 0) {
-            return res.render("edit-user", {
-                title: "User Not Found",
-                message: {
-                    type: 'error',
-                    text: 'User not found or has been deleted'
-                },
-                user: null
-            });
-        }
-
-        const message = req.session.message || { type: '', text: '' };
-
-        res.render("edit-user", {
-            user: result[0],
-            title: `Edit User - ${result[0].Email}`,
-            message: message
-        });
-
-        if (req.session.message) {
-            delete req.session.message;
-        }
-    });
-});
-
-
-// Handle form submission (support both singular and plural URLs)
-app.post(["/update-user/:id", "/update-users/:id"], isAuthenticated, isAdmin, (req, res) => {
-    const userId = req.params.id;
-    const { TemporaryPassword, UserType, IsDeleted } = req.body;
-
-    const query = `
-        UPDATE User 
-        SET TemporaryPassword = ?, 
-            UserType = ?, 
-            IsDeleted = ?,
-            UpdatedDate = NOW()
-        WHERE UserID = ? 
-    `;
-
-    db.query(query, [TemporaryPassword, UserType, IsDeleted, userId], (err, result) => {
-        if (err) {
-            console.error("❌ Database Error:", err);
-            return res.status(500).json({
-                success: false,
-                message: 'Failed to update user: ' + err.message
-            });
-        } else if (result.affectedRows === 0) {
-            return res.status(404).json({
-                success: false,
-                message: 'User not found or already deleted'
-            });
-        } else {
-            return res.json({
-                success: true,
-                message: 'User updated successfully!'
-            });
-        }
-    });
-});
-
-
-
-// ✅ API to Fetch a Single User by ID
-app.get("/api/admin-users/:id", isAuthenticated, isAdmin, (req, res) => {
-    const userId = req.params.id;
-    const query = "SELECT UserID, Email, Password, TemporaryPassword FROM User WHERE UserID = ? AND IsDeleted = 0";
-
-    db.query(query, [userId], (err, result) => {
-        if (err) {
-            console.error("❌ Database Error:", err);
-            return res.status(500).json({ error: "Database error" });
-        }
-
-        if (result.length === 0) {
-            return res.status(404).json({ error: "User not found" });
-        }
-
-        res.json({ success: true, user: result[0] });
-    });
-});
-
-// ✅ API to Edit User Details
-app.put("/api/admin-users/:id", isAuthenticated, isAdmin, (req, res) => {
-    const userId = req.params.id;
-    const { Email, Password, TemporaryPassword } = req.body;
-
-    const query = `
-        UPDATE User 
-        SET Email = ?, Password = ?, TemporaryPassword = ?, UpdatedDate = NOW() 
-        WHERE UserID = ? AND IsDeleted = 0
-    `;
-
-    db.query(query, [Email, Password, TemporaryPassword, userId], (err, result) => {
-        if (err) {
-            console.error("❌ Database Error:", err);
-            return res.status(500).json({ error: "Database error" });
-        }
-
-        res.json({ success: true, message: "User updated successfully" });
-    });
-});
-
-// ✅ Delete User (Soft Delete - Update IsDeleted to 1)
-app.put("/api/delete-user/:id", (req, res) => {
-    const userId = req.params.id;
-    const query = "UPDATE User SET IsDeleted = 1 WHERE UserID = ?";
-
-    db.query(query, [userId], (err, result) => {
-        if (err) {
-            console.error("❌ Database Error:", err);
-            return res.status(500).json({ success: false, error: "Database error" });
-        }
-        console.log(`🗑️ User ${userId} marked as deleted`);
-        res.json({ success: true });
-    });
-});
-
 
 
 
@@ -748,7 +577,6 @@ app.post('/change-password', isAuthenticated, (req, res) => {
 
 
 
-// ---------------------------- Revamped Admin Form Table ---------------------------- //
 
 
 
