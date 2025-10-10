@@ -8,6 +8,7 @@ const adminRoutes = require('./routes/admin/admin');
 const adminMediaRoutes = require('./routes/admin/media');
 const adminImagingRequestRoutes = require('./routes/admin/imaging-request');
 const adminUserManagementRoutes = require('./routes/admin/user-management');
+const userImagingRequestRoutes = require('./routes/user/imaging-request');
 const { isAuthenticated, isAdmin } = require("./middleware/auth");
 
 
@@ -37,6 +38,7 @@ app.use("/admin/media", adminMediaRoutes);
 app.use("/admin/imaging-request", adminImagingRequestRoutes);
 app.use("/admin/user-management", adminUserManagementRoutes);
 
+app.use("/user/imaging-request", userImagingRequestRoutes);
 
 // ✅ Serve HTML pages
 const serveHTML = (route, file) => {
@@ -700,74 +702,6 @@ app.post('/submit-imaging-request', isAuthenticated, async (req, res) => {
 
 
 
-app.get('/user/imaging-requests', isAuthenticated, async (req, res) => {
-    const loginUserId = req.session.user.UserID;
-    const findUserQuery = `
-      SELECT u.UserID , u.RequestStatus, u.UserType
-      FROM User u
-      WHERE u.CreatedByID = ? 
-        AND u.IsDeleted = 0
-      LIMIT 1
-    `;
-
-    const [userResult] = await db.promise().query(findUserQuery, [loginUserId], (err1, userResult) => {
-        if (err1) {
-            console.error("❌ Error checking user approval:", err1);
-            return res.status(500).render("error", {
-                message: "Server error while checking user approval.",
-                error: process.env.NODE_ENV === 'development' ? err1 : null
-            });
-        }
-    });
-    // No such user created OR not approved
-    // if (!userResult[0]) {
-    //     // console.log("🔒 User not approved or not registered as Internal/External");
-    //     return res.render("user/view_all_imaging_request_index", {
-    //         imagingRequests: [],
-    //         showPendingAlert: false
-    //     });
-    // }
-    console.log(Object.keys(userResult[0]))
-    console.log(Object.values(userResult[0]))
-    const approvedUserId = userResult[0].UserID;
-    const requestQuery = `
-          SELECT 
-              ir.*,
-              r.Name AS requestor_name,
-              photographer.Email AS photographer_name
-          FROM ImagingRequest ir
-          LEFT JOIN User r ON ir.ImagingRequestorID = r.UserID
-          JOIN ImagingRequestUserPhotographyLink irupl ON irupl.ImagingRequestID = ir.ImagingRequestID
-          JOIN User photographer on irupl.PhotographerID = photographer.UserID
-          WHERE ir.IsDeleted = 0 AND ir.ImagingRequestorID = ?
-          ORDER BY ir.CreatedDate DESC
-        `;
-
-
-
-
-
-    const [imagingRequests] = await db.promise().query(requestQuery, [approvedUserId], (err2, imagingRequests) => {
-        if (err2) {
-            console.error("❌ Error fetching imaging requests:", err2);
-            return res.status(500).render("error", {
-                message: "Error loading imaging requests",
-                error: process.env.NODE_ENV === 'development' ? err2 : null
-            });
-        }
-
-        console.log(`📄 Imaging requests for approved user ${approvedUserId}: ${imagingRequests.length}`);
-
-    });
-    res.render("user/view_all_imaging_request_index", {
-        imagingRequests,
-        showPendingAlert: false,
-        title: "Imaging Requests" // Add title here
-    });
-});
-
-
-
 
 
 
@@ -868,7 +802,7 @@ app.get('/imaging-request-user', isAuthenticated, (req, res) => {
             const requestor = requestorResults[0];
             if (!requestor) {
                 console.log("⚠️ No approved requestor found for this login user.");
-                return res.redirect('/user/imaging-requests?status=pending');
+                return res.redirect('/user/imaging-request/view-all-imaging-requests?status=pending');
             }
 
             db.query(getPhotographersQuery, [UserID], (err2, photographerResults) => {
