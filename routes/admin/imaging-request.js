@@ -174,10 +174,13 @@ router.get('/edit-imaging-request/:id', isAuthenticated, isAdmin, async (req, re
         const requestQuery = `
             SELECT 
                 ir.*,
-                requestor.Name AS requestor_name,
-                requestor.UserID AS requestor_id,
-                photographer.Name AS photographer_name,
-                photographer.UserID AS photographer_id,
+                requestor.Name AS RequestorName,
+                requestor.Email AS RequestorEmail,
+                requestor.UserID AS RequestorID,
+                
+                photographer.Name AS PhotographerName,
+                photographer.Email as PhotographerEmail,
+                photographer.UserID AS PhotographerUserID,
                 requestor.RequestStatus
             FROM ImagingRequest ir
             JOIN User requestor ON ir.ImagingRequestorID = requestor.UserID
@@ -189,7 +192,7 @@ router.get('/edit-imaging-request/:id', isAuthenticated, isAdmin, async (req, re
         // Get all needed data in parallel for better performance
         const [requestResults, photographerResults, requestorResults] = await Promise.all([
             db.promise().query(requestQuery, [imagingRequestID]),
-            db.promise().query("SELECT UserID, Email FROM User WHERE UserType = 'photographer' ORDER BY Email"),
+            db.promise().query("SELECT UserID, Email,Name FROM User WHERE UserType = 'photographer' ORDER BY Email"),
             db.promise().query("SELECT UserID, Email FROM User WHERE UserType = 'requestor' ORDER BY Email")
         ]);
         if (requestResults[0].length === 0) {

@@ -126,7 +126,7 @@
                 <div class="form-group">
                     <label>Requestor</label>
                     <p class="form-control-static">
-                        <%= request.requestor_name || 'Not specified' %>
+                        <%= request.RequestorName || 'Not specified' %>, <%= request.RequestorEmail %>
                     </p>
                 </div>
 
@@ -135,9 +135,9 @@
                     <select name="PhotographerID" id="PhotographerID" class="form-control">
                         <option value="">-- Select Photographer --</option>
                         <% photographers.forEach(photographer=> { %>
-                            <option value="<%= photographer.UserID %>" <%=request.PhotographerID==photographer.UserID
-                                ? 'selected' : '' %>>
-                                <%= photographer.Email %>
+                            <option value="<%= photographer.UserID %>"
+                                <%=request.PhotographerUserID==photographer.UserID ? 'selected' : '' %>>
+                                <%= photographer.Name %>, <%= photographer.Email%>
                             </option>
                             <% }) %>
                     </select>
