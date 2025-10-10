@@ -93,8 +93,10 @@ router.get('/view-imaging-request/:id', isAuthenticated, isAdmin, (req, res) => 
             r.Email AS requestor_name,
             photographer.Email AS photographer_name,
             r.RequestStatus AS status_name,
-            creator.Email AS creator_name,
-            updater.Email AS updater_name
+            creator.Email AS CreatorEmail,
+            creator.Name AS CreatorName,
+            updater.Email AS UpdaterEmail,
+            updater.Name AS UpdaterName
         FROM ImagingRequest ir
         LEFT JOIN User r ON ir.ImagingRequestorID = r.UserID
         JOIN ImagingRequestUserPhotographyLink irupl ON irupl.ImagingRequestID = ir.ImagingRequestID
@@ -133,7 +135,8 @@ router.get('/view-imaging-request/:id', isAuthenticated, isAdmin, (req, res) => 
         res.render('view-imaging-request', {
             request: request,
             currentUser: req.user,
-            title: "Admin View Imaging Request" // Add title here
+            title: "Admin View Imaging Request", // Add title here
+            isAdmin: isAdmin
         });
     });
 });

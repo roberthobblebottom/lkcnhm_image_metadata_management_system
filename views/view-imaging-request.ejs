@@ -336,136 +336,129 @@
 
 <body>
 
-    <% if (request.UserType=='admin' ) {%>
-        <%- include('partials/sidenav') %>
-            <% } else { %>
-                <%- include('partials/sidenav_user') %>
-                    <% }%>
+    <%- include(isAdmin ? 'partials/sidenav_admin' : 'partials/sidenav_user' )%>
+        <main>
+            <div class="container request-container">
+                <div class="request-header">
+                    <h1 class="h3 mb-0">Imaging Request #<%= request.ImagingRequestID %>
+                    </h1>
+                    <p class="text-muted mb-0">Created on <%= request.CreatedDate %> by <%= request.CreatorName
+                                || 'System' %>, <%= request.CreatorEmail %>
+                    </p>
+                    <% if (request.UpdatedDate) { %>
+                        <p class="text-muted">Last updated on <%= request.UpdatedDate %> by <%= request.UpdaterName
+                                    || 'System' %>, <%= request.UpdaterEmail%>
+                        </p>
+                        <% } %>
+                            <span
+                                class="badge <%= request.IsDelete === 'Yes' ? 'bg-danger' : 'bg-success' %> status-badge">
+                                <%= request.IsDelete==='Yes' ? 'Deleted' : 'Active' %>
+                            </span>
+                </div>
 
-                        <main>
-                            <div class="container request-container">
-                                <div class="request-header">
-                                    <h1 class="h3 mb-0">Imaging Request #<%= request.ImagingRequestID %>
-                                    </h1>
-                                    <p class="text-muted mb-0">Created on <%= request.CreatedDate %> by <%=
-                                                request.creator_name || 'System' %>
-                                    </p>
-                                    <% if (request.UpdatedDate) { %>
-                                        <p class="text-muted">Last updated on <%= request.UpdatedDate %> by <%=
-                                                    request.updater_name || 'System' %>
-                                        </p>
-                                        <% } %>
-                                            <span
-                                                class="badge <%= request.IsDelete === 'Yes' ? 'bg-danger' : 'bg-success' %> status-badge">
-                                                <%= request.IsDelete==='Yes' ? 'Deleted' : 'Active' %>
-                                            </span>
-                                </div>
-
-                                <div class="row">
-                                    <div class="col-md-6">
-                                        <div class="detail-row">
-                                            <div class="detail-label">Requestor</div>
-                                            <div class="detail-value">
-                                                <%= request.requestor_name %>
-                                            </div>
-                                        </div>
-
-                                        <div class="detail-row">
-                                            <div class="detail-label">Photographer</div>
-                                            <div class="detail-value">
-                                                <%= request.photographer_name %>
-                                            </div>
-                                        </div>
-
-                                        <div class="detail-row">
-                                            <div class="detail-label">Status</div>
-                                            <div class="detail-value">
-                                                <span
-                                                    class="badge bg-<%= request.status_name === 'approved' ? 'success' : request.status_name === 'rejected' ? 'danger' : 'warning' %>">
-                                                    <%= request.status_name %>
-                                                </span>
-                                            </div>
-                                        </div>
-
-                                        <div class="detail-row">
-                                            <div class="detail-label">Request Date</div>
-                                            <div class="detail-value">
-                                                <%= request.DateOfRequest %>
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    <div class="col-md-6">
-                                        <div class="detail-row">
-                                            <div class="detail-label">Imaging Period</div>
-                                            <div class="detail-value">
-                                                <%= request.ImagingStartDate %> to <%= request.ImagingEndDate %>
-                                            </div>
-                                        </div>
-
-                                        <div class="detail-row">
-                                            <div class="detail-label">Location</div>
-                                            <div class="detail-value">
-                                                <%= request.SpecimenLocationName %>
-                                            </div>
-                                        </div>
-
-                                        <div class="detail-row">
-                                            <div class="detail-label">Imaging Platform</div>
-                                            <div class="detail-value">
-                                                <%= request.ImagingPlatform || 'Not specified' %>
-                                            </div>
-                                        </div>
-
-                                        <div class="detail-row">
-                                            <div class="detail-label">Reason for Status</div>
-                                            <div class="detail-value">
-                                                <%= request.ReasonforRequest || 'Not specified' %>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div class="detail-row">
-                                    <div class="detail-label">Project Summary</div>
-                                    <div class="detail-value text-area-value">
-                                        <%= request.SummaryOfProject %>
-                                    </div>
-                                </div>
-
-                                <div class="detail-row">
-                                    <div class="detail-label">Specimen Details</div>
-                                    <div class="detail-value text-area-value">
-                                        <%= request.SpecimenDetails %>
-                                    </div>
-                                </div>
-
-                                <% if (request.Comments) { %>
-                                    <div class="detail-row">
-                                        <div class="detail-label">Additional Comments</div>
-                                        <div class="detail-value text-area-value">
-                                            <%= request.Comments %>
-                                        </div>
-                                    </div>
-                                    <% } %>
-
-                                        <div class="mt-4 d-flex justify-content-between">
-                                            <a href="/admin/imaging-request/view-all-imaging-requests"
-                                                class="btn btn-primary">
-                                                <i class="fas fa-arrow-left"></i> Back to Imaging Requests
-                                            </a>
-                                            <a href="/admin/imaging-request/edit-imaging-request/<%= request.ImagingRequestID %>"
-                                                class="btn btn-warning">
-                                                <i class="fas fa-edit"></i> Edit Request
-                                            </a>
-                                        </div>
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="detail-row">
+                            <div class="detail-label">Requestor</div>
+                            <div class="detail-value">
+                                <%= request.requestor_name %>
                             </div>
-                        </main>
-                        <!-- Font Awesome for icons -->
+                        </div>
 
-                        <!-- Bootstrap JS -->
-                        <script
-                            src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+                        <div class="detail-row">
+                            <div class="detail-label">Photographer</div>
+                            <div class="detail-value">
+                                <%= request.photographer_name %>
+                            </div>
+                        </div>
+
+                        <div class="detail-row">
+                            <div class="detail-label">Status</div>
+                            <div class="detail-value">
+                                <span
+                                    class="badge bg-<%= request.status_name === 'approved' ? 'success' : request.status_name === 'rejected' ? 'danger' : 'warning' %>">
+                                    <%= request.status_name %>
+                                </span>
+                            </div>
+                        </div>
+
+                        <div class="detail-row">
+                            <div class="detail-label">Request Date</div>
+                            <div class="detail-value">
+                                <%= request.DateOfRequest %>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-6">
+                        <div class="detail-row">
+                            <div class="detail-label">Imaging Period</div>
+                            <div class="detail-value">
+                                <%= request.ImagingStartDate %> to <%= request.ImagingEndDate %>
+                            </div>
+                        </div>
+
+                        <div class="detail-row">
+                            <div class="detail-label">Location</div>
+                            <div class="detail-value">
+                                <%= request.SpecimenLocationName %>
+                            </div>
+                        </div>
+
+                        <div class="detail-row">
+                            <div class="detail-label">Imaging Platform</div>
+                            <div class="detail-value">
+                                <%= request.ImagingPlatform || 'Not specified' %>
+                            </div>
+                        </div>
+
+                        <div class="detail-row">
+                            <div class="detail-label">Reason for Status</div>
+                            <div class="detail-value">
+                                <%= request.ReasonforRequest || 'Not specified' %>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="detail-row">
+                    <div class="detail-label">Project Summary</div>
+                    <div class="detail-value text-area-value">
+                        <%= request.SummaryOfProject %>
+                    </div>
+                </div>
+
+                <div class="detail-row">
+                    <div class="detail-label">Specimen Details</div>
+                    <div class="detail-value text-area-value">
+                        <%= request.SpecimenDetails %>
+                    </div>
+                </div>
+
+                <% if (request.Comments) { %>
+                    <div class="detail-row">
+                        <div class="detail-label">Additional Comments</div>
+                        <div class="detail-value text-area-value">
+                            <%= request.Comments %>
+                        </div>
+                    </div>
+                    <% } %>
+
+                        <div class="mt-4 d-flex justify-content-between">
+                            <a href="/admin/imaging-request/view-all-imaging-requests" class="btn btn-primary">
+                                <i class="fas fa-arrow-left"></i> Back to Imaging Requests
+                            </a>
+                            <a href="/admin/imaging-request/edit-imaging-request/<%= request.ImagingRequestID %>"
+                                class="btn btn-warning">
+                                <i class="fas fa-edit"></i> Edit Request
+                            </a>
+                        </div>
+            </div>
+        </main>
+        <!-- Font Awesome for icons -->
+
+        <!-- Bootstrap JS -->
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 
 </html>
