@@ -188,8 +188,8 @@
                 </div>
 
                 <div class="form-group">
-                    <label for="RequestStatusID">Status:</label>
-                    <select name="RequestStatusID" id="RequestStatusID" class="form-control" required>
+                    <label for="RequestStatus">Status:</label>
+                    <select name="RequestStatus" id="RequestStatus" class="form-control" required>
                         <option value="">-- Select Type --</option>
                         <% statuses.forEach(status=> { %>
                             <option value="<%= status %>" <%=request.RequestStatus==status ? 'selected' : '' %>>
@@ -200,8 +200,8 @@
                 </div>
 
                 <div class="form-group">
-                    <label for="ReasonforRequestStatus">Reason for Status Change:</label>
-                    <textarea id="ReasonforRequestStatus" name="ReasonforRequestStatus"
+                    <label for="ReasonForRequest">Reason for Status Change:</label>
+                    <textarea id="ReasonForRequest" name="ReasonForRequest"
                         class="form-control"><%= request.ReasonForRequest || '' %></textarea>
                 </div>
 
@@ -217,9 +217,9 @@
                 const requestDate = new Date('<%= request.DateofRequest %>');
                 const startDateInput = document.getElementById('ImagingStartDate');
                 const endDateInput = document.getElementById('ImagingEndDate');
-                const statusSelect = document.getElementById('RequestStatusID');
-                const reasonField = document.getElementById('ReasonforRequestStatus');
-
+                const statusSelect = document.getElementById('RequestStatus');
+                const reasonField = document.getElementById('ReasonForRequest');
+                console.log('reasonField' + reasonField)
                 // Set minimum dates
                 startDateInput.min = '<%= request.DateofRequest %>';
                 endDateInput.min = '<%= request.ImagingStartDate %>';
@@ -256,11 +256,9 @@
                 // Form submission handler
                 form.addEventListener('submit', async function (e) {
                     e.preventDefault();
-
                     // Validate dates
                     const startDate = new Date(startDateInput.value);
                     const endDate = new Date(endDateInput.value);
-
                     if (startDate < requestDate) {
                         Swal.fire({
                             icon: 'error',
@@ -278,7 +276,6 @@
                         });
                         return;
                     }
-
                     // Validate reason if status changed
                     if (statusSelect.value !== '<%= request.RequestStatusID %>' && !reasonField.value.trim()) {
                         Swal.fire({
@@ -297,11 +294,11 @@
                         });
                         return;
                     }
-
                     // Submit form via AJAX
                     try {
                         const formData = new FormData(form);
-                        console.log(formData)
+                        console.log(JSON.stringify(Object.fromEntries(formData)))
+                        console.log(form.action)
                         const response = await fetch(form.action, {
                             method: 'POST',
                             headers: {
@@ -311,7 +308,6 @@
                         });
 
                         const result = await response.json();
-                        console.log(result)
                         if (result.success) {
                             Swal.fire({
                                 icon: 'success',

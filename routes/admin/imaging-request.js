@@ -169,7 +169,6 @@ router.post('/delete-imaging-request/:id', isAuthenticated, isAdmin, (req, res) 
 router.get('/edit-imaging-request/:id', isAuthenticated, isAdmin, async (req, res) => {
     try {
         const imagingRequestID = req.params.id;
-        // Get imaging request with joined data
         const requestQuery = `
             SELECT 
                 ir.*,
@@ -194,9 +193,10 @@ router.get('/edit-imaging-request/:id', isAuthenticated, isAdmin, async (req, re
             return res.status(404).render('error', { message: 'Request not found' });
         }
         // Format dates for display
+
         const request = {
             ...requestResults[0][0],
-            // DateOfRequest: formatDisplayDate(requestResults[0][0].DateofRequest),
+            DateOfRequest: formatDisplayDate(requestResults[0][0].DateOfRequest),
             ImagingStartDate: formatDisplayDate(requestResults[0][0].ImagingStartDate),
             ImagingEndDate: formatDisplayDate(requestResults[0][0].ImagingEndDate)
         };
@@ -218,6 +218,7 @@ router.get('/edit-imaging-request/:id', isAuthenticated, isAdmin, async (req, re
 
 router.post('/edit-imaging-request/:id', isAuthenticated, isAdmin, async (req, res) => {
     // === 0. SESSION VALIDATION ===
+    console.log("------------")
     if (!req.session.user || !req.session.user.UserID) {
         console.error("❌ No user in session");
         return res.status(401).json({ success: false, message: 'Session expired. Please login again.' });
@@ -228,15 +229,17 @@ router.post('/edit-imaging-request/:id', isAuthenticated, isAdmin, async (req, r
         PhotographerID,
         ImagingStartDate,
         ImagingEndDate,
-        SummaryofProject,
+        SummaryOfProject,
         SpecimenDetails,
         SpecimenLocationName,
         ImagingPlatform,
         RequestStatus,
-        ReasonforRequest
+        ReasonForRequest
     } = req.body;
 
     // === 1. VALIDATION ===
+    console.log(req.body)
+    console.log(RequestStatus)
     if (!ImagingStartDate || !ImagingEndDate || !RequestStatus) {
         return res.status(400).json({ success: false, message: 'Missing required fields' });
     }
@@ -276,52 +279,24 @@ router.post('/edit-imaging-request/:id', isAuthenticated, isAdmin, async (req, r
         SET PhotographerID = ?
         WHERE ImagingRequestID = ?
         `;
-    console.log("a")
     const results = await db.promise().query(updateQuery, [
         startDate,
         endDate,
-        SummaryofProject || null,
+        SummaryOfProject || null,
         SpecimenDetails || null,
         SpecimenLocationName || null,
         ImagingPlatform || null,
         RequestStatus,
-        ReasonforRequest || null,
+        ReasonForRequest || null,
         req.session.user.UserID,
         imagingRequestID
-    ], (err, result) => {
-        if (err) {
-            console.error('❌ Error updating request:', err);
-            return res.status(500).json({
-                success: false,
-                message: 'Server error during update',
-                details: process.env.NODE_ENV === 'development' ? err.message : null
-            });
-        }
-
-        if (result.affectedRows === 0) {
-            return res.status(404).json({ success: false, message: 'Request not found or no changes made' });
-        }
-
-    });
+    ])
     console.log('b')
     console.log(results)
     const r2 = await db.promise().query(updateQuery2, [
         PhotographerID,
         imagingRequestID
-    ], (err, result) => {
-        if (err) {
-            console.error('❌ Error updating request:', err);
-            return res.status(500).json({
-                success: false,
-                message: 'Server error during update',
-                details: process.env.NODE_ENV === 'development' ? err.message : null
-            });
-        }
-
-        if (result.affectedRows === 0) {
-            return res.status(404).json({ success: false, message: 'Request not found or no changes made' });
-        }
-    });
+    ]);
     console.log("c")
     console.log(r2)
     // Return success response

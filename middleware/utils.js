@@ -12,9 +12,7 @@ const formatDate = (dateString) => {
     });
 };
 const formatDisplayDate = (date) => {
-    console.log(date)
     const d = date ? new Date(date).toISOString().split('T')[0] : null;
-    console.log(d)
     return d
 }
 
