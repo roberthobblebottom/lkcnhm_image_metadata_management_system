@@ -63,8 +63,8 @@ app.get("/login", (req, res) => {
 
 
 // ✅ User Dashboard (Protected)
-app.get("/user-dashboard", isAuthenticated, (req, res) => {
-    res.render("user-dashboard", {
+app.get("/user/dashboard", isAuthenticated, (req, res) => {
+    res.render("user/dashboard", {
         layout: 'layout', // Specify your layout file
         user: req.session.user,
         title: "User Dashboard",
@@ -508,8 +508,8 @@ app.post("/forgot-password", (req, res) => {
 
 
 //change [password] route
-// app.get("/user-dashboard",isAuthenticated,(req, res) => {
-//     res.sendFile(path.resolve(__dirname, "views", "user-dashboard.html"));
+// app.get("/user/dashboard",isAuthenticated,(req, res) => {
+//     res.sendFile(path.resolve(__dirname, "views", "user/dashboard.html"));
 // });
 app.get('/change-password', isAuthenticated, (req, res) => {
     if (!req.session.user) {

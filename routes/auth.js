@@ -97,7 +97,7 @@ router.post("/login", (req, res) => {
 
                 return res.json({
                     success: true,
-                    redirect: user.UserType === "admin" ? "/admin/dashboard" : "/user-dashboard"
+                    redirect: user.UserType === "admin" ? "/admin/dashboard" : "/user/dashboard"
                 });
             });
         });
