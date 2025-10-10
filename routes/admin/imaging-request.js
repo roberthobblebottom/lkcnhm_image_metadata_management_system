@@ -191,7 +191,7 @@ router.get('/edit-imaging-request/:id', isAuthenticated, isAdmin, async (req, re
         // Get all needed data in parallel for better performance
         const [requestResults, photographerResults] = await Promise.all([
             db.promise().query(requestQuery, [imagingRequestID]),
-            db.promise().query("SELECT UserID, Email,Name FROM User WHERE UserType = 'photographer' ORDER BY Email"),
+            db.promise().query("SELECT UserID, Email,Name FROM User ORDER BY Email"),
         ]);
         if (requestResults[0].length === 0) {
             return res.status(404).render('error', { message: 'Request not found' });
@@ -221,9 +221,6 @@ router.get('/edit-imaging-request/:id', isAuthenticated, isAdmin, async (req, re
         res.status(500).render('error', { message: 'Server error' });
     }
 });
-
-// Helper function for date formatting
-
 
 
 router.post('/edit-imaging-request/:id', isAuthenticated, isAdmin, async (req, res) => {

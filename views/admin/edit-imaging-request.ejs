@@ -136,7 +136,8 @@
                         <option value="">-- Select Photographer --</option>
                         <% photographers.forEach(photographer=> { %>
                             <option value="<%= photographer.UserID %>"
-                                <%=request.PhotographerUserID==photographer.UserID ? 'selected' : '' %>>
+                                <%=request.PhotographerUserID==photographer.UserID ? 'selected' : '' %>
+                                >
                                 <%= photographer.Name %>, <%= photographer.Email%>
                             </option>
                             <% }) %>
