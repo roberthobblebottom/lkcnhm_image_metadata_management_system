@@ -722,7 +722,7 @@ app.get('/user/imaging-requests', isAuthenticated, async (req, res) => {
     // No such user created OR not approved
     // if (!userResult[0]) {
     //     // console.log("🔒 User not approved or not registered as Internal/External");
-    //     return res.render("imaging_request_index", {
+    //     return res.render("user/view_all_imaging_request_index", {
     //         imagingRequests: [],
     //         showPendingAlert: false
     //     });
@@ -742,6 +742,11 @@ app.get('/user/imaging-requests', isAuthenticated, async (req, res) => {
           WHERE ir.IsDeleted = 0 AND ir.ImagingRequestorID = ?
           ORDER BY ir.CreatedDate DESC
         `;
+
+
+
+
+
     const [imagingRequests] = await db.promise().query(requestQuery, [approvedUserId], (err2, imagingRequests) => {
         if (err2) {
             console.error("❌ Error fetching imaging requests:", err2);
@@ -754,7 +759,7 @@ app.get('/user/imaging-requests', isAuthenticated, async (req, res) => {
         console.log(`📄 Imaging requests for approved user ${approvedUserId}: ${imagingRequests.length}`);
 
     });
-    res.render("imaging_request_index", {
+    res.render("user/view_all_imaging_request_index", {
         imagingRequests,
         showPendingAlert: false,
         title: "Imaging Requests" // Add title here

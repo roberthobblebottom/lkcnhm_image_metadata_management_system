@@ -102,7 +102,7 @@
 <body>
   <div class="main_con">
     <h2 style="margin-top: 50px;">MY IMAGING REQUESTS</h2>
-    <%- include('partials/sidenav_user') %>
+    <%- include('../partials/sidenav_user') %>
 
       <% if (showPendingAlert) { %>
         <button class="btn" disabled style="opacity: 0.6;" title="Wait for admin approval">➕ Add Imaging Request
@@ -138,17 +138,17 @@
                           <%= req.photographer_name %>
                         </td>
                         <td>
-                          <%= req.DateofRequest?.toISOString().slice(0, 10) %>
+                          <%= req.DateOfRequest?.toDateString() %>
                         </td>
                         <td>
-                          <%= req.ImagingStartDate?.toISOString().slice(0, 10) %>
+                          <%= req.ImagingStartDate?.toDateString()%>
                         </td>
                         <td>
-                          <%= req.ImagingEndDate?.toISOString().slice(0, 10) %>
+                          <%= req.ImagingEndDate?.toDateString()%>
                         </td>
                         <td
-                          class="<%= req.RequestStatusName === 'approved' ? 'status-approved' : req.RequestStatusName === 'rejected' ? 'status-rejected' : '' %>">
-                          <%= req.RequestStatusName || '-' %>
+                          class="<%= req.RequestStatus === 'approved' ? 'status-approved' : req.RequestStatus === 'rejected' ? 'status-rejected' : '-' %>">
+                          <%= req.RequestStatus || '-' %>
                         </td>
                         <td>
                           <a href="/user/view-imaging-request/<%= req.ImagingRequestID %>" class="view-btn">View</a>

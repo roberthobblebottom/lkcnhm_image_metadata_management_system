@@ -218,7 +218,6 @@ router.get('/edit-imaging-request/:id', isAuthenticated, isAdmin, async (req, re
 
 router.post('/edit-imaging-request/:id', isAuthenticated, isAdmin, async (req, res) => {
     // === 0. SESSION VALIDATION ===
-    console.log("------------")
     if (!req.session.user || !req.session.user.UserID) {
         console.error("❌ No user in session");
         return res.status(401).json({ success: false, message: 'Session expired. Please login again.' });
