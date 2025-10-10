@@ -219,7 +219,6 @@
                 const endDateInput = document.getElementById('ImagingEndDate');
                 const statusSelect = document.getElementById('RequestStatus');
                 const reasonField = document.getElementById('ReasonForRequest');
-                console.log('reasonField' + reasonField)
                 // Set minimum dates
                 startDateInput.min = '<%= request.DateofRequest %>';
                 endDateInput.min = '<%= request.ImagingStartDate %>';
@@ -297,8 +296,6 @@
                     // Submit form via AJAX
                     try {
                         const formData = new FormData(form);
-                        console.log(JSON.stringify(Object.fromEntries(formData)))
-                        console.log(form.action)
                         const response = await fetch(form.action, {
                             method: 'POST',
                             headers: {

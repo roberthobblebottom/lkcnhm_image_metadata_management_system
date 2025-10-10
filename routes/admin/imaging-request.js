@@ -238,8 +238,6 @@ router.post('/edit-imaging-request/:id', isAuthenticated, isAdmin, async (req, r
     } = req.body;
 
     // === 1. VALIDATION ===
-    console.log(req.body)
-    console.log(RequestStatus)
     if (!ImagingStartDate || !ImagingEndDate || !RequestStatus) {
         return res.status(400).json({ success: false, message: 'Missing required fields' });
     }
@@ -291,14 +289,10 @@ router.post('/edit-imaging-request/:id', isAuthenticated, isAdmin, async (req, r
         req.session.user.UserID,
         imagingRequestID
     ])
-    console.log('b')
-    console.log(results)
     const r2 = await db.promise().query(updateQuery2, [
         PhotographerID,
         imagingRequestID
     ]);
-    console.log("c")
-    console.log(r2)
     // Return success response
     res.json({
         success: true,
