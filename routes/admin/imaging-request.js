@@ -177,7 +177,6 @@ router.get('/edit-imaging-request/:id', isAuthenticated, isAdmin, async (req, re
                 requestor.Name AS RequestorName,
                 requestor.Email AS RequestorEmail,
                 requestor.UserID AS RequestorID,
-                
                 photographer.Name AS PhotographerName,
                 photographer.Email as PhotographerEmail,
                 photographer.UserID AS PhotographerUserID,
@@ -190,10 +189,9 @@ router.get('/edit-imaging-request/:id', isAuthenticated, isAdmin, async (req, re
         `;
         console.log('imaging request id ' + imagingRequestID)
         // Get all needed data in parallel for better performance
-        const [requestResults, photographerResults, requestorResults] = await Promise.all([
+        const [requestResults, photographerResults] = await Promise.all([
             db.promise().query(requestQuery, [imagingRequestID]),
             db.promise().query("SELECT UserID, Email,Name FROM User WHERE UserType = 'photographer' ORDER BY Email"),
-            db.promise().query("SELECT UserID, Email FROM User WHERE UserType = 'requestor' ORDER BY Email")
         ]);
         if (requestResults[0].length === 0) {
             return res.status(404).render('error', { message: 'Request not found' });
@@ -213,7 +211,6 @@ router.get('/edit-imaging-request/:id', isAuthenticated, isAdmin, async (req, re
             request: request,
             photographers: photographerResults[0],
             statuses: Object.values(requestStatusTuple()),
-            requestors: requestorResults[0],
             currentUser: req.user,
             title: "Edit Imaging Request", // Add title here
             isAdmin: isAdmin

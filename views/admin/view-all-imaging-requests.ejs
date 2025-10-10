@@ -132,13 +132,13 @@
                         %>
                   </td>
                   <td>
-                    <%= request.DateOfRequest?.toISOString().slice(0, 10) %>
+                    <%= request.DateOfRequest?.toDateString() %>
                   </td>
                   <td>
-                    <%= request.ImagingStartDate?.toISOString().slice(0, 10) %>
+                    <%= request.ImagingStartDate?.toDateString() %>
                   </td>
                   <td>
-                    <%= request.ImagingEndDate?.toISOString().slice(0, 10) %>
+                    <%= request.ImagingEndDate?.toDateString()%>
                   </td>
                   <td
                     class="<%= request.RequestStatus === 'approved' ? 'status-approved' : request.RequestStatus === 'rejected' ? 'status-rejected' : '-' %>">
