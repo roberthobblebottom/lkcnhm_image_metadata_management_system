@@ -12,7 +12,10 @@ const formatDate = (dateString) => {
     });
 };
 const formatDisplayDate = (date) => {
-    return date ? new Date(date).toISOString().split('T')[0] : null;
+    console.log(date)
+    const d = date ? new Date(date).toISOString().split('T')[0] : null;
+    console.log(d)
+    return d
 }
 
 const requestStatusTuple = () => {

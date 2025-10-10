@@ -2,7 +2,6 @@ const express = require("express");
 const router = express.Router();
 const db = require("../db"); // Database connection
 const { isAuthenticated, isAdmin } = require("../../middleware/auth"); // Middleware
-
 const { formatDate, formatDisplayDate, requestStatusTuple } = require("../../middleware/utils");
 
 router.get('/add-new-imaging-request', isAuthenticated, isAdmin, async (req, res) => {
@@ -178,16 +177,14 @@ router.get('/edit-imaging-request/:id', isAuthenticated, isAdmin, async (req, re
                 requestor.Email AS RequestorEmail,
                 requestor.UserID AS RequestorID,
                 photographer.Name AS PhotographerName,
-                photographer.Email as PhotographerEmail,
-                photographer.UserID AS PhotographerUserID,
-                requestor.RequestStatus
+                photographer.Email AS PhotographerEmail,
+                photographer.UserID AS PhotographerUserID
             FROM ImagingRequest ir
             JOIN User requestor ON ir.ImagingRequestorID = requestor.UserID
             JOIN ImagingRequestUserPhotographyLink i ON ir.ImagingRequestID = i.ImagingRequestID
             JOIN User photographer ON i.PhotographerID = photographer.UserID 
             WHERE ir.ImagingRequestID = ?;
         `;
-        console.log('imaging request id ' + imagingRequestID)
         // Get all needed data in parallel for better performance
         const [requestResults, photographerResults] = await Promise.all([
             db.promise().query(requestQuery, [imagingRequestID]),
@@ -199,14 +196,10 @@ router.get('/edit-imaging-request/:id', isAuthenticated, isAdmin, async (req, re
         // Format dates for display
         const request = {
             ...requestResults[0][0],
-            DateOfRequest: formatDisplayDate(requestResults[0][0].DateofRequest),
+            // DateOfRequest: formatDisplayDate(requestResults[0][0].DateofRequest),
             ImagingStartDate: formatDisplayDate(requestResults[0][0].ImagingStartDate),
             ImagingEndDate: formatDisplayDate(requestResults[0][0].ImagingEndDate)
         };
-        console.log("---" + Object.keys(request))
-        console.log("---" + Object.values(request))
-        console.log(request.RequestStatus)
-
         res.render(`admin/edit-imaging-request`, {
             request: request,
             photographers: photographerResults[0],
