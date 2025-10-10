@@ -24,7 +24,7 @@ router.get('/add-new-imaging-request', isAuthenticated, isAdmin, async (req, res
     const [requestors] = await db.promise().query(getRequestors);
     const [photographers] = await db.promise().query(getPhotographers);
     console.log(requestors)
-    res.render('admin/imaging-request-admin', {
+    res.render('admin/create-imaging-request', {
         requestors,
         photographers,
         title: "Imaging Request Form",
@@ -75,7 +75,7 @@ router.get('/view-all-imaging-requests', isAuthenticated, isAdmin, (req, res) =>
             });
         }
 
-        res.render('admin/imaging-request-view-admin', {
+        res.render('admin/view-all-imaging-requests', {
             imagingRequests: results,
             currentUser: req.user,
             title: "Imaging Requests Dashboard" // Add title here

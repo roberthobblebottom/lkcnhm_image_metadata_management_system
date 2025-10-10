@@ -25,7 +25,7 @@ router.get("/api/users", isAuthenticated, isAdmin, (req, res) => {
 // 🔒 Admin Routes (Protected)
 router.get("/dashboard", isAuthenticated, isAdmin, (req, res) => {
     console.log("🟢 Accessing Admin Dashboard - Session Data:", req.session.user);
-    res.render("admin/admin-dashboard", { user: req.session.user, title: "Admin Dashboard" });
+    res.render("admin/dashboard", { user: req.session.user, title: "Admin Dashboard" });
 });
 
 //change-password.ejs
@@ -34,7 +34,7 @@ router.get('/change-password', isAuthenticated, isAdmin, (req, res) => {
         return res.redirect('/login');
     }
 
-    res.render('change-password', { user: req.session.user.Email }); // ✅ pass `user` to EJS
+    res.render('admin/change-password', { user: req.session.user.Email }); // ✅ pass `user` to EJS
 });
 
 router.post('/change-password', isAuthenticated, (req, res) => {
