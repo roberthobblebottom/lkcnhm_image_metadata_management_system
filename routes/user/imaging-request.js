@@ -70,5 +70,75 @@ router.get('/view-all-imaging-requests', isAuthenticated, async (req, res) => {
 
 
 
+// Changes Done by Rex to this Module of Non_admin Imaging Request Form page Loading Controller
+
+router.get('/view-imaging-request', isAuthenticated, (req, res) => {
+    try {
+        const { UserID, Email } = req.session.user;
+        console.log("🔍 [DEBUG] Current User - ID:", UserID, "Name:", Email);
+
+        // ✅ Get requestor that matches this login user's approved user record
+        const getRequestorQuery = `
+            SELECT id, Email 
+            FROM User 
+            WHERE CreatedByID = ? 
+              AND UserTypeID IN (1, 2) 
+              AND IsDeleted = 0
+              AND RequestStatusID = (
+                SELECT RequestStatusID FROM RequestStatus WHERE RequestStatusName = 'approved'
+              )
+            LIMIT 1
+        `;
+
+        // ✅ Get photographers created by this user, and are approved
+        const getPhotographersQuery = `
+            SELECT id, Email 
+            FROM User 
+            WHERE CreatedByID = ? 
+              AND UserTypeID IN (3, 4)
+              AND IsDeleted = 0
+              AND RequestStatusID = (
+                SELECT RequestStatusID FROM RequestStatus WHERE RequestStatusName = 'approved'
+              )
+        `;
+
+        db.query(getRequestorQuery, [UserID], (err1, requestorResults) => {
+            if (err1) {
+                console.error("❌ Error loading requestor:", err1);
+                return res.status(500).render('error', { message: "Error loading requestor" });
+            }
+
+            const requestor = requestorResults[0];
+            if (!requestor) {
+                console.log("⚠️ No approved requestor found for this login user.");
+                return res.redirect('/user/imaging-request/view-all-imaging-requests?status=pending');
+            }
+
+            db.query(getPhotographersQuery, [UserID], (err2, photographerResults) => {
+                if (err2) {
+                    console.error("❌ Error loading photographers:", err2);
+                    return res.status(500).render('error', { message: "Error loading photographers" });
+                }
+
+                console.log("✅ [Final] Rendering form with requestor:", requestor, "and photographers:", photographerResults);
+
+                res.render('user/view-imaging-request', {
+                    requestor, // only one
+                    photographers: photographerResults || [],
+                    title: 'Imaging Request Form',
+                    currentUser: req.session.user,
+                    title: "Imaging Request Form" // Add title here
+                });
+            });
+        });
+
+    } catch (err) {
+        console.error("❌ Unexpected error:", err);
+        res.status(500).render('error', {
+            message: "Unexpected server error.",
+            error: process.env.NODE_ENV === 'development' ? err : null
+        });
+    }
+});
 
 module.exports = router;
