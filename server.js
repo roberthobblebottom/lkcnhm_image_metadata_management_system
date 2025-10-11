@@ -216,8 +216,6 @@ app.get("/form", isAuthenticated, (req, res) => {
     });
 });
 
-
-
 app.get("/admin/UserRequest", isAuthenticated, isAdmin, (req, res) => {
     res.render("admin", { user: req.session.user });
 });
@@ -281,141 +279,8 @@ app.post('/submit', isAuthenticated, (req, res) => {
 });
 
 
-app.get('/view/:user_id', isAuthenticated, (req, res) => {
-    const { user_id } = req.params;
-    const isAdminRequestor = req.session.user?.UserType === 'admin';
-    const isAdmin = req.session.user.UserType === "admin";
-
-    const query = `
-        SELECT 
-            u.*, 
-            creator.Email AS CreatedByName,
-            updater.Email AS UpdatedByName,
-            ut.UserTypeName,
-            u.RequestStatus
-        FROM User u
-        LEFT JOIN User creator ON u.CreatedByID = creator.UserID
-        LEFT JOIN User updater ON u.updated_by = updater.UserID
-        LEFT JOIN UserType ut ON u.UserTypeID = ut.UserTypeID
-        WHERE u.UserID = ? AND u.IsDeleted = 0
-    `;
-
-    db.query(query, [user_id], (err, results) => {
-        if (err) {
-            console.error('❌ Error fetching user with joins:', err);
-            return res.status(500).send('Error fetching user.');
-        }
-
-        if (results.length === 0) {
-            return res.status(404).send('User not found or has been deleted.');
-        }
-
-        console.log("📄 User Data Fetched:", results[0]);
-        res.render('view', { user: results[0], isAdminRequestor, isAdmin, title: "Imaging User Details" });
-    });
-});
 
 
-
-
-
-
-app.get("/edit/:user_id", isAuthenticated, isAdmin, (req, res) => {
-    const userId = req.params.user_id;
-
-    const query = `
-        SELECT 
-            u.*, 
-            u.UserType, 
-            u.RequestStatus 
-        FROM User u
-        WHERE u.UserID = ?
-    `;
-
-    const getUserTypes = `SELECT * FROM UserType`;
-    const getStatuses = `SELECT * FROM RequestStatus`;
-
-    db.query(query, [userId], (err, results) => {
-        if (err) {
-            console.error("❌ Error fetching user:", err);
-            return res.status(500).send("Internal Server Error");
-        }
-
-        if (results.length === 0) {
-            return res.status(404).send("User not found");
-        }
-
-        const user = results[0];
-
-        db.query(getUserTypes, (err, userTypes) => {
-            if (err) return res.status(500).send("Error fetching user types");
-
-            db.query(getStatuses, (err, requestStatuses) => {
-                if (err) return res.status(500).send("Error fetching request statuses");
-
-                res.render("edit", {
-                    user,
-                    userTypes,
-                    requestStatuses,
-                    title: "Edit User",
-                });
-            });
-        });
-    });
-});
-app.post("/edit/:user_id", isAuthenticated, isAdmin, (req, res) => {
-    const { user_id } = req.params;
-    const {
-        email,
-        ContactNumber,
-        organisation,
-        UserType,           // This is the UserTypeID from the form
-        request_status,      // This is the RequestStatusID from the form
-        comments,
-        reason_for_req
-    } = req.body;
-
-    const updated_time = new Date().toISOString().slice(0, 19).replace("T", " ");
-    const updated_by = req.session.user.UserID;
-
-    const query = `
-        UPDATE User 
-        SET 
-            email = ?, 
-            ContactNumber = ?, 
-            organisation = ?, 
-            UserTypeID = ?, 
-            RequestStatusID = ?, 
-            comments = ?, 
-            reason_for_req = ?, 
-            updated_date = ?, 
-            updated_by = ? 
-        WHERE id = ?
-    `;
-
-    const values = [
-        email,
-        ContactNumber,
-        organisation,
-        UserType,
-        request_status,
-        comments,
-        reason_for_req,
-        updated_time,
-        updated_by,
-        user_id
-    ];
-
-    db.query(query, values, (err) => {
-        if (err) {
-            console.error('❌ Error updating user:', err);
-            return res.status(500).json({ message: "Internal Server Error" });
-        }
-
-        console.log("✅ User Updated:", user_id);
-        res.redirect('/admin/UserRequest');
-    });
-});
 
 
 // Handle forgot password page

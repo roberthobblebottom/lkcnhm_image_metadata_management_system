@@ -36,9 +36,41 @@ router.get("/admin-users", isAuthenticated, isAdmin, (req, res) => {
     });
 });
 
+//refactored from server.js, not tested and may not be needed
+app.get('/view/:user_id', isAuthenticated, (req, res) => {
+    const { user_id } = req.params;
+    const isAdminRequestor = req.session.user?.UserType === 'admin';
+    const isAdmin = req.session.user.UserType === "admin";
 
+    const query = `
+        SELECT 
+            u.*, 
+            creator.Email AS CreatedByName,
+            updater.Email AS UpdatedByName,
+            ut.UserTypeName,
+            u.RequestStatus
+        FROM User u
+        LEFT JOIN User creator ON u.CreatedByID = creator.UserID
+        LEFT JOIN User updater ON u.updated_by = updater.UserID
+        LEFT JOIN UserType ut ON u.UserTypeID = ut.UserTypeID
+        WHERE u.UserID = ? AND u.IsDeleted = 0
+    `;
+
+    db.query(query, [user_id], (err, results) => {
+        if (err) {
+            console.error('❌ Error fetching user with joins:', err);
+            return res.status(500).send('Error fetching user.');
+        }
+
+        if (results.length === 0) {
+            return res.status(404).send('User not found or has been deleted.');
+        }
+
+        console.log("📄 User Data Fetched:", results[0]);
+        res.render('view', { user: results[0], isAdminRequestor, isAdmin, title: "Imaging User Details" });
+    });
+});
 //update user details
-// Handle form submission from edit page
 // Render edit user page (support both singular and plural URLs)
 router.get("/edit-users/:id", isAuthenticated, isAdmin, (req, res) => {
     const userId = req.params.id;
@@ -84,6 +116,7 @@ router.get("/edit-users/:id", isAuthenticated, isAdmin, (req, res) => {
 
 
 // Handle form submission (support both singular and plural URLs)
+// TODO more User Attributes need to be updated here.
 router.post(["/update-user/:id", "/update-users/:id"], isAuthenticated, isAdmin, (req, res) => {
     const userId = req.params.id;
     const { TemporaryPassword, UserType, IsDeleted } = req.body;
