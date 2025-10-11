@@ -172,8 +172,25 @@ router.put("/delete-user/:id", (req, res) => {
         }
         console.log(`🗑️ User ${userId} marked as deleted`);
         res.json({ success: true });
+
+        res.redirect('/admin/UserRequest');
     });
 });
+
+
+
+app.get("/recover/:id", isAuthenticated, isAdmin, (req, res) => {
+    const { id } = req.params;
+    db.query("UPDATE User SET IsDeleted = 0 WHERE id = ?", [id], (err, result) => {
+        if (err) {
+            console.error(err);
+            return res.status(500).json({ error: "Error recovering user" });
+        }
+        console.log(`✅ User with ID ${id} recovered`);
+        res.redirect('/admin/UserRequest'); // Redirect to admin page after recovery
+    });
+});
+
 
 
 module.exports = router;

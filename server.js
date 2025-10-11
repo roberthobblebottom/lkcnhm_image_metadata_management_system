@@ -101,42 +101,42 @@ app.listen(PORT, () => {
 
 /// This is the Main Buisness Logic Starts so Don't touch it ///
 
-app.get("/imagingUser", isAuthenticated, (req, res) => {
-    const userId = req.session.user.UserID;
+// app.get("/imagingUser", isAuthenticated, (req, res) => {
+//     const userId = req.session.user.UserID;
 
-    const query = `
-        SELECT u.*, ut.UserTypeName
-        FROM User u
-        LEFT JOIN UserType ut ON u.UserTypeID = ut.UserTypeID
-        WHERE u.CreatedByID = ? AND u.IsDeleted = 0
-    `;
+//     const query = `
+//         SELECT u.*, ut.UserTypeName
+//         FROM User u
+//         LEFT JOIN UserType ut ON u.UserTypeID = ut.UserTypeID
+//         WHERE u.CreatedByID = ? AND u.IsDeleted = 0
+//     `;
 
-    db.query(query, [userId], (err, results) => {
-        if (err) {
-            console.error("❌ Error fetching imaging requests:", err);
-            return res.status(500).send("Server error");
-        }
+//     db.query(query, [userId], (err, results) => {
+//         if (err) {
+//             console.error("❌ Error fetching imaging requests:", err);
+//             return res.status(500).send("Server error");
+//         }
 
-        const mainUserTypes = ['Internal User', 'External User'];
+//         const mainUserTypes = ['Internal User', 'External User'];
 
-        const userRequests = results.filter(r => mainUserTypes.includes(r.UserTypeName));
-        const otherRequests = results.filter(r => !mainUserTypes.includes(r.UserTypeName));
+//         const userRequests = results.filter(r => mainUserTypes.includes(r.UserTypeName));
+//         const otherRequests = results.filter(r => !mainUserTypes.includes(r.UserTypeName));
 
-        // ✅ Check if primary user request exists and is not approved
-        let showPendingAlert = false;
+//         // ✅ Check if primary user request exists and is not approved
+//         let showPendingAlert = false;
 
-        if (userRequests.length > 0 && userRequests[0].RequestStatusName !== "approved") {
-            showPendingAlert = true;
-        }
+//         if (userRequests.length > 0 && userRequests[0].RequestStatusName !== "approved") {
+//             showPendingAlert = true;
+//         }
 
-        res.render("imagingUser", {
-            userRequests,
-            otherRequests,
-            showPendingAlert,
-            title: "Imaging User Request",
-        });
-    });
-});
+//         res.render("imagingUser", {
+//             userRequests,
+//             otherRequests,
+//             showPendingAlert,
+//             title: "Imaging User Request",
+//         });
+//     });
+// });
 
 
 
@@ -242,8 +242,6 @@ app.get("/check-email", (req, res) => {
 
 app.post('/submit', isAuthenticated, (req, res) => {
     const { email, ContactNumber, organisation, UserType, comments } = req.body;
-
-
     const created_by = req.session.user.UserID;
     const date_of_req = new Date().toISOString().slice(0, 19).replace("T", " ");
     const reason_for_req = null;
@@ -283,23 +281,6 @@ app.post('/submit', isAuthenticated, (req, res) => {
 });
 
 
-
-// API Route to Get All Users (deleted + active)
-app.get("/api/users", isAuthenticated, isAdmin, (req, res) => {
-    const query = `
-        SELECT * FROM User 
-    `;
-
-    db.query(query, (err, results) => {
-        if (err) {
-            console.error("❌ Error fetching users:", err);
-            return res.status(500).json({ error: "Error fetching user data" });
-        }
-
-        console.log("📄 All User Data Fetched:", results.length);
-        res.json(results); // Send all user data including joined fields
-    });
-});
 app.get('/view/:user_id', isAuthenticated, (req, res) => {
     const { user_id } = req.params;
     const isAdminRequestor = req.session.user?.UserType === 'admin';
@@ -334,33 +315,6 @@ app.get('/view/:user_id', isAuthenticated, (req, res) => {
     });
 });
 
-
-// Delete User Route
-app.get("/delete/:id", isAuthenticated, isAdmin, (req, res) => {
-    const { id } = req.params;
-    db.query("UPDATE User SET IsDeleted = 1 WHERE id = ?", [id], (err, result) => {
-        if (err) {
-            console.error(err);
-            return res.status(500).json({ error: "Error deleting user" });
-        }
-        console.log(`🗑️ User with ID ${id} soft-deleted`);
-        res.redirect('/admin/UserRequest');
-    });
-});
-
-
-
-app.get("/recover/:id", isAuthenticated, isAdmin, (req, res) => {
-    const { id } = req.params;
-    db.query("UPDATE User SET IsDeleted = 0 WHERE id = ?", [id], (err, result) => {
-        if (err) {
-            console.error(err);
-            return res.status(500).json({ error: "Error recovering user" });
-        }
-        console.log(`✅ User with ID ${id} recovered`);
-        res.redirect('/admin/UserRequest'); // Redirect to admin page after recovery
-    });
-});
 
 
 
@@ -569,7 +523,7 @@ app.post('/change-password', isAuthenticated, (req, res) => {
 });
 
 
-// may be for both admin and non admin
+//  for both admin and non admin
 app.post('/submit-imaging-request', isAuthenticated, async (req, res) => {
     console.log("in /submit-imaging-request")
     try {
@@ -649,10 +603,6 @@ app.post('/submit-imaging-request', isAuthenticated, async (req, res) => {
          ImagingRequestID)
          VALUES (?,?)
         `;
-        // console.log('level 0')
-        // console.log(req.body)
-        // console.log(createdBy)
-        // console.log(requestStatus)
         const result = await db.promise().query(insertQuery, [
             req.body.requestor,
             req.body.requestDate,
