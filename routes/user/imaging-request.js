@@ -71,7 +71,7 @@ router.get('/view-all-imaging-requests', isAuthenticated, async (req, res) => {
 
 
 // Changes Done by Rex to this Module of Non_admin Imaging Request Form page Loading Controller
-
+//I don't know where this is from. I may need to remove - Ryan
 router.get('/view-imaging-request', isAuthenticated, (req, res) => {
     try {
         const { UserID, Email } = req.session.user;
@@ -140,5 +140,60 @@ router.get('/view-imaging-request', isAuthenticated, (req, res) => {
         });
     }
 });
+
+// View Request (GET)
+router.get('/view-imaging-request/:id', isAuthenticated, (req, res) => {
+    const imagingRequestID = req.params.id;
+    const query = `
+        SELECT 
+            ir.*,
+            r.Name AS requestor_name,
+            photographer.Email AS photographer_name,
+            r.RequestStatus AS status_name,
+            creator.Email AS creator_name,
+            updater.Email AS updater_name
+        FROM ImagingRequest ir
+        LEFT JOIN User r ON ir.ImagingRequestorID = r.UserID
+        JOIN ImagingRequestUserPhotographyLink irupl ON irupl.ImagingRequestID = ir.ImagingRequestID
+        JOIN User photographer on irupl.PhotographerID = photographer.UserID
+        LEFT JOIN User creator ON ir.CreatedByID = creator.UserID
+        LEFT JOIN User updater ON ir.UpdatedByID = updater.UserID
+        WHERE ir.ImagingRequestID = ?
+    `;
+
+    db.query(query, [imagingRequestID], (err, results) => {
+        if (err) {
+            console.error('Error fetching imaging request:', err);
+            return res.status(500).render('error', {
+                message: 'Error loading imaging request',
+                error: process.env.NODE_ENV === 'development' ? err : null
+            });
+        }
+
+        if (results.length === 0) {
+            return res.status(404).render('error', {
+                message: 'Imaging request not found'
+            });
+        }
+
+        // Format dates for display
+        const request = {
+            ...results[0],
+            DateofRequest: formatDate(results[0].DateofRequest),
+            ImagingStartDate: formatDate(results[0].ImagingStartDate),
+            ImagingEndDate: formatDate(results[0].ImagingEndDate),
+            CreatedDate: formatDate(results[0].CreatedDate),
+            UpdatedDate: results[0].UpdatedDate ? formatDate(results[0].UpdatedDate) : null,
+            IsDeleted: results[0].IsDeleted ? 'Yes' : 'No'
+        };
+        res.render('view-imaging-request', {
+            request: request,
+            currentUser: req.user,
+            title: "User View Imaging Request", // Add title here
+            userType: req.session.user.UserType
+        });
+    });
+});
+
 
 module.exports = router;

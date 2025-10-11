@@ -336,7 +336,7 @@
 
 <body>
 
-    <%- include(isAdmin ? 'partials/sidenav_admin' : 'partials/sidenav_user' )%>
+    <%- include(userType=='admin' ? 'partials/sidenav_admin' : 'partials/sidenav_user' )%>
         <main>
             <div class="container request-container">
                 <div class="request-header">
@@ -443,16 +443,23 @@
                         </div>
                     </div>
                     <% } %>
-
-                        <div class="mt-4 d-flex justify-content-between">
-                            <a href="/admin/imaging-request/view-all-imaging-requests" class="btn btn-primary">
-                                <i class="fas fa-arrow-left"></i> Back to Imaging Requests
-                            </a>
-                            <a href="/admin/imaging-request/edit-imaging-request/<%= request.ImagingRequestID %>"
-                                class="btn btn-warning">
-                                <i class="fas fa-edit"></i> Edit Request
-                            </a>
-                        </div>
+                        <% if (userType=='admin' ){%>
+                            <div class="mt-4 d-flex justify-content-between">
+                                <a href="/admin/imaging-request/view-all-imaging-requests" class="btn btn-primary">
+                                    <i class="fas fa-arrow-left"></i> Back to Imaging Requests
+                                </a>
+                                <a href="/admin/imaging-request/edit-imaging-request/<%= request.ImagingRequestID %>"
+                                    class="btn btn-warning">
+                                    <i class="fas fa-edit"></i> Edit Request
+                                </a>
+                            </div>
+                            <% } else{ %>
+                                <div class="mt-4 d-flex justify-content-between">
+                                    <a href="/user/imaging-request/view-all-imaging-requests" class="btn btn-primary">
+                                        <i class="fas fa-arrow-left"></i> Back to Imaging Requests
+                                    </a>
+                                </div>
+                                <%}%>
             </div>
         </main>
         <!-- Font Awesome for icons -->
