@@ -1,7 +1,65 @@
 const express = require("express");
 const router = express.Router();
-const db = require("./db"); // Database connection
+const db = require("./db");
+const passport = require('passport');
+const LocalStrategy = require('passport-local');
+const crypto = require('crypto');
+passport.use(new LocalStrategy(async function verify(username, password, cb) {
+    //Do not change the variable name from username to email, it doesn't work.
+    const query = "SELECT * FROM User WHERE Email = ?";
+    const [result] = await db.promise().query(query, [username]).catch(
+        error => {
 
+            console.error("❌ Database Error:", error);
+            return cb(null, false, { message: "Database error" })
+        }
+    )
+
+    console.log("🔎 Query Result:", result);
+
+    if (result.length === 0) {
+        console.log("🚫 User Not Found");
+        return cb(null, false, { message: 'Invalid email or password' })
+    }
+
+    const user = result[0];
+    console.log("🆔 Found User:", user.Email);
+
+    crypto.pbkdf2(password, user.PasswordSalt, 310000, 32, 'sha256', function (err, hashedPassword) {
+        if (err) { return cb(err); }
+        console.log("hashed password from log form", hashedPassword.toString('base64'))
+        // console.log("database hashed password", user.HashedPassword)
+
+        if (!crypto.timingSafeEqual(user.HashedPassword, hashedPassword)) {
+            console.log("❌ Invalid Password");
+            return cb(null, false, { message: 'Incorrect username or password.' });
+        }
+        console.log("successful local strategy execution");
+        return cb(null, user);
+    });
+}));
+
+// serialise user to be added into session data.
+passport.serializeUser((user, done) => {
+    process.nextTick(function () {
+        return done(null, {
+            UserID: user.UserID,
+            Email: user.Email,
+            UserType: user.UserType
+        })
+    })
+})
+
+// retrieving session data
+passport.deserializeUser((user, cb) => {
+    process.nextTick(function () {
+        return cb(null, user);
+    });
+})
+
+
+// router.use(passport.initialize())
+// router.use(passport.session())
 router.post("/register", (req, res) => {
     const { email, password } = req.body;
     console.log(`🔹 Register Attempt: ${email}`);
@@ -37,72 +95,59 @@ router.post("/register", (req, res) => {
 
 
 // Login User
-router.post("/login", (req, res) => {
-    console.log("🔵 Received Login Request");
-    // console.log("📩 Request Body:", req.body);
+router.post("/login",
+    (req, res, next) => {
+        passport.authenticate('local', {
+            successRedirect: "/", // I don't think this is doing anything.
+            successFlash: true,
+            failureRedirect: '/login',
+            failureFlash: true,
+            failureMessage: "CUSTOM",// not working
+        },
+            (err, user, info) => {
 
-    const { email, password } = req.body;
-
-    if (!email || !password) {
-        console.log("⚠️ Missing Email or Password");
-        return res.status(400).json({ error: "Email and password required" });
-    }
-
-    const query = "SELECT * FROM User WHERE Email = ?";
-    db.query(query, [email], (err, result) => {
-        if (err) {
-            console.error("❌ Database Error:", err);
-            return res.status(500).json({ error: "Database error" });
-        }
-
-        console.log("🔎 Query Result:", result);
-
-        if (result.length === 0) {
-            console.log("🚫 User Not Found");
-            return res.status(400).json({ error: "Invalid email or password" });
-        }
-
-        const user = result[0];
-        console.log("🆔 Found User:", user.Email);
-
-        if (password !== user.Password) {
-            console.log("❌ Invalid Password");
-            return res.status(400).json({ error: "Invalid email or password" });
-        }
-
-        // ✅ Store Session Data
-        req.session.user = {
-            UserID: user.UserID,
-            Email: user.Email,
-            UserType: user.UserType
-        };
-
-        // 🔄 Update LastLoginDate
-        const updateQuery = "UPDATE User SET LastLoginDate = NOW() WHERE UserID = ?";
-        db.query(updateQuery, [user.UserID], (updateErr) => {
-            if (updateErr) {
-                console.error("❌ Failed to update LastLoginDate:", updateErr);
-                // Not blocking login if date update fails
-            } else {
-                console.log("🕓 LastLoginDate updated");
-            }
-
-            req.session.save(err => {
                 if (err) {
-                    console.error("❌ Session Save Error:", err);
-                    return res.status(500).json({ error: "Session error" });
+                    return next(err);
                 }
+                if (!user) {
+                    return res.status(401).send(info);
+                }
+                req.login(user, (err) => { // I am not suppose to use this as password authenticate already does it, but somehow this guy's code from stackoverflow works
+                    if (err) {
+                        console.log('err')
+                        return res.status(500).json({ error: "Login failed." });
+                    }
+                    // 🔄 Update LastLoginDate
+                    const updateQuery = "UPDATE User SET LastLoginDate = NOW() WHERE UserID = ?";
+                    db.query(updateQuery, [user.UserID], (updateErr) => {
+                        if (updateErr) {
+                            console.error("❌ Failed to update LastLoginDate:", updateErr);
+                            // Not blocking login if date update fails
+                        } else {
+                            console.log("🕓 LastLoginDate updated");
+                        }
 
-                // console.log("✅ Login Successful! User:", req.session.user.LoginEmail,);
+                        req.session.save(err => {
+                            if (err) {
+                                console.error("❌ Session Save Error:", err);
+                                return res.status(500).json({ error: "Session error" });
+                            }
 
-                return res.json({
-                    success: true,
-                    redirect: user.UserType === "admin" ? "/admin/dashboard" : "/user/dashboard"
+                            // console.log("✅ Login Successful! User:", req.session.user.LoginEmail,);
+
+                            return res.json({
+                                success: true,
+                                redirect: user.UserType === "admin" ? "/admin/dashboard" : "/user/dashboard"
+                            });
+                        });
+                    });
+
                 });
-            });
-        });
-    });
-});
+
+            }
+        )(req, res, next)
+    }
+);
 
 
 
@@ -111,12 +156,12 @@ router.post("/login", (req, res) => {
 // Logout User
 router.get("/logout", (req, res) => {
     try {
-        if (!req.session.user || !req.session.user.UserID) {
+        if (!req.session.passport.user || !req.session.passport.user.UserID) {
             console.warn("⚠️ Logout Attempt Without Login");
             return res.redirect('/');
         }
 
-        console.log(`🔹 Logout Attempt: ${req.session.user.Email}`);
+        console.log(`🔹 Logout Attempt: ${req.session.passport.user.Email}`);
 
         req.session.destroy((err) => {
             if (err) {
@@ -136,13 +181,13 @@ router.get("/logout", (req, res) => {
 
 // Get Logged-in User
 router.get("/user", (req, res) => {
-    if (!req.session.user) {
+    if (!req.session.paassport.user) {
         console.warn("⚠️ Unauthorized User Info Request");
         return res.status(401).json({ error: "Not logged in" });
     }
 
-    console.log(`🔹 User Info Requested: ${req.session.user.Email}`);
-    res.json({ user: req.session.user });
+    console.log(`🔹 User Info Requested: ${req.session.passport.user.Email}`);
+    res.json({ user: req.session.passport.user });
 });
 
 module.exports = router;

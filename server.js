@@ -10,9 +10,7 @@ const adminImagingRequestRoutes = require('./routes/admin/imaging-request');
 const adminUserManagementRoutes = require('./routes/admin/user-management');
 const userImagingRequestRoutes = require('./routes/user/imaging-request');
 const { isAuthenticated, isAdmin } = require("./middleware/auth");
-
-
-
+const passport = require("passport");
 const app = express();
 const PORT = process.env.PORT || 5000;
 
@@ -21,6 +19,7 @@ app.use(express.static("public"));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.set('view engine', 'ejs'); // Set view engine to HTML
+// app.use(cookieParser());
 // 🔒 Session setup
 app.use(
     session({
@@ -30,6 +29,7 @@ app.use(
         cookie: { secure: false, httpOnly: true, maxAge: 1000 * 60 * 60 } // 1-hour expiry
     })
 );
+app.use(passport.session())
 
 // ✅ API Routes
 app.use("/auth", authRoutes);
@@ -47,7 +47,6 @@ const serveHTML = (route, file) => {
     });
 };
 
-
 app.get("/", (req, res) => {
     res.render("index", { title: "register" });
 });
@@ -61,22 +60,21 @@ app.get("/login", (req, res) => {
     res.render("login", { title: "Login Page" });
 });
 
-
 // ✅ User Dashboard (Protected)
 app.get("/user/dashboard", isAuthenticated, (req, res) => {
     res.render("user/dashboard", {
         layout: 'layout', // Specify your layout file
-        user: req.session.user,
+        user: req.session.passport.user,
         title: "User Dashboard",
         // Add other data
     });
 });
 
 app.get('/api/current-user', (req, res) => {
-    if (req.session && req.session.user) {
+    if (req.session && req.session.passport.user) {
         res.json({
-            email: req.session.user.Email,
-            UserType: req.session.user.UserType
+            email: req.session.passport.user.Email,
+            UserType: req.session.passport.user.UserType
         });
     } else {
         res.status(401).json({ error: "Not logged in" });
@@ -84,22 +82,16 @@ app.get('/api/current-user', (req, res) => {
 });
 
 
-
 // ✅ Debug Route to Check Session Persistence
 app.get("/session", (req, res) => {
     console.log("🟢 Session Check:", req.session.user);
-    res.json({ sessionData: req.session.user || "No active session" });
+    res.json({ sessionData: req.session.passport.user || "No active session" });
 });
 
 // ✅ Start Server
 app.listen(PORT, () => {
     console.log(`✅ Server running at http://localhost:${PORT}`);
 });
-
-
-
-
-/// This is the Main Buisness Logic Starts so Don't touch it ///
 
 // app.get("/imagingUser", isAuthenticated, (req, res) => {
 //     const userId = req.session.user.UserID;
@@ -137,12 +129,6 @@ app.listen(PORT, () => {
 //         });
 //     });
 // });
-
-
-
-
-
-
 
 app.get("/form", isAuthenticated, (req, res) => {
     const loginUserId = req.session.user.UserID;
@@ -237,7 +223,6 @@ app.get("/check-email", (req, res) => {
 });
 
 
-
 app.post('/submit', isAuthenticated, (req, res) => {
     const { email, ContactNumber, organisation, UserType, comments } = req.body;
     const created_by = req.session.user.UserID;
@@ -277,11 +262,6 @@ app.post('/submit', isAuthenticated, (req, res) => {
         });
     });
 });
-
-
-
-
-
 
 // Handle forgot password page
 app.get("/forgot-password", (req, res) => {
@@ -323,8 +303,6 @@ app.post("/forgot-password", (req, res) => {
         });
     });
 });
-
-
 
 //change [password] route
 // app.get("/user/dashboard",isAuthenticated,(req, res) => {
@@ -514,8 +492,3 @@ app.post('/submit-imaging-request', isAuthenticated, async (req, res) => {
         });
     }
 });
-
-
-
-
-

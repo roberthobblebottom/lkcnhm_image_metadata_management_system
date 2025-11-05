@@ -37,7 +37,7 @@ router.get("/admin-users", isAuthenticated, isAdmin, (req, res) => {
 });
 
 //refactored from server.js, not tested and may not be needed
-app.get('/view/:user_id', isAuthenticated, (req, res) => {
+router.get('/view/:user_id', isAuthenticated, (req, res) => {
     const { user_id } = req.params;
     const isAdminRequestor = req.session.user?.UserType === 'admin';
     const isAdmin = req.session.user.UserType === "admin";
@@ -212,7 +212,7 @@ router.put("/delete-user/:id", (req, res) => {
 
 
 
-app.get("/recover/:id", isAuthenticated, isAdmin, (req, res) => {
+router.get("/recover/:id", isAuthenticated, isAdmin, (req, res) => {
     const { id } = req.params;
     db.query("UPDATE User SET IsDeleted = 0 WHERE id = ?", [id], (err, result) => {
         if (err) {

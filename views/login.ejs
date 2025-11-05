@@ -9,7 +9,7 @@
         <input type="password" id="password" placeholder="Enter your password" required>
         <span id="togglePassword" class="toggle-eye">👁️</span>
       </div>
-      
+
       <div class="forgot-password">
         <a href="/forgot-password">Forgot your password?</a>
       </div>
@@ -22,99 +22,97 @@
 </div>
 
 <script>
-document.addEventListener("DOMContentLoaded", function() {
-  const loginForm = document.getElementById("login-form");
-  const togglePassword = document.getElementById("togglePassword");
-  const passwordInput = document.getElementById("password");
+  document.addEventListener("DOMContentLoaded", function () {
+    const loginForm = document.getElementById("login-form");
+    const togglePassword = document.getElementById("togglePassword");
+    const passwordInput = document.getElementById("password");
 
-  // Form submission
-  if (loginForm) {
-    loginForm.addEventListener("submit", async function(event) {
-      event.preventDefault();
-      
-      const userEmail = document.getElementById("email").value.trim();
-      const userPassword = document.getElementById("password").value.trim();
+    // Form submission
+    if (loginForm) {
+      loginForm.addEventListener("submit", async function (event) {
+        event.preventDefault();
 
-      if (!userEmail || !userPassword) {
-        alert("⚠️ Please enter both email and password.");
-        return;
-      }
+        const userEmail = document.getElementById("email").value.trim();
+        const userPassword = document.getElementById("password").value.trim();
 
-      try {
-        const response = await fetch("/auth/login", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          credentials: 'include', // Important for sessions
-          body: JSON.stringify({ email: userEmail, password: userPassword })
-        });
-
-        if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-        
-        const data = await response.json();
-        
-        if (data.success) {
-          window.location.href = data.redirect;
-        } else {
-          alert(`❌ Login Failed: ${data.error || 'Unknown error'}`);
+        if (!userEmail || !userPassword) {
+          alert("⚠️ Please enter both email and password.");
+          return;
         }
-      } catch (error) {
-        console.error('Login error:', error);
-        alert("❌ Login failed. Please check your connection and try again.");
-      }
+
+        try {
+          const response = await fetch("/auth/login", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            credentials: 'include', // Important for sessions
+            body: JSON.stringify({ username: userEmail, password: userPassword })
+            // Do not change username to email, it doesn't work
+          });
+
+          if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+
+          const data = await response.json();
+
+          if (data.success) {
+            window.location.href = data.redirect;
+          } else {
+            alert(`❌ Login Failed: ${data.error || 'Unknown error'}`);
+          }
+        } catch (error) {
+          console.error('Login error:', error);
+          alert("❌ Login failed. Please check your connection and try again.");
+        }
+      });
+    }
+
+    // Password visibility toggle
+    document.getElementById("togglePassword").addEventListener("click", function () {
+      const passwordInput = document.getElementById("password");
+      const type = passwordInput.getAttribute("type") === "password" ? "text" : "password";
+      passwordInput.setAttribute("type", type);
+
+      // Toggle icon if needed
+      this.textContent = type === "password" ? "👁️" : "🙈";
     });
-  }
 
-  // Password visibility toggle
-  document.getElementById("togglePassword").addEventListener("click", function () {
-  const passwordInput = document.getElementById("password");
-  const type = passwordInput.getAttribute("type") === "password" ? "text" : "password";
-  passwordInput.setAttribute("type", type);
-
-  // Toggle icon if needed
-  this.textContent = type === "password" ? "👁️" : "🙈";
-});
-
-});
+  });
 </script>
 
 <style>
+  .password-field {
+    position: relative;
+    width: 100%;
+    max-width: 400px;
+    margin: 20px auto;
+  }
 
-.password-field {
-  position: relative;
-  width: 100%;
-  max-width: 400px;
-  margin: 20px auto;
-}
+  .password-field input {
+    width: 100%;
+    padding: 12px 40px 12px 12px;
+    font-size: 16px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    outline: none;
+    transition: border-color 0.3s;
+  }
 
-.password-field input {
-  width: 100%;
-  padding: 12px 40px 12px 12px;
-  font-size: 16px;
-  border: 1px solid #ccc;
-  border-radius: 6px;
-  outline: none;
-  transition: border-color 0.3s;
-}
+  .password-field input:focus {
+    border-color: #007bff;
+  }
 
-.password-field input:focus {
-  border-color: #007bff;
-}
+  .toggle-eye {
+    position: absolute;
+    top: 50%;
+    right: 12px;
+    transform: translateY(-50%);
+    cursor: pointer;
+    font-size: 18px;
+    color: #555;
+    user-select: none;
+    transition: color 0.2s;
+  }
 
-.toggle-eye {
-  position: absolute;
-  top: 50%;
-  right: 12px;
-  transform: translateY(-50%);
-  cursor: pointer;
-  font-size: 18px;
-  color: #555;
-  user-select: none;
-  transition: color 0.2s;
-}
-
-.toggle-eye:hover {
-  color: #000;
-}
-
-
+  .toggle-eye:hover {
+    color: #000;
+  }
 </style>

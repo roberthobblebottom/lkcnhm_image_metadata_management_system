@@ -5,10 +5,11 @@ USE museum;
 CREATE TABLE User (
     UserID INT AUTO_INCREMENT PRIMARY KEY,
     Email VARCHAR(255) UNIQUE NOT NULL,
-    Password VARCHAR(50) NOT NULL,
+    HashedPassword BLOB NOT NULL,
+    PasswordSalt VARCHAR(255) NOT NULL,
     TemporaryPassword VARCHAR(50) NULL,
-    UserType VARCHAR(50) NOT NULL DEFAULT 'Non-admin',
-    Name VARCHAR(255),
+    UserType VARCHAR(50) NOT NULL,
+    Name VARCHAR(255) NOT NULL,
     RegisteredDate DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     LastLoginDate DATETIME NULL,
     UpdatedDate DATETIME NULL,
@@ -86,9 +87,13 @@ CREATE TABLE Media (
 );
 
 -- Test Data, do not use them for production
-INSERT INTO User (Email,Password,UserType,Name,CreatedByID,UpdatedByID,RequestStatus) VALUES ('admin@gmail.com','1','admin',"jeff",'1','1','approved');
-INSERT INTO User (Email,Password,UserType,Name,CreatedByID,UpdatedByID,RequestStatus) VALUES ('r1@gmail.com','1','requestor',"Zesty",'2','2','approved');
-INSERT INTO User (Email,Password,UserType,Name,CreatedByID,UpdatedByID,RequestStatus) VALUES ('p1@gmail.com','1','photographer',"Ron",'3','3','approved');
+INSERT INTO User (Email,HashedPassword,PasswordSalt,UserType,Name,CreatedByID,UpdatedByID,RequestStatus) 
+VALUES ('admin@gmail.com',FROM_BASE64('W8VK+3eef900fOpSgH0HZmeD2E9wEr7hevUHM+GEQ3c='),'JR6lq3JUFxejg39f','admin',"jeff",'1','1','approved');
+INSERT INTO User (Email,HashedPassword,PasswordSalt,UserType,Name,CreatedByID,UpdatedByID,RequestStatus) 
+VALUES ('r1@gmail.com',FROM_BASE64("hwXpWnraI+KqYkaChBAc4EjTdAEtXxKZXBn/cMss2/4="),'ZdYThKAg1ZD4ULyd','requestor',"Zesty",'2','2','approved');
+INSERT INTO User (Email,HashedPassword,PasswordSalt,UserType,Name,CreatedByID,UpdatedByID,RequestStatus) 
+VALUES ('p1@gmail.com',FROM_BASE64("sj1O+m695SCDA0cyNiHK/aEknLFcYPhoxP9YOZe0pvA="),'UkSbEVvinkts1Dbb','photographer',"Ron",'3','3','approved');
+
 INSERT INTO ImagingRequest (ImagingRequestorID ,DateOfRequest ,ImagingStartDate ,ImagingEndDate ,CreatedDate ,UpdatedDate ,RequestStatus,CreatedByID,UpdatedByID) 
 VALUES (1,NOW(),NOW(),NOW(),NOW(),NOW(),'approved','1','1');
 INSERT INTO ImagingRequestUserPhotographyLink (ImagingRequestID,PhotographerID) VALUES ("1",'1'); 
