@@ -158,17 +158,17 @@
       <h2>Create a New Project</h2>
       <form id="projectForm">
         <div class="form-group">
-          <label for="requestor">Requestor Name</label>
-          <select id="requestor" name="requestor" required>
+          <label for="projectOwner">Requestor Name</label>
+          <select id="projectOwner" name="projectOwner" required>
             <option value="">Select Requestor</option>
-            <% requestors.forEach(user=> { %>
+            <% projectOwners.forEach(user=> { %>
               <option value="<%= user.UserID %>">
                 <%=user.Name%>
                   <%= user.Email %>
               </option>
               <% }) %>
           </select>
-          <div id="requestor-error" class="error-message">Please select a requestor</div>
+          <div id="projectOwner-error" class="error-message">Please select a projectOwner</div>
         </div>
 
         <div class="form-group">
@@ -283,13 +283,13 @@
       //       return res.json();
       //     })
       //     .then(data => {
-      //       if (data.requestors && Array.isArray(data.requestors)) {
-      //         const requestorSelect = document.getElementById('requestor');
-      //         data.requestors.forEach(user => {
+      //       if (data.projectOwners && Array.isArray(data.projectOwners)) {
+      //         const projectOwnerSelect = document.getElementById('projectOwner');
+      //         data.projectOwners.forEach(user => {
       //           const option = document.createElement('option');
       //           option.value = user.id;
       //           option.textContent = user.username;
-      //           requestorSelect.appendChild(option);
+      //           projectOwnerSelect.appendChild(option);
       //         });
       //       }
 
@@ -344,8 +344,8 @@
           let isValid = true;
 
           // Check dropdowns
-          if (!form.requestor.value) {
-            document.getElementById('requestor-error').style.display = 'block';
+          if (!form.projectOwner.value) {
+            document.getElementById('projectOwner-error').style.display = 'block';
             isValid = false;
           }
 
@@ -427,7 +427,7 @@
           submitBtn.disabled = true;
           // Create a plain object from form data
           const formData = {
-            requestor: form.requestor.value,
+            projectOwner: form.projectOwner.value,
             photographer: form.photographer.value,
             requestDate: form.requestDate.value,
             startDate: form.startDate.value,

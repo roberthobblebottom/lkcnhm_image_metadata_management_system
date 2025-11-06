@@ -16,7 +16,7 @@ router.get('/view-all-media', isAuthenticated, isAdmin, (req, res) => {
         m.FileFormat,
         m.CreatedDate,
         p.ProjectID,
-        projectOwner.Name AS requestor_name,
+        projectOwner.Name AS projectOwner_name,
         u2.Email AS photographer_name
       FROM Media m
       JOIN Project p ON m.ProjectID = p.ProjectID
@@ -60,7 +60,7 @@ router.get('/select-user-for-media', isAuthenticated, isAdmin, (req, res) => {
             SELECT 
                 p.ProjectID,
                 u.UserID AS user_id,
-                u.Email AS requestor_name,
+                u.Email AS projectOwner_name,
                 u.Email,
                 u.ContactNumber,
                 u.Organisation,
@@ -104,7 +104,7 @@ router.get('/form/:projectId', isAuthenticated, isAdmin, (req, res) => {
       SELECT 
         p.ProjectID,
         p.ProjectOwnerID,
-        projectOwner.Name AS requestor_name,
+        projectOwner.Name AS projectOwner_name,
         u2.Email AS photographer_name
       FROM Project p
       JOIN User projectOwner ON p.ProjectOwnerID = projectOwner.UserID
@@ -133,7 +133,7 @@ router.get('/form/:projectId', isAuthenticated, isAdmin, (req, res) => {
         const project = results[0];
 
         res.render('media-form', {
-            project,  // contains projectId, photographerId, requestorId + names
+            project,  // contains projectId, photographerId, projectOwnerId + names
             title: 'Media Form'
         });
     });
@@ -296,7 +296,7 @@ router.get('/edit/:mediaId', isAuthenticated, isAdmin, (req, res) => {
         const query = `
             SELECT m.*, 
                    p.ProjectOwnerID AS RequestorID,
-                   u1.Email AS requestor_name,
+                   u1.Email AS projectOwner_name,
                    u2.Email AS photographer_name
             FROM Media m
             JOIN Project p ON m.ProjectID = p.ProjectID
@@ -322,7 +322,7 @@ router.get('/edit/:mediaId', isAuthenticated, isAdmin, (req, res) => {
                     ProjectID: results[0].ProjectID,
                     ProjectOwnerID: results[0].RequestorID,
                     PhotographerID: results[0].PhotographerID,
-                    requestor_name: results[0].requestor_name,
+                    projectOwner_name: results[0].projectOwner_name,
                     photographer_name: results[0].photographer_name
                 }
             });

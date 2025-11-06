@@ -87,14 +87,14 @@ router.post('/change-password', isAuthenticated, (req, res) => {
 
 router.get('/get-user', isAuthenticated, (req, res) => {
     const getRequestors = "SELECT UserID, Email FROM User WHERE UserType = 'photographer'";
-    const getPhotographers = "SELECT UserID, Email FROM User WHERE UserType = 'requestor'";
+    const getPhotographers = "SELECT UserID, Email FROM User WHERE UserType = 'projectOwner'";
 
-    db.query(getRequestors, (err1, requestors) => {
+    db.query(getRequestors, (err1, projectOwners) => {
         if (err1) {
-            console.error("Error loading requestors:", err1);
+            console.error("Error loading projectOwners:", err1);
             return res.status(500).json({
                 success: false,
-                message: "Error loading requestors"
+                message: "Error loading projectOwners"
             });
         }
 
@@ -109,7 +109,7 @@ router.get('/get-user', isAuthenticated, (req, res) => {
 
             res.json({
                 success: true,
-                requestors: requestors,
+                projectOwners: projectOwners,
                 photographers: photographers
             });
         });

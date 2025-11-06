@@ -8,7 +8,7 @@ router.get('/add-new-project', isAuthenticated, isAdmin, async (req, res) => {
     const getRequestors = `
       SELECT u.UserID, u.Email 
       FROM User u
-      WHERE u.UserType IN ('requestor','admin')
+      WHERE u.UserType IN ('projectOwner','admin')
         AND u.RequestStatus = 'approved'
         AND u.IsDeleted = 0
     `; // TODO wrong usertypeid filter
@@ -20,11 +20,11 @@ router.get('/add-new-project', isAuthenticated, isAdmin, async (req, res) => {
         AND u.IsDeleted = 0
     `; // todo wrong user type id filter these are hard coded.
 
-    const [requestors] = await db.promise().query(getRequestors);
+    const [projectOwners] = await db.promise().query(getRequestors);
     const [photographers] = await db.promise().query(getPhotographers);
-    console.log(requestors)
+    console.log(projectOwners)
     res.render('admin/create-project', {
-        requestors,
+        projectOwners,
         photographers,
         title: "Project Form",
         isAdmin: isAdmin
@@ -37,7 +37,7 @@ router.get('/view-all-projects', isAuthenticated, isAdmin, (req, res) => {
     const query = `
         SELECT 
             p.*,
-            projectOwner.Name AS requestorName,
+            projectOwner.Name AS projectOwnerName,
             projectOwner.Email,
             photographer.Name AS photographerName,
             photographer.Email AS photographerEmail,
@@ -89,7 +89,7 @@ router.get('/view-project/:id', isAuthenticated, isAdmin, (req, res) => {
     const query = `
         SELECT 
             p.*,
-            projectOwner.Email AS requestor_name,
+            projectOwner.Email AS projectOwner_name,
             photographer.Email AS photographer_name,
             p.RequestStatus AS status_name,
             creator.Email AS CreatorEmail,
@@ -172,14 +172,14 @@ router.get('/edit-project/:id', isAuthenticated, isAdmin, async (req, res) => {
         const requestQuery = `
             SELECT 
                 p.*,
-                requestor.Name AS RequestorName,
-                requestor.Email AS RequestorEmail,
-                requestor.UserID AS RequestorID,
+                projectOwner.Name AS RequestorName,
+                projectOwner.Email AS RequestorEmail,
+                projectOwner.UserID AS RequestorID,
                 photographer.Name AS PhotographerName,
                 photographer.Email AS PhotographerEmail,
                 photographer.UserID AS PhotographerUserID
             FROM Project p
-            JOIN User projectOwner ON p.ProjectOwnerID = requestor.UserID
+            JOIN User projectOwner ON p.ProjectOwnerID = projectOwner.UserID
             JOIN ProjectUserPhotographyLink i ON p.ProjectID = i.ProjectID
             JOIN User photographer ON i.PhotographerID = photographer.UserID 
             WHERE p.ProjectID = ?;

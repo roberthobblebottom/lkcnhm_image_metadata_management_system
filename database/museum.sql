@@ -90,7 +90,7 @@ CREATE TABLE Media (
 INSERT INTO User (Email,HashedPassword,PasswordSalt,UserType,Name,CreatedByID,UpdatedByID,RequestStatus) 
 VALUES ('admin@gmail.com',FROM_BASE64('W8VK+3eef900fOpSgH0HZmeD2E9wEr7hevUHM+GEQ3c='),'JR6lq3JUFxejg39f','admin',"jeff",'1','1','approved');
 INSERT INTO User (Email,HashedPassword,PasswordSalt,UserType,Name,CreatedByID,UpdatedByID,RequestStatus) 
-VALUES ('r1@gmail.com',FROM_BASE64("hwXpWnraI+KqYkaChBAc4EjTdAEtXxKZXBn/cMss2/4="),'ZdYThKAg1ZD4ULyd','requestor',"Zesty",'2','2','approved');
+VALUES ('r1@gmail.com',FROM_BASE64("hwXpWnraI+KqYkaChBAc4EjTdAEtXxKZXBn/cMss2/4="),'ZdYThKAg1ZD4ULyd','projectOwner',"Zesty",'2','2','approved');
 INSERT INTO User (Email,HashedPassword,PasswordSalt,UserType,Name,CreatedByID,UpdatedByID,RequestStatus) 
 VALUES ('p1@gmail.com',FROM_BASE64("sj1O+m695SCDA0cyNiHK/aEknLFcYPhoxP9YOZe0pvA="),'UkSbEVvinkts1Dbb','photographer',"Ron",'3','3','approved');
 

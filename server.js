@@ -371,7 +371,7 @@ app.post('/submit-project', isAuthenticated, async (req, res) => {
     console.log("in /submit-project")
     try {
         const requiredFields = [
-            'requestor', 'photographer', 'requestDate',
+            'projectOwner', 'photographer', 'requestDate',
             'startDate', 'endDate', 'summary',
             'specimenDetails', 'location'
         ];
@@ -447,7 +447,7 @@ app.post('/submit-project', isAuthenticated, async (req, res) => {
          VALUES (?,?)
         `;
         const result = await db.promise().query(insertQuery, [
-            req.body.requestor,
+            req.body.projectOwner,
             req.body.requestDate,
             req.body.startDate,
             req.body.endDate,

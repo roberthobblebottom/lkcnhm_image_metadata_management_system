@@ -38,7 +38,7 @@ router.get('/view-all-projects', isAuthenticated, async (req, res) => {
     const requestQuery = `
           SELECT 
               p.*,
-              projectOwner.Name AS requestor_name,
+              projectOwner.Name AS projectOwner_name,
               photographer.Email AS photographer_name
           FROM Project p
           LEFT JOIN User projectOwner ON p.ProjectOwnerID = projectOwner.UserID
@@ -77,7 +77,7 @@ router.get('/view-project', isAuthenticated, (req, res) => {
         const { UserID, Email } = req.session.passport.user;
         console.log("🔍 [DEBUG] Current User - ID:", UserID, "Name:", Email);
 
-        // ✅ Get requestor that matches this login user's approved user record
+        // ✅ Get projectOwner that matches this login user's approved user record
         const getRequestorQuery = `
             SELECT id, Email 
             FROM User 
@@ -102,15 +102,15 @@ router.get('/view-project', isAuthenticated, (req, res) => {
               )
         `;
 
-        db.query(getRequestorQuery, [UserID], (err1, requestorResults) => {
+        db.query(getRequestorQuery, [UserID], (err1, projectOwnerResults) => {
             if (err1) {
-                console.error("❌ Error loading requestor:", err1);
-                return res.status(500).render('error', { message: "Error loading requestor" });
+                console.error("❌ Error loading projectOwner:", err1);
+                return res.status(500).render('error', { message: "Error loading projectOwner" });
             }
 
-            const requestor = requestorResults[0];
-            if (!requestor) {
-                console.log("⚠️ No approved requestor found for this login user.");
+            const projectOwner = projectOwnerResults[0];
+            if (!projectOwner) {
+                console.log("⚠️ No approved projectOwner found for this login user.");
                 return res.redirect('/user/project/view-all-projects?status=pending');
             }
 
@@ -120,10 +120,10 @@ router.get('/view-project', isAuthenticated, (req, res) => {
                     return res.status(500).render('error', { message: "Error loading photographers" });
                 }
 
-                console.log("✅ [Final] Rendering form with requestor:", requestor, "and photographers:", photographerResults);
+                console.log("✅ [Final] Rendering form with projectOwner:", projectOwner, "and photographers:", photographerResults);
 
                 res.render('user/view-project', {
-                    requestor, // only one
+                    projectOwner, // only one
                     photographers: photographerResults || [],
                     title: 'Project Form',
                     currentUser: req.session.passport.user,
@@ -147,7 +147,7 @@ router.get('/view-project/:id', isAuthenticated, (req, res) => {
     const query = `
         SELECT 
             p.*,
-            projectOwner.Name AS requestor_name,
+            projectOwner.Name AS projectOwner_name,
             projectOwner.Email,
             photographer.Email,
             photographer.Name AS photographer_name,
@@ -210,7 +210,7 @@ router.get('/add-new-project', isAuthenticated, async (req, res) => {
 
     const [photographers] = await db.promise().query(getPhotographers);
     res.render('user/create-project', {
-        requestor: req.session.passport.user,
+        projectOwner: req.session.passport.user,
         photographers: photographers,
         title: "Project Form",
     });

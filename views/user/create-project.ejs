@@ -205,8 +205,8 @@
       <h2>Add New Project</h2>
       <form id="projectForm">
         <div class="form-group">
-          <label for="requestor">Requestor</label>
-          <input readonly type="text" value="<%=requestor.Name%> <%=requestor.Email%>">
+          <label for="projectOwner">Requestor</label>
+          <input readonly type="text" value="<%=projectOwner.Name%> <%=projectOwner.Email%>">
           </input>
         </div>
 
@@ -326,16 +326,16 @@
             return res.json();
           })
           .then(data => {
-            // Safely populate requestors dropdown
-            if (data.requestors && Array.isArray(data.requestors)) {
-              const requestorSelect = document.getElementById('requestor');
-              if (requestorSelect) {
-                requestorSelect.innerHTML = '<option value="">Select Requestor</option>';
-                data.requestors.forEach(user => {
+            // Safely populate projectOwners dropdown
+            if (data.projectOwners && Array.isArray(data.projectOwners)) {
+              const projectOwnerSelect = document.getElementById('projectOwner');
+              if (projectOwnerSelect) {
+                projectOwnerSelect.innerHTML = '<option value="">Select Requestor</option>';
+                data.projectOwners.forEach(user => {
                   const option = document.createElement('option');
                   option.value = user.id;
                   option.textContent = user.username;
-                  requestorSelect.appendChild(option);
+                  projectOwnerSelect.appendChild(option);
                 });
               }
             }
@@ -400,8 +400,8 @@
           let isValid = true;
 
           // Check dropdowns
-          if (!form.requestor.value) {
-            const errorEl = document.getElementById('requestor-error');
+          if (!form.projectOwner.value) {
+            const errorEl = document.getElementById('projectOwner-error');
             if (errorEl) errorEl.style.display = 'block';
             isValid = false;
           }
@@ -500,7 +500,7 @@
 
           // Create a plain object from form data
           const formData = {
-            requestor: form.requestor.value,
+            projectOwner: form.projectOwner.value,
             photographer: form.photographer.value,
             requestDate: form.requestDate.value,
             startDate: form.startDate.value,
