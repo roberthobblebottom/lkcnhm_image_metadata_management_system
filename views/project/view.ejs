@@ -336,7 +336,7 @@
 
 <body>
 
-    <%- include(currentUser.UserType=='admin' ? 'partials/sidenav-admin' : 'partials/sidenav-user' )%>
+    <%- include(currentUser.UserType=='admin' ? '../partials/sidenav-admin' : '../partials/sidenav-user' )%>
         <main>
             <div class="container request-container">
                 <div class="request-header">
@@ -445,16 +445,16 @@
                     <% } %>
                         <% if (currentUser.UserType=='admin' ){%>
                             <div class="mt-4 d-flex justify-content-between">
-                                <a href="/admin/project/view-all-projects" class="btn btn-primary">
+                                <a href="/project/view-all" class="btn btn-primary">
                                     <i class="fas fa-arrow-left"></i> Back to Projects
                                 </a>
-                                <a href="/admin/project/edit-project/<%= request.ProjectID %>" class="btn btn-warning">
+                                <a href="/project/edit/<%= request.ProjectID %>" class="btn btn-warning">
                                     <i class="fas fa-edit"></i> Edit Request
                                 </a>
                             </div>
                             <% } else{ %>
                                 <div class="mt-4 d-flex justify-content-between">
-                                    <a href="/user/project/view-all-projects" class="btn btn-primary">
+                                    <a href="/user/project/view-all" class="btn btn-primary">
                                         <i class="fas fa-arrow-left"></i> Back to Projects
                                     </a>
                                 </div>

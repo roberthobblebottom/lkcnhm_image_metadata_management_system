@@ -102,7 +102,7 @@
 
 <body>
 
-    <%- include(isAdmin ? 'partials/sidenav.ejs' : 'partials/sidenav-user' ) %>
+    <%- include(currentUser.UserType='admin' ? '../partials/sidenav-admin.ejs' : '../partials/sidenav-user' ) %>
         <div class="container">
             <h2>User Details</h2>
             <p><strong>User ID:</strong>

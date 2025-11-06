@@ -149,12 +149,9 @@
 </head>
 
 <body>
-
-
   <%- include(isAdmin ? '../partials/sidenav-admin.ejs' : '../partials/sidenav-user' ) %>
     <main>
-
-      <a href="/admin/project/view-all-projects"><button class="btn btn-secondary">Back to all Projects</button></a>
+      <a href="/project/view-all"><button class="btn btn-secondary">Back to all Projects</button></a>
       <h2>Create a New Project</h2>
       <form id="projectForm">
         <div class="form-group">
@@ -441,7 +438,7 @@
 
 
           console.log('before response ' + formData)
-          const response = await fetch('../../submit-project', {
+          const response = await fetch('/project/submit', {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json'

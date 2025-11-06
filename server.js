@@ -6,7 +6,7 @@ const db = require("./routes/db");
 const authRoutes = require("./routes/auth");
 const adminRoutes = require('./routes/admin/admin');
 const adminMediaRoutes = require('./routes/admin/media');
-const adminProjectRoutes = require('./routes/admin/project');
+const projectRoutes = require('./routes/project');
 const adminUserManagementRoutes = require('./routes/admin/user-management');
 const userProjectRoutes = require('./routes/user/project');
 const { isAuthenticated, isAdmin } = require("./middleware/auth");
@@ -36,7 +36,7 @@ app.use(passport.session())
 app.use("/auth", authRoutes);
 app.use("/admin", adminRoutes);
 app.use("/admin/media", adminMediaRoutes);
-app.use("/admin/project", adminProjectRoutes);
+app.use("/project", projectRoutes);
 app.use("/admin/user-management", adminUserManagementRoutes);
 app.use("/user/project", userProjectRoutes);
 
@@ -365,130 +365,3 @@ app.post('/change-password', isAuthenticated, (req, res) => {
     });
 });
 
-
-//  for both admin and non admin
-app.post('/submit-project', isAuthenticated, async (req, res) => {
-    console.log("in /submit-project")
-    try {
-        const requiredFields = [
-            'projectOwner', 'photographer', 'requestDate',
-            'startDate', 'endDate', 'summary',
-            'specimenDetails', 'location'
-        ];
-
-        const missingFields = requiredFields.filter(field => !req.body[field]);
-
-        if (missingFields.length > 0) {
-            return res.status(400).json({
-                success: false,
-                message: `Missing required fields: ${missingFields.join(', ')}`
-            });
-        }
-
-        const requestDate = new Date(req.body.requestDate);
-        const startDate = new Date(req.body.startDate);
-        const endDate = new Date(req.body.endDate);
-        console.log('requestDate' + requestDate)
-        if (isNaN(requestDate.getTime()) || isNaN(startDate.getTime()) || isNaN(endDate.getTime())) {
-            return res.status(400).json({
-                success: false,
-                message: "Invalid date format provided"
-            });
-        }
-
-        if (startDate < requestDate) {
-            return res.status(400).json({
-                success: false,
-                message: "Start date cannot be before request date"
-            });
-        }
-
-        if (endDate < startDate) {
-            return res.status(400).json({
-                success: false,
-                message: "End date cannot be before start date"
-            });
-        }
-
-        const createdBy = req.session.passport.user.UserID;
-        if (!createdBy) {
-            console.error("User ID not found in session");
-            return res.status(401).json({
-                success: false,
-                message: "Unauthorized: Please login first."
-            });
-        }
-
-        const requestStatus = "pending"; // Hardcoded for now – represents 'New'
-
-        const insertQuery = `
-      INSERT INTO Project (
-        ProjectOwnerID,
-        DateofRequest,
-        ImagingStartDate,
-        ImagingEndDate,
-        SummaryofProject,
-        SpecimenDetails,
-        SpecimenLocationName,
-        ImagingPlatform,
-        Comments,
-        CreatedDate,
-        CreatedByID,
-        UpdatedDate,
-        UpdatedByID,
-        IsDeleted,
-        RequestStatus
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, NOW(), ?, NOW(), ?, 0, ?)
-        `;
-        const updateQuery2 = `
-        INSERT INTO ProjectUserPhotographyLink(
-         PhotographerID,
-         ProjectID)
-         VALUES (?,?)
-        `;
-        const result = await db.promise().query(insertQuery, [
-            req.body.projectOwner,
-            req.body.requestDate,
-            req.body.startDate,
-            req.body.endDate,
-            req.body.summary,
-            req.body.specimenDetails,
-            req.body.location,
-            req.body.platform || null,
-            req.body.comments || null,
-            createdBy,
-            createdBy,
-            requestStatus
-        ]);
-        const r2 = await db.promise().query(
-            "SELECT ProjectID FROM Project ORDER BY ProjectID DESC LIMIT 1",
-            [])
-        // console.log("r2", r2)
-        projectID2 = r2[0][0].ProjectID
-        const r3 = await db.promise().query(updateQuery2, [
-            req.body.photographer,
-            projectID2
-        ])
-        // console.log('r3', r3)
-        console.log('📸 project inserted with RequestStatus =', requestStatus, ' UserID:', projectID2);
-
-        const role = req.session.passport.user.UserType; // Example: 'Admin' or 'User'
-        const redirectUrl = role === 'admin'
-            ? `/admin/project/view-project/${projectID2}`
-            : `/user/view-project/${projectID2}`;
-        // Return success response
-        res.json({
-            success: true,
-            message: 'project submitted successfully',
-            redirectUrl: redirectUrl
-        });
-
-    } catch (err) {
-        console.error("❌ Error in submitProject:", err);
-        res.status(500).json({
-            success: false,
-            message: "Error submitting the project.",
-            error: err.message
-        });
-    }
-});

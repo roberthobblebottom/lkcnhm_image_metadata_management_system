@@ -1,10 +1,10 @@
 const express = require("express");
 const router = express.Router();
-const db = require("../db"); // Database connection
-const { isAuthenticated, isAdmin } = require("../../middleware/auth"); // Middleware
-const { formatDate, formatDisplayDate, requestStatusTuple } = require("../../middleware/utils");
+const db = require("./db"); // Database connection
+const { isAuthenticated, isAdmin } = require("../middleware/auth"); // Middleware
+const { formatDate, formatDisplayDate, requestStatusTuple } = require("../middleware/utils");
 
-router.get('/add-new-project', isAuthenticated, isAdmin, async (req, res) => {
+router.get('/create', isAuthenticated, isAdmin, async (req, res) => {
     const getProjectOwners = `
       SELECT u.UserID,u.Name, u.Email 
       FROM User u
@@ -22,8 +22,7 @@ router.get('/add-new-project', isAuthenticated, isAdmin, async (req, res) => {
 
     const [projectOwners] = await db.promise().query(getProjectOwners);
     const [photographers] = await db.promise().query(getPhotographers);
-    console.log(projectOwners)
-    res.render('admin/create-project', {
+    res.render('project/create', {
         projectOwners,
         photographers,
         title: "Project Form",
@@ -31,9 +30,134 @@ router.get('/add-new-project', isAuthenticated, isAdmin, async (req, res) => {
     });
 });
 
+//  for both admin and non admin
+router.post('/submit', isAuthenticated, async (req, res) => {
+    console.log("in /submit-project")
+    try {
+        const requiredFields = [
+            'projectOwner', 'photographer', 'requestDate',
+            'startDate', 'endDate', 'summary',
+            'specimenDetails', 'location'
+        ];
+
+        const missingFields = requiredFields.filter(field => !req.body[field]);
+
+        if (missingFields.length > 0) {
+            return res.status(400).json({
+                success: false,
+                message: `Missing required fields: ${missingFields.join(', ')}`
+            });
+        }
+
+        const requestDate = new Date(req.body.requestDate);
+        const startDate = new Date(req.body.startDate);
+        const endDate = new Date(req.body.endDate);
+        console.log('requestDate' + requestDate)
+        if (isNaN(requestDate.getTime()) || isNaN(startDate.getTime()) || isNaN(endDate.getTime())) {
+            return res.status(400).json({
+                success: false,
+                message: "Invalid date format provided"
+            });
+        }
+
+        if (startDate < requestDate) {
+            return res.status(400).json({
+                success: false,
+                message: "Start date cannot be before request date"
+            });
+        }
+
+        if (endDate < startDate) {
+            return res.status(400).json({
+                success: false,
+                message: "End date cannot be before start date"
+            });
+        }
+
+        const createdBy = req.session.passport.user.UserID;
+        if (!createdBy) {
+            console.error("User ID not found in session");
+            return res.status(401).json({
+                success: false,
+                message: "Unauthorized: Please login first."
+            });
+        }
+
+        const requestStatus = "pending"; // Hardcoded for now – represents 'New'
+
+        const insertQuery = `
+      INSERT INTO Project (
+        ProjectOwnerID,
+        DateofRequest,
+        ImagingStartDate,
+        ImagingEndDate,
+        SummaryofProject,
+        SpecimenDetails,
+        SpecimenLocationName,
+        ImagingPlatform,
+        Comments,
+        CreatedDate,
+        CreatedByID,
+        UpdatedDate,
+        UpdatedByID,
+        IsDeleted,
+        RequestStatus
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, NOW(), ?, NOW(), ?, 0, ?)
+        `;
+        const updateQuery2 = `
+        INSERT INTO ProjectUserPhotographyLink(
+         PhotographerID,
+         ProjectID)
+         VALUES (?,?)
+        `;
+        const result = await db.promise().query(insertQuery, [
+            req.body.projectOwner,
+            req.body.requestDate,
+            req.body.startDate,
+            req.body.endDate,
+            req.body.summary,
+            req.body.specimenDetails,
+            req.body.location,
+            req.body.platform || null,
+            req.body.comments || null,
+            createdBy,
+            createdBy,
+            requestStatus
+        ]);
+        const r2 = await db.promise().query(
+            "SELECT ProjectID FROM Project ORDER BY ProjectID DESC LIMIT 1",
+            [])
+        // console.log("r2", r2)
+        projectID2 = r2[0][0].ProjectID
+        const r3 = await db.promise().query(updateQuery2, [
+            req.body.photographer,
+            projectID2
+        ])
+        // console.log('r3', r3)
+        console.log('📸 project inserted with RequestStatus =', requestStatus, ' UserID:', projectID2);
+
+        const role = req.session.passport.user.UserType; // Example: 'Admin' or 'User'
+        const redirectUrl = `/project/view/${projectID2}`
+        // Return success response
+        res.json({
+            success: true,
+            message: 'project submitted successfully',
+            redirectUrl: redirectUrl
+        });
+
+    } catch (err) {
+        console.error("❌ Error in submitProject:", err);
+        res.status(500).json({
+            success: false,
+            message: "Error submitting the project.",
+            error: err.message
+        });
+    }
+});
+
 
 // Route to view projects
-router.get('/view-all-projects', isAuthenticated, isAdmin, (req, res) => {
+router.get('/view-all', isAuthenticated, isAdmin, (req, res) => {
     const query = `
         SELECT 
             p.*,
@@ -68,13 +192,13 @@ router.get('/view-all-projects', isAuthenticated, isAdmin, (req, res) => {
         // console.log(results)
 
         if (results.length === 0) {
-            return res.render('admin/view-all-projects', {
+            return res.render('project/view-all', {
                 projects: [],
                 message: 'No projects found'
             });
         }
 
-        res.render('admin/view-all-projects', {
+        res.render('project/view-all', {
             projects: results,
             currentUser: req.user,
             title: "Projects Dashboard" // Add title here
@@ -84,7 +208,7 @@ router.get('/view-all-projects', isAuthenticated, isAdmin, (req, res) => {
 
 
 // View Request (GET)
-router.get('/view-project/:id', isAuthenticated, isAdmin, (req, res) => {
+router.get('/view/:id', isAuthenticated, isAdmin, (req, res) => {
     const projectID = req.params.id;
     const query = `
         SELECT 
@@ -119,7 +243,6 @@ router.get('/view-project/:id', isAuthenticated, isAdmin, (req, res) => {
                 message: 'project not found'
             });
         }
-        console.log("dddddd" + results[0].DateOfRequest)
         // Format dates for display
         const request = {
             ...results[0],
@@ -131,7 +254,7 @@ router.get('/view-project/:id', isAuthenticated, isAdmin, (req, res) => {
             IsDeleted: results[0].IsDeleted ? 'Yes' : 'No'
         };
 
-        res.render('view-project', {
+        res.render('project/view', {
             request: request,
             currentUser: req.user,
             title: "Admin View Project", // Add title here
@@ -142,7 +265,7 @@ router.get('/view-project/:id', isAuthenticated, isAdmin, (req, res) => {
 
 // Delete Request (POST)
 // Soft Delete Request (POST) 
-router.post('/delete-project/:id', isAuthenticated, isAdmin, (req, res) => {
+router.post('/delete/:id', isAuthenticated, isAdmin, (req, res) => {
     const projectID = req.params.id;
     const query = `
         UPDATE Project 
@@ -159,14 +282,14 @@ router.post('/delete-project/:id', isAuthenticated, isAdmin, (req, res) => {
             return res.status(500).send('Error marking request as deleted.');
         }
 
-        res.redirect('/admin/project/view-all-projects');
+        res.redirect('/project/view-all');
     });
 });
 
 
 // Edit Project (GET)
 // Define queries at the top of your file for better maintainability
-router.get('/edit-project/:id', isAuthenticated, isAdmin, async (req, res) => {
+router.get('/edit/:id', isAuthenticated, isAdmin, async (req, res) => {
     try {
         const projectID = req.params.id;
         const requestQuery = `
@@ -200,7 +323,7 @@ router.get('/edit-project/:id', isAuthenticated, isAdmin, async (req, res) => {
             ImagingStartDate: formatDisplayDate(requestResults[0][0].ImagingStartDate),
             ImagingEndDate: formatDisplayDate(requestResults[0][0].ImagingEndDate)
         };
-        res.render(`admin/edit-project`, {
+        res.render(`project/edit`, {
             request: request,
             photographers: photographerResults[0],
             statuses: Object.values(requestStatusTuple()),
@@ -216,7 +339,7 @@ router.get('/edit-project/:id', isAuthenticated, isAdmin, async (req, res) => {
 });
 
 
-router.post('/edit-project/:id', isAuthenticated, isAdmin, async (req, res) => {
+router.post('/edit/:id', isAuthenticated, isAdmin, async (req, res) => {
     // === 0. SESSION VALIDATION ===
     if (!req.session.passport.user || !req.session.passport.user.UserID) {
         console.error("❌ No user in session");
@@ -296,7 +419,7 @@ router.post('/edit-project/:id', isAuthenticated, isAdmin, async (req, res) => {
     res.json({
         success: true,
         message: 'project updated successfully',
-        redirectUrl: `/admin/project/view-project/${projectID}`
+        redirectUrl: `../view/${projectID}`
     });
 });
 

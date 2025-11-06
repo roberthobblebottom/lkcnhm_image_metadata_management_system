@@ -115,13 +115,12 @@
 </head>
 
 <body>
-    <%- include(isAdmin ? '../partials/sidenav-admin.ejs' : '../partials/sidenav-user' ) %>
+    <%- include(currentUser.UserType=='admin' ? '../partials/sidenav-admin.ejs' : '../partials/sidenav-user' ) %>
         <main>
-            <a href="/admin/project/view-all-projects"><button class="btn btn-secondary">Back to All
+            <a href="/project/view-all"><button class="btn btn-secondary">Back to All
                     Projects</button></a>
             <h1>Edit Project</h1>
-
-            <form action="/admin/project/edit-project/<%= request.ProjectID %>" method="POST">
+            <form action="/project/edit/<%= request.ProjectID %>" method="POST">
                 <div class="form-group">
                     <label>Requestor</label>
                     <p class="form-control-static">

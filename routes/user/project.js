@@ -5,7 +5,7 @@ const { isAuthenticated, isAdmin } = require("../../middleware/auth"); // Middle
 const { formatDate, formatDisplayDate, requestStatusTuple } = require("../../middleware/utils");
 
 
-router.get('/view-all-projects', isAuthenticated, async (req, res) => {
+router.get('/view-all', isAuthenticated, async (req, res) => {
     const loginUserId = req.session.passport.user.UserID;
     const findUserQuery = `
       SELECT u.UserID , u.RequestStatus, u.UserType
@@ -72,7 +72,7 @@ router.get('/view-all-projects', isAuthenticated, async (req, res) => {
 
 // Changes Done by Rex to this Module of Non_admin Project Form page Loading Controller
 //I don't know where this is from. I may need to remove - Ryan
-router.get('/view-project', isAuthenticated, (req, res) => {
+router.get('/view', isAuthenticated, (req, res) => {
     try {
         const { UserID, Email } = req.session.passport.user;
         console.log("🔍 [DEBUG] Current User - ID:", UserID, "Name:", Email);
@@ -111,7 +111,7 @@ router.get('/view-project', isAuthenticated, (req, res) => {
             const projectOwner = projectOwnerResults[0];
             if (!projectOwner) {
                 console.log("⚠️ No approved projectOwner found for this login user.");
-                return res.redirect('/user/project/view-all-projects?status=pending');
+                return res.redirect('/user/project/view-all?status=pending');
             }
 
             db.query(getPhotographersQuery, [UserID], (err2, photographerResults) => {
@@ -122,7 +122,7 @@ router.get('/view-project', isAuthenticated, (req, res) => {
 
                 console.log("✅ [Final] Rendering form with projectOwner:", projectOwner, "and photographers:", photographerResults);
 
-                res.render('user/view-project', {
+                res.render('user/view', {
                     projectOwner, // only one
                     photographers: photographerResults || [],
                     title: 'Project Form',
@@ -142,7 +142,7 @@ router.get('/view-project', isAuthenticated, (req, res) => {
 });
 
 // View Request (GET)
-router.get('/view-project/:id', isAuthenticated, (req, res) => {
+router.get('/view/:id', isAuthenticated, (req, res) => {
     const projectID = req.params.id;
     const query = `
         SELECT 
@@ -188,7 +188,7 @@ router.get('/view-project/:id', isAuthenticated, (req, res) => {
             UpdatedDate: results[0].UpdatedDate ? formatDate(results[0].UpdatedDate) : null,
             IsDeleted: results[0].IsDeleted ? 'Yes' : 'No'
         };
-        res.render('view-project', {
+        res.render('view', {
             request: request,
             currentUser: req.user,
             title: "User View Project", // Add title here
@@ -198,7 +198,7 @@ router.get('/view-project/:id', isAuthenticated, (req, res) => {
 });
 
 
-router.get('/add-new-project', isAuthenticated, async (req, res) => {
+router.get('/create', isAuthenticated, async (req, res) => {
 
 
     const getPhotographers = `
@@ -209,7 +209,7 @@ router.get('/add-new-project', isAuthenticated, async (req, res) => {
     `; // todo wrong user type id filter these are hard coded.
 
     const [photographers] = await db.promise().query(getPhotographers);
-    res.render('user/create-project', {
+    res.render('user/create', {
         projectOwner: req.session.passport.user,
         photographers: photographers,
         title: "Project Form",

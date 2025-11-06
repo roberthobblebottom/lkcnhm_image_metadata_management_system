@@ -201,7 +201,7 @@
   <%- include("../partials/sidenav-user")%>
 
     <main>
-      <a href="/user/project/view-all-projects"><button class="btn btn-secondary">Back to all Projects</button></a>
+      <a href="/user/project/view-all"><button class="btn btn-secondary">Back to all Projects</button></a>
       <h2>Add New Project</h2>
       <form id="projectForm">
         <div class="form-group">
@@ -231,18 +231,18 @@
 
         <div class="form-group">
           <label for="requestDate">Date of Request</label>
-          <input type="datetime-local" id="requestDate" name="requestDate" required readonly>
+          <input type="date" id="requestDate" name="requestDate" required readonly>
         </div>
 
         <div class="form-group">
           <label for="startDate">Imaging Start Date</label>
-          <input type="datetime-local" id="startDate" name="startDate" required>
+          <input type="date" id="startDate" name="startDate" required>
           <div id="startDate-error" class="error-message">Start date must be after request date</div>
         </div>
 
         <div class="form-group">
           <label for="endDate">Imaging End Date</label>
-          <input type="datetime-local" id="endDate" name="endDate" required>
+          <input type="date" id="endDate" name="endDate" required>
           <div id="endDate-error" class="error-message">End date must be after start date</div>
         </div>
 
@@ -283,10 +283,13 @@
       // Initialize form with current datetime
       document.addEventListener('DOMContentLoaded', function () {
         // Set current datetime to requestDate field
-        const requestDateField = document.getElementById('requestDate');
-        if (requestDateField) {
-          requestDateField.value = new Date().toISOString().slice(0, 16);
-        }
+        document.getElementById('requestDate').value = new Date().toISOString().slice(0, 16).split('T')[0];
+
+        const now = new Date()
+        now.setDate(new Date().getDate() + 1)
+        document.getElementById('startDate').value = now.toISOString().slice(0, 16).split('T')[0]
+        now.setDate(now.getDate() + 7)
+        document.getElementById('endDate').value = now.toISOString().slice(0, 16).split('T')[0]
 
         // Set min attributes for date fields
         updateDateConstraints();
@@ -487,6 +490,7 @@
 
       // Function to handle form submission
       async function submitForm(form) {
+        console.log("HERE")
         const submitBtn = form.querySelector('button[type="submit"]');
         if (!submitBtn) return;
 
@@ -512,7 +516,7 @@
             comments: form.comments.value || null
           };
 
-          const response = await fetch('/submit-project', {
+          const response = await fetch('/submit', {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json'

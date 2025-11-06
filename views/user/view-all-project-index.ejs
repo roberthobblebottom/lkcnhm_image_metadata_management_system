@@ -107,7 +107,7 @@
         <button class="btn" disabled style="opacity: 0.6;" title="Wait for admin approval">➕ Add Project
           (Locked)</button>
         <% } else { %>
-          <a href="/user/project/add-new-project""><button class=" btn"> Add Project</button></a>
+          <a href="/user/project/create""><button class=" btn"> Add Project</button></a>
           <% } %>
             <br>
 
@@ -151,7 +151,7 @@
                           <%= req.RequestStatus || '-' %>
                         </td>
                         <td>
-                          <a href="/user/project/view-project/<%= req.ProjectID %>" class="view-btn">View</a>
+                          <a href="/user/project/view/<%= req.ProjectID %>" class="view-btn">View</a>
                         </td>
                       </tr>
                       <% }) %>
