@@ -227,7 +227,7 @@
 
 <body>
     <div class="main_con">
-        <%- include('partials/sidenav_admin') %>
+        <%- include('partials/sidenav-admin') %>
             <div class="form-container">
                 <h2>
                     <%= editing ? 'Edit Media File' : 'Submit New Media File' %>
@@ -238,16 +238,16 @@
                     <% if (editing) { %>
                         <input type="hidden" name="MediaID" value="<%= media.MediaID %>">
                         <% } %>
-                            <input type="hidden" name="ImagingRequestID" value="<%= imagingRequest.ImagingRequestID %>">
-                            <input type="hidden" name="RequestorID" value="<%= imagingRequest.ImagingRequestorID %>">
-                            <input type="hidden" name="PhotographerID" value="<%= imagingRequest.PhotographerID %>">
+                            <input type="hidden" name="ProjectID" value="<%= project.ProjectID %>">
+                            <input type="hidden" name="RequestorID" value="<%= project.ProjectOwnerID %>">
+                            <input type="hidden" name="PhotographerID" value="<%= project.PhotographerID %>">
 
                             <div class="form-row">
                                 <!-- Requestor Name (readonly) -->
                                 <div class="form-group">
                                     <label>Requestor Name</label>
                                     <div class="readonly-field">
-                                        <%= imagingRequest.requestor_name %>
+                                        <%= project.requestor_name %>
                                     </div>
                                 </div>
 
@@ -255,7 +255,7 @@
                                 <div class="form-group">
                                     <label>Photographer Name</label>
                                     <div class="readonly-field">
-                                        <%= imagingRequest.photographer_name %>
+                                        <%= project.photographer_name %>
                                     </div>
                                 </div>
                             </div>

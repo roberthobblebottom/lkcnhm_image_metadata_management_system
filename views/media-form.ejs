@@ -213,26 +213,26 @@
 
 <body>
   <div class="main_con">
-    <%- include('partials/sidenav_admin') %>
+    <%- include('partials/sidenav-admin') %>
       <!-- 📸 MEDIA SUBMISSION FORM (UPDATED) -->
       <form action="/admin/media/submit" method="POST">
         <h2>Media Submission Form</h2>
 
         <!-- Hidden IDs -->
-        <input type="hidden" name="ImagingRequestID" value="<%= imagingRequest.ImagingRequestID %>">
-        <input type="hidden" name="RequestorID" value="<%= imagingRequest.ImagingRequestorID %>">
-        <input type="hidden" name="PhotographerID" value="<%= imagingRequest.PhotographerID %>">
+        <input type="hidden" name="ProjectID" value="<%= project.ProjectID %>">
+        <input type="hidden" name="RequestorID" value="<%= project.ProjectOwnerID %>">
+        <input type="hidden" name="PhotographerID" value="<%= project.PhotographerID %>">
 
         <!-- Requestor Name (readonly) -->
         <div class="form-group">
           <label>Requestor Name</label>
-          <input type="text" value="<%= imagingRequest.requestor_name %>" readonly>
+          <input type="text" value="<%= project.requestor_name %>" readonly>
         </div>
 
         <!-- Photographer Name (readonly) -->
         <div class="form-group">
           <label>Photographer Name</label>
-          <input type="text" value="<%= imagingRequest.photographer_name %>" readonly>
+          <input type="text" value="<%= project.photographer_name %>" readonly>
         </div>
 
         <!-- The rest of the form stays the same... -->

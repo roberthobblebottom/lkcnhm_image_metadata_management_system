@@ -5,8 +5,8 @@ const { isAuthenticated, isAdmin } = require("../../middleware/auth"); // Middle
 const { formatDate, formatDisplayDate, requestStatusTuple } = require("../../middleware/utils");
 
 
-router.get('/view-all-imaging-requests', isAuthenticated, async (req, res) => {
-    const loginUserId = req.session.user.UserID;
+router.get('/view-all-projects', isAuthenticated, async (req, res) => {
+    const loginUserId = req.session.passport.user.UserID;
     const findUserQuery = `
       SELECT u.UserID , u.RequestStatus, u.UserType
       FROM User u
@@ -27,8 +27,8 @@ router.get('/view-all-imaging-requests', isAuthenticated, async (req, res) => {
     // No such user created OR not approved
     // if (!userResult[0]) {
     //     // console.log("🔒 User not approved or not registered as Internal/External");
-    //     return res.render("user/view_all_imaging_request_index", {
-    //         imagingRequests: [],
+    //     return res.render("user/view_all_project_index", {
+    //         projects: [],
     //         showPendingAlert: false
     //     });
     // }
@@ -40,41 +40,41 @@ router.get('/view-all-imaging-requests', isAuthenticated, async (req, res) => {
               ir.*,
               r.Name AS requestor_name,
               photographer.Email AS photographer_name
-          FROM ImagingRequest ir
-          LEFT JOIN User r ON ir.ImagingRequestorID = r.UserID
-          JOIN ImagingRequestUserPhotographyLink irupl ON irupl.ImagingRequestID = ir.ImagingRequestID
+          FROM Project ir
+          LEFT JOIN User r ON ir.ProjectOwnerID = r.UserID
+          JOIN ProjectUserPhotographyLink irupl ON irupl.ProjectID = ir.ProjectID
           JOIN User photographer on irupl.PhotographerID = photographer.UserID
-          WHERE ir.IsDeleted = 0 AND ir.ImagingRequestorID = ?
+          WHERE ir.IsDeleted = 0 AND ir.ProjectOwnerID = ?
           ORDER BY ir.CreatedDate DESC
         `;
 
 
-    const [imagingRequests] = await db.promise().query(requestQuery, [approvedUserId], (err2, imagingRequests) => {
+    const [projects] = await db.promise().query(requestQuery, [approvedUserId], (err2, projects) => {
         if (err2) {
-            console.error("❌ Error fetching imaging requests:", err2);
+            console.error("❌ Error fetching projects:", err2);
             return res.status(500).render("error", {
-                message: "Error loading imaging requests",
+                message: "Error loading projects",
                 error: process.env.NODE_ENV === 'development' ? err2 : null
             });
         }
 
-        console.log(`📄 Imaging requests for approved user ${approvedUserId}: ${imagingRequests.length}`);
+        console.log(`📄 projects for approved user ${approvedUserId}: ${projects.length}`);
 
     });
-    res.render("user/view_all_imaging_request_index", {
-        imagingRequests,
+    res.render("user/view-all-project-index", {
+        projects,
         showPendingAlert: false,
-        title: "Imaging Requests" // Add title here
+        title: "Projects" // Add title here
     });
 });
 
 
 
-// Changes Done by Rex to this Module of Non_admin Imaging Request Form page Loading Controller
+// Changes Done by Rex to this Module of Non_admin Project Form page Loading Controller
 //I don't know where this is from. I may need to remove - Ryan
-router.get('/view-imaging-request', isAuthenticated, (req, res) => {
+router.get('/view-project', isAuthenticated, (req, res) => {
     try {
-        const { UserID, Email } = req.session.user;
+        const { UserID, Email } = req.session.passport.user;
         console.log("🔍 [DEBUG] Current User - ID:", UserID, "Name:", Email);
 
         // ✅ Get requestor that matches this login user's approved user record
@@ -111,7 +111,7 @@ router.get('/view-imaging-request', isAuthenticated, (req, res) => {
             const requestor = requestorResults[0];
             if (!requestor) {
                 console.log("⚠️ No approved requestor found for this login user.");
-                return res.redirect('/user/imaging-request/view-all-imaging-requests?status=pending');
+                return res.redirect('/user/project/view-all-projects?status=pending');
             }
 
             db.query(getPhotographersQuery, [UserID], (err2, photographerResults) => {
@@ -122,12 +122,12 @@ router.get('/view-imaging-request', isAuthenticated, (req, res) => {
 
                 console.log("✅ [Final] Rendering form with requestor:", requestor, "and photographers:", photographerResults);
 
-                res.render('user/view-imaging-request', {
+                res.render('user/view-project', {
                     requestor, // only one
                     photographers: photographerResults || [],
-                    title: 'Imaging Request Form',
-                    currentUser: req.session.user,
-                    title: "Imaging Request Form" // Add title here
+                    title: 'Project Form',
+                    currentUser: req.session.passport.user,
+                    title: "Project Form" // Add title here
                 });
             });
         });
@@ -142,8 +142,8 @@ router.get('/view-imaging-request', isAuthenticated, (req, res) => {
 });
 
 // View Request (GET)
-router.get('/view-imaging-request/:id', isAuthenticated, (req, res) => {
-    const imagingRequestID = req.params.id;
+router.get('/view-project/:id', isAuthenticated, (req, res) => {
+    const projectID = req.params.id;
     const query = `
         SELECT 
             ir.*,
@@ -152,27 +152,27 @@ router.get('/view-imaging-request/:id', isAuthenticated, (req, res) => {
             r.RequestStatus AS status_name,
             creator.Email AS creator_name,
             updater.Email AS updater_name
-        FROM ImagingRequest ir
-        LEFT JOIN User r ON ir.ImagingRequestorID = r.UserID
-        JOIN ImagingRequestUserPhotographyLink irupl ON irupl.ImagingRequestID = ir.ImagingRequestID
+        FROM Project ir
+        LEFT JOIN User r ON ir.ProjectOwnerID = r.UserID
+        JOIN ProjectUserPhotographyLink irupl ON irupl.ProjectID = ir.ProjectID
         JOIN User photographer on irupl.PhotographerID = photographer.UserID
         LEFT JOIN User creator ON ir.CreatedByID = creator.UserID
         LEFT JOIN User updater ON ir.UpdatedByID = updater.UserID
-        WHERE ir.ImagingRequestID = ?
+        WHERE ir.ProjectID = ?
     `;
 
-    db.query(query, [imagingRequestID], (err, results) => {
+    db.query(query, [projectID], (err, results) => {
         if (err) {
-            console.error('Error fetching imaging request:', err);
+            console.error('Error fetching project:', err);
             return res.status(500).render('error', {
-                message: 'Error loading imaging request',
+                message: 'Error loading project',
                 error: process.env.NODE_ENV === 'development' ? err : null
             });
         }
 
         if (results.length === 0) {
             return res.status(404).render('error', {
-                message: 'Imaging request not found'
+                message: 'project not found'
             });
         }
 
@@ -186,11 +186,11 @@ router.get('/view-imaging-request/:id', isAuthenticated, (req, res) => {
             UpdatedDate: results[0].UpdatedDate ? formatDate(results[0].UpdatedDate) : null,
             IsDeleted: results[0].IsDeleted ? 'Yes' : 'No'
         };
-        res.render('view-imaging-request', {
+        res.render('view-project', {
             request: request,
             currentUser: req.user,
-            title: "User View Imaging Request", // Add title here
-            userType: req.session.user.UserType
+            title: "User View Project", // Add title here
+            userType: req.session.passport.user.UserType
         });
     });
 });

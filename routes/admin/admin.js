@@ -24,21 +24,21 @@ router.get("/api/users", isAuthenticated, isAdmin, (req, res) => {
 
 // 🔒 Admin Routes (Protected)
 router.get("/dashboard", isAuthenticated, isAdmin, (req, res) => {
-    console.log("🟢 Accessing Admin Dashboard - Session Data:", req.session.user);
-    res.render("admin/dashboard", { user: req.session.user, title: "Admin Dashboard" });
+    console.log("🟢 Accessing Admin Dashboard - Session Data:", req.session.passport.user);
+    res.render("admin/dashboard", { user: req.session.passport.user, title: "Admin Dashboard" });
 });
 
 //change-password.ejs
 router.get('/change-password', isAuthenticated, isAdmin, (req, res) => {
-    if (!req.session.user) {
+    if (!req.session.passport.user) {
         return res.redirect('/login');
     }
 
-    res.render('admin/change-password', { user: req.session.user.Email }); // ✅ pass `user` to EJS
+    res.render('admin/change-password', { user: req.session.passport.user.Email }); // ✅ pass `user` to EJS
 });
 
 router.post('/change-password', isAuthenticated, (req, res) => {
-    const email = req.session.user.Email;
+    const email = req.session.passport.user.Email;
     const { old_password, new_password } = req.body;
 
     console.log("📩 Change Password Request for:", email);

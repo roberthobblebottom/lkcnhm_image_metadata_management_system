@@ -6,9 +6,9 @@ const db = require("./routes/db");
 const authRoutes = require("./routes/auth");
 const adminRoutes = require('./routes/admin/admin');
 const adminMediaRoutes = require('./routes/admin/media');
-const adminImagingRequestRoutes = require('./routes/admin/imaging-request');
+const adminProjectRoutes = require('./routes/admin/project');
 const adminUserManagementRoutes = require('./routes/admin/user-management');
-const userImagingRequestRoutes = require('./routes/user/imaging-request');
+const userProjectRoutes = require('./routes/user/project');
 const { isAuthenticated, isAdmin } = require("./middleware/auth");
 const passport = require("passport");
 const app = express();
@@ -20,6 +20,7 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.set('view engine', 'ejs'); // Set view engine to HTML
 // app.use(cookieParser());
+
 // 🔒 Session setup
 app.use(
     session({
@@ -35,10 +36,9 @@ app.use(passport.session())
 app.use("/auth", authRoutes);
 app.use("/admin", adminRoutes);
 app.use("/admin/media", adminMediaRoutes);
-app.use("/admin/imaging-request", adminImagingRequestRoutes);
+app.use("/admin/project", adminProjectRoutes);
 app.use("/admin/user-management", adminUserManagementRoutes);
-
-app.use("/user/imaging-request", userImagingRequestRoutes);
+app.use("/user/project", userProjectRoutes);
 
 // ✅ Serve HTML pages
 const serveHTML = (route, file) => {
@@ -84,7 +84,7 @@ app.get('/api/current-user', (req, res) => {
 
 // ✅ Debug Route to Check Session Persistence
 app.get("/session", (req, res) => {
-    console.log("🟢 Session Check:", req.session.user);
+    console.log("🟢 Session Check:", req.session.passport.user);
     res.json({ sessionData: req.session.passport.user || "No active session" });
 });
 
@@ -94,7 +94,7 @@ app.listen(PORT, () => {
 });
 
 // app.get("/imagingUser", isAuthenticated, (req, res) => {
-//     const userId = req.session.user.UserID;
+//     const userId = req.session.passport.user.UserID;
 
 //     const query = `
 //         SELECT u.*, ut.UserTypeName
@@ -105,7 +105,7 @@ app.listen(PORT, () => {
 
 //     db.query(query, [userId], (err, results) => {
 //         if (err) {
-//             console.error("❌ Error fetching imaging requests:", err);
+//             console.error("❌ Error fetching projects:", err);
 //             return res.status(500).send("Server error");
 //         }
 
@@ -131,8 +131,8 @@ app.listen(PORT, () => {
 // });
 
 app.get("/form", isAuthenticated, (req, res) => {
-    const loginUserId = req.session.user.UserID;
-    const isAdmin = req.session.user.UserType === "admin";
+    const loginUserId = req.session.passport.user.UserID;
+    const isAdmin = req.session.passport.user.UserType === "admin";
 
     // Get all user type data first
     const userTypeQuery = `SELECT * FROM UserType`;
@@ -203,7 +203,7 @@ app.get("/form", isAuthenticated, (req, res) => {
 });
 
 app.get("/admin/UserRequest", isAuthenticated, isAdmin, (req, res) => {
-    res.render("admin", { user: req.session.user });
+    res.render("admin", { user: req.session.passport.user });
 });
 
 app.get("/check-email", (req, res) => {
@@ -225,7 +225,7 @@ app.get("/check-email", (req, res) => {
 
 app.post('/submit', isAuthenticated, (req, res) => {
     const { email, ContactNumber, organisation, UserType, comments } = req.body;
-    const created_by = req.session.user.UserID;
+    const created_by = req.session.passport.user.UserID;
     const date_of_req = new Date().toISOString().slice(0, 19).replace("T", " ");
     const reason_for_req = null;
     const IsDeleted = 0;
@@ -309,15 +309,15 @@ app.post("/forgot-password", (req, res) => {
 //     res.sendFile(path.resolve(__dirname, "views", "user/dashboard.html"));
 // });
 app.get('/change-password', isAuthenticated, (req, res) => {
-    if (!req.session.user) {
+    if (!req.session.passport.user) {
         return res.redirect('/login');
     }
 
-    res.render('change-password', { user: req.session.user.Email, title: "Change Password" }); // ✅ pass `user` to EJS
+    res.render('change-password', { user: req.session.passport.user.Email, title: "Change Password" }); // ✅ pass `user` to EJS
 });
 
 app.post('/change-password', isAuthenticated, (req, res) => {
-    const email = req.session.user.Email;
+    const email = req.session.passport.user.Email;
     const { old_password, new_password } = req.body;
 
     console.log("📩 Change Password Request for:", email);
@@ -367,8 +367,8 @@ app.post('/change-password', isAuthenticated, (req, res) => {
 
 
 //  for both admin and non admin
-app.post('/submit-imaging-request', isAuthenticated, async (req, res) => {
-    console.log("in /submit-imaging-request")
+app.post('/submit-project', isAuthenticated, async (req, res) => {
+    console.log("in /submit-project")
     try {
         const requiredFields = [
             'requestor', 'photographer', 'requestDate',
@@ -410,7 +410,7 @@ app.post('/submit-imaging-request', isAuthenticated, async (req, res) => {
             });
         }
 
-        const createdBy = req.session.user.UserID;
+        const createdBy = req.session.passport.user.UserID;
         if (!createdBy) {
             console.error("User ID not found in session");
             return res.status(401).json({
@@ -422,8 +422,8 @@ app.post('/submit-imaging-request', isAuthenticated, async (req, res) => {
         const requestStatus = "pending"; // Hardcoded for now – represents 'New'
 
         const insertQuery = `
-      INSERT INTO ImagingRequest (
-        ImagingRequestorID,
+      INSERT INTO Project (
+        ProjectOwnerID,
         DateofRequest,
         ImagingStartDate,
         ImagingEndDate,
@@ -441,9 +441,9 @@ app.post('/submit-imaging-request', isAuthenticated, async (req, res) => {
         ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, NOW(), ?, NOW(), ?, 0, ?)
         `;
         const updateQuery2 = `
-        INSERT INTO ImagingRequestUserPhotographyLink(
+        INSERT INTO ProjectUserPhotographyLink(
          PhotographerID,
-         ImagingRequestID)
+         ProjectID)
          VALUES (?,?)
         `;
         const result = await db.promise().query(insertQuery, [
@@ -461,33 +461,33 @@ app.post('/submit-imaging-request', isAuthenticated, async (req, res) => {
             requestStatus
         ]);
         const r2 = await db.promise().query(
-            "SELECT ImagingRequestID FROM ImagingRequest ORDER BY ImagingRequestID DESC LIMIT 1",
+            "SELECT ProjectID FROM Project ORDER BY ProjectID DESC LIMIT 1",
             [])
         // console.log("r2", r2)
-        imagingRequestID2 = r2[0][0].ImagingRequestID
+        projectID2 = r2[0][0].ProjectID
         const r3 = await db.promise().query(updateQuery2, [
             req.body.photographer,
-            imagingRequestID2
+            projectID2
         ])
         // console.log('r3', r3)
-        console.log('📸 Imaging request inserted with RequestStatus =', requestStatus, ' UserID:', imagingRequestID2);
+        console.log('📸 project inserted with RequestStatus =', requestStatus, ' UserID:', projectID2);
 
-        const role = req.session.user.UserType; // Example: 'Admin' or 'User'
+        const role = req.session.passport.user.UserType; // Example: 'Admin' or 'User'
         const redirectUrl = role === 'admin'
-            ? `/admin/imaging-request/view-imaging-request/${imagingRequestID2}`
-            : `/user/view-imaging-request/${imagingRequestID2}`;
+            ? `/admin/project/view-project/${projectID2}`
+            : `/user/view-project/${projectID2}`;
         // Return success response
         res.json({
             success: true,
-            message: 'Imaging request submitted successfully',
+            message: 'project submitted successfully',
             redirectUrl: redirectUrl
         });
 
     } catch (err) {
-        console.error("❌ Error in submitImagingRequest:", err);
+        console.error("❌ Error in submitProject:", err);
         res.status(500).json({
             success: false,
-            message: "Error submitting the imaging request.",
+            message: "Error submitting the project.",
             error: err.message
         });
     }

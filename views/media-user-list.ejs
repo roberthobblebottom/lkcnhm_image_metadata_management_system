@@ -73,11 +73,11 @@
 
 <body>
   <div class="main_con">
-    <%- include('partials/sidenav_admin') %>
+    <%- include('partials/sidenav-admin') %>
       <h2>📸 Select Requestor for Media Entry</h2>
 
       <% if (users.length===0) { %>
-        <p class="no-data">No imaging requests found.</p>
+        <p class="no-data">No projects found.</p>
         <% } else { %>
           <table>
             <thead>
@@ -94,7 +94,7 @@
               <% users.forEach(row=> { %>
                 <tr>
                   <td>
-                    <%= row.ImagingRequestID %>
+                    <%= row.ProjectID %>
                   </td>
                   <td>
                     <%= row.requestor_name %>
@@ -109,7 +109,7 @@
                     <%= row.ImagingEndDate.toISOString().slice(0, 10) %>
                   </td>
                   <td>
-                    <a href="/admin/media/form/<%= row.ImagingRequestID %>" class="btn-choose">Choose</a>
+                    <a href="/admin/media/form/<%= row.ProjectID %>" class="btn-choose">Choose</a>
                   </td>
                 </tr>
                 <% }) %>

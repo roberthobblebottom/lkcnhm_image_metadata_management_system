@@ -99,7 +99,7 @@
 
 <body>
   <div class="main_con">
-    <%- include('partials/sidenav_admin') %>
+    <%- include('partials/sidenav-admin') %>
 
       <a href="/admin/media/select-user-for-media" class="btn">Add Media</a>
 
@@ -112,7 +112,7 @@
             <thead>
               <tr>
                 <th>Media ID</th>
-                <th>Imaging Request ID</th>
+                <th>Project ID</th>
                 <th>Requestor</th>
                 <th>Photographer</th>
                 <th>File Name</th>
@@ -128,7 +128,7 @@
                     <%= record.MediaID || 'Not specified' %>
                   </td>
                   <td>
-                    <%= record.ImagingRequestID || 'Not specified' %>
+                    <%= record.ProjectID || 'Not specified' %>
                   </td>
                   <td>
                     <%= record.requestor_name || 'Not specified' %>

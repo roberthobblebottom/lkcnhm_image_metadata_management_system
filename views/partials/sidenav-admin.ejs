@@ -17,19 +17,21 @@
       <li>
         <div id="userGreeting"></div>
       </li>
-      <li class="active"><a href="/user/dashboard"><i class="fas fa-chart-line"></i><span>Dashboard</span></a></li>
-      <li><a href="/imagingUser"><i class="fas fa-users"></i><span>Imaging User Management</span></a></li>
-      <li><a href="/user/imaging-request/view-all-imaging-requests"><i class="fas fa-file-medical"></i><span>Imaging
-            Request
+      <li class="active"><a href="/admin/dashboard"><i class="fas fa-chart-line"></i><span>Dashboard</span></a>
+      </li>
+      <li><a href="/admin-users"><i class="fas fa-users"></i><span>Login Details Management</span></a></li>
+      <li><a href="/admin/UserRequest"><i class="fas fa-file-alt"></i><span>Imaging User Management</span></a></li>
+      <li><a href="/admin/project/view-all-projects"><i class="fas fa-file-medical"></i><span>Project
             Management</span></a></li>
-      <li><a href="/change-password"><i class="fas fa-key"></i><span>Change Password</span></a></li>
-
+      <li><a href="/admin/media/view-all-media"><i class="fas fa-image"></i><span>Media Management</span></a></li>
+      <!-- <li><a href="/media_request_admin"><i class="fas fa-image"></i><span>Media Management</span></a></li> -->
+      <li><a href="/admin/change-password"><i class="fas fa-key"></i><span>Change Password</span></a></li>
       <li><a href="/auth/logout"><i class="fas fa-sign-out-alt"></i><span>Logout</span></a></li>
     </ul>
-
   </div>
   <script>
     document.addEventListener("DOMContentLoaded", function () {
+
 
       fetch("/api/current-user")
         .then(res => res.json())
@@ -42,6 +44,8 @@
           document.getElementById("userGreeting").textContent = "Welcome";
         });
     });
+
+
   </script>
 </body>
 

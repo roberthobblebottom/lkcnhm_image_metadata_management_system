@@ -3,7 +3,7 @@
 
 <head>
   <meta charset="UTF-8" />
-  <title>My Imaging Requests</title>
+  <title>My Projects</title>
   <link rel="stylesheet" href="/css/user.css" />
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
@@ -101,20 +101,20 @@
 
 <body>
   <div class="main_con">
-    <h2 style="margin-top: 50px;">MY IMAGING REQUESTS</h2>
-    <%- include('../partials/sidenav_user') %>
+    <h2 style="margin-top: 50px;">My Projects</h2>
+    <%- include('../partials/sidenav-user') %>
 
       <% if (showPendingAlert) { %>
-        <button class="btn" disabled style="opacity: 0.6;" title="Wait for admin approval">➕ Add Imaging Request
+        <button class="btn" disabled style="opacity: 0.6;" title="Wait for admin approval">➕ Add Project
           (Locked)</button>
         <% } else { %>
-          <a href="/user/imaging-request/view-imaging-request"><button class="btn"> Add Imaging Request</button></a>
+          <a href="/user/project/view-project"><button class="btn"> Add Project</button></a>
           <% } %>
             <br>
 
 
-            <% if (imagingRequests.length===0) { %>
-              <p class="no-data">No imaging requests found.</p>
+            <% if (projects.length===0) { %>
+              <p class="no-data">No projects found.</p>
               <% } else { %>
                 <table>
                   <thead>
@@ -129,10 +129,10 @@
                     </tr>
                   </thead>
                   <tbody>
-                    <% imagingRequests.forEach(req=> { %>
+                    <% projects.forEach(req=> { %>
                       <tr>
                         <td>
-                          <%= req.ImagingRequestID %>
+                          <%= req.ProjectID %>
                         </td>
                         <td>
                           <%= req.photographer_name %>
@@ -151,8 +151,7 @@
                           <%= req.RequestStatus || '-' %>
                         </td>
                         <td>
-                          <a href="/user/imaging-request/view-imaging-request/<%= req.ImagingRequestID %>"
-                            class="view-btn">View</a>
+                          <a href="/user/project/view-project/<%= req.ProjectID %>" class="view-btn">View</a>
                         </td>
                       </tr>
                       <% }) %>
@@ -166,7 +165,7 @@
       Swal.fire({
         icon: 'info',
         title: 'Hold On!',
-        text: 'Your user access request is still pending approval. Imaging Request cannot be added until approved.',
+        text: 'Your user access request is still pending approval. Project cannot be added until approved.',
         confirmButtonColor: '#007bff'
       });
     <% } %>

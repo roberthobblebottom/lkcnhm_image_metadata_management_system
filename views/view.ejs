@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -98,45 +99,60 @@
         }
     </style>
 </head>
+
 <body>
 
-    <%- include(isAdmin ? 'partials/sidenav.ejs' : 'partials/sidenav_user') %>
-    <div class="container">
-        <h2>User Details</h2>
-        <p><strong>User ID:</strong> <%= user.id %></p>
-        <p><strong>Name:</strong> <%= user.username %></p>
-        <p><strong>Email:</strong> <%= user.email %></p>
-        <p><strong>Contact Number:</strong> <%= user.ContactNumber %></p>
-        <p><strong>Organisation:</strong> <%= user.organisation %></p>
-        <p><strong>UserType:</strong><%= user.UserTypeName %></p>
-       
-        <p><strong>Request Status:</strong> <%= user.RequestStatusName %></p>
-        <p><strong>Reason for Request:</strong> <%= user.reason_for_req %></p>
-        <p><strong>Comments:</strong> <%= user.comments %></p>
-        <p><strong>Created Date:</strong><%= new Date(user.date_of_req).toLocaleString('en-US', { 
-            year: 'numeric', 
-            month: 'long', 
-            day: 'numeric', 
-            hour: '2-digit', 
-            minute: '2-digit',
-            hour12: true 
-        }) 
-      %></p>
-        <p><strong>Created By:</strong> <%= user.CreatedByName || 'Unknown' %></p>
-        <p><strong>Updated By:</strong> <%= user.UpdatedByName || 'Not yet updated' %></p>
-        <p><strong>Last Updated:</strong>  <%= user.updated_date ? new Date(user.updated_date).toLocaleString('en-US', {
-            year: 'numeric', 
-            month: 'long', 
-            day: 'numeric', 
-            hour: '2-digit', 
-            minute: '2-digit',
-            hour12: true 
-        }) : 'Not Updated Yet'
-      %></p>
-    
-    <a href="<%= isAdminRequestor ? '/admin/UserRequest' : '/imagingUser' %>" class="back-btn">Back</a>
-    
-    </div>
-    
+    <%- include(isAdmin ? 'partials/sidenav.ejs' : 'partials/sidenav-user' ) %>
+        <div class="container">
+            <h2>User Details</h2>
+            <p><strong>User ID:</strong>
+                <%= user.id %>
+            </p>
+            <p><strong>Name:</strong>
+                <%= user.username %>
+            </p>
+            <p><strong>Email:</strong>
+                <%= user.email %>
+            </p>
+            <p><strong>Contact Number:</strong>
+                <%= user.ContactNumber %>
+            </p>
+            <p><strong>Organisation:</strong>
+                <%= user.organisation %>
+            </p>
+            <p><strong>UserType:</strong>
+                <%= user.UserTypeName %>
+            </p>
+
+            <p><strong>Request Status:</strong>
+                <%= user.RequestStatusName %>
+            </p>
+            <p><strong>Reason for Request:</strong>
+                <%= user.reason_for_req %>
+            </p>
+            <p><strong>Comments:</strong>
+                <%= user.comments %>
+            </p>
+            <p><strong>Created Date:</strong>
+                <%= new Date(user.date_of_req).toLocaleString('en-US', { year: 'numeric' , month: 'long' ,
+                    day: 'numeric' , hour: '2-digit' , minute: '2-digit' , hour12: true }) %>
+            </p>
+            <p><strong>Created By:</strong>
+                <%= user.CreatedByName || 'Unknown' %>
+            </p>
+            <p><strong>Updated By:</strong>
+                <%= user.UpdatedByName || 'Not yet updated' %>
+            </p>
+            <p><strong>Last Updated:</strong>
+                <%= user.updated_date ? new Date(user.updated_date).toLocaleString('en-US', { year: 'numeric' ,
+                    month: 'long' , day: 'numeric' , hour: '2-digit' , minute: '2-digit' , hour12: true })
+                    : 'Not Updated Yet' %>
+            </p>
+
+            <a href="<%= isAdminRequestor ? '/admin/UserRequest' : '/imagingUser' %>" class="back-btn">Back</a>
+
+        </div>
+
 </body>
+
 </html>

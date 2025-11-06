@@ -39,8 +39,8 @@ router.get("/admin-users", isAuthenticated, isAdmin, (req, res) => {
 //refactored from server.js, not tested and may not be needed
 router.get('/view/:user_id', isAuthenticated, (req, res) => {
     const { user_id } = req.params;
-    const isAdminRequestor = req.session.user?.UserType === 'admin';
-    const isAdmin = req.session.user.UserType === "admin";
+    const isAdminRequestor = req.session.passport.user?.UserType === 'admin';
+    const isAdmin = req.session.passport.user.UserType === "admin";
 
     const query = `
         SELECT 

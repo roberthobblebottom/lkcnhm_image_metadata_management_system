@@ -3,7 +3,7 @@
 
 <head>
   <meta charset="UTF-8">
-  <title>Imaging Request Management</title>
+  <title>Project Management</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <!-- Add this in your <head> section -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
@@ -36,7 +36,7 @@
       margin-top: -60px;
     }
 
-    form#imagingRequestForm {
+    form#projectForm {
       max-width: 600px;
       margin: 30px auto;
       padding: 25px 30px;
@@ -156,7 +156,7 @@
 
     /* Responsive Enhancements */
     @media (max-width: 600px) {
-      form#imagingRequestForm {
+      form#projectForm {
         padding: 1.5rem;
       }
 
@@ -174,12 +174,12 @@
 </head>
 
 <body>
-  <%- include("../partials/sidenav_user")%>
+  <%- include("../partials/sidenav-user")%>
 
     <main>
-      <h2>Imaging Request Management</h2>
+      <h2>Project Management</h2>
 
-      <form id="imagingRequestForm">
+      <form id="projectForm">
         <!-- Requestor (Readonly text input + hidden ID for submission) -->
         <div class="form-group">
           <label for="requestor">Requestor</label>
@@ -343,7 +343,7 @@
 
       // Function to setup form validation with null checks
       function setupFormValidation() {
-        const form = document.getElementById('imagingRequestForm');
+        const form = document.getElementById('projectForm');
         if (!form) return;
 
         // Add event listeners for date changes with null checks
@@ -488,7 +488,7 @@
             comments: form.comments.value || null
           };
 
-          const response = await fetch('/submit-imaging-request', {
+          const response = await fetch('/submit-project', {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json'
@@ -510,7 +510,7 @@
           // Show success message
           await Swal.fire({
             title: 'Success!',
-            text: 'Imaging request submitted successfully!',
+            text: 'project submitted successfully!',
             icon: 'success',
             confirmButtonText: 'OK',
             confirmButtonColor: '#28a745',

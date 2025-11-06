@@ -4,7 +4,7 @@ const db = require("../db"); // Database connection
 const { isAuthenticated, isAdmin } = require("../../middleware/auth"); // Middleware
 const { formatDate, formatDisplayDate, requestStatusTuple } = require("../../middleware/utils");
 
-router.get('/add-new-imaging-request', isAuthenticated, isAdmin, async (req, res) => {
+router.get('/add-new-project', isAuthenticated, isAdmin, async (req, res) => {
     const getRequestors = `
       SELECT u.UserID, u.Email 
       FROM User u
@@ -23,17 +23,17 @@ router.get('/add-new-imaging-request', isAuthenticated, isAdmin, async (req, res
     const [requestors] = await db.promise().query(getRequestors);
     const [photographers] = await db.promise().query(getPhotographers);
     console.log(requestors)
-    res.render('admin/create-imaging-request', {
+    res.render('admin/create-project', {
         requestors,
         photographers,
-        title: "Imaging Request Form",
+        title: "Project Form",
         isAdmin: isAdmin
     });
 });
 
 
-// Route to view imaging requests
-router.get('/view-all-imaging-requests', isAuthenticated, isAdmin, (req, res) => {
+// Route to view projects
+router.get('/view-all-projects', isAuthenticated, isAdmin, (req, res) => {
     const query = `
         SELECT 
             ir.*,
@@ -43,9 +43,9 @@ router.get('/view-all-imaging-requests', isAuthenticated, isAdmin, (req, res) =>
             photographer.Email AS photographerEmail,
             cb.Name AS CreatedByName,
             ub.Name AS UpdatedByName
-        FROM ImagingRequest ir
-        LEFT JOIN User r ON ir.ImagingRequestorID = r.UserID
-        JOIN ImagingRequestUserPhotographyLink irupl ON irupl.ImagingRequestID = ir.ImagingRequestID
+        FROM Project ir
+        LEFT JOIN User r ON ir.ProjectOwnerID = r.UserID
+        JOIN ProjectUserPhotographyLink irupl ON irupl.ProjectID = ir.ProjectID
         JOIN User photographer on irupl.PhotographerID = photographer.UserID
         LEFT JOIN User cb ON ir.CreatedByID = cb.UserID
         LEFT JOIN User ub ON ir.UpdatedByID = ub.UserID
@@ -53,39 +53,39 @@ router.get('/view-all-imaging-requests', isAuthenticated, isAdmin, (req, res) =>
         ORDER BY ir.CreatedDate DESC
     `;
 
-    console.log("📩 Fetching Imaging Requests...");
+    console.log("📩 Fetching Projects...");
 
     db.query(query, (err, results) => {
         if (err) {
-            console.error('❌ Error fetching imaging requests:', err);
+            console.error('❌ Error fetching projects:', err);
             return res.status(500).render('error', {
-                message: 'Error loading imaging requests',
+                message: 'Error loading projects',
                 error: process.env.NODE_ENV === 'development' ? err : null
             });
         }
 
-        console.log(`📄 Fetched ${results.length} imaging requests`);
+        console.log(`📄 Fetched ${results.length} projects`);
         // console.log(results)
 
         if (results.length === 0) {
-            return res.render('admin/imaging-request-view-admin', {
-                imagingRequests: [],
-                message: 'No imaging requests found'
+            return res.render('admin/view-all-projects', {
+                projects: [],
+                message: 'No projects found'
             });
         }
 
-        res.render('admin/view-all-imaging-requests', {
-            imagingRequests: results,
+        res.render('admin/view-all-projects', {
+            projects: results,
             currentUser: req.user,
-            title: "Imaging Requests Dashboard" // Add title here
+            title: "Projects Dashboard" // Add title here
         });
     });
 });
 
 
 // View Request (GET)
-router.get('/view-imaging-request/:id', isAuthenticated, isAdmin, (req, res) => {
-    const imagingRequestID = req.params.id;
+router.get('/view-project/:id', isAuthenticated, isAdmin, (req, res) => {
+    const projectID = req.params.id;
     const query = `
         SELECT 
             ir.*,
@@ -96,27 +96,27 @@ router.get('/view-imaging-request/:id', isAuthenticated, isAdmin, (req, res) => 
             creator.Name AS CreatorName,
             updater.Email AS UpdaterEmail,
             updater.Name AS UpdaterName
-        FROM ImagingRequest ir
-        LEFT JOIN User r ON ir.ImagingRequestorID = r.UserID
-        JOIN ImagingRequestUserPhotographyLink irupl ON irupl.ImagingRequestID = ir.ImagingRequestID
+        FROM Project ir
+        LEFT JOIN User r ON ir.ProjectOwnerID = r.UserID
+        JOIN ProjectUserPhotographyLink irupl ON irupl.ProjectID = ir.ProjectID
         JOIN User photographer on irupl.PhotographerID = photographer.UserID
         LEFT JOIN User creator ON ir.CreatedByID = creator.UserID
         LEFT JOIN User updater ON ir.UpdatedByID = updater.UserID
-        WHERE ir.ImagingRequestID = ?
+        WHERE ir.ProjectID = ?
     `;
 
-    db.query(query, [imagingRequestID], (err, results) => {
+    db.query(query, [projectID], (err, results) => {
         if (err) {
-            console.error('Error fetching imaging request:', err);
+            console.error('Error fetching project:', err);
             return res.status(500).render('error', {
-                message: 'Error loading imaging request',
+                message: 'Error loading project',
                 error: process.env.NODE_ENV === 'development' ? err : null
             });
         }
 
         if (results.length === 0) {
             return res.status(404).render('error', {
-                message: 'Imaging request not found'
+                message: 'project not found'
             });
         }
         console.log("dddddd" + results[0].DateOfRequest)
@@ -131,10 +131,10 @@ router.get('/view-imaging-request/:id', isAuthenticated, isAdmin, (req, res) => 
             IsDeleted: results[0].IsDeleted ? 'Yes' : 'No'
         };
 
-        res.render('view-imaging-request', {
+        res.render('view-project', {
             request: request,
             currentUser: req.user,
-            title: "Admin View Imaging Request", // Add title here
+            title: "Admin View Project", // Add title here
             isAdmin: isAdmin
         });
     });
@@ -142,33 +142,33 @@ router.get('/view-imaging-request/:id', isAuthenticated, isAdmin, (req, res) => 
 
 // Delete Request (POST)
 // Soft Delete Request (POST) 
-router.post('/delete-imaging-request/:id', isAuthenticated, isAdmin, (req, res) => {
-    const imagingRequestID = req.params.id;
+router.post('/delete-project/:id', isAuthenticated, isAdmin, (req, res) => {
+    const projectID = req.params.id;
     const query = `
-        UPDATE ImagingRequest 
+        UPDATE Project 
         SET 
             IsDeleted = 1,
             UpdatedByID = ?,
             UpdatedDate = NOW()
-        WHERE ImagingRequestID = ?
+        WHERE ProjectID = ?
     `;
     console.log(req.user)
-    db.query(query, [req.session.user.UserID, imagingRequestID], (err, results) => {
+    db.query(query, [req.session.passport.user.UserID, projectID], (err, results) => {
         if (err) {
             console.error('Error soft deleting request:', err);
             return res.status(500).send('Error marking request as deleted.');
         }
 
-        res.redirect('/admin/imaging-request/view-all-imaging-requests');
+        res.redirect('/admin/project/view-all-projects');
     });
 });
 
 
-// Edit Imaging Request (GET)
+// Edit Project (GET)
 // Define queries at the top of your file for better maintainability
-router.get('/edit-imaging-request/:id', isAuthenticated, isAdmin, async (req, res) => {
+router.get('/edit-project/:id', isAuthenticated, isAdmin, async (req, res) => {
     try {
-        const imagingRequestID = req.params.id;
+        const projectID = req.params.id;
         const requestQuery = `
             SELECT 
                 ir.*,
@@ -178,15 +178,15 @@ router.get('/edit-imaging-request/:id', isAuthenticated, isAdmin, async (req, re
                 photographer.Name AS PhotographerName,
                 photographer.Email AS PhotographerEmail,
                 photographer.UserID AS PhotographerUserID
-            FROM ImagingRequest ir
-            JOIN User requestor ON ir.ImagingRequestorID = requestor.UserID
-            JOIN ImagingRequestUserPhotographyLink i ON ir.ImagingRequestID = i.ImagingRequestID
+            FROM Project ir
+            JOIN User requestor ON ir.ProjectOwnerID = requestor.UserID
+            JOIN ProjectUserPhotographyLink i ON ir.ProjectID = i.ProjectID
             JOIN User photographer ON i.PhotographerID = photographer.UserID 
-            WHERE ir.ImagingRequestID = ?;
+            WHERE ir.ProjectID = ?;
         `;
         // Get all needed data in parallel for better performance
         const [requestResults, photographerResults] = await Promise.all([
-            db.promise().query(requestQuery, [imagingRequestID]),
+            db.promise().query(requestQuery, [projectID]),
             db.promise().query("SELECT UserID, Email,Name FROM User ORDER BY Email"),
         ]);
         if (requestResults[0].length === 0) {
@@ -200,12 +200,12 @@ router.get('/edit-imaging-request/:id', isAuthenticated, isAdmin, async (req, re
             ImagingStartDate: formatDisplayDate(requestResults[0][0].ImagingStartDate),
             ImagingEndDate: formatDisplayDate(requestResults[0][0].ImagingEndDate)
         };
-        res.render(`admin/edit-imaging-request`, {
+        res.render(`admin/edit-project`, {
             request: request,
             photographers: photographerResults[0],
             statuses: Object.values(requestStatusTuple()),
             currentUser: req.user,
-            title: "Edit Imaging Request", // Add title here
+            title: "Edit Project", // Add title here
             isAdmin: isAdmin
         });
 
@@ -216,14 +216,14 @@ router.get('/edit-imaging-request/:id', isAuthenticated, isAdmin, async (req, re
 });
 
 
-router.post('/edit-imaging-request/:id', isAuthenticated, isAdmin, async (req, res) => {
+router.post('/edit-project/:id', isAuthenticated, isAdmin, async (req, res) => {
     // === 0. SESSION VALIDATION ===
-    if (!req.session.user || !req.session.user.UserID) {
+    if (!req.session.passport.user || !req.session.passport.user.UserID) {
         console.error("❌ No user in session");
         return res.status(401).json({ success: false, message: 'Session expired. Please login again.' });
     }
 
-    const imagingRequestID = req.params.id;
+    const projectID = req.params.id;
     const {
         PhotographerID,
         ImagingStartDate,
@@ -256,7 +256,7 @@ router.post('/edit-imaging-request/:id', isAuthenticated, isAdmin, async (req, r
 
     // === 2. DATABASE UPDATE ===
     const updateQuery = `
-        UPDATE ImagingRequest 
+        UPDATE Project 
         SET 
             ImagingStartDate = ?,
             ImagingEndDate = ?,
@@ -268,13 +268,13 @@ router.post('/edit-imaging-request/:id', isAuthenticated, isAdmin, async (req, r
             ReasonforRequest = ?,
             UpdatedByID = ?,
             UpdatedDate = NOW()
-        WHERE ImagingRequestID = ?
+        WHERE ProjectID = ?
     `;
     const updateQuery2 =
         `
-        UPDATE ImagingRequestUserPhotographyLink
+        UPDATE ProjectUserPhotographyLink
         SET PhotographerID = ?
-        WHERE ImagingRequestID = ?
+        WHERE ProjectID = ?
         `;
     const results = await db.promise().query(updateQuery, [
         startDate,
@@ -285,18 +285,18 @@ router.post('/edit-imaging-request/:id', isAuthenticated, isAdmin, async (req, r
         ImagingPlatform || null,
         RequestStatus,
         ReasonForRequest || null,
-        req.session.user.UserID,
-        imagingRequestID
+        req.session.passport.user.UserID,
+        projectID
     ])
     const r2 = await db.promise().query(updateQuery2, [
         PhotographerID,
-        imagingRequestID
+        projectID
     ]);
     // Return success response
     res.json({
         success: true,
-        message: 'Imaging request updated successfully',
-        redirectUrl: `/admin/imaging-request/view-imaging-request/${imagingRequestID}`
+        message: 'project updated successfully',
+        redirectUrl: `/admin/project/view-project/${projectID}`
     });
 });
 

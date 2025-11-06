@@ -25,9 +25,9 @@ CREATE TABLE User (
     FOREIGN KEY (CreatedByID) REFERENCES User(UserID)
 );
 
-CREATE TABLE ImagingRequest (
-        ImagingRequestID INT AUTO_INCREMENT PRIMARY KEY,
-        ImagingRequestorID INT NOT NULL,
+CREATE TABLE Project (
+        ProjectID INT AUTO_INCREMENT PRIMARY KEY,
+        ProjectOwnerID INT NOT NULL,
         DateOfRequest DATETIME NOT NULL,
         ImagingStartDate DATETIME NOT NULL,
         ImagingEndDate DATETIME NOT NULL,
@@ -43,22 +43,22 @@ CREATE TABLE ImagingRequest (
         IsDeleted BOOL NOT NULL DEFAULT 0,
         RequestStatus VARCHAR(255),
         ReasonForRequest VARCHAR(255),
-        FOREIGN KEY (ImagingRequestorID) REFERENCES User(UserID),
+        FOREIGN KEY (ProjectOwnerID) REFERENCES User(UserID),
         FOREIGN KEY (UpdatedByID) REFERENCES User(UserID),
         FOREIGN KEY (CreatedByID) REFERENCES User(UserID)
 );
 
-CREATE TABLE ImagingRequestUserPhotographyLink (
+CREATE TABLE ProjectUserPhotographyLink (
    ID INT AUTO_INCREMENT PRIMARY KEY,
-   ImagingRequestID INT NOT NULL,
+   ProjectID INT NOT NULL,
    PhotographerID INT NOT NULL,
-   FOREIGN KEY (ImagingRequestID) REFERENCES ImagingRequest(ImagingRequestID), 
+   FOREIGN KEY (ProjectID) REFERENCES Project(ProjectID), 
    FOREIGN KEY (PhotographerID) REFERENCES User(UserID) 
 );
 
 CREATE TABLE Media (
         MediaID INT AUTO_INCREMENT PRIMARY KEY,
-        ImagingRequestID INT NOT NULL,
+        ProjectID INT NOT NULL,
         photographerID INT NOT NULL,
         MediaFileName VARCHAR(255),
         FilePath VARCHAR(255),
@@ -79,7 +79,7 @@ CREATE TABLE Media (
         UpdatedDate DATETIME,
         UpdatedByID INT NOT NULL,
         IsDeleted BOOL NOT NULL DEFAULT 0,
-        FOREIGN KEY (ImagingRequestID) REFERENCES ImagingRequest(ImagingRequestID),
+        FOREIGN KEY (ProjectID) REFERENCES Project(ProjectID),
         FOREIGN KEY (photographerID) REFERENCES User(UserID),
         FOREIGN KEY (UpdatedByID) REFERENCES User(UserID),
         FOREIGN KEY (CreatedByID) REFERENCES User(UserID)
@@ -94,9 +94,9 @@ VALUES ('r1@gmail.com',FROM_BASE64("hwXpWnraI+KqYkaChBAc4EjTdAEtXxKZXBn/cMss2/4=
 INSERT INTO User (Email,HashedPassword,PasswordSalt,UserType,Name,CreatedByID,UpdatedByID,RequestStatus) 
 VALUES ('p1@gmail.com',FROM_BASE64("sj1O+m695SCDA0cyNiHK/aEknLFcYPhoxP9YOZe0pvA="),'UkSbEVvinkts1Dbb','photographer',"Ron",'3','3','approved');
 
-INSERT INTO ImagingRequest (ImagingRequestorID ,DateOfRequest ,ImagingStartDate ,ImagingEndDate ,CreatedDate ,UpdatedDate ,RequestStatus,CreatedByID,UpdatedByID) 
+INSERT INTO Project (ProjectOwnerID ,DateOfRequest ,ImagingStartDate ,ImagingEndDate ,CreatedDate ,UpdatedDate ,RequestStatus,CreatedByID,UpdatedByID) 
 VALUES (1,NOW(),NOW(),NOW(),NOW(),NOW(),'approved','1','1');
-INSERT INTO ImagingRequestUserPhotographyLink (ImagingRequestID,PhotographerID) VALUES ("1",'1'); 
+INSERT INTO ProjectUserPhotographyLink (ProjectID,PhotographerID) VALUES ("1",'1'); 
 -- SELECT * FROM User WHERE Email = 'admin@gmail.com';
--- SELECT * FROM ImagingRequest;
-SELECT * FROM ImagingRequestUserPhotographyLink;
+-- SELECT * FROM Project;
+SELECT * FROM ProjectUserPhotographyLink;

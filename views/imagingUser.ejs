@@ -1,8 +1,9 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8" />
-  <title>My Imaging Requests</title>
+  <title>My Projects</title>
   <link rel="stylesheet" href="/css/user.css" />
   <style>
     body {
@@ -36,12 +37,13 @@
       border-collapse: collapse;
       margin-bottom: 40px;
       background: white;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
       border-radius: 8px;
       overflow: hidden;
     }
 
-    th, td {
+    th,
+    td {
       padding: 12px 15px;
       border-bottom: 1px solid #eee;
       text-align: left;
@@ -57,8 +59,15 @@
       background-color: #f1f1f1;
     }
 
-    .status-approved { color: green; font-weight: bold; }
-    .status-rejected { color: red; font-weight: bold; }
+    .status-approved {
+      color: green;
+      font-weight: bold;
+    }
+
+    .status-rejected {
+      color: red;
+      font-weight: bold;
+    }
 
     .view-btn {
       background: #17a2b8;
@@ -78,108 +87,148 @@
       color: gray;
       margin-top: 20px;
     }
-    .main_con{
+
+    .main_con {
       display: block;
       margin-left: 300px;
     }
   </style>
 </head>
+
 <body>
   <div class="main_con">
-    <%- include('partials/sidenav_user') %> 
-    
-  
-  <% if (showPendingAlert) { %>
-    <button class="btn" disabled style="opacity: 0.6;" title="Wait for admin approval">➕ Add User (Locked)</button>
-  <% } else { %>
-    <a href="/form" ><button class="btn">➕ Add User</button></a>
-  <% } %>
-  
-  
+    <%- include('partials/sidenav-user') %>
 
-  <h2>🧍 My User Requests</h2>
-  <% if (userRequests.length === 0) { %>
-    <p class="no-data">No user requests found.</p>
-  <% } else { %>
-    <table>
-      <thead>
-        <tr>
-          <th>ID</th>
-          <th>Name</th>
-          <th>Email</th>
-          <th>Contact</th>
-          <th>Organisation</th>
-          <th>User Type</th>
-          <th>Date</th>
-          <th>Status</th>
-          <th>Reason</th>
-          <th>Comments</th>
-          <th>Action</th>
-        </tr>
-      </thead>
-      <tbody>
-        <% userRequests.forEach(req => { %>
-          <tr>
-            <td><%= req.id %></td>
-            <td><%= req.username %></td>
-            <td><%= req.email %></td>
-            <td><%= req.ContactNumber %></td>
-            <td><%= req.organisation %></td>
-            <td><%= req.UserTypeName %></td>
-            <td><%= req.date_of_req.toISOString().slice(0,10) %></td>
-            <td class="<%= req.RequestStatusName === 'approved' ? 'status-approved' : req.RequestStatusName === 'rejected' ? 'status-rejected' : '' %>">
-              <%= req.RequestStatusName %>
-            </td>
-            <td><%= req.reason_for_req || '-' %></td>
-            <td><%= req.comments || '-' %></td>
-            <td><a href="/view/<%= req.id %>" class="view-btn">View</a></td>
-          </tr>
-        <% }) %>
-      </tbody>
-    </table>
-  <% } %>
 
-  <h2>📸 Photographer Requests</h2>
-  <% if (otherRequests.length === 0) { %>
-    <p class="no-data">No photographer requests found.</p>
-  <% } else { %>
-    <table>
-      <thead>
-        <tr>
-          <th>ID</th>
-          <th>Name</th>
-          <th>Email</th>
-          <th>Contact</th>
-          <th>Organisation</th>
-          <th>User Type</th>
-          <th>Date</th>
-          <th>Status</th>
-          <th>Reason</th>
-          <th>Comments</th>
-          <th>Action</th>
-        </tr>
-      </thead>
-      <tbody>
-        <% otherRequests.forEach(req => { %>
-          <tr>
-            <td><%= req.id %></td>
-            <td><%= req.username %></td>
-            <td><%= req.email %></td>
-            <td><%= req.ContactNumber %></td>
-            <td><%= req.organisation %></td>
-            <td><%= req.UserTypeName %></td>
-            <td><%= req.date_of_req.toISOString().slice(0,10) %></td>
-            <td class="<%= req.RequestStatusName === 'approved' ? 'status-approved' : req.RequestStatusName === 'rejected' ? 'status-rejected' : '' %>">
-              <%= req.RequestStatusName %>
-            </td>
-            <td><%= req.reason_for_req || '-' %></td>
-            <td><%= req.comments || '-' %></td>
-            <td><a href="/view/<%= req.id %>" class="view-btn">View</a></td>
-          </tr>
-        <% }) %>
-      </tbody>
-    </table>
-  <% } %>
+      <% if (showPendingAlert) { %>
+        <button class="btn" disabled style="opacity: 0.6;" title="Wait for admin approval">➕ Add User (Locked)</button>
+        <% } else { %>
+          <a href="/form"><button class="btn">➕ Add User</button></a>
+          <% } %>
+
+
+
+            <h2>🧍 My User Requests</h2>
+            <% if (userRequests.length===0) { %>
+              <p class="no-data">No user requests found.</p>
+              <% } else { %>
+                <table>
+                  <thead>
+                    <tr>
+                      <th>ID</th>
+                      <th>Name</th>
+                      <th>Email</th>
+                      <th>Contact</th>
+                      <th>Organisation</th>
+                      <th>User Type</th>
+                      <th>Date</th>
+                      <th>Status</th>
+                      <th>Reason</th>
+                      <th>Comments</th>
+                      <th>Action</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <% userRequests.forEach(req=> { %>
+                      <tr>
+                        <td>
+                          <%= req.id %>
+                        </td>
+                        <td>
+                          <%= req.username %>
+                        </td>
+                        <td>
+                          <%= req.email %>
+                        </td>
+                        <td>
+                          <%= req.ContactNumber %>
+                        </td>
+                        <td>
+                          <%= req.organisation %>
+                        </td>
+                        <td>
+                          <%= req.UserTypeName %>
+                        </td>
+                        <td>
+                          <%= req.date_of_req.toISOString().slice(0,10) %>
+                        </td>
+                        <td
+                          class="<%= req.RequestStatusName === 'approved' ? 'status-approved' : req.RequestStatusName === 'rejected' ? 'status-rejected' : '' %>">
+                          <%= req.RequestStatusName %>
+                        </td>
+                        <td>
+                          <%= req.reason_for_req || '-' %>
+                        </td>
+                        <td>
+                          <%= req.comments || '-' %>
+                        </td>
+                        <td><a href="/view/<%= req.id %>" class="view-btn">View</a></td>
+                      </tr>
+                      <% }) %>
+                  </tbody>
+                </table>
+                <% } %>
+
+                  <h2>📸 Photographer Requests</h2>
+                  <% if (otherRequests.length===0) { %>
+                    <p class="no-data">No photographer requests found.</p>
+                    <% } else { %>
+                      <table>
+                        <thead>
+                          <tr>
+                            <th>ID</th>
+                            <th>Name</th>
+                            <th>Email</th>
+                            <th>Contact</th>
+                            <th>Organisation</th>
+                            <th>User Type</th>
+                            <th>Date</th>
+                            <th>Status</th>
+                            <th>Reason</th>
+                            <th>Comments</th>
+                            <th>Action</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          <% otherRequests.forEach(req=> { %>
+                            <tr>
+                              <td>
+                                <%= req.id %>
+                              </td>
+                              <td>
+                                <%= req.username %>
+                              </td>
+                              <td>
+                                <%= req.email %>
+                              </td>
+                              <td>
+                                <%= req.ContactNumber %>
+                              </td>
+                              <td>
+                                <%= req.organisation %>
+                              </td>
+                              <td>
+                                <%= req.UserTypeName %>
+                              </td>
+                              <td>
+                                <%= req.date_of_req.toISOString().slice(0,10) %>
+                              </td>
+                              <td
+                                class="<%= req.RequestStatusName === 'approved' ? 'status-approved' : req.RequestStatusName === 'rejected' ? 'status-rejected' : '' %>">
+                                <%= req.RequestStatusName %>
+                              </td>
+                              <td>
+                                <%= req.reason_for_req || '-' %>
+                              </td>
+                              <td>
+                                <%= req.comments || '-' %>
+                              </td>
+                              <td><a href="/view/<%= req.id %>" class="view-btn">View</a></td>
+                            </tr>
+                            <% }) %>
+                        </tbody>
+                      </table>
+                      <% } %>
 
 </body>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
@@ -196,4 +245,5 @@
 
 </script>
 </div>
+
 </html>

@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>View Imaging Request</title>
+    <title>View Project</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
 
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -336,11 +336,11 @@
 
 <body>
 
-    <%- include(userType=='admin' ? 'partials/sidenav_admin' : 'partials/sidenav_user' )%>
+    <%- include(currentUser.UserType=='admin' ? 'partials/sidenav-admin' : 'partials/sidenav-user' )%>
         <main>
             <div class="container request-container">
                 <div class="request-header">
-                    <h1 class="h3 mb-0">Imaging Request #<%= request.ImagingRequestID %>
+                    <h1 class="h3 mb-0">Project #<%= request.ProjectID %>
                     </h1>
                     <p class="text-muted mb-0">Created on <%= request.CreatedDate %> by <%= request.CreatorName
                                 || 'System' %>, <%= request.CreatorEmail %>
@@ -443,20 +443,19 @@
                         </div>
                     </div>
                     <% } %>
-                        <% if (userType=='admin' ){%>
+                        <% if (currentUser.UserType=='admin' ){%>
                             <div class="mt-4 d-flex justify-content-between">
-                                <a href="/admin/imaging-request/view-all-imaging-requests" class="btn btn-primary">
-                                    <i class="fas fa-arrow-left"></i> Back to Imaging Requests
+                                <a href="/admin/project/view-all-projects" class="btn btn-primary">
+                                    <i class="fas fa-arrow-left"></i> Back to Projects
                                 </a>
-                                <a href="/admin/imaging-request/edit-imaging-request/<%= request.ImagingRequestID %>"
-                                    class="btn btn-warning">
+                                <a href="/admin/project/edit-project/<%= request.ProjectID %>" class="btn btn-warning">
                                     <i class="fas fa-edit"></i> Edit Request
                                 </a>
                             </div>
                             <% } else{ %>
                                 <div class="mt-4 d-flex justify-content-between">
-                                    <a href="/user/imaging-request/view-all-imaging-requests" class="btn btn-primary">
-                                        <i class="fas fa-arrow-left"></i> Back to Imaging Requests
+                                    <a href="/user/project/view-all-projects" class="btn btn-primary">
+                                        <i class="fas fa-arrow-left"></i> Back to Projects
                                     </a>
                                 </div>
                                 <%}%>

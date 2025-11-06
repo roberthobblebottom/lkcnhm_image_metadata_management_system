@@ -133,7 +133,7 @@ router.post("/login",
                                 return res.status(500).json({ error: "Session error" });
                             }
 
-                            // console.log("✅ Login Successful! User:", req.session.user.LoginEmail,);
+                            // console.log("✅ Login Successful! User:", req.session.passport.user.LoginEmail,);
 
                             return res.json({
                                 success: true,

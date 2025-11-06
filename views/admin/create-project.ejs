@@ -3,7 +3,7 @@
 
 <head>
   <meta charset="UTF-8">
-  <title>Imaging Request Management</title>
+  <title>Project Management</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <!-- Add this in your <head> section -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
@@ -37,7 +37,7 @@
     }
 
     /* Form Styles */
-    form#imagingRequestForm {
+    form#projectForm {
       max-width: 700px;
       margin: auto;
       padding: 2rem;
@@ -116,7 +116,7 @@
 
     /* Responsive Enhancements */
     @media (max-width: 600px) {
-      form#imagingRequestForm {
+      form#projectForm {
         padding: 1.5rem;
       }
 
@@ -130,11 +130,11 @@
 <body>
 
 
-  <%- include(isAdmin ? '../partials/sidenav_admin.ejs' : '../partials/sidenav_user' ) %>
+  <%- include(isAdmin ? '../partials/sidenav-admin.ejs' : '../partials/sidenav-user' ) %>
     <main>
-      <h2>Imaging Request Form</h2>
+      <h2>Project Form</h2>
 
-      <form id="imagingRequestForm">
+      <form id="projectForm">
         <div class="form-group">
           <label for="requestor">Requestor Name</label>
           <select id="requestor" name="requestor" required>
@@ -292,7 +292,7 @@
 
       // Function to setup form validation
       function setupFormValidation() {
-        const form = document.getElementById('imagingRequestForm');
+        const form = document.getElementById('projectForm');
 
         // Add event listeners for date changes
         document.getElementById('requestDate').addEventListener('change', function () {
@@ -417,7 +417,7 @@
 
 
           console.log('before response ' + formData)
-          const response = await fetch('../../submit-imaging-request', {
+          const response = await fetch('../../submit-project', {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json'
@@ -438,7 +438,7 @@
           // Show success message
           await Swal.fire({
             title: 'Success!',
-            text: 'Imaging request submitted successfully!',
+            text: 'project submitted successfully!',
             icon: 'success',
             confirmButtonText: 'OK',
             confirmButtonColor: '#28a745',

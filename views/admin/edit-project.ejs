@@ -8,7 +8,7 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Edit Imaging Request</title>
+    <title>Edit Project</title>
     <style>
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -115,14 +115,14 @@
 </head>
 
 <body>
-    <%- include(isAdmin ? '../partials/sidenav_admin.ejs' : '../partials/sidenav_user' ) %>
+    <%- include(isAdmin ? '../partials/sidenav-admin.ejs' : '../partials/sidenav-user' ) %>
         <main>
-            <a href="/admin/imaging-request/view-all-imaging-requests"><button class="btn btn-secondary">Back to
+            <a href="/admin/project/view-all-projects"><button class="btn btn-secondary">Back to
                     Imaging
                     Requests</button></a>
-            <h1>Edit Imaging Request</h1>
+            <h1>Edit Project</h1>
 
-            <form action="/admin/imaging-request/edit-imaging-request/<%= request.ImagingRequestID %>" method="POST">
+            <form action="/admin/project/edit-project/<%= request.ProjectID %>" method="POST">
                 <div class="form-group">
                     <label>Requestor</label>
                     <p class="form-control-static">
