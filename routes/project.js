@@ -173,7 +173,6 @@ router.get('/view-all', isAuthenticated, (req, res) => {
         JOIN User photographer on irupl.PhotographerID = photographer.UserID
         LEFT JOIN User cb ON p.CreatedByID = cb.UserID
         LEFT JOIN User ub ON p.UpdatedByID = ub.UserID
-        WHERE p.IsDeleted = 0
         ORDER BY p.CreatedDate DESC
     `;
 
@@ -266,7 +265,7 @@ router.get('/view/:id', isAuthenticated, (req, res) => {
             });
         }
         // Format dates for display
-        console.log(results[0].IsDeleted)
+        console.log(results[0].statusName)
         const request = {
             ...results[0],
             DateOfRequest: formatDate(results[0].DateOfRequest),
@@ -308,7 +307,26 @@ router.post('/delete/:id', isAuthenticated, (req, res) => {
     });
 });
 
+router.post('/restore/:id', isAuthenticated, (req, res) => {
+    const projectID = req.params.id;
+    const query = `
+        UPDATE Project 
+        SET 
+            IsDeleted = 0,
+            UpdatedByID = ?,
+            UpdatedDate = NOW()
+        WHERE ProjectID = ?
+    `;
+    console.log(req.user)
+    db.query(query, [req.session.passport.user.UserID, projectID], (err, results) => {
+        if (err) {
+            console.error('Error soft deleting request:', err);
+            return res.status(500).send('Error marking request as deleted.');
+        }
 
+        res.redirect('/project/view-all');
+    });
+});
 // Edit Project (GET)
 // Define queries at the top of your file for better maintainability
 router.get('/edit/:id', isAuthenticated, async (req, res) => {

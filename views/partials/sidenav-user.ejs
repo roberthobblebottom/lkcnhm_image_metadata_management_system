@@ -19,7 +19,7 @@
       </li>
       <li class="active"><a href="/user/dashboard"><i class="fas fa-chart-line"></i><span>Dashboard</span></a></li>
       <li><a href="/imagingUser"><i class="fas fa-users"></i><span>Imaging User Management</span></a></li>
-      <li><a href="/project/view-all"><i class="fas fa-file-medical"></i><span>Project
+      <li id="projectManagement"><a href="/project/view-all"><i class="fas fa-file-medical"></i><span>Project
             Management</span></a></li>
       <li><a href="/change-password"><i class="fas fa-key"></i><span>Change Password</span></a></li>
 
@@ -36,6 +36,7 @@
           const email = data.email; // trim after @
           const UserType = data.UserType;
           document.getElementById("userGreeting").textContent = `Logged in as: ${email}\nRole: ${UserType}`;
+          document.getElementById("projectManagement").hidden = UserType == 'photographer' ? true : false
         })
         .catch(() => {
           document.getElementById("userGreeting").textContent = "Welcome";
