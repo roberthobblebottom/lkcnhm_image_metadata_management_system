@@ -350,21 +350,21 @@
                                     || 'System' %>, <%= request.UpdaterEmail%>
                         </p>
                         <% } %>
-                            <span
-                                class="badge <%= request.IsDelete === 'Yes' ? 'bg-danger' : 'bg-success' %> status-badge">
-                                <%= request.IsDelete==='Yes' ? 'Deleted' : 'Active' %>
-                            </span>
+                            <% if(request.isDeleted){%>
+                                <span class="status-badge bg-danger">
+                                    Deleted
+                                </span>
+                                <%}%>
                 </div>
 
                 <div class="row">
                     <div class="col-md-6">
                         <div class="detail-row">
-                            <div class="detail-label">Requestor</div>
+                            <div class="detail-label">Project Owner</div>
                             <div class="detail-value">
                                 <%= request.projectOwnerName %>
                             </div>
                         </div>
-
                         <div class="detail-row">
                             <div class="detail-label">Photographer</div>
                             <div class="detail-value">
@@ -443,22 +443,14 @@
                         </div>
                     </div>
                     <% } %>
-                        <% if (currentUser.UserType=='admin' ){%>
-                            <div class="mt-4 d-flex justify-content-between">
-                                <a href="/project/view-all" class="btn btn-primary">
-                                    <i class="fas fa-arrow-left"></i> Back to Projects
-                                </a>
-                                <a href="/project/edit/<%= request.ProjectID %>" class="btn btn-warning">
-                                    <i class="fas fa-edit"></i> Edit Request
-                                </a>
-                            </div>
-                            <% } else{ %>
-                                <div class="mt-4 d-flex justify-content-between">
-                                    <a href="/user/project/view-all" class="btn btn-primary">
-                                        <i class="fas fa-arrow-left"></i> Back to Projects
-                                    </a>
-                                </div>
-                                <%}%>
+                        <div class="mt-4 d-flex justify-content-between">
+                            <a href="/project/view-all" class="btn btn-primary">
+                                <i class="fas fa-arrow-left"></i> Back to Projects
+                            </a>
+                            <a href="/project/edit/<%= request.ProjectID %>" class="btn btn-warning">
+                                <i class="fas fa-edit"></i> Edit Request
+                            </a>
+                        </div>
             </div>
         </main>
         <!-- Font Awesome for icons -->

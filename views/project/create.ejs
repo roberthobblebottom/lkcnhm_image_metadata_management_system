@@ -149,17 +149,20 @@
 </head>
 
 <body>
-  <%- include(isAdmin ? '../partials/sidenav-admin.ejs' : '../partials/sidenav-user' ) %>
+  <%- include(currentUser.UserType==='admin' ? '../partials/sidenav-admin.ejs' : '../partials/sidenav-user' ) %>
     <main>
       <a href="/project/view-all"><button class="btn btn-secondary">Back to all Projects</button></a>
       <h2>Create a New Project</h2>
       <form id="projectForm">
         <div class="form-group">
-          <label for="projectOwner">Requestor Name</label>
-          <select id="projectOwner" name="projectOwner" required>
+          <label for="projectOwner">Project Owner Name</label>
+          <select id="projectOwner" name="projectOwner" disabled=<%=currentUser.UserType=='projectOwner' ? true : false
+            %>
+            required>
             <option value="">Select Requestor</option>
             <% projectOwners.forEach(user=> { %>
-              <option value="<%= user.UserID %>">
+              <option value="<%= user.UserID %>" <%=currentUser.UserType=='projectOwner' ? 'selected' : '' %>
+                >
                 <%=user.Name%>
                   <%= user.Email %>
               </option>
@@ -238,6 +241,7 @@
       document.addEventListener('DOMContentLoaded', function () {
         // Set current datetime to requestDate field
         document.getElementById('requestDate').value = new Date().toISOString().slice(0, 16).split('T')[0];
+        // document.getElementById('projectOwner').disabled = projectOwner.UserType == 'admin' ? True : False
         // document.getElementById('startDate').value = ((new Date()).getDate() + 1).toISOString().slice(0, 16).split('T')[0];
         const now = new Date()
         now.setDate(new Date().getDate() + 1)

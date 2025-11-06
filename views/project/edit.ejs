@@ -120,7 +120,7 @@
             <a href="/project/view-all"><button class="btn btn-secondary">Back to All
                     Projects</button></a>
             <h1>Edit Project</h1>
-            <form action="/project/edit/<%= request.ProjectID %>" method="POST">
+            <form id='editForm' action="/project/edit/<%= request.ProjectID %>" method="POST">
                 <div class="form-group">
                     <label>Requestor</label>
                     <p class="form-control-static">
@@ -184,26 +184,26 @@
                     <input type="text" id="ImagingPlatform" name="ImagingPlatform"
                         value="<%= request.ImagingPlatform || '' %>" class="form-control">
                 </div>
+                <% if(currentUser.UserType==='admin' ){%>
+                    <div class="form-group">
+                        <label for="RequestStatus">Status:</label>
+                        <select name="RequestStatus" id="RequestStatus" class="form-control" required>
+                            <option value="">-- Select Type --</option>
+                            <% statuses.forEach(status=> { %>
+                                <option value="<%= status %>" <%=request.RequestStatus==status ? 'selected' : '' %>>
+                                    <%= status%>
+                                </option>
+                                <% }) %>
+                        </select>
+                    </div>
 
-                <div class="form-group">
-                    <label for="RequestStatus">Status:</label>
-                    <select name="RequestStatus" id="RequestStatus" class="form-control" required>
-                        <option value="">-- Select Type --</option>
-                        <% statuses.forEach(status=> { %>
-                            <option value="<%= status %>" <%=request.RequestStatus==status ? 'selected' : '' %>>
-                                <%= status%>
-                            </option>
-                            <% }) %>
-                    </select>
-                </div>
-
-                <div class="form-group">
-                    <label for="ReasonForRequest">Reason for Status Change:</label>
-                    <textarea id="ReasonForRequest" name="ReasonForRequest"
-                        class="form-control"><%= request.ReasonForRequest || '' %></textarea>
-                </div>
-
-                <button type="submit" class="btn btn-primary">Save Changes</button>
+                    <div class="form-group">
+                        <label for="ReasonForRequest">Reason for Status Change:</label>
+                        <textarea id="ReasonForRequest" name="ReasonForRequest"
+                            class="form-control"><%= request.ReasonForRequest || '' %></textarea>
+                    </div>
+                    <%}%>
+                        <button type="submit" class="btn btn-primary">Save Changes</button>
             </form>
 
             <br>
@@ -211,12 +211,15 @@
         </main>
         <script>
             document.addEventListener('DOMContentLoaded', function () {
-                const form = document.querySelector('form');
+                const form = document.getElementById('editForm')
                 const requestDate = new Date('<%= request.DateofRequest %>');
                 const startDateInput = document.getElementById('ImagingStartDate');
                 const endDateInput = document.getElementById('ImagingEndDate');
-                const statusSelect = document.getElementById('RequestStatus');
-                const reasonField = document.getElementById('ReasonForRequest');
+                const currentUser = '<%= currentUser%>'
+                if (currentUser.UserType === 'admin') {
+                    const statusSelect = document.getElementById('RequestStatus');
+                    const reasonField = document.getElementById('ReasonForRequest');
+                }
                 // Set minimum dates
                 startDateInput.min = '<%= request.DateofRequest %>';
                 endDateInput.min = '<%= request.ImagingStartDate %>';
@@ -249,7 +252,6 @@
                         this.value = '<%= request.ImagingEndDate %>';
                     }
                 });
-
                 // Form submission handler
                 form.addEventListener('submit', async function (e) {
                     e.preventDefault();
@@ -273,23 +275,25 @@
                         });
                         return;
                     }
-                    // Validate reason if status changed
-                    if (statusSelect.value !== '<%= request.RequestStatusID %>' && !reasonField.value.trim()) {
-                        Swal.fire({
-                            icon: 'error',
-                            title: 'Missing Reason',
-                            text: 'Please provide a reason for status change'
-                        });
-                        return;
-                    }
-                    // Validate that a valid status is selected
-                    if (statusSelect.value === '') {
-                        Swal.fire({
-                            icon: 'error',
-                            title: 'Invalid Status',
-                            text: 'Please select a valid status.'
-                        });
-                        return;
+                    if (currentUser.UserType === 'admin') {
+                        // Validate reason if status changed
+                        if (statusSelect.value !== '<%= request.RequestStatusID %>' && !reasonField.value.trim()) {
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Missing Reason',
+                                text: 'Please provide a reason for status change'
+                            });
+                            return;
+                        }
+                        // Validate that a valid status is selected
+                        if (statusSelect.value === '') {
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Invalid Status',
+                                text: 'Please select a valid status.'
+                            });
+                            return;
+                        }
                     }
                     // Submit form via AJAX
                     try {
@@ -301,7 +305,6 @@
                             },
                             body: JSON.stringify(Object.fromEntries(formData))
                         });
-
                         const result = await response.json();
                         if (result.success) {
                             Swal.fire({
