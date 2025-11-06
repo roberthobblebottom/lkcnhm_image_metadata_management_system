@@ -15,13 +15,13 @@ router.get('/view-all-media', isAuthenticated, isAdmin, (req, res) => {
         m.Description,
         m.FileFormat,
         m.CreatedDate,
-        ir.ProjectID,
-        r.Name AS requestor_name,
+        p.ProjectID,
+        projectOwner.Name AS requestor_name,
         u2.Email AS photographer_name
       FROM Media m
-      JOIN Project ir ON m.ProjectID = ir.ProjectID
-      JOIN User r ON ir.ProjectOwnerID = r.UserID
-      JOIN ProjectUserPhotographyLink p ON ir.ProjectID = p.ProjectID
+      JOIN Project p ON m.ProjectID = p.ProjectID
+      JOIN User projectOwner ON p.ProjectOwnerID = projectOwner.UserID
+      JOIN ProjectUserPhotographyLink p ON p.ProjectID = p.ProjectID
       JOIN User u2 ON p.PhotographerID = u2.UserID  
       WHERE m.IsDeleted = 0
       ORDER BY m.CreatedDate DESC
@@ -58,24 +58,24 @@ router.get('/view-all-media', isAuthenticated, isAdmin, (req, res) => {
 router.get('/select-user-for-media', isAuthenticated, isAdmin, (req, res) => {
     const query = `
             SELECT 
-                ir.ProjectID,
+                p.ProjectID,
                 u.UserID AS user_id,
                 u.Email AS requestor_name,
                 u.Email,
                 u.ContactNumber,
                 u.Organisation,
                 u2.Email AS photographer_name,
-                ir.ImagingStartDate,
-                ir.ImagingEndDate
-            FROM Project ir
-            JOIN User u ON ir.ProjectOwnerID = u.UserID
-            JOIN ProjectUserPhotographyLink p ON ir.ProjectID = p.ProjectID
+                p.ImagingStartDate,
+                p.ImagingEndDate
+            FROM Project p
+            JOIN User u ON p.ProjectOwnerID = u.UserID
+            JOIN ProjectUserPhotographyLink p ON p.ProjectID = p.ProjectID
             JOIN User u2 ON p.PhotographerID = u2.UserID  
 
             WHERE 
-                ir.RequestStatus = 'approved' AND
+                p.RequestStatus = 'approved' AND
                 u.IsDeleted = 0 AND 
-                ir.IsDeleted = 0;
+                p.IsDeleted = 0;
 
       `;
 
@@ -102,17 +102,17 @@ router.get('/form/:projectId', isAuthenticated, isAdmin, (req, res) => {
 
     const query = `
       SELECT 
-        ir.ProjectID,
-        ir.ProjectOwnerID,
-        r.Name AS requestor_name,
+        p.ProjectID,
+        p.ProjectOwnerID,
+        projectOwner.Name AS requestor_name,
         u2.Email AS photographer_name
-      FROM Project ir
-      JOIN User r ON ir.ProjectOwnerID = r.UserID
-      JOIN ProjectUserPhotographyLink p ON ir.ProjectID = p.ProjectID
+      FROM Project p
+      JOIN User projectOwner ON p.ProjectOwnerID = projectOwner.UserID
+      JOIN ProjectUserPhotographyLink p ON p.ProjectID = p.ProjectID
       JOIN User u2 ON p.PhotographerID = u2.UserID  
 
 
-      WHERE ir.ProjectID = ? AND ir.IsDeleted = 0
+      WHERE p.ProjectID = ? AND p.IsDeleted = 0
     `;
 
     db.query(query, [projectId], (err, results) => {
@@ -295,13 +295,13 @@ router.get('/edit/:mediaId', isAuthenticated, isAdmin, (req, res) => {
         // Editing existing media
         const query = `
             SELECT m.*, 
-                   ir.ProjectOwnerID AS RequestorID,
+                   p.ProjectOwnerID AS RequestorID,
                    u1.Email AS requestor_name,
                    u2.Email AS photographer_name
             FROM Media m
-            JOIN Project ir ON m.ProjectID = ir.ProjectID
-            LEFT JOIN User u1 ON ir.ProjectOwnerID = u1.UserID
-            JOIN ProjectUserPhotographyLink p ON ir.ProjectID = p.ProjectID
+            JOIN Project p ON m.ProjectID = p.ProjectID
+            LEFT JOIN User u1 ON p.ProjectOwnerID = u1.UserID
+            JOIN ProjectUserPhotographyLink p ON p.ProjectID = p.ProjectID
             JOIN User u2 ON p.PhotographerID = u2.UserID  
 
             WHERE m.MediaID = ? AND m.IsDeleted = 0

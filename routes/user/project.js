@@ -37,15 +37,15 @@ router.get('/view-all-projects', isAuthenticated, async (req, res) => {
     const approvedUserId = userResult[0].UserID;
     const requestQuery = `
           SELECT 
-              ir.*,
-              r.Name AS requestor_name,
+              p.*,
+              projectOwner.Name AS requestor_name,
               photographer.Email AS photographer_name
-          FROM Project ir
-          LEFT JOIN User r ON ir.ProjectOwnerID = r.UserID
-          JOIN ProjectUserPhotographyLink irupl ON irupl.ProjectID = ir.ProjectID
+          FROM Project p
+          LEFT JOIN User projectOwner ON p.ProjectOwnerID = projectOwner.UserID
+          JOIN ProjectUserPhotographyLink irupl ON irupl.ProjectID = p.ProjectID
           JOIN User photographer on irupl.PhotographerID = photographer.UserID
-          WHERE ir.IsDeleted = 0 AND ir.ProjectOwnerID = ?
-          ORDER BY ir.CreatedDate DESC
+          WHERE p.IsDeleted = 0 AND p.ProjectOwnerID = ?
+          ORDER BY p.CreatedDate DESC
         `;
 
 
@@ -146,19 +146,21 @@ router.get('/view-project/:id', isAuthenticated, (req, res) => {
     const projectID = req.params.id;
     const query = `
         SELECT 
-            ir.*,
-            r.Name AS requestor_name,
-            photographer.Email AS photographer_name,
-            r.RequestStatus AS status_name,
+            p.*,
+            projectOwner.Name AS requestor_name,
+            projectOwner.Email,
+            photographer.Email,
+            photographer.Name AS photographer_name,
+            projectOwner.RequestStatus AS status_name,
             creator.Email AS creator_name,
             updater.Email AS updater_name
-        FROM Project ir
-        LEFT JOIN User r ON ir.ProjectOwnerID = r.UserID
-        JOIN ProjectUserPhotographyLink irupl ON irupl.ProjectID = ir.ProjectID
+        FROM Project p
+        LEFT JOIN User projectOwner ON p.ProjectOwnerID = projectOwner.UserID
+        JOIN ProjectUserPhotographyLink irupl ON irupl.ProjectID = p.ProjectID
         JOIN User photographer on irupl.PhotographerID = photographer.UserID
-        LEFT JOIN User creator ON ir.CreatedByID = creator.UserID
-        LEFT JOIN User updater ON ir.UpdatedByID = updater.UserID
-        WHERE ir.ProjectID = ?
+        LEFT JOIN User creator ON p.CreatedByID = creator.UserID
+        LEFT JOIN User updater ON p.UpdatedByID = updater.UserID
+        WHERE p.ProjectID = ?
     `;
 
     db.query(query, [projectID], (err, results) => {

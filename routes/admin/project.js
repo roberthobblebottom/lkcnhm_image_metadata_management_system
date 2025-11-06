@@ -36,21 +36,21 @@ router.get('/add-new-project', isAuthenticated, isAdmin, async (req, res) => {
 router.get('/view-all-projects', isAuthenticated, isAdmin, (req, res) => {
     const query = `
         SELECT 
-            ir.*,
-            r.Name AS requestorName,
-            r.Email,
+            p.*,
+            projectOwner.Name AS requestorName,
+            projectOwner.Email,
             photographer.Name AS photographerName,
             photographer.Email AS photographerEmail,
             cb.Name AS CreatedByName,
             ub.Name AS UpdatedByName
-        FROM Project ir
-        LEFT JOIN User r ON ir.ProjectOwnerID = r.UserID
-        JOIN ProjectUserPhotographyLink irupl ON irupl.ProjectID = ir.ProjectID
+        FROM Project p
+        LEFT JOIN User projectOwner ON p.ProjectOwnerID = r.UserID
+        JOIN ProjectUserPhotographyLink irupl ON irupl.ProjectID = p.ProjectID
         JOIN User photographer on irupl.PhotographerID = photographer.UserID
-        LEFT JOIN User cb ON ir.CreatedByID = cb.UserID
-        LEFT JOIN User ub ON ir.UpdatedByID = ub.UserID
-        WHERE ir.IsDeleted = 0
-        ORDER BY ir.CreatedDate DESC
+        LEFT JOIN User cb ON p.CreatedByID = cb.UserID
+        LEFT JOIN User ub ON p.UpdatedByID = ub.UserID
+        WHERE p.IsDeleted = 0
+        ORDER BY p.CreatedDate DESC
     `;
 
     console.log("📩 Fetching Projects...");
@@ -88,21 +88,21 @@ router.get('/view-project/:id', isAuthenticated, isAdmin, (req, res) => {
     const projectID = req.params.id;
     const query = `
         SELECT 
-            ir.*,
+            p.*,
             r.Email AS requestor_name,
             photographer.Email AS photographer_name,
-            ir.RequestStatus AS status_name,
+            p.RequestStatus AS status_name,
             creator.Email AS CreatorEmail,
             creator.Name AS CreatorName,
             updater.Email AS UpdaterEmail,
             updater.Name AS UpdaterName
-        FROM Project ir
-        LEFT JOIN User r ON ir.ProjectOwnerID = r.UserID
-        JOIN ProjectUserPhotographyLink irupl ON irupl.ProjectID = ir.ProjectID
+        FROM Project p
+        LEFT JOIN User projectOwner ON p.ProjectOwnerID = r.UserID
+        JOIN ProjectUserPhotographyLink irupl ON irupl.ProjectID = p.ProjectID
         JOIN User photographer on irupl.PhotographerID = photographer.UserID
-        LEFT JOIN User creator ON ir.CreatedByID = creator.UserID
-        LEFT JOIN User updater ON ir.UpdatedByID = updater.UserID
-        WHERE ir.ProjectID = ?
+        LEFT JOIN User creator ON p.CreatedByID = creator.UserID
+        LEFT JOIN User updater ON p.UpdatedByID = updater.UserID
+        WHERE p.ProjectID = ?
     `;
 
     db.query(query, [projectID], (err, results) => {
@@ -171,18 +171,18 @@ router.get('/edit-project/:id', isAuthenticated, isAdmin, async (req, res) => {
         const projectID = req.params.id;
         const requestQuery = `
             SELECT 
-                ir.*,
+                p.*,
                 requestor.Name AS RequestorName,
                 requestor.Email AS RequestorEmail,
                 requestor.UserID AS RequestorID,
                 photographer.Name AS PhotographerName,
                 photographer.Email AS PhotographerEmail,
                 photographer.UserID AS PhotographerUserID
-            FROM Project ir
-            JOIN User requestor ON ir.ProjectOwnerID = requestor.UserID
-            JOIN ProjectUserPhotographyLink i ON ir.ProjectID = i.ProjectID
+            FROM Project p
+            JOIN User projectOwner ON p.ProjectOwnerID = requestor.UserID
+            JOIN ProjectUserPhotographyLink i ON p.ProjectID = i.ProjectID
             JOIN User photographer ON i.PhotographerID = photographer.UserID 
-            WHERE ir.ProjectID = ?;
+            WHERE p.ProjectID = ?;
         `;
         // Get all needed data in parallel for better performance
         const [requestResults, photographerResults] = await Promise.all([
