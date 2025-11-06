@@ -117,9 +117,8 @@
 <body>
     <%- include(isAdmin ? '../partials/sidenav-admin.ejs' : '../partials/sidenav-user' ) %>
         <main>
-            <a href="/admin/project/view-all-projects"><button class="btn btn-secondary">Back to
-                    Imaging
-                    Requests</button></a>
+            <a href="/admin/project/view-all-projects"><button class="btn btn-secondary">Back to All
+                    Projects</button></a>
             <h1>Edit Project</h1>
 
             <form action="/admin/project/edit-project/<%= request.ProjectID %>" method="POST">

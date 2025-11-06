@@ -31,7 +31,7 @@ router.get('/view-all-media', isAuthenticated, isAdmin, (req, res) => {
         if (err) {
             console.error("Database error:", err);
             // Render the media page with empty results and error message
-            return res.render('media_managment_index', {
+            return res.render('media-managment-index', {
                 title: "Media Management - Error",
                 mediaRecords: [],
                 errorMessage: "Failed to load media data. Please try again later."
@@ -39,7 +39,7 @@ router.get('/view-all-media', isAuthenticated, isAdmin, (req, res) => {
         }
 
         // Successful query
-        res.render('media_managment_index', {
+        res.render('media-managment-index', {
             title: "Media Management",
             mediaRecords: results,
             message: req.session.message || null,
@@ -132,7 +132,7 @@ router.get('/form/:projectId', isAuthenticated, isAdmin, (req, res) => {
 
         const project = results[0];
 
-        res.render('media_form', {
+        res.render('media-form', {
             project,  // contains projectId, photographerId, requestorId + names
             title: 'Media Form'
         });
@@ -279,7 +279,7 @@ router.get('/view/:mediaId', isAuthenticated, isAdmin, (req, res) => {
             });
         }
 
-        res.render('media_view', {
+        res.render('media-view', {
             media: results[0], // Since we're querying by ID, we'll only get one record
             mediaId,
             title: "View Media",
@@ -315,7 +315,7 @@ router.get('/edit/:mediaId', isAuthenticated, isAdmin, (req, res) => {
                 });
             }
 
-            res.render('media_edit', {
+            res.render('media-edit', {
                 media: results[0],
                 editing: true,
                 project: {
@@ -330,7 +330,7 @@ router.get('/edit/:mediaId', isAuthenticated, isAdmin, (req, res) => {
     } else {
         // Creating new media - you'll need to pass project data
         // This part depends on how you're creating new media
-        res.render('media_edit', {
+        res.render('media-edit', {
             media: null,
             editing: false,
             project: req.query.project || {},

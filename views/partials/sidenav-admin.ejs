@@ -24,15 +24,12 @@
       <li><a href="/admin/project/view-all-projects"><i class="fas fa-file-medical"></i><span>Project
             Management</span></a></li>
       <li><a href="/admin/media/view-all-media"><i class="fas fa-image"></i><span>Media Management</span></a></li>
-      <!-- <li><a href="/media_request_admin"><i class="fas fa-image"></i><span>Media Management</span></a></li> -->
       <li><a href="/admin/change-password"><i class="fas fa-key"></i><span>Change Password</span></a></li>
       <li><a href="/auth/logout"><i class="fas fa-sign-out-alt"></i><span>Logout</span></a></li>
     </ul>
   </div>
   <script>
     document.addEventListener("DOMContentLoaded", function () {
-
-
       fetch("/api/current-user")
         .then(res => res.json())
         .then(data => {

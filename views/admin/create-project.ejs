@@ -114,6 +114,27 @@
       margin-right: 8px;
     }
 
+    .btn-primary {
+      background-color: #007bff;
+      color: white;
+    }
+
+    .btn-primary:hover {
+      background-color: #0056b3;
+    }
+
+    .btn-secondary {
+      background-color: #452dff;
+      color: white;
+      margin-top: 0px;
+      margin-bottom: 10px;
+
+    }
+
+    .btn-secondary:hover {
+      background-color: #431eff;
+    }
+
     /* Responsive Enhancements */
     @media (max-width: 600px) {
       form#projectForm {
@@ -132,8 +153,9 @@
 
   <%- include(isAdmin ? '../partials/sidenav-admin.ejs' : '../partials/sidenav-user' ) %>
     <main>
-      <h2>Project Form</h2>
 
+      <a href="/admin/project/view-all-projects"><button class="btn btn-secondary">Back to all Projects</button></a>
+      <h2>Create a New Project</h2>
       <form id="projectForm">
         <div class="form-group">
           <label for="requestor">Requestor Name</label>
@@ -141,7 +163,8 @@
             <option value="">Select Requestor</option>
             <% requestors.forEach(user=> { %>
               <option value="<%= user.UserID %>">
-                <%= user.Email %>
+                <%=user.Name%>
+                  <%= user.Email %>
               </option>
               <% }) %>
           </select>
@@ -154,7 +177,8 @@
             <option value="">Select Photographer</option>
             <% photographers.forEach(user=> { %>
               <option value="<%= user.UserID %>">
-                <%= user.Email %>
+                <%=user.Name%>
+                  <%= user.Email %>
               </option>
               <% }) %>
           </select>

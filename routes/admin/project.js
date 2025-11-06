@@ -91,7 +91,7 @@ router.get('/view-project/:id', isAuthenticated, isAdmin, (req, res) => {
             ir.*,
             r.Email AS requestor_name,
             photographer.Email AS photographer_name,
-            r.RequestStatus AS status_name,
+            ir.RequestStatus AS status_name,
             creator.Email AS CreatorEmail,
             creator.Name AS CreatorName,
             updater.Email AS UpdaterEmail,

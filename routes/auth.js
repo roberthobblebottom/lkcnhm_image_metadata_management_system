@@ -44,6 +44,7 @@ passport.serializeUser((user, done) => {
     process.nextTick(function () {
         return done(null, {
             UserID: user.UserID,
+            Name: user.Name,
             Email: user.Email,
             UserType: user.UserType
         })

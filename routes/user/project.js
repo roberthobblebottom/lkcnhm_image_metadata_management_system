@@ -196,4 +196,23 @@ router.get('/view-project/:id', isAuthenticated, (req, res) => {
 });
 
 
+router.get('/add-new-project', isAuthenticated, async (req, res) => {
+
+
+    const getPhotographers = `
+      SELECT u.UserID, u.Name,u.Email 
+      FROM User u
+        WHERE u.RequestStatus = 'approved'
+        AND u.IsDeleted = 0
+    `; // todo wrong user type id filter these are hard coded.
+
+    const [photographers] = await db.promise().query(getPhotographers);
+    res.render('user/create-project', {
+        requestor: req.session.passport.user,
+        photographers: photographers,
+        title: "Project Form",
+    });
+});
+
+
 module.exports = router;
