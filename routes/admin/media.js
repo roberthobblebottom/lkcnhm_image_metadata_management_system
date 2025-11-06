@@ -16,8 +16,8 @@ router.get('/view-all-media', isAuthenticated, isAdmin, (req, res) => {
         m.FileFormat,
         m.CreatedDate,
         p.ProjectID,
-        projectOwner.Name AS projectOwner_name,
-        u2.Email AS photographer_name
+        projectOwner.Name AS projectOwnerName,
+        u2.Email AS photographerName
       FROM Media m
       JOIN Project p ON m.ProjectID = p.ProjectID
       JOIN User projectOwner ON p.ProjectOwnerID = projectOwner.UserID
@@ -60,11 +60,11 @@ router.get('/select-user-for-media', isAuthenticated, isAdmin, (req, res) => {
             SELECT 
                 p.ProjectID,
                 u.UserID AS user_id,
-                u.Email AS projectOwner_name,
+                u.Email AS projectOwnerName,
                 u.Email,
                 u.ContactNumber,
                 u.Organisation,
-                u2.Email AS photographer_name,
+                u2.Email AS photographerName,
                 p.ImagingStartDate,
                 p.ImagingEndDate
             FROM Project p
@@ -104,8 +104,8 @@ router.get('/form/:projectId', isAuthenticated, isAdmin, (req, res) => {
       SELECT 
         p.ProjectID,
         p.ProjectOwnerID,
-        projectOwner.Name AS projectOwner_name,
-        u2.Email AS photographer_name
+        projectOwner.Name AS projectOwnerName,
+        u2.Email AS photographerName
       FROM Project p
       JOIN User projectOwner ON p.ProjectOwnerID = projectOwner.UserID
       JOIN ProjectUserPhotographyLink p ON p.ProjectID = p.ProjectID
@@ -296,8 +296,8 @@ router.get('/edit/:mediaId', isAuthenticated, isAdmin, (req, res) => {
         const query = `
             SELECT m.*, 
                    p.ProjectOwnerID AS RequestorID,
-                   u1.Email AS projectOwner_name,
-                   u2.Email AS photographer_name
+                   u1.Email AS projectOwnerName,
+                   u2.Email AS photographerName
             FROM Media m
             JOIN Project p ON m.ProjectID = p.ProjectID
             LEFT JOIN User u1 ON p.ProjectOwnerID = u1.UserID
@@ -322,8 +322,8 @@ router.get('/edit/:mediaId', isAuthenticated, isAdmin, (req, res) => {
                     ProjectID: results[0].ProjectID,
                     ProjectOwnerID: results[0].RequestorID,
                     PhotographerID: results[0].PhotographerID,
-                    projectOwner_name: results[0].projectOwner_name,
-                    photographer_name: results[0].photographer_name
+                    projectOwnerName: results[0].projectOwnerName,
+                    photographerName: results[0].photographerName
                 }
             });
         });

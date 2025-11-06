@@ -340,11 +340,11 @@
             <div class="request-header">
                 <h1 class="h3 mb-0">Project #<%= request.ProjectID %>
                 </h1>
-                <p class="text-muted mb-0">Created on <%= request.CreatedDate %> by <%= request.creator_name || 'System'
+                <p class="text-muted mb-0">Created on <%= request.CreatedDate %> by <%= request.creatorName || 'System'
                             %>
                 </p>
                 <% if (request.UpdatedDate) { %>
-                    <p class="text-muted">Last updated on <%= request.UpdatedDate %> by <%= request.updater_name
+                    <p class="text-muted">Last updated on <%= request.UpdatedDate %> by <%= request.updaterName
                                 || 'System' %>
                     </p>
                     <% } %>
@@ -358,14 +358,14 @@
                     <div class="detail-row">
                         <div class="detail-label">Requestor</div>
                         <div class="detail-value">
-                            <%= request.projectOwner_name %>
+                            <%= request.projectOwnerName %>
                         </div>
                     </div>
 
                     <div class="detail-row">
                         <div class="detail-label">Photographer</div>
                         <div class="detail-value">
-                            <%= request.photographer_name %>
+                            <%= request.photographerName %>
                         </div>
                     </div>
 
@@ -373,8 +373,8 @@
                         <div class="detail-label">Status</div>
                         <div class="detail-value">
                             <span
-                                class="badge bg-<%= request.status_name === 'approved' ? 'success' : request.status_name === 'rejected' ? 'danger' : 'warning' %>">
-                                <%= request.status_name %>
+                                class="badge bg-<%= request.statusName === 'approved' ? 'success' : request.statusName === 'rejected' ? 'danger' : 'warning' %>">
+                                <%= request.statusName %>
                             </span>
                         </div>
                     </div>

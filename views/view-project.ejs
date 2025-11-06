@@ -361,14 +361,14 @@
                         <div class="detail-row">
                             <div class="detail-label">Requestor</div>
                             <div class="detail-value">
-                                <%= request.projectOwner_name %>
+                                <%= request.projectOwnerName %>
                             </div>
                         </div>
 
                         <div class="detail-row">
                             <div class="detail-label">Photographer</div>
                             <div class="detail-value">
-                                <%= request.photographer_name %>
+                                <%= request.photographerName %>
                             </div>
                         </div>
 
@@ -376,8 +376,8 @@
                             <div class="detail-label">Status</div>
                             <div class="detail-value">
                                 <span
-                                    class="badge bg-<%= request.status_name === 'approved' ? 'success' : request.status_name === 'rejected' ? 'danger' : 'warning' %>">
-                                    <%= request.status_name %>
+                                    class="badge bg-<%= request.statusName === 'approved' ? 'success' : request.statusName === 'rejected' ? 'danger' : 'warning' %>">
+                                    <%= request.statusName %>
                                 </span>
                             </div>
                         </div>

@@ -5,8 +5,8 @@ const { isAuthenticated, isAdmin } = require("../../middleware/auth"); // Middle
 const { formatDate, formatDisplayDate, requestStatusTuple } = require("../../middleware/utils");
 
 router.get('/add-new-project', isAuthenticated, isAdmin, async (req, res) => {
-    const getRequestors = `
-      SELECT u.UserID, u.Email 
+    const getProjectOwners = `
+      SELECT u.UserID,u.Name, u.Email 
       FROM User u
       WHERE u.UserType IN ('projectOwner','admin')
         AND u.RequestStatus = 'approved'
@@ -14,13 +14,13 @@ router.get('/add-new-project', isAuthenticated, isAdmin, async (req, res) => {
     `; // TODO wrong usertypeid filter
 
     const getPhotographers = `
-      SELECT u.UserID, u.Email 
+      SELECT u.UserID,u.Name, u.Email 
       FROM User u
         WHERE u.RequestStatus = 'approved'
         AND u.IsDeleted = 0
     `; // todo wrong user type id filter these are hard coded.
 
-    const [projectOwners] = await db.promise().query(getRequestors);
+    const [projectOwners] = await db.promise().query(getProjectOwners);
     const [photographers] = await db.promise().query(getPhotographers);
     console.log(projectOwners)
     res.render('admin/create-project', {
@@ -89,9 +89,9 @@ router.get('/view-project/:id', isAuthenticated, isAdmin, (req, res) => {
     const query = `
         SELECT 
             p.*,
-            projectOwner.Email AS projectOwner_name,
-            photographer.Email AS photographer_name,
-            p.RequestStatus AS status_name,
+            projectOwner.Email AS projectOwnerName,
+            photographer.Email AS photographerName,
+            p.RequestStatus AS statusName,
             creator.Email AS CreatorEmail,
             creator.Name AS CreatorName,
             updater.Email AS UpdaterEmail,

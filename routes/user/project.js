@@ -38,8 +38,8 @@ router.get('/view-all-projects', isAuthenticated, async (req, res) => {
     const requestQuery = `
           SELECT 
               p.*,
-              projectOwner.Name AS projectOwner_name,
-              photographer.Email AS photographer_name
+              projectOwner.Name AS projectOwnerName,
+              photographer.Email AS photographerName
           FROM Project p
           LEFT JOIN User projectOwner ON p.ProjectOwnerID = projectOwner.UserID
           JOIN ProjectUserPhotographyLink irupl ON irupl.ProjectID = p.ProjectID
@@ -147,13 +147,13 @@ router.get('/view-project/:id', isAuthenticated, (req, res) => {
     const query = `
         SELECT 
             p.*,
-            projectOwner.Name AS projectOwner_name,
+            projectOwner.Name AS projectOwnerName,
             projectOwner.Email,
             photographer.Email,
-            photographer.Name AS photographer_name,
-            projectOwner.RequestStatus AS status_name,
-            creator.Email AS creator_name,
-            updater.Email AS updater_name
+            photographer.Name AS photographerName,
+            projectOwner.RequestStatus AS statusName,
+            creator.Email AS creatorName,
+            updater.Email AS updaterName
         FROM Project p
         LEFT JOIN User projectOwner ON p.ProjectOwnerID = projectOwner.UserID
         JOIN ProjectUserPhotographyLink irupl ON irupl.ProjectID = p.ProjectID

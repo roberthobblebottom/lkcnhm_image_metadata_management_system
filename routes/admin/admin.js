@@ -86,10 +86,10 @@ router.post('/change-password', isAuthenticated, (req, res) => {
 });
 
 router.get('/get-user', isAuthenticated, (req, res) => {
-    const getRequestors = "SELECT UserID, Email FROM User WHERE UserType = 'photographer'";
+    const getProjectOwners = "SELECT UserID, Email FROM User WHERE UserType = 'photographer'";
     const getPhotographers = "SELECT UserID, Email FROM User WHERE UserType = 'projectOwner'";
 
-    db.query(getRequestors, (err1, projectOwners) => {
+    db.query(getProjectOwners, (err1, projectOwners) => {
         if (err1) {
             console.error("Error loading projectOwners:", err1);
             return res.status(500).json({
