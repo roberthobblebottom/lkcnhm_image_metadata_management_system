@@ -44,7 +44,7 @@ router.get('/view-all-projects', isAuthenticated, isAdmin, (req, res) => {
             cb.Name AS CreatedByName,
             ub.Name AS UpdatedByName
         FROM Project p
-        LEFT JOIN User projectOwner ON p.ProjectOwnerID = r.UserID
+        LEFT JOIN User projectOwner ON p.ProjectOwnerID = projectOwner.UserID
         JOIN ProjectUserPhotographyLink irupl ON irupl.ProjectID = p.ProjectID
         JOIN User photographer on irupl.PhotographerID = photographer.UserID
         LEFT JOIN User cb ON p.CreatedByID = cb.UserID
@@ -89,7 +89,7 @@ router.get('/view-project/:id', isAuthenticated, isAdmin, (req, res) => {
     const query = `
         SELECT 
             p.*,
-            r.Email AS requestor_name,
+            projectOwner.Email AS requestor_name,
             photographer.Email AS photographer_name,
             p.RequestStatus AS status_name,
             creator.Email AS CreatorEmail,
@@ -97,7 +97,7 @@ router.get('/view-project/:id', isAuthenticated, isAdmin, (req, res) => {
             updater.Email AS UpdaterEmail,
             updater.Name AS UpdaterName
         FROM Project p
-        LEFT JOIN User projectOwner ON p.ProjectOwnerID = r.UserID
+        LEFT JOIN User projectOwner ON p.ProjectOwnerID = projectOwner.UserID
         JOIN ProjectUserPhotographyLink irupl ON irupl.ProjectID = p.ProjectID
         JOIN User photographer on irupl.PhotographerID = photographer.UserID
         LEFT JOIN User creator ON p.CreatedByID = creator.UserID
