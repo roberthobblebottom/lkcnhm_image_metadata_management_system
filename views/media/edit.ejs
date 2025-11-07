@@ -233,7 +233,7 @@
                     <%= editing ? 'Edit Media File' : 'Submit New Media File' %>
                 </h2>
 
-                <form id="mediaForm" action="/admin/view-all-media/save" method="POST">
+                <form id="mediaForm" action="/view-all-media/save" method="POST">
                     <!-- Hidden IDs -->
                     <% if (editing) { %>
                         <input type="hidden" name="MediaID" value="<%= media.MediaID %>">

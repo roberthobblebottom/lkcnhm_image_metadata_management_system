@@ -5,10 +5,9 @@ const session = require("express-session");
 const db = require("./routes/db");
 const authRoutes = require("./routes/auth");
 const adminRoutes = require('./routes/admin/admin');
-const adminMediaRoutes = require('./routes/admin/media');
+const mediaRoutes = require('./routes/media');
 const projectRoutes = require('./routes/project');
 const adminUserManagementRoutes = require('./routes/admin/user-management');
-const userProjectRoutes = require('./routes/user/project');
 const { isAuthenticated, isAdmin } = require("./middleware/auth");
 const passport = require("passport");
 const app = express();
@@ -35,10 +34,9 @@ app.use(passport.session())
 // ✅ API Routes
 app.use("/auth", authRoutes);
 app.use("/admin", adminRoutes);
-app.use("/admin/media", adminMediaRoutes);
+app.use("/media", mediaRoutes);
 app.use("/project", projectRoutes);
 app.use("/admin/user-management", adminUserManagementRoutes);
-app.use("/user/project", userProjectRoutes);
 
 // ✅ Serve HTML pages
 const serveHTML = (route, file) => {

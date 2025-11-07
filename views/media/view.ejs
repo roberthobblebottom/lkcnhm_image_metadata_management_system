@@ -140,12 +140,32 @@
     .media-details {
       animation: fadeIn 0.5s ease-out;
     }
+
+    .btn-primary {
+      background-color: #007bff;
+      border: none;
+      color: #fff;
+    }
+
+    .btn-primary:hover {
+      background-color: #0056b3;
+    }
+
+    .btn-warning {
+      background-color: #07daff;
+      border: none;
+      color: #212529;
+    }
+
+    .btn-warning:hover {
+      background-color: #e0a800;
+    }
   </style>
 </head>
 
 <body>
   <div class="main_con">
-    <%- include('partials/sidenav-admin') %>
+    <%- currentUser.UserType=='admin' ? include('../partials/sidenav-admin'): include('../partials/sidenav-user') %>
       <div class="media-container">
         <h2>📸 Media File Details - ID: <%= mediaId %>
         </h2>
@@ -196,7 +216,7 @@
           <div class="detail-row">
             <div class="detail-label">File Size:</div>
             <div class="detail-value">
-              <%= media.FileSize || '-' %>
+              <%= media.FileSizeBytes || '-' %> Bytes
             </div>
           </div>
 
@@ -238,7 +258,7 @@
           <div class="detail-row">
             <div class="detail-label">Created By:</div>
             <div class="detail-value">
-              <%= media.created_byName || 'Unknown' %>
+              <%= media.CreatedByName || 'Unknown' %>
             </div>
           </div>
 
@@ -271,6 +291,14 @@
                   <img src="<%= media.FilePath %>" alt="Media preview">
                 </div>
                 <% } %>
+                  <div class="mt-4 d-flex justify-content-between">
+                    <a href="/media/view-all" class="btn btn-primary">
+                      <i class="fas fa-arrow-left"></i> Back to Projects
+                    </a>
+                    <a href="/media/edit/<%= media.MediaId%>" class="btn btn-warning">
+                      <i class="fas fa-edit"></i> Edit Request
+                    </a>
+                  </div>
         </div>
       </div>
   </div>

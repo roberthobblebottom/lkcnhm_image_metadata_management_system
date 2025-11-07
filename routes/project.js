@@ -31,7 +31,7 @@ router.get('/create', isAuthenticated, async (req, res) => {
     });
 });
 
-//  for both admin and non admin
+//  for creation of new project
 router.post('/submit', isAuthenticated, async (req, res) => {
     console.log("in /submit-project")
     try {
@@ -154,7 +154,6 @@ router.post('/submit', isAuthenticated, async (req, res) => {
         });
     }
 });
-
 
 // Route to view projects
 router.get('/view-all', isAuthenticated, (req, res) => {
@@ -307,6 +306,7 @@ router.post('/delete/:id', isAuthenticated, (req, res) => {
     });
 });
 
+//undo soft delete
 router.post('/restore/:id', isAuthenticated, (req, res) => {
     const projectID = req.params.id;
     const query = `
@@ -327,6 +327,7 @@ router.post('/restore/:id', isAuthenticated, (req, res) => {
         res.redirect('/project/view-all');
     });
 });
+
 // Edit Project (GET)
 // Define queries at the top of your file for better maintainability
 router.get('/edit/:id', isAuthenticated, async (req, res) => {
@@ -376,7 +377,6 @@ router.get('/edit/:id', isAuthenticated, async (req, res) => {
         res.status(500).render('error', { message: 'Server error' });
     }
 });
-
 
 router.post('/edit/:id', isAuthenticated, async (req, res) => {
     try {

@@ -3,7 +3,7 @@
 
 <head>
   <meta charset="UTF-8" />
-  <title>Select Requestor</title>
+  <title></title>
   <link rel="stylesheet" href="/css/admin-users.css" />
   <style>
     body {
@@ -73,8 +73,8 @@
 
 <body>
   <div class="main_con">
-    <%- include('partials/sidenav-admin') %>
-      <h2>📸 Select Requestor for Media Entry</h2>
+    <%- currentUser.UserType=='admin' ? include('../partials/sidenav-admin'): include('../partials/sidenav-user') %>
+      <h2>📸 Firstly, Select project owner/photographer pair for Media Entry</h2>
 
       <% if (users.length===0) { %>
         <p class="no-data">No projects found.</p>
@@ -100,7 +100,7 @@
                     <%= row.projectOwnerName %>
                   </td>
                   <td>
-                    <%= row.photographerName %>
+                    <%= row.PhotographerName %>
                   </td>
                   <td>
                     <%= row.ImagingStartDate.toISOString().slice(0, 10) %>
@@ -109,7 +109,8 @@
                     <%= row.ImagingEndDate.toISOString().slice(0, 10) %>
                   </td>
                   <td>
-                    <a href="/admin/media/form/<%= row.ProjectID %>" class="btn-choose">Choose</a>
+                    <a href="/media/create-for-project/<%= row.ProjectID %>" class="btn-choose">add one</a>
+                    <a href="/media/csv-upload-for-project/<%= row.ProjectID %>" class="btn-choose">add many</a>
                   </td>
                 </tr>
                 <% }) %>

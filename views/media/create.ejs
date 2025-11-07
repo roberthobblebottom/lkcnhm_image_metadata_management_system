@@ -213,116 +213,116 @@
 
 <body>
   <div class="main_con">
-    <%- include('partials/sidenav-admin') %>
+    <%- currentUser.UserType=='admin' ? include('../partials/sidenav-admin'): include('../partials/sidenav-user') %>
       <!-- 📸 MEDIA SUBMISSION FORM (UPDATED) -->
-      <form action="/admin/media/submit" method="POST">
-        <h2>Media Submission Form</h2>
+      <form action="/media/submit" method="POST">
+        <h2>Then, enter new image metadata entry </h2>
+        <%= project.PhotographerID %> ttt
+          <!-- Hidden IDs -->
+          <input type="hidden" name="ProjectID" value="<%= project.ProjectID %>">
+          <input type="hidden" name="ProjectOwnerID" value="<%= project.ProjectOwnerID %>">
+          <input type="hidden" name="PhotographerID" value="<%= project.PhotographerID %>">
+          <!-- Requestor Name (readonly) -->
+          <div class="form-group">
+            <label>Project Owner Name</label>
+            <input type="text" value="<%= project.projectOwnerName %>" readonly>
+          </div>
 
-        <!-- Hidden IDs -->
-        <input type="hidden" name="ProjectID" value="<%= project.ProjectID %>">
-        <input type="hidden" name="RequestorID" value="<%= project.ProjectOwnerID %>">
-        <input type="hidden" name="PhotographerID" value="<%= project.PhotographerID %>">
+          <!-- Photographer Name (readonly) -->
+          <div class="form-group">
+            <label>Photographer Name</label>
+            <input type="text" value="<%= project.photographerName %>" readonly>
+          </div>
 
-        <!-- Requestor Name (readonly) -->
-        <div class="form-group">
-          <label>Requestor Name</label>
-          <input type="text" value="<%= project.projectOwnerName %>" readonly>
-        </div>
+          <!-- The rest of the form stays the same... -->
+          <div class="form-group">
+            <label for="mediaFileName">Media File Name</label>
+            <input type="text" name="mediaFileName" id="mediaFileName" required>
+          </div>
 
-        <!-- Photographer Name (readonly) -->
-        <div class="form-group">
-          <label>Photographer Name</label>
-          <input type="text" value="<%= project.photographerName %>" readonly>
-        </div>
+          <div class="form-group">
+            <label for="filePath">File Path</label>
+            <input type="text" name="filePath" id="filePath" required>
+          </div>
 
-        <!-- The rest of the form stays the same... -->
-        <div class="form-group">
-          <label for="mediaFileName">Media File Name</label>
-          <input type="text" name="mediaFileName" id="mediaFileName" required>
-        </div>
+          <div class="form-group">
+            <label for="catalogID">Catalog ID</label>
+            <input type="text" name="catalogID" id="catalogID" required>
+          </div>
 
-        <div class="form-group">
-          <label for="filePath">File Path</label>
-          <input type="text" name="filePath" id="filePath" required>
-        </div>
+          <div class="form-group">
+            <label for="morphoID">Morpho ID</label>
+            <input type="text" name="morphoID" id="morphoID" required>
+          </div>
 
-        <div class="form-group">
-          <label for="catalogID">Catalog ID</label>
-          <input type="text" name="catalogID" id="catalogID" required>
-        </div>
+          <div class="form-group">
+            <label for="clusterID">Cluster ID</label>
+            <input type="text" name="clusterID" id="clusterID" required>
+          </div>
 
-        <div class="form-group">
-          <label for="morphoID">Morpho ID</label>
-          <input type="text" name="morphoID" id="morphoID" required>
-        </div>
+          <div class="form-group">
+            <label for="imagingDate">Date of Imaging</label>
+            <input type="datetime-local" name="imagingDate" id="imagingDate" required>
+          </div>
 
-        <div class="form-group">
-          <label for="clusterID">Cluster ID</label>
-          <input type="text" name="clusterID" id="clusterID" required>
-        </div>
+          <div class="form-group">
+            <label for="resolution">Resolution</label>
+            <input type="text" name="resolution" id="resolution">
+          </div>
 
-        <div class="form-group">
-          <label for="imagingDate">Date of Imaging</label>
-          <input type="datetime-local" name="imagingDate" id="imagingDate" required>
-        </div>
+          <div class="form-group">
+            <label for="colorDepth">Color Depth</label>
+            <select name="colorDepth" id="colorDepth" required>
+              <option value="">Select Color Depth</option>
+              <option>1-bit (Monochrome)</option>
+              <option>8-bit (256 Colors)</option>
+              <option>16-bit (High Color)</option>
+              <option>24-bit (True Color)</option>
+              <option>32-bit (True Color with transparency)</option>
+              <option>48-bit</option>
+              <option>64-bit</option>
+            </select>
+          </div>
 
-        <div class="form-group">
-          <label for="resolution">Resolution</label>
-          <input type="text" name="resolution" id="resolution">
-        </div>
+          <div class="form-group">
+            <label for="fileSize">File Size</label>
+            <input type="text" name="fileSizeBytes" id="fileSizeBytes">
+          </div>
 
-        <div class="form-group">
-          <label for="colorDepth">Color Depth</label>
-          <select name="colorDepth" id="colorDepth" required>
-            <option value="">Select Color Depth</option>
-            <option>1-bit (Monochrome)</option>
-            <option>8-bit (256 Colors)</option>
-            <option>16-bit (High Color)</option>
-            <option>24-bit (True Color)</option>
-            <option>32-bit (True Color with transparency)</option>
-            <option>48-bit</option>
-            <option>64-bit</option>
-          </select>
-        </div>
+          <div class="form-group">
+            <label for="fileFormat">File Format</label>
+            <input type="text" name="fileFormat" id="fileFormat">
+          </div>
 
-        <div class="form-group">
-          <label for="fileSize">File Size</label>
-          <input type="text" name="fileSize" id="fileSize">
-        </div>
+          <div class="form-group">
+            <label for="description">Description of Image</label>
+            <textarea name="description" id="description" required></textarea>
+          </div>
 
-        <div class="form-group">
-          <label for="fileFormat">File Format</label>
-          <input type="text" name="fileFormat" id="fileFormat">
-        </div>
+          <div class="form-group">
+            <label for="cameraModel">Camera Model</label>
+            <input type="text" name="cameraModel" id="cameraModel" required>
+          </div>
 
-        <div class="form-group">
-          <label for="description">Description of Image</label>
-          <textarea name="description" id="description" required></textarea>
-        </div>
+          <div class="form-group">
+            <label for="imageEditingTool">Image Editing Tool</label>
+            <input type="text" name="imageEditingTool" id="imageEditingTool">
+          </div>
 
-        <div class="form-group">
-          <label for="cameraModel">Camera Model</label>
-          <input type="text" name="cameraModel" id="cameraModel" required>
-        </div>
-
-        <div class="form-group">
-          <label for="imageEditingTool">Image Editing Tool</label>
-          <input type="text" name="imageEditingTool" id="imageEditingTool">
-        </div>
-
-        <div class="form-group">
-          <label for="comments">Comments</label>
-          <textarea name="comments" id="comments"></textarea>
-        </div>
-
+          <div class="form-group">
+            <label for="comments">Comments</label>
+            <textarea name="comments" id="comments"></textarea>
+          </div>
 
 
-        <p class="note">
-          💡 Note: If there is more than one image for a specimen, submit this form multiple times with different image
-          details.
-        </p>
 
-        <button type="submit" class="submit-btn">Submit Media</button>
+          <p class="note">
+            💡 Note: If there is more than one image for a specimen, submit this form multiple times with different
+            image
+            details.
+          </p>
+
+          <button type="submit" class="submit-btn">Submit Media</button>
       </form>
   </div>
   <script>

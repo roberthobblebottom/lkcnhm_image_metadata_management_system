@@ -1,10 +1,18 @@
 const express = require("express");
 const router = express.Router();
-const db = require("../db"); // Database connection
-const { isAuthenticated, isAdmin } = require("../../middleware/auth"); // Middleware
+const db = require("./db"); // Database connection
+const { isAuthenticated, isAdmin } = require("../middleware/auth"); // Middleware
+
+// router.get('/create', isAuthenticated, async (req, res) => {
+
+//     res.render('media/create', {
+//         currentUser: req.session.passport.user,
+//         title: "Media Form"
+//     });
+// });
 
 // ✅ Admin Media Management Main Page Controller
-router.get('/view-all-media', isAuthenticated, isAdmin, (req, res) => {
+router.get('/view-all', isAuthenticated, (req, res) => {
     const query = `
       SELECT 
         m.MediaID,
@@ -17,12 +25,14 @@ router.get('/view-all-media', isAuthenticated, isAdmin, (req, res) => {
         m.CreatedDate,
         p.ProjectID,
         projectOwner.Name AS projectOwnerName,
-        u2.Email AS photographerName
+        projectOwner.Email as projectOwnerEmail,
+        photographer.Email AS photographerEmail,
+        photographer.Name As phtographerName
       FROM Media m
       JOIN Project p ON m.ProjectID = p.ProjectID
       JOIN User projectOwner ON p.ProjectOwnerID = projectOwner.UserID
-      JOIN ProjectUserPhotographyLink p ON p.ProjectID = p.ProjectID
-      JOIN User u2 ON p.PhotographerID = u2.UserID  
+      JOIN ProjectUserPhotographyLink pupl ON pupl.ProjectID = p.ProjectID
+      JOIN User photographer ON pupl.PhotographerID = photographer.UserID  
       WHERE m.IsDeleted = 0
       ORDER BY m.CreatedDate DESC
     `;
@@ -39,10 +49,11 @@ router.get('/view-all-media', isAuthenticated, isAdmin, (req, res) => {
         }
 
         // Successful query
-        res.render('media-managment-index', {
+        res.render('media/view-all', {
             title: "Media Management",
             mediaRecords: results,
             message: req.session.message || null,
+            currentUser: req.session.passport.user,
             title: "Admin Media "   // For success messages
         });
 
@@ -55,27 +66,29 @@ router.get('/view-all-media', isAuthenticated, isAdmin, (req, res) => {
 
 
 
-router.get('/select-user-for-media', isAuthenticated, isAdmin, (req, res) => {
+router.get('/select-user-for', isAuthenticated, (req, res) => {
     const query = `
             SELECT 
                 p.ProjectID,
                 u.UserID AS user_id,
-                u.Email AS projectOwnerName,
+                u.Name AS projectOwnerName,
                 u.Email,
                 u.ContactNumber,
                 u.Organisation,
-                u2.Email AS photographerName,
+                photographer.Name as photographerName,
+                photographer.UserID as PhotographerID,
                 p.ImagingStartDate,
                 p.ImagingEndDate
             FROM Project p
             JOIN User u ON p.ProjectOwnerID = u.UserID
-            JOIN ProjectUserPhotographyLink p ON p.ProjectID = p.ProjectID
-            JOIN User u2 ON p.PhotographerID = u2.UserID  
+            JOIN ProjectUserPhotographyLink pupl ON pupl.ProjectID = p.ProjectID
+            JOIN User photographer ON pupl.PhotographerID = photographer.UserID  
 
             WHERE 
                 p.RequestStatus = 'approved' AND
                 u.IsDeleted = 0 AND 
-                p.IsDeleted = 0;
+                p.IsDeleted = 0 AND
+                photographer.IsDeleted = 0;
 
       `;
 
@@ -88,8 +101,9 @@ router.get('/select-user-for-media', isAuthenticated, isAdmin, (req, res) => {
 
         console.log(`📋 Found ${users.length} eligible users`);
         // console.log("📋 User:", users);
-        res.render('media-user-list', {
+        res.render('media/user-list', {
             users,
+            currentUser: req.session.passport.user,
             title: 'Media Image List'
         });
     });
@@ -97,7 +111,7 @@ router.get('/select-user-for-media', isAuthenticated, isAdmin, (req, res) => {
 
 
 
-router.get('/form/:projectId', isAuthenticated, isAdmin, (req, res) => {
+router.get('/create-for-project/:projectId', isAuthenticated, (req, res) => {
     const projectId = req.params.projectId;
 
     const query = `
@@ -105,11 +119,12 @@ router.get('/form/:projectId', isAuthenticated, isAdmin, (req, res) => {
         p.ProjectID,
         p.ProjectOwnerID,
         projectOwner.Name AS projectOwnerName,
-        u2.Email AS photographerName
+        photographer.Email AS photographerName,
+        photographer.UserID AS PhotographerID 
       FROM Project p
       JOIN User projectOwner ON p.ProjectOwnerID = projectOwner.UserID
-      JOIN ProjectUserPhotographyLink p ON p.ProjectID = p.ProjectID
-      JOIN User u2 ON p.PhotographerID = u2.UserID  
+      JOIN ProjectUserPhotographyLink pupl ON pupl.ProjectID = p.ProjectID
+      JOIN User photographer ON pupl.PhotographerID = photographer.UserID  
 
 
       WHERE p.ProjectID = ? AND p.IsDeleted = 0
@@ -132,7 +147,8 @@ router.get('/form/:projectId', isAuthenticated, isAdmin, (req, res) => {
 
         const project = results[0];
 
-        res.render('media-form', {
+        res.render('media/create', {
+            currentUser: req.session.passport.user,
             project,  // contains projectId, photographerId, projectOwnerId + names
             title: 'Media Form'
         });
@@ -141,11 +157,11 @@ router.get('/form/:projectId', isAuthenticated, isAdmin, (req, res) => {
 
 
 
-router.post('/submit', isAuthenticated, isAdmin, async (req, res) => {
+router.post('/submit', isAuthenticated, async (req, res) => {
     try {
         const {
             ProjectID,
-            RequestorID,
+            ProjectOwnerID,
             PhotographerID,
             mediaFileName,
             filePath,
@@ -155,7 +171,7 @@ router.post('/submit', isAuthenticated, isAdmin, async (req, res) => {
             imagingDate,
             resolution,
             colorDepth,
-            fileSize,
+            fileSizeBytes,
             fileFormat,
             description,
             cameraModel,
@@ -165,11 +181,11 @@ router.post('/submit', isAuthenticated, isAdmin, async (req, res) => {
 
         console.log("📤 Media submission data:", req.body);
         const createdBy = req.session.passport.user.UserID;
-
+        const updatedBy = createdBy;
         // Validation: required fields
         const missingFields = [];
         if (!ProjectID) missingFields.push("ProjectID");
-        if (!RequestorID) missingFields.push("RequestorID");
+        if (!ProjectOwnerID) missingFields.push("RequestorID");
         if (!PhotographerID) missingFields.push("PhotographerID");
         if (!mediaFileName || !mediaFileName.includes(".")) missingFields.push("mediaFileName");
         if (!filePath) missingFields.push("filePath");
@@ -199,7 +215,7 @@ router.post('/submit', isAuthenticated, isAdmin, async (req, res) => {
         ImagingDate,
         Resolution,
         ColorDepth,
-        FileSize,
+        FileSizeBytes,
         FileFormat,
         Description,
         CameraModel,
@@ -209,7 +225,7 @@ router.post('/submit', isAuthenticated, isAdmin, async (req, res) => {
         CreatedByID,
         UpdatedDate,
         UpdatedByID
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW(), ?, NULL, NULL)
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW(), ?, NOW(),?)
     `;
 
         const values = [
@@ -223,13 +239,14 @@ router.post('/submit', isAuthenticated, isAdmin, async (req, res) => {
             imagingDate,
             resolution || null,
             colorDepth || null,
-            fileSize || null,
+            fileSizeBytes || null,
             fileFormat || null,
             description,
             cameraModel,
             imageEditingTool || null,
             comments || null,
-            createdBy
+            createdBy,
+            updatedBy
         ];
 
         const [result] = await db.promise().query(insertQuery, values);
@@ -237,7 +254,7 @@ router.post('/submit', isAuthenticated, isAdmin, async (req, res) => {
         console.log("✅ Media submitted successfully, ID:", result.insertId);
 
 
-        res.redirect(`/admin/view-all-media/view/${result.insertId}`);
+        res.redirect(`/media/view/${result.insertId}`);
 
     } catch (error) {
         console.error("❌ Media submission failed:", error);
@@ -249,7 +266,7 @@ router.post('/submit', isAuthenticated, isAdmin, async (req, res) => {
     }
 });
 
-router.get('/view/:mediaId', isAuthenticated, isAdmin, (req, res) => {
+router.get('/view/:mediaId', isAuthenticated, (req, res) => {
     const mediaId = req.params.mediaId;
 
     const query = `
@@ -278,8 +295,9 @@ router.get('/view/:mediaId', isAuthenticated, isAdmin, (req, res) => {
                 message: 'Media record not found'
             });
         }
-
-        res.render('media-view', {
+        console.log(results[0])
+        res.render('media/view', {
+            currentUser: req.session.passport.user,
             media: results[0], // Since we're querying by ID, we'll only get one record
             mediaId,
             title: "View Media",
@@ -288,7 +306,7 @@ router.get('/view/:mediaId', isAuthenticated, isAdmin, (req, res) => {
 });
 
 // Controller for rendering the edit form
-router.get('/edit/:mediaId', isAuthenticated, isAdmin, (req, res) => {
+router.get('/edit/:mediaId', isAuthenticated, (req, res) => {
     const mediaId = req.params.mediaId;
 
     if (mediaId) {
@@ -297,12 +315,12 @@ router.get('/edit/:mediaId', isAuthenticated, isAdmin, (req, res) => {
             SELECT m.*, 
                    p.ProjectOwnerID AS RequestorID,
                    u1.Email AS projectOwnerName,
-                   u2.Email AS photographerName
+                   photographer.Email AS photographerName
             FROM Media m
             JOIN Project p ON m.ProjectID = p.ProjectID
             LEFT JOIN User u1 ON p.ProjectOwnerID = u1.UserID
             JOIN ProjectUserPhotographyLink p ON p.ProjectID = p.ProjectID
-            JOIN User u2 ON p.PhotographerID = u2.UserID  
+            JOIN User photographer ON p.PhotographerID = photgrapher.UserID  
 
             WHERE m.MediaID = ? AND m.IsDeleted = 0
         `;
@@ -340,7 +358,7 @@ router.get('/edit/:mediaId', isAuthenticated, isAdmin, (req, res) => {
 });
 
 // Controller for handling form submission
-router.post('/save', isAuthenticated, isAdmin, (req, res) => {
+router.post('/save', isAuthenticated, (req, res) => {
     const mediaData = req.body;
 
     const isEdit = mediaData.MediaID !== '';
@@ -437,7 +455,7 @@ router.post('/save', isAuthenticated, isAdmin, (req, res) => {
 });
 
 // Soft delete media by setting IsDelete = 1 and redirect
-router.post('/delete/:mediaId', isAuthenticated, isAdmin, (req, res) => {
+router.post('/delete/:mediaId', isAuthenticated, (req, res) => {
     const mediaId = req.params.mediaId;
     const userId = req.session.passport.user.UserID;
 
@@ -448,7 +466,7 @@ router.post('/delete/:mediaId', isAuthenticated, isAdmin, (req, res) => {
         .then(([results]) => {
             if (results.length === 0) {
                 req.flash('error', 'Media not found or already deleted');
-                return res.redirect('/admin/media');
+                return res.redirect('/media/view-all');
             }
 
             // Perform soft delete
@@ -464,12 +482,12 @@ router.post('/delete/:mediaId', isAuthenticated, isAdmin, (req, res) => {
         })
         .then(() => {
             // req.flash('success', 'Media has been archived successfully');
-            res.redirect('/admin/media');
+            res.redirect('/media/view-all');
         })
         .catch(error => {
             console.error("❌ Error soft deleting media:", error);
             req.flash('error', 'Error archiving media');
-            res.redirect('/admin/media');
+            res.redirect('/media/view-all');
         });
 });
 module.exports = router;
