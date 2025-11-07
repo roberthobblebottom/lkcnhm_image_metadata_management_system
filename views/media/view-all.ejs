@@ -131,10 +131,12 @@
                     <%= record.ProjectID || 'Not specified' %>
                   </td>
                   <td>
-                    <%= record.projectOwnerName || 'Not specified' %>
+                    <%= record.projectOwnerName %>
+                      <%= record.projectOwnerEmail%>
                   </td>
                   <td>
-                    <%= record.photographerName || 'Not specified' %>
+                    <%= record.photographerName%>
+                      <%=record.photographerEmail%>
                   </td>
                   <td>
                     <%= record.MediaFileName || 'Not specified' %>

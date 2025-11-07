@@ -166,6 +166,20 @@
       margin-left: 4px;
     }
 
+    .btn {
+      display: inline-block;
+      background: #007bff;
+      color: white;
+      padding: 10px 16px;
+      border: none;
+      border-radius: 6px;
+      text-decoration: none;
+      font-weight: 600;
+      float: left;
+      margin-top: 50px;
+      margin-bottom: 50px;
+    }
+
     /* Responsive Adjustments */
     @media (max-width: 768px) {
       form {
@@ -206,6 +220,25 @@
     /* input:invalid, select:invalid, textarea:invalid {
   border-color: red;
 } */
+    .btn-primary {
+      background-color: #007bff;
+      border: none;
+      color: #fff;
+    }
+
+    .btn-primary:hover {
+      background-color: #0056b3;
+    }
+
+    .btn-warning {
+      background-color: #07daff;
+      border: none;
+      color: #212529;
+    }
+
+    .btn-warning:hover {
+      background-color: #e0a800;
+    }
   </style>
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
@@ -216,149 +249,152 @@
     <%- currentUser.UserType=='admin' ? include('../partials/sidenav-admin'): include('../partials/sidenav-user') %>
       <!-- 📸 MEDIA SUBMISSION FORM (UPDATED) -->
       <form action="/media/submit" method="POST">
+        <a href="/media/view-all" class="btn btn-primary">
+          <i class="fas fa-arrow-left"></i> Back to view all media
+        </a>
         <h2>Then, enter new image metadata entry </h2>
-        <%= project.PhotographerID %> ttt
-          <!-- Hidden IDs -->
-          <input type="hidden" name="ProjectID" value="<%= project.ProjectID %>">
-          <input type="hidden" name="ProjectOwnerID" value="<%= project.ProjectOwnerID %>">
-          <input type="hidden" name="PhotographerID" value="<%= project.PhotographerID %>">
-          <!-- Requestor Name (readonly) -->
-          <div class="form-group">
-            <label>Project Owner Name</label>
-            <input type="text" value="<%= project.projectOwnerName %>" readonly>
-          </div>
+        <!-- Hidden IDs -->
+        <input type="hidden" name="ProjectID" value="<%= project.ProjectID %>">
+        <input type="hidden" name="ProjectOwnerID" value="<%= project.ProjectOwnerID %>">
+        <input type="hidden" name="PhotographerID" value="<%= project.PhotographerID %>">
+        <!-- Requestor Name (readonly) -->
+        <div class="form-group">
+          <label>Project Owner Name</label>
+          <input type="text" value="<%= project.projectOwnerName %>" readonly>
+        </div>
 
-          <!-- Photographer Name (readonly) -->
-          <div class="form-group">
-            <label>Photographer Name</label>
-            <input type="text" value="<%= project.photographerName %>" readonly>
-          </div>
+        <!-- Photographer Name (readonly) -->
+        <div class="form-group">
+          <label>Photographer Name</label>
+          <input type="text" value="<%= project.photographerName %>" readonly>
+        </div>
 
-          <!-- The rest of the form stays the same... -->
-          <div class="form-group">
-            <label for="mediaFileName">Media File Name</label>
-            <input type="text" name="mediaFileName" id="mediaFileName" required>
-          </div>
+        <!-- The rest of the form stays the same... -->
+        <div class="form-group">
+          <label for="mediaFileName">Media File Name</label>
+          <input type="text" name="mediaFileName" id="mediaFileName" required>
+        </div>
 
-          <div class="form-group">
-            <label for="filePath">File Path</label>
-            <input type="text" name="filePath" id="filePath" required>
-          </div>
+        <div class="form-group">
+          <label for="filePath">File Path</label>
+          <input type="text" name="filePath" id="filePath" required>
+        </div>
 
-          <div class="form-group">
-            <label for="catalogID">Catalog ID</label>
-            <input type="text" name="catalogID" id="catalogID" required>
-          </div>
+        <div class="form-group">
+          <label for="catalogID">Catalog ID</label>
+          <input type="text" name="catalogID" id="catalogID" required>
+        </div>
 
-          <div class="form-group">
-            <label for="morphoID">Morpho ID</label>
-            <input type="text" name="morphoID" id="morphoID" required>
-          </div>
+        <div class="form-group">
+          <label for="morphoID">Morpho ID</label>
+          <input type="text" name="morphoID" id="morphoID" required>
+        </div>
 
-          <div class="form-group">
-            <label for="clusterID">Cluster ID</label>
-            <input type="text" name="clusterID" id="clusterID" required>
-          </div>
+        <div class="form-group">
+          <label for="clusterID">Cluster ID</label>
+          <input type="text" name="clusterID" id="clusterID" required>
+        </div>
 
-          <div class="form-group">
-            <label for="imagingDate">Date of Imaging</label>
-            <input type="datetime-local" name="imagingDate" id="imagingDate" required>
-          </div>
+        <div class="form-group">
+          <label for="imagingDate">Date of Imaging</label>
+          <input type="datetime-local" name="imagingDate" id="imagingDate" required>
+        </div>
 
-          <div class="form-group">
-            <label for="resolution">Resolution</label>
-            <input type="text" name="resolution" id="resolution">
-          </div>
+        <div class="form-group">
+          <label for="resolution">Resolution</label>
+          <input type="text" name="resolution" id="resolution">
+        </div>
 
-          <div class="form-group">
-            <label for="colorDepth">Color Depth</label>
-            <select name="colorDepth" id="colorDepth" required>
-              <option value="">Select Color Depth</option>
-              <option>1-bit (Monochrome)</option>
-              <option>8-bit (256 Colors)</option>
-              <option>16-bit (High Color)</option>
-              <option>24-bit (True Color)</option>
-              <option>32-bit (True Color with transparency)</option>
-              <option>48-bit</option>
-              <option>64-bit</option>
-            </select>
-          </div>
+        <!-- <div class="form-group">
+          <label for="colorDepth">Color Depth</label>
+          <select name="colorDepth" id="colorDepth" required>
+            <option value="">Select Color Depth</option>
+            <option>1-bit (Monochrome)</option>
+            <option>8-bit (256 Colors)</option>
+            <option>16-bit (High Color)</option>
+            <option>24-bit (True Color)</option>
+            <option>32-bit (True Color with transparency)</option>
+            <option>48-bit</option>
+            <option>64-bit</option>
+          </select>
+        </div> -->
 
-          <div class="form-group">
-            <label for="fileSize">File Size</label>
-            <input type="text" name="fileSizeBytes" id="fileSizeBytes">
-          </div>
+        <div class="form-group">
+          <label for="fileSize">File Size in Bytes</label>
+          <input type="number" name="fileSizeBytes" id="fileSizeBytes">
+        </div>
 
-          <div class="form-group">
-            <label for="fileFormat">File Format</label>
-            <input type="text" name="fileFormat" id="fileFormat">
-          </div>
+        <div class="form-group">
+          <label for="fileFormat">File Format</label>
+          <input type="text" name="fileFormat" id="fileFormat">
+        </div>
 
-          <div class="form-group">
-            <label for="description">Description of Image</label>
-            <textarea name="description" id="description" required></textarea>
-          </div>
+        <div class="form-group">
+          <label for="description">Description of Image</label>
+          <textarea name="description" id="description" required></textarea>
+        </div>
 
-          <div class="form-group">
-            <label for="cameraModel">Camera Model</label>
-            <input type="text" name="cameraModel" id="cameraModel" required>
-          </div>
+        <div class="form-group">
+          <label for="cameraModel">Camera Model</label>
+          <input type="text" name="cameraModel" id="cameraModel" required>
+        </div>
 
-          <div class="form-group">
-            <label for="imageEditingTool">Image Editing Tool</label>
-            <input type="text" name="imageEditingTool" id="imageEditingTool">
-          </div>
+        <div class="form-group">
+          <label for="imageEditingTool">Image Editing Tool</label>
+          <input type="text" name="imageEditingTool" id="imageEditingTool">
+        </div>
 
-          <div class="form-group">
-            <label for="comments">Comments</label>
-            <textarea name="comments" id="comments"></textarea>
-          </div>
-
+        <div class="form-group">
+          <label for="comments">Comments</label>
+          <textarea name="comments" id="comments"></textarea>
+        </div>
 
 
-          <p class="note">
-            💡 Note: If there is more than one image for a specimen, submit this form multiple times with different
-            image
-            details.
-          </p>
 
-          <button type="submit" class="submit-btn">Submit Media</button>
+        <p class="note">
+          💡 Note: If there is more than one image for a specimen, submit this form multiple times with different
+          image
+          details.
+        </p>
+
+        <button type="submit" class="submit-btn">Submit Media</button>
       </form>
+
   </div>
   <script>
     document.addEventListener("DOMContentLoaded", () => {
       const form = document.querySelector("form");
       const fileNameInput = document.getElementById("mediaFileName");
 
-      const validExtensions = [".jpg", ".jpeg", ".png", ".gif", ".tiff", ".bmp", ".svg"];
+      const validExtensions = [".jpg", ".jpeg", ".png", ".gif", ".tiff", ".bmp", ".svg", ".raw"];
 
       // Check for a valid file extension
-      function isValidFileName(filename) {
-        if (!filename) return false;
-        const lower = filename.toLowerCase();
-        return validExtensions.some(ext => lower.endsWith(ext));
-      }
+      // function isValidFileName(filename) {
+      //   if (!filename) return false;
+      //   const lower = filename.toLowerCase();
+      //   return validExtensions.some(ext => lower.endsWith(ext));
+      // }
 
       form.addEventListener("submit", (e) => {
         const fileName = fileNameInput.value.trim();
         let errorMessages = [];
 
-        if (!isValidFileName(fileName)) {
-          errorMessages.push("📁 The media file name must include a valid extension like `.jpg`, `.png`, `.tiff`, etc.");
-          fileNameInput.style.borderColor = "red";
-        } else {
-          fileNameInput.style.borderColor = "";
-        }
-        const colorDepth = document.getElementById("colorDepth").value;
-        if (!colorDepth) {
-          Swal.fire({
-            icon: "warning",
-            title: "Color Depth Required",
-            text: "Please select a valid color depth option before submitting.",
-            confirmButtonColor: "#007bff"
-          });
-          return; // Stop form submission
-        }
+        // if (!isValidFileName(fileName)) {
+        //   errorMessages.push("📁 The media file name must include a valid extension like `.jpg`, `.png`, `.tiff`, etc.");
+        //   fileNameInput.style.borderColor = "red";
+        // } else {
+        //   fileNameInput.style.borderColor = "";
+        // }
+        // const colorDepth = document.getElementById("colorDepth").value;
+        // if (!colorDepth) {
+        //   Swal.fire({
+        //     icon: "warning",
+        //     title: "Color Depth Required",
+        //     text: "Please select a valid color depth option before submitting.",
+        //     confirmButtonColor: "#007bff"
+        //   });
+        //   return; // Stop form submission
+        // }
 
 
         if (errorMessages.length > 0) {

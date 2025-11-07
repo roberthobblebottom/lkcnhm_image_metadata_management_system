@@ -68,12 +68,49 @@
       margin-left: 600px;
 
     }
+
+    .btn-primary {
+      background-color: #007bff;
+      border: none;
+      color: #fff;
+    }
+
+    .btn-primary:hover {
+      background-color: #0056b3;
+    }
+
+    .btn-warning {
+      background-color: #07daff;
+      border: none;
+      color: #212529;
+    }
+
+    .btn-warning:hover {
+      background-color: #e0a800;
+    }
+
+    .btn {
+      display: inline-block;
+      background: #007bff;
+      color: white;
+      padding: 10px 16px;
+      border: none;
+      border-radius: 6px;
+      text-decoration: none;
+      font-weight: 600;
+      float: left;
+      margin-top: 50px;
+      margin-bottom: 50px;
+    }
   </style>
 </head>
 
 <body>
   <div class="main_con">
     <%- currentUser.UserType=='admin' ? include('../partials/sidenav-admin'): include('../partials/sidenav-user') %>
+      <a href="/media/view-all" class="btn btn-primary">
+        <i class="fas fa-arrow-left"></i> Back to view all media
+      </a>
       <h2>📸 Firstly, Select project owner/photographer pair for Media Entry</h2>
 
       <% if (users.length===0) { %>
@@ -82,8 +119,8 @@
           <table>
             <thead>
               <tr>
-                <th>ID</th>
-                <th>Requestor Name</th>
+                <th>Project ID</th>
+                <th>Project Owner Name</th>
                 <th>Photographer</th>
                 <th>Start Date</th>
                 <th>End Date</th>
@@ -98,9 +135,11 @@
                   </td>
                   <td>
                     <%= row.projectOwnerName %>
+                      <%=row.projectOwnerEmail%>
                   </td>
                   <td>
-                    <%= row.PhotographerName %>
+                    <%= row.photographerName %>
+                      <%=row.photographerEmail%>
                   </td>
                   <td>
                     <%= row.ImagingStartDate.toISOString().slice(0, 10) %>
@@ -116,6 +155,7 @@
                 <% }) %>
             </tbody>
           </table>
+
           <% } %>
 
   </div>

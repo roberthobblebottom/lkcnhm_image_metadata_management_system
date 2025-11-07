@@ -27,7 +27,7 @@ router.get('/view-all', isAuthenticated, (req, res) => {
         projectOwner.Name AS projectOwnerName,
         projectOwner.Email as projectOwnerEmail,
         photographer.Email AS photographerEmail,
-        photographer.Name As phtographerName
+        photographer.Name As photographerName
       FROM Media m
       JOIN Project p ON m.ProjectID = p.ProjectID
       JOIN User projectOwner ON p.ProjectOwnerID = projectOwner.UserID
@@ -72,10 +72,11 @@ router.get('/select-user-for', isAuthenticated, (req, res) => {
                 p.ProjectID,
                 u.UserID AS user_id,
                 u.Name AS projectOwnerName,
-                u.Email,
+                u.Email AS projectOwnerEmail,
                 u.ContactNumber,
                 u.Organisation,
                 photographer.Name as photographerName,
+                photographer.Email as photographerEmail,
                 photographer.UserID as PhotographerID,
                 p.ImagingStartDate,
                 p.ImagingEndDate
@@ -187,7 +188,7 @@ router.post('/submit', isAuthenticated, async (req, res) => {
         if (!ProjectID) missingFields.push("ProjectID");
         if (!ProjectOwnerID) missingFields.push("RequestorID");
         if (!PhotographerID) missingFields.push("PhotographerID");
-        if (!mediaFileName || !mediaFileName.includes(".")) missingFields.push("mediaFileName");
+        if (!mediaFileName) missingFields.push("mediaFileName");
         if (!filePath) missingFields.push("filePath");
         if (!catalogID) missingFields.push("catalogID");
         if (!morphoID) missingFields.push("morphoID");

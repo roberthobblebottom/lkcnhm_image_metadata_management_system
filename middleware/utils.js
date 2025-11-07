@@ -20,4 +20,23 @@ const requestStatusTuple = () => {
     return { approved: 'approved', rejected: 'rejected', pending: 'pending' }
 };
 
-module.exports = { formatDate, formatDisplayDate, requestStatusTuple };
+const mediaFormats = () => {
+    return {
+        jpg: ".jpg", jpeg: ".jpeg", png: ".png", gif: ".gif",
+        tiff: ".tiff", bmp: ".bmp", svg: ".svg", raw: ".raw"
+    };
+}
+
+const cameraModels = () => {
+    return {
+        nikon: "nikon", sony: "sony", canon: "canon"
+    };
+}
+
+const imageEditingTools = () => {
+    return {
+        photoshop: "photoshop"
+    }
+}
+
+module.exports = { formatDate, formatDisplayDate, requestStatusTuple, mediaFormats };

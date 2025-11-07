@@ -59,16 +59,16 @@ CREATE TABLE ProjectUserPhotographyLink (
 CREATE TABLE Media (
         MediaID INT AUTO_INCREMENT PRIMARY KEY,
         ProjectID INT NOT NULL,
-        photographerID INT NOT NULL,
+        PhotographerID INT NOT NULL,
         MediaFileName VARCHAR(255),
         FilePath VARCHAR(255),
-        CatalogID INT,
-        MorphoID INT,
-        ClusterID INT,
+        CatalogID VARCHAR(100) NOT NULL,
+        MorphoID VARCHAR(100),
+        ClusterID VARCHAR(100),
         ImagingDate DATETIME,
         Resolution VARCHAR(255),
         ColorDepth VARCHAR(255),
-        FileSizeBytes VARCHAR(50),
+        FileSizeBytes INT,
         FileFormat VARCHAR(50),
         Description VARCHAR(225),
         CameraModel VARCHAR(255),
@@ -80,7 +80,7 @@ CREATE TABLE Media (
         UpdatedByID INT NOT NULL,
         IsDeleted BOOL NOT NULL DEFAULT 0,
         FOREIGN KEY (ProjectID) REFERENCES Project(ProjectID),
-        FOREIGN KEY (photographerID) REFERENCES User(UserID),
+        FOREIGN KEY (PhotographerID) REFERENCES User(UserID),
         FOREIGN KEY (UpdatedByID) REFERENCES User(UserID),
         FOREIGN KEY (CreatedByID) REFERENCES User(UserID)
 
@@ -97,6 +97,21 @@ VALUES ('p1@gmail.com',FROM_BASE64("sj1O+m695SCDA0cyNiHK/aEknLFcYPhoxP9YOZe0pvA=
 INSERT INTO Project (ProjectOwnerID ,DateOfRequest ,ImagingStartDate ,ImagingEndDate ,CreatedDate ,UpdatedDate ,RequestStatus,CreatedByID,UpdatedByID) 
 VALUES (1,NOW(),NOW(),NOW(),NOW(),NOW(),'approved','1','1');
 INSERT INTO ProjectUserPhotographyLink (ProjectID,PhotographerID) VALUES ("1",'1'); 
+
+INSERT INTO Project (ProjectOwnerID ,DateOfRequest ,ImagingStartDate ,ImagingEndDate ,CreatedDate ,UpdatedDate ,RequestStatus,CreatedByID,UpdatedByID) 
+VALUES (2,NOW(),NOW(),NOW(),NOW(),NOW(),'approved','1','1');
+INSERT INTO ProjectUserPhotographyLink (ProjectID,PhotographerID) VALUES ("2",'3'); 
+
+
+INSERT INTO Media (ProjectID,PhotographerID,MediaFileName,FilePath,CatalogID,
+MorphoID,ClusterID,ImagingDate,Resolution,
+ColorDepth,FileSizeBytes,FileFormat,Description,CameraModel,ImageEditingTool,
+Comments,CreatedDate,CreatedByID,UpdatedDate,UpdatedByID) VALUES (
+1,1,"photo.png","filepath",'catelogid',"MorphoID","ClusterID",NOW(),
+"1000 x 1000","48-bit",1000,".png","Description",
+"nikon", "imaging editing tool", 'comments', NOW(),1,NOW(),1);
+
+
 -- SELECT * FROM User WHERE Email = 'admin@gmail.com';
 -- SELECT * FROM Project;
-SELECT * FROM ProjectUserPhotographyLink;
+SELECT * FROM Media;
