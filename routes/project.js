@@ -406,8 +406,8 @@ router.post('/edit/:id', isAuthenticated, async (req, res) => {
             selectedImagingPlatforms
         } = req.body;
 
-        selectedImagingPlatforms2 = selectedImagingPlatforms.split(",")
-        console.log(selectedImagingPlatforms2)
+        newSelectedImagingPlatforms = selectedImagingPlatforms.split(",")
+        console.log(newSelectedImagingPlatforms)
         // === 1. VALIDATION ===
         if (!ImagingStartDate || !ImagingEndDate || (!ProjectStatus
             && req.session.passport.user.UserType == userTypesEnumeration.admin)) {
@@ -447,6 +447,35 @@ router.post('/edit/:id', isAuthenticated, async (req, res) => {
         SET PhotographerID = ?
         WHERE ProjectID = ?
         `;
+
+        const selectImagingQuery = `
+        SELECT ImagingPlatform FROM ImagingPlatformInstance WHERE ProjectID = ?
+        
+        `;
+
+        const temp = (await db.promise().query(selectImagingQuery, [projectID]))[0]
+        currentSelectedImagingPlatforms = []
+        for (x of temp) {
+            currentSelectedImagingPlatforms.push(x.ImagingPlatform)
+        }
+        console.log("currentSelectedImagingPlatforms", currentSelectedImagingPlatforms)
+        const temp2 = newSelectedImagingPlatforms.filter((e) => !currentSelectedImagingPlatforms.includes(e))
+        imagingPlatformsToBeAdded = []
+        for (x of temp2) {
+            imagingPlatformsToBeAdded.push([x, projectID])
+        }
+        console.log('imagingPlatforms to be added', imagingPlatformsToBeAdded)
+        imagingPlatformsToBeRemoved = currentSelectedImagingPlatforms.filter((e) => !newSelectedImagingPlatforms.includes(e))
+        console.log('imagingPlatformsToBeRemoved', imagingPlatformsToBeRemoved)
+
+        if (imagingPlatformsToBeRemoved.length != 0) {
+            await db.promise().query("DELETE FROM ImagingPlatformInstance WHERE ImagingPlatform in (?) AND ProjectID =?", [imagingPlatformsToBeRemoved, projectID])
+        }
+        if (imagingPlatformsToBeAdded.length != 0) {
+
+            await db.promise().query("INSERT INTO ImagingPlatformInstance(ImagingPlatform,ProjectID) VALUES ? ", [imagingPlatformsToBeAdded])
+
+        }
         await db.promise().query(updateQuery, [
             startDate,
             endDate,
