@@ -2,8 +2,7 @@ const express = require("express");
 const router = express.Router();
 const db = require("../db"); // Database connection
 const { isAuthenticated, isAdmin } = require("../../middleware/auth"); // Middleware
-
-
+const userTypesEnumeration = require('../../middleware/utils').userTypesEnum;
 
 // ✅ Serve edit-user.html
 router.get("/edit-user", isAuthenticated, isAdmin, (req, res) => {
@@ -39,8 +38,8 @@ router.get("/admin-users", isAuthenticated, isAdmin, (req, res) => {
 //refactored from server.js, not tested and may not be needed
 router.get('/view/:user_id', isAuthenticated, (req, res) => {
     const { user_id } = req.params;
-    const isAdminRequestor = req.session.passport.user?.UserType === 'admin';
-    const isAdmin = req.session.passport.user.UserType === "admin";
+    const isAdminRequestor = req.session.passport.user?.UserType === userTypesEnumeration.admin;
+    const isAdmin = req.session.passport.user.UserType === userTypesEnumeration.admin;
 
     const query = `
         SELECT 

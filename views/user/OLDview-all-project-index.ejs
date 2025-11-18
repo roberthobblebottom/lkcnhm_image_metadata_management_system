@@ -121,7 +121,6 @@
                     <tr>
                       <th>ID</th>
                       <th>Photographer</th>
-                      <th>Date of Request</th>
                       <th>Start</th>
                       <th>End</th>
                       <th>Status</th>
@@ -138,17 +137,15 @@
                           <%= req.photographerName %>
                         </td>
                         <td>
-                          <%= req.DateOfRequest?.toDateString() %>
-                        </td>
-                        <td>
                           <%= req.ImagingStartDate?.toDateString()%>
                         </td>
                         <td>
                           <%= req.ImagingEndDate?.toDateString()%>
                         </td>
-                        <td
-                          class="<%= req.RequestStatus === 'approved' ? 'status-approved' : req.RequestStatus === 'rejected' ? 'status-rejected' : '-' %>">
-                          <%= req.RequestStatus || '-' %>
+                        <td <!--
+                          class="<%= req.ProjectStatus === 'approved' ? 'status-approved' : req.ProjectStatus === 'rejected' ? 'status-rejected' : '-' %>">
+                          -->
+                          <%= req.ProjectStatus || '-' %>
                         </td>
                         <td>
                           <a href="/user/project/view/<%= req.ProjectID %>" class="view-btn">View</a>

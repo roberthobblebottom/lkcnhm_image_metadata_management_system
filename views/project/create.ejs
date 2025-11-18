@@ -155,7 +155,7 @@
       <h2>Create a New Project</h2>
       <form id="projectForm">
         <div class="form-group">
-          <label for="projectOwner">Project Owner Name</label>
+          <label for="projectOwner">Project Owner Full Name</label>
           <select id="projectOwner" name="projectOwner" disabled=<%=currentUser.UserType=='projectOwner' ? true : false
             %>
             required>
@@ -163,7 +163,7 @@
             <% projectOwners.forEach(user=> { %>
               <option value="<%= user.UserID %>" <%=currentUser.UserType=='projectOwner' ? 'selected' : '' %>
                 >
-                <%=user.Name%>
+                <%=user.FullName%>
                   <%= user.Email %>
               </option>
               <% }) %>
@@ -172,12 +172,12 @@
         </div>
 
         <div class="form-group">
-          <label for="photographer">Photographer Name</label>
+          <label for="photographer">Photographer Full Name</label>
           <select id="photographer" name="photographer" required>
             <option value="">Select Photographer</option>
             <% photographers.forEach(user=> { %>
               <option value="<%= user.UserID %>">
-                <%=user.Name%>
+                <%=user.FullName%>
                   <%= user.Email %>
               </option>
               <% }) %>
@@ -216,7 +216,7 @@
         </div>
 
         <div class="form-group">
-          <label for="location">Specimen Location Name</label>
+          <label for="location">Specimen Location Full Name</label>
           <input type="text" id="location" name="location" required>
           <div id="location-error" class="error-message">Please specify the location</div>
         </div>
@@ -241,7 +241,6 @@
       document.addEventListener('DOMContentLoaded', function () {
         // Set current datetime to requestDate field
         document.getElementById('requestDate').value = new Date().toISOString().slice(0, 16).split('T')[0];
-        // document.getElementById('projectOwner').disabled = projectOwner.UserType == 'admin' ? True : False
         // document.getElementById('startDate').value = ((new Date()).getDate() + 1).toISOString().slice(0, 16).split('T')[0];
         const now = new Date()
         now.setDate(new Date().getDate() + 1)

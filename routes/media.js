@@ -24,10 +24,10 @@ router.get('/view-all', isAuthenticated, (req, res) => {
         m.FileFormat,
         m.CreatedDate,
         p.ProjectID,
-        projectOwner.Name AS projectOwnerName,
+        projectOwner.FullName AS projectOwnerName,
         projectOwner.Email as projectOwnerEmail,
         photographer.Email AS photographerEmail,
-        photographer.Name As photographerName
+        photographer.FullName As photographerName
       FROM Media m
       JOIN Project p ON m.ProjectID = p.ProjectID
       JOIN User projectOwner ON p.ProjectOwnerID = projectOwner.UserID
@@ -71,11 +71,11 @@ router.get('/select-user-for', isAuthenticated, (req, res) => {
             SELECT 
                 p.ProjectID,
                 u.UserID AS user_id,
-                u.Name AS projectOwnerName,
+                u.FullName AS projectOwnerName,
                 u.Email AS projectOwnerEmail,
                 u.ContactNumber,
                 u.Organisation,
-                photographer.Name as photographerName,
+                photographer.FullName as photographerName,
                 photographer.Email as photographerEmail,
                 photographer.UserID as PhotographerID,
                 p.ImagingStartDate,
@@ -86,7 +86,6 @@ router.get('/select-user-for', isAuthenticated, (req, res) => {
             JOIN User photographer ON pupl.PhotographerID = photographer.UserID  
 
             WHERE 
-                p.RequestStatus = 'approved' AND
                 u.IsDeleted = 0 AND 
                 p.IsDeleted = 0 AND
                 photographer.IsDeleted = 0;
@@ -119,7 +118,7 @@ router.get('/create-for-project/:projectId', isAuthenticated, (req, res) => {
       SELECT 
         p.ProjectID,
         p.ProjectOwnerID,
-        projectOwner.Name AS projectOwnerName,
+        projectOwner.FullName AS projectOwnerName,
         photographer.Email AS photographerName,
         photographer.UserID AS PhotographerID 
       FROM Project p
@@ -215,7 +214,6 @@ router.post('/submit', isAuthenticated, async (req, res) => {
         ClusterID,
         ImagingDate,
         Resolution,
-        ColorDepth,
         FileSizeBytes,
         FileFormat,
         Description,
@@ -375,7 +373,6 @@ router.post('/save', isAuthenticated, (req, res) => {
                 ClusterID = ?,
                 ImagingDate = ?,
                 Resolution = ?,
-                ColorDepth = ?,
                 FileSize = ?,
                 FileFormat = ?,
                 Description = ?,
@@ -419,7 +416,7 @@ router.post('/save', isAuthenticated, (req, res) => {
             INSERT INTO Media (
                 ProjectID, PhotographerID, MediaFileName, FilePath,
                 CatalogID, MorphoID, ClusterID, ImagingDate, Resolution,
-                ColorDepth, FileSize, FileFormat, Description, CameraModel,
+                FileSize, FileFormat, Description, CameraModel,
                 ImageEditingTool, Comments, CreatedByID, CreatedDate
             ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW())
         `;

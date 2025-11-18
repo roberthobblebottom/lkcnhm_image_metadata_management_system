@@ -206,7 +206,7 @@
       <form id="projectForm">
         <div class="form-group">
           <label for="projectOwner">Requestor</label>
-          <input readonly type="text" value="<%=projectOwner.Name%> <%=projectOwner.Email%>">
+          <input readonly type="text" value="<%=projectOwner.FullName%> <%=projectOwner.Email%>">
           </input>
         </div>
 
@@ -217,7 +217,7 @@
             <option value="">Select Photographer</option>
             <% photographers.forEach(user=> { %>
               <option value="<%= user.UserID %>">
-                <%=user.Name%>
+                <%=user.FullName%>
                   <%= user.Email %>
               </option>
               <% }) %>

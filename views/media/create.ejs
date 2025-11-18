@@ -257,21 +257,21 @@
         <input type="hidden" name="ProjectID" value="<%= project.ProjectID %>">
         <input type="hidden" name="ProjectOwnerID" value="<%= project.ProjectOwnerID %>">
         <input type="hidden" name="PhotographerID" value="<%= project.PhotographerID %>">
-        <!-- Requestor Name (readonly) -->
+        <!-- Requestor Full Name (readonly) -->
         <div class="form-group">
-          <label>Project Owner Name</label>
+          <label>Project Owner Full Name</label>
           <input type="text" value="<%= project.projectOwnerName %>" readonly>
         </div>
 
-        <!-- Photographer Name (readonly) -->
+        <!-- Photographer Full Name (readonly) -->
         <div class="form-group">
-          <label>Photographer Name</label>
+          <label>Photographer Full Name</label>
           <input type="text" value="<%= project.photographerName %>" readonly>
         </div>
 
         <!-- The rest of the form stays the same... -->
         <div class="form-group">
-          <label for="mediaFileName">Media File Name</label>
+          <label for="mediaFileName">Media File Full Name</label>
           <input type="text" name="mediaFileName" id="mediaFileName" required>
         </div>
 

@@ -118,7 +118,7 @@
       <form id="editUserForm" action="/edit/<%= user.id %>" method="post">
         <div class="form-group">
           <div>
-            <label for="username">Name:</label>
+            <label for="username">Full Name:</label>
             <input type="text" id="username" name="username" value="<%= user.username %>" required>
           </div>
           <div>
@@ -140,7 +140,7 @@
           <div>
             <label for="UserType">User Type:</label>
             <select id="UserType" name="UserType" required>
-              <% userTypes.forEach(type=> { %>
+              <% userTypesEnumeration.forEach(type=> { %>
                 <option value="<%= type.UserTypeID %>" <%=user.UserTypeID===type.UserTypeID ? "selected" : "" %>>
                   <%= type.UserTypeName %>
                 </option>

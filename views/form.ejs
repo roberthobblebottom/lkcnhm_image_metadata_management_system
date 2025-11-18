@@ -116,7 +116,7 @@
       <form id="userForm" method="POST">
         <div class="form-row">
           <div class="form-group">
-            <label for="username">Name:</label>
+            <label for="username">Full Name:</label>
             <input type="text" id="username" name="username" required />
           </div>
 
@@ -143,7 +143,7 @@
             <label for="UserType">User Type:</label>
             <select id="UserType" name="UserType" required>
               <option value="">-- Select Type --</option>
-              <% userTypes.forEach(type=> { %>
+              <% userTypesEnumeration.forEach(type=> { %>
                 <option value="<%= type.UserTypeID %>">
                   <%= type.UserTypeName %>
                 </option>

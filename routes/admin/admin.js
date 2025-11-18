@@ -3,7 +3,7 @@ const router = express.Router();
 const path = require("path");
 const db = require("../db"); // Database connection
 const { isAuthenticated, isAdmin } = require("../../middleware/auth"); // Middleware
-
+const userTypesEnumeration = require("../../middleware/utils").userTypesEnum;
 // 📌 Serve Admin Users Page (HTML)
 router.get("/admin-users", isAuthenticated, isAdmin, (req, res) => {
     res.sendFile(path.join(__dirname, "../views/admin-users.html"));
@@ -86,8 +86,8 @@ router.post('/change-password', isAuthenticated, (req, res) => {
 });
 
 router.get('/get-user', isAuthenticated, (req, res) => {
-    const getProjectOwners = "SELECT UserID, Email FROM User WHERE UserType = 'photographer'";
-    const getPhotographers = "SELECT UserID, Email FROM User WHERE UserType = 'projectOwner'";
+    const getProjectOwners = "SELECT UserID, Email FROM User WHERE UserType = '" + userTypesEnumeration.projectOwners + "'";
+    const getPhotographers = "SELECT UserID, Email FROM User WHERE UserType = '" + userTypesEnumeration.pohtographerOnly + "'";
 
     db.query(getProjectOwners, (err1, projectOwners) => {
         if (err1) {

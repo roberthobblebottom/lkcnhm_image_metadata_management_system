@@ -4,6 +4,8 @@ const db = require("./db");
 const passport = require('passport');
 const LocalStrategy = require('passport-local');
 const crypto = require('crypto');
+
+const userTypesEnumeration = require('../middleware/utils').userTypesEnumeration;
 passport.use(new LocalStrategy(async function verify(username, password, cb) {
     //Do not change the variable name from username to email, it doesn't work.
     const query = "SELECT * FROM User WHERE Email = ?";
@@ -44,7 +46,7 @@ passport.serializeUser((user, done) => {
     process.nextTick(function () {
         return done(null, {
             UserID: user.UserID,
-            Name: user.Name,
+            FullName: user.FullName,
             Email: user.Email,
             UserType: user.UserType
         })
@@ -138,7 +140,7 @@ router.post("/login",
 
                             return res.json({
                                 success: true,
-                                redirect: user.UserType === "admin" ? "/admin/dashboard" : "/user/dashboard"
+                                redirect: user.UserType === userTypesEnumeration.admin ? "/admin/dashboard" : "/user/dashboard"
                             });
                         });
                     });

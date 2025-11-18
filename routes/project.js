@@ -2,11 +2,12 @@ const express = require("express");
 const router = express.Router();
 const db = require("./db"); // Database connection
 const { isAuthenticated, isAdmin } = require("../middleware/auth"); // Middleware
-const { formatDate, formatDisplayDate, requestStatusTuple } = require("../middleware/utils");
 
+const { formatDate, formatDisplayDate, projectStatusEnumeration, projectTypeEnumeration,
+    mediaFormatEnumeration, imagingPlatformEnumeration, imageEditingToolEnumeration, userTypesEnumeration } = require('../middleware/utils');
 router.get('/create', isAuthenticated, async (req, res) => {
     const getProjectOwners = `
-      SELECT u.UserID,u.Name, u.Email, u.UserType 
+      SELECT u.UserID,u.FullName, u.Email, u.UserType 
       FROM User u
       WHERE u.UserType IN ('projectOwner','admin')
         AND u.RequestStatus = 'approved'
@@ -14,7 +15,7 @@ router.get('/create', isAuthenticated, async (req, res) => {
     `; // TODO wrong usertypeid filter
 
     const getPhotographers = `
-      SELECT u.UserID,u.Name, u.Email 
+      SELECT u.UserID,u.FullName, u.Email 
       FROM User u
         WHERE u.RequestStatus = 'approved'
         AND u.IsDeleted = 0
@@ -93,8 +94,8 @@ router.post('/submit', isAuthenticated, async (req, res) => {
         ImagingStartDate,
         ImagingEndDate,
         SummaryofProject,
-        SpecimenDetails,
-        SpecimenLocationName,
+        DetailsofSpecimens,
+        LocationsOfSpecimens,
         ImagingPlatform,
         Comments,
         CreatedDate,
@@ -102,7 +103,7 @@ router.post('/submit', isAuthenticated, async (req, res) => {
         UpdatedDate,
         UpdatedByID,
         IsDeleted,
-        RequestStatus
+        ProjectStatus
         ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, NOW(), ?, NOW(), ?, 0, ?)
         `;
         const updateQuery2 = `
@@ -123,7 +124,7 @@ router.post('/submit', isAuthenticated, async (req, res) => {
             req.body.comments || null,
             createdBy,
             createdBy,
-            requestStatus
+            projectStatus
         ]);
         const r2 = await db.promise().query(
             "SELECT ProjectID FROM Project ORDER BY ProjectID DESC LIMIT 1",
@@ -135,7 +136,7 @@ router.post('/submit', isAuthenticated, async (req, res) => {
             projectID2
         ])
         // console.log('r3', r3)
-        console.log('📸 project inserted with RequestStatus =', requestStatus, ' UserID:', projectID2);
+        console.log('📸 project inserted with ProjectStatus =', projectStatus, ' UserID:', projectID2);
 
         const redirectUrl = `/project/view/${projectID2}`
         // Return success response
@@ -160,12 +161,12 @@ router.get('/view-all', isAuthenticated, (req, res) => {
     const queryForAdmin = `
         SELECT 
             p.*,
-            projectOwner.Name AS projectOwnerName,
+            projectOwner.FullName AS projectOwnerName,
             projectOwner.Email,
-            photographer.Name AS photographerName,
+            photographer.FullName AS photographerName,
             photographer.Email AS photographerEmail,
-            cb.Name AS CreatedByName,
-            ub.Name AS UpdatedByName
+            cb.FullName AS CreatedByName,
+            ub.FullName AS UpdatedByName
         FROM Project p
         LEFT JOIN User projectOwner ON p.ProjectOwnerID = projectOwner.UserID
         JOIN ProjectUserPhotographyLink irupl ON irupl.ProjectID = p.ProjectID
@@ -178,12 +179,12 @@ router.get('/view-all', isAuthenticated, (req, res) => {
     const queryForNonAdmin = `
     SELECT 
             p.*,
-            projectOwner.Name AS projectOwnerName,
+            projectOwner.FullName AS projectOwnerName,
             projectOwner.Email,
-            photographer.Name AS photographerName,
+            photographer.FullName AS photographerName,
             photographer.Email AS photographerEmail,
-            cb.Name AS CreatedByName,
-            ub.Name AS UpdatedByName
+            cb.FullName AS CreatedByName,
+            ub.FullName AS UpdatedByName
         FROM Project p
         LEFT JOIN User projectOwner ON p.ProjectOwnerID = projectOwner.UserID
         JOIN ProjectUserPhotographyLink irupl ON irupl.ProjectID = p.ProjectID
@@ -217,7 +218,6 @@ router.get('/view-all', isAuthenticated, (req, res) => {
                 message: 'No projects found'
             });
         }
-
         res.render('project/view-all', {
             projects: results,
             currentUser: req.user,
@@ -233,13 +233,13 @@ router.get('/view/:id', isAuthenticated, (req, res) => {
     const query = `
         SELECT 
             p.*,
-            projectOwner.Email AS projectOwnerName,
-            photographer.Email AS photographerName,
-            p.RequestStatus AS statusName,
+            projectOwner.FullName AS projectOwnerName,
+            photographer.FullName AS photographerName,
+            p.ProjectStatus AS statusName,
             creator.Email AS CreatorEmail,
-            creator.Name AS CreatorName,
+            creator.FullName AS CreatorName,
             updater.Email AS UpdaterEmail,
-            updater.Name AS UpdaterName
+            updater.FullName AS UpdaterName
         FROM Project p
         LEFT JOIN User projectOwner ON p.ProjectOwnerID = projectOwner.UserID
         JOIN ProjectUserPhotographyLink irupl ON irupl.ProjectID = p.ProjectID
@@ -267,7 +267,7 @@ router.get('/view/:id', isAuthenticated, (req, res) => {
         console.log(results[0].statusName)
         const request = {
             ...results[0],
-            DateOfRequest: formatDate(results[0].DateOfRequest),
+            CreatedDate: formatDate(results[0].CreatedDate),
             ImagingStartDate: formatDate(results[0].ImagingStartDate),
             ImagingEndDate: formatDate(results[0].ImagingEndDate),
             CreatedDate: formatDate(results[0].CreatedDate),
@@ -336,10 +336,10 @@ router.get('/edit/:id', isAuthenticated, async (req, res) => {
         const requestQuery = `
             SELECT 
                 p.*,
-                projectOwner.Name AS RequestorName,
+                projectOwner.FullName AS RequestorName,
                 projectOwner.Email AS RequestorEmail,
                 projectOwner.UserID AS RequestorID,
-                photographer.Name AS PhotographerName,
+                    photographer.FullName AS PhotographerName,
                 photographer.Email AS PhotographerEmail,
                 photographer.UserID AS PhotographerUserID
             FROM Project p
@@ -349,25 +349,34 @@ router.get('/edit/:id', isAuthenticated, async (req, res) => {
             WHERE p.ProjectID = ?;
         `;
         // Get all needed data in parallel for better performance
-        const [requestResults, photographerResults] = await Promise.all([
+        const [requestResults, photographerResults, imagingPlatformResults1] = await Promise.all([
             db.promise().query(requestQuery, [projectID]),
-            db.promise().query("SELECT UserID, Email,Name FROM User ORDER BY Email"),
+            db.promise().query("SELECT UserID, Email,FullName FROM User ORDER BY Email"),
+            db.promise().query("SELECT ImagingPlatform FROM ImagingPlatformInstance WHERE ProjectID = ? ORDER BY ImagingPlatform",
+                [projectID]
+            ),
         ]);
+        const imagingPlatformResults = []
+        for (i of imagingPlatformResults1[0]) {
+            imagingPlatformResults.push(Object.values(i)[0]);
+        }
         if (requestResults[0].length === 0) {
             return res.status(404).render('error', { message: 'Request not found' });
         }
         // Format dates for display
-
         const request = {
             ...requestResults[0][0],
-            DateOfRequest: formatDisplayDate(requestResults[0][0].DateOfRequest),
+            CreatedDate: formatDisplayDate(requestResults[0][0].CreatedDate),
             ImagingStartDate: formatDisplayDate(requestResults[0][0].ImagingStartDate),
             ImagingEndDate: formatDisplayDate(requestResults[0][0].ImagingEndDate)
         };
         res.render(`project/edit`, {
             request: request,
             photographers: photographerResults[0],
-            statuses: Object.values(requestStatusTuple()),
+            selectedImagingPlatforms: imagingPlatformResults,
+            statuses: Object.values(projectStatusEnumeration()),
+            projectTypes: Object.values(projectTypeEnumeration()),
+            imagingPlatforms: Object.values(imagingPlatformEnumeration()),
             currentUser: req.user,
             title: "Edit Project"// Add title here
         });
@@ -391,15 +400,17 @@ router.post('/edit/:id', isAuthenticated, async (req, res) => {
             ImagingStartDate,
             ImagingEndDate,
             SummaryOfProject,
-            SpecimenDetails,
-            SpecimenLocationName,
-            ImagingPlatform,
-            RequestStatus,
-            ReasonForRequest
+            DetailsofSpecimens,
+            LocationsOfSpecimens,
+            ProjectStatus,
+            selectedImagingPlatforms
         } = req.body;
 
+        selectedImagingPlatforms2 = selectedImagingPlatforms.split(",")
+        console.log(selectedImagingPlatforms2)
         // === 1. VALIDATION ===
-        if (!ImagingStartDate || !ImagingEndDate || (!RequestStatus && req.session.passport.user.UserType == 'admin')) {
+        if (!ImagingStartDate || !ImagingEndDate || (!ProjectStatus
+            && req.session.passport.user.UserType == userTypesEnumeration.admin)) {
             return res.status(400).json({ success: false, message: 'Missing required fields' });
         }
 
@@ -423,11 +434,9 @@ router.post('/edit/:id', isAuthenticated, async (req, res) => {
             ImagingStartDate = ?,
             ImagingEndDate = ?,
             SummaryofProject = ?,
-            SpecimenDetails = ?,
-            SpecimenLocationName = ?,
-            ImagingPlatform = ?,
-            RequestStatus = ?,
-            ReasonforRequest = ?,
+            DetailsofSpecimens = ?,
+            LocationsOfSpecimens = ?,
+            ProjectStatus = ?,
             UpdatedByID = ?,
             UpdatedDate = NOW()
         WHERE ProjectID = ?
@@ -438,19 +447,17 @@ router.post('/edit/:id', isAuthenticated, async (req, res) => {
         SET PhotographerID = ?
         WHERE ProjectID = ?
         `;
-        const results = await db.promise().query(updateQuery, [
+        await db.promise().query(updateQuery, [
             startDate,
             endDate,
             SummaryOfProject || null,
-            SpecimenDetails || null,
-            SpecimenLocationName || null,
-            ImagingPlatform || null,
-            RequestStatus,
-            ReasonForRequest || null,
+            DetailsofSpecimens || null,
+            LocationsOfSpecimens || null,
+            ProjectStatus,
             req.session.passport.user.UserID,
             projectID
         ])
-        const r2 = await db.promise().query(updateQuery2, [
+        await db.promise().query(updateQuery2, [
             PhotographerID,
             projectID
         ]);

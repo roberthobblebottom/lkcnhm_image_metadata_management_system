@@ -12,7 +12,7 @@ const { isAuthenticated, isAdmin } = require("./middleware/auth");
 const passport = require("passport");
 const app = express();
 const PORT = process.env.PORT || 5000;
-
+const userTypesEnumeration = require('./middleware/utils').userTypesEnum;
 // ✅ Middleware
 app.use(express.static("public"));
 app.use(express.json());
@@ -130,12 +130,12 @@ app.listen(PORT, () => {
 
 app.get("/form", isAuthenticated, (req, res) => {
     const loginUserId = req.session.passport.user.UserID;
-    const isAdmin = req.session.passport.user.UserType === "admin";
+    const isAdmin = req.session.passport.user.UserType === userTypesEnumeration.admin;
 
     // Get all user type data first
     const userTypeQuery = `SELECT * FROM UserType`;
 
-    db.query(userTypeQuery, (err, userTypes) => {
+    db.query(userTypeQuery, (err, userTypesEnum) => {
         if (err) {
             console.error("❌ Error fetching user types:", err);
             return res.status(500).send("Server error.");
@@ -144,7 +144,7 @@ app.get("/form", isAuthenticated, (req, res) => {
         // If admin, send all user types directly
         if (isAdmin) {
             return res.render("form", {
-                userTypes,
+                userTypesEnumeration,
                 isAdmin,
                 isPrimaryUserRegistered: false // Admin doesn't register themselves
             });

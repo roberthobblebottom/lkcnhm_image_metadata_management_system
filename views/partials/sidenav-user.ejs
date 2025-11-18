@@ -29,6 +29,7 @@
 
   </div>
   <script>
+
     document.addEventListener("DOMContentLoaded", function () {
 
       fetch("/api/current-user")
@@ -37,7 +38,7 @@
           const email = data.email; // trim after @
           const UserType = data.UserType;
           document.getElementById("userGreeting").textContent = `Logged in as: ${email}\nRole: ${UserType}`;
-          document.getElementById("projectManagement").hidden = UserType == 'photographer' ? true : false
+          document.getElementById("projectManagement").hidden = UserType == 'photographerOnly' ? true : false
         })
         .catch(() => {
           document.getElementById("userGreeting").textContent = "Welcome";

@@ -340,7 +340,8 @@
         <main>
             <div class="container request-container">
                 <div class="request-header">
-                    <h1 class="h3 mb-0">Project #<%= request.ProjectID %>
+                    <h1 class="h3 mb-0">
+                        Name: <%= request.ProjectName %>
                     </h1>
                     <p class="text-muted mb-0">Created on <%= request.CreatedDate %> by <%= request.CreatorName
                                 || 'System' %>, <%= request.CreatorEmail %>
@@ -366,6 +367,12 @@
                             </div>
                         </div>
                         <div class="detail-row">
+                            <div class="detail-label">Project Type</div>
+                            <div class="detail-value">
+                                <%= request.ProjectType %>
+                            </div>
+                        </div>
+                        <div class="detail-row">
                             <div class="detail-label">Photographer</div>
                             <div class="detail-value">
                                 <%= request.photographerName %>
@@ -375,8 +382,7 @@
                         <div class="detail-row">
                             <div class="detail-label">Status</div>
                             <div class="detail-value">
-                                <span
-                                    class="badge bg-<%= request.statusName === 'approved' ? 'success' : request.statusName === 'rejected' ? 'danger' : 'warning' %>">
+                                <span>
                                     <%= request.statusName %>
                                 </span>
                             </div>
@@ -385,7 +391,7 @@
                         <div class="detail-row">
                             <div class="detail-label">Request Date</div>
                             <div class="detail-value">
-                                <%= request.DateOfRequest %>
+                                <%= request.CreatedDate %>
                             </div>
                         </div>
                     </div>
@@ -398,12 +404,7 @@
                             </div>
                         </div>
 
-                        <div class="detail-row">
-                            <div class="detail-label">Location</div>
-                            <div class="detail-value">
-                                <%= request.SpecimenLocationName %>
-                            </div>
-                        </div>
+
 
                         <div class="detail-row">
                             <div class="detail-label">Imaging Platform</div>
@@ -431,7 +432,7 @@
                 <div class="detail-row">
                     <div class="detail-label">Specimen Details</div>
                     <div class="detail-value text-area-value">
-                        <%= request.SpecimenDetails %>
+                        <%= request.DetailsofSpecimens %>
                     </div>
                 </div>
 

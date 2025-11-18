@@ -109,11 +109,12 @@
             <thead>
               <tr>
                 <th>ID</th>
+                <th>Project Name</th>
                 <% if (currentUser.UserType=='admin' ) {%>
-                  <th>ProjectOwner</th>
+                  <th>Project Owner</th>
                   <%}%>
+                    <th>Project Type</th>
                     <th>Photographer</th>
-                    <th>Date of Request</th>
                     <th>Start</th>
                     <th>End</th>
                     <th>Status</th>
@@ -130,29 +131,30 @@
                   <td>
                     <%= request.ProjectID || 'Not specified' %>
                   </td>
-
+                  <td>
+                    <%=request.ProjectName %>
+                  </td>
                   <% if (currentUser.UserType=='admin' ) {%>
                     <td>
-                      <%= request.projectOwnerName || 'Not specified' %>, <%= request.Email || 'Not specified' %>
+                      <%= request.projectOwnerName || 'Not specified' %>
                     </td>
 
                     <%}%>
                       <td>
-                        <%= request.photographerName || 'Not specified' %>, <%= request.photographerEmail
-                            || 'Not specified' %>
+                        <%= request.ProjectType %>
                       </td>
                       <td>
-                        <%= request.DateOfRequest?.toDateString() %>
+                        <%= request.photographerName || 'Not specified' %>
                       </td>
+
                       <td>
                         <%= request.ImagingStartDate?.toDateString() %>
                       </td>
                       <td>
                         <%= request.ImagingEndDate?.toDateString()%>
                       </td>
-                      <td
-                        class="<%= request.RequestStatus === 'approved' ? 'status-approved' : request.RequestStatus === 'rejected' ? 'status-rejected' : '-' %>">
-                        <%= request.RequestStatus || 'pending' %>
+                      <td>
+                        <%=request.ProjectStatus %>
                       </td>
                       <% if(currentUser.UserType=='admin' ){%>
                         <td class="<%= !request.IsDeleted  ? 'status-approved' :  'status-rejected'  %>">

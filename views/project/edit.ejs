@@ -111,6 +111,36 @@
             display: block;
             margin: 0 auto;
         }
+
+        #imagingPlatformCheckboxes {
+            display: none;
+            border: 1px #dadada solid;
+        }
+
+        #imagingPlatformCheckboxes label {
+            display: block;
+        }
+
+        #imagingPlatformCheckboxes label:hover {
+            background-color: #1e90ff;
+        }
+
+        .selectBox {
+            position: relative;
+        }
+
+        .selectBox select {
+            width: 100%;
+            font-weight: bold;
+        }
+
+        .overSelect {
+            position: absolute;
+            left: 0;
+            right: 0;
+            top: 0;
+            bottom: 0;
+        }
     </style>
 </head>
 
@@ -122,11 +152,27 @@
             <h1>Edit Project</h1>
             <form id='editForm' action="/project/edit/<%= request.ProjectID %>" method="POST">
                 <div class="form-group">
-                    <label>Requestor</label>
+                    <label>Project Owner</label>
                     <p class="form-control-static">
-                        <%= request.RequestorName || 'Not specified' %>, <%= request.RequestorEmail %>
+                        <%= request.RequestorName || 'Not specified' %>
                     </p>
                 </div>
+                <div class="form-group">
+                    <label>Project Type</label>
+                    <%= request.RequestorType %>
+                        <select name="projectType" id="projectType" class="form-control">
+                            <option value="">-- Select Project Type --</option>
+                            <% projectTypes.forEach(projectType=> { %>
+                                <option value="<%= projectType %>" <%=request.projectType==projectType ? 'selected' : ''
+                                    %>
+                                    >
+                                    <%= projectType %>
+                                </option>
+                                <% }) %>
+                        </select>
+
+                </div>
+
 
                 <div class="form-group">
                     <label for="PhotographerID">Photographer:</label>
@@ -136,7 +182,7 @@
                             <option value="<%= photographer.UserID %>"
                                 <%=request.PhotographerUserID==photographer.UserID ? 'selected' : '' %>
                                 >
-                                <%= photographer.Name %>, <%= photographer.Email%>
+                                <%= photographer.FullName %>
                             </option>
                             <% }) %>
                     </select>
@@ -144,9 +190,9 @@
 
 
                 <div class="form-group">
-                    <label for="DateOfRequest">Date Of Request:</label>
-                    <input type="date" id="DateOfRequest" name="DateOfRequest" value="<%= request.DateOfRequest %>"
-                        readonly class="form-control-plaintext">
+                    <label for="CreatedDate">Date Of Request:</label>
+                    <input type="date" id="CreatedDate" name="CreatedDate" value="<%= request.CreatedDate %>" readonly
+                        class="form-control-plaintext">
                 </div>
 
                 <div class="form-group">
@@ -167,57 +213,81 @@
                         required><%= request.SummaryOfProject %></textarea>
                 </div>
 
-                <div class="form-group">
-                    <label for="SpecimenDetails">Specimen Details:</label>
-                    <textarea id="SpecimenDetails" name="SpecimenDetails" class="form-control"
-                        required><%= request.SpecimenDetails %></textarea>
-                </div>
-
-                <div class="form-group">
-                    <label for="SpecimenLocationName">Specimen Location Name:</label>
-                    <input type="text" id="SpecimenLocationName" name="SpecimenLocationName"
-                        value="<%= request.SpecimenLocationName %>" class="form-control" required>
-                </div>
 
                 <div class="form-group">
                     <label for="ImagingPlatform">Imaging Platform:</label>
-                    <input type="text" id="ImagingPlatform" name="ImagingPlatform"
-                        value="<%= request.ImagingPlatform || '' %>" class="form-control">
-                </div>
-                <% if(currentUser.UserType==='admin' ){%>
-                    <div class="form-group">
-                        <label for="RequestStatus">Status:</label>
-                        <select name="RequestStatus" id="RequestStatus" class="form-control" required>
-                            <option value="">-- Select Type --</option>
-                            <% statuses.forEach(status=> { %>
-                                <option value="<%= status %>" <%=request.RequestStatus==status ? 'selected' : '' %>>
-                                    <%= status%>
-                                </option>
-                                <% }) %>
+
+                    <div class="selectBox" onclick="showCheckboxes()">
+                        <select name="ImagingPlatform" id="ImagingPlatform" class="form-control">
+                            <option>Select an option</option>
                         </select>
+                        <div class="overSelect"></div>
+                    </div>
+                    <!-- <select class='selectBox' name="ImagingPlatform" id="ImagingPlatform" class="form-control"
+                        onclick='showCheckboxes()' required>
+                        <option value="">-- Select Type --</option>
+                        <div class="overSelect"></div>
+                        <% imagingPlatforms.forEach(imagingPlatform=> { %>
+                            <option value="<%= imagingPlatform %>" <%=request.imagingPlatform=imagingPlatform
+                                ? 'selected' : '' %>>
+                                <%=imagingPlatform%>
+                            </option>
+                            <% }) %>
+                    </select> -->
+                    <div id="imagingPlatformCheckboxes">
+                        <% imagingPlatforms.forEach(imagingPlatform=>{ %>
+                            <label for='<%=imagingPlatform%>Input'>
+                                <input type="checkbox" id="<%=imagingPlatform%>Input"
+                                    <%=selectedImagingPlatforms.includes(imagingPlatform) ? 'checked' : '' %>
+                                />
+                                <%=imagingPlatform%>
+                            </label>
+                            <%})%>
                     </div>
 
-                    <div class="form-group">
-                        <label for="ReasonForRequest">Reason for Status Change:</label>
-                        <textarea id="ReasonForRequest" name="ReasonForRequest"
-                            class="form-control"><%= request.ReasonForRequest || '' %></textarea>
-                    </div>
-                    <%}%>
-                        <button type="submit" class="btn btn-primary">Save Changes</button>
+                </div>
+                <div class=" form-group">
+                    <label for="ProjectStatus">Status:</label>
+                    <select name="ProjectStatus" id="ProjectStatus" class="form-control" required>
+                        <option value="">-- Select Type --</option>
+                        <% statuses.forEach(status=> { %>
+                            <option value="<%= status %>" <%=request.ProjectStatus==status ? ' selected' : '' %>>
+                                <%= status%>
+                            </option>
+                            <% }) %>
+                    </select>
+                </div>
+
+                <button type="submit" class="btn btn-primary">Save Changes</button>
             </form>
 
             <br>
 
         </main>
         <script>
+            var expanded = false;
+
+            function showCheckboxes() {
+                var checkboxes = document.getElementById("imagingPlatformCheckboxes");
+                console.log('expanded: ' + expanded)
+                console.log('checkboxes: ' + checkboxes)
+                if (!expanded) {
+                    checkboxes.style.display = "block";
+                    expanded = true;
+                } else {
+                    checkboxes.style.display = "none";
+                    expanded = false;
+                }
+            }
             document.addEventListener('DOMContentLoaded', function () {
                 const form = document.getElementById('editForm')
+
                 const requestDate = new Date('<%= request.DateofRequest %>');
                 const startDateInput = document.getElementById('ImagingStartDate');
                 const endDateInput = document.getElementById('ImagingEndDate');
                 const currentUser = '<%= currentUser%>'
                 if (currentUser.UserType === 'admin') {
-                    const statusSelect = document.getElementById('RequestStatus');
+                    const statusSelect = document.getElementById('ProjectStatus');
                     const reasonField = document.getElementById('ReasonForRequest');
                 }
                 // Set minimum dates
@@ -297,7 +367,21 @@
                     }
                     // Submit form via AJAX
                     try {
+                        selectedImagingPlatforms = [];
+                        for (x of document.getElementById('imagingPlatformCheckboxes').childNodes) {
+                            if (x instanceof HTMLLabelElement) {
+                                if (x.firstElementChild.checked) {
+
+                                    console.log(x.textContent.trim());
+                                    selectedImagingPlatforms.push(x.textContent.trim());
+                                }
+                            }
+                        }
+
+
                         const formData = new FormData(form);
+                        formData.append('selectedImagingPlatforms', selectedImagingPlatforms);
+                        console.log(formData)
                         const response = await fetch(form.action, {
                             method: 'POST',
                             headers: {

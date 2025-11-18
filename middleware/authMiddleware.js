@@ -1,3 +1,5 @@
+
+const userTypesEnumeration = require('./utils').userTypesEnumeration;
 function isAuthenticated(req, res, next) {
     if (req.session && req.session.passport.user) {
         return next();
@@ -6,7 +8,7 @@ function isAuthenticated(req, res, next) {
 }
 
 function isAdmin(req, res, next) {
-    if (req.session && req.session.passport.user && req.session.passport.user.UserType === "admin") {
+    if (req.session && req.session.passport.user && req.session.passport.user.UserType === userTypesEnumeration.admin) {
         return next();
     }
     res.status(403).json({ error: "Forbidden: Admin access required" });

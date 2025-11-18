@@ -1,3 +1,5 @@
+
+const { userTypesEnumeration } = require('./utils').userTypesEnumeration;
 const isAuthenticated = (req, res, next) => {
     const user = req.session.passport.user
     console.log("Checking Auth:", user.Email);
@@ -13,7 +15,7 @@ const isAuthenticated = (req, res, next) => {
 const isAdmin = (req, res, next) => {
 
     const user = req.session.passport.user
-    if (!user || user.UserType !== "admin") {
+    if (!user || user.UserType !== userTypesEnumeration.admin) {
         console.log("🚫 Forbidden: User is not an admin");
         return res.redirect("/login"); // 🔁 Send to login page if not admin
     }
