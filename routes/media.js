@@ -2,6 +2,7 @@ const express = require("express");
 const router = express.Router();
 const db = require("./db"); // Database connection
 const { isAuthenticated, isAdmin } = require("../middleware/auth"); // Middleware
+const { userTypesEnumeration } = require("../middleware/utils");
 
 // router.get('/create', isAuthenticated, async (req, res) => {
 
@@ -67,7 +68,7 @@ router.get('/view-all', isAuthenticated, (req, res) => {
 
 
 router.get('/select-user-for', isAuthenticated, (req, res) => {
-    const query = `
+    const baseQuery = `
             SELECT 
                 p.ProjectID,
                 u.UserID AS user_id,
@@ -88,11 +89,15 @@ router.get('/select-user-for', isAuthenticated, (req, res) => {
             WHERE 
                 u.IsDeleted = 0 AND 
                 p.IsDeleted = 0 AND
-                photographer.IsDeleted = 0;
+                photographer.IsDeleted = 0
 
       `;
 
 
+    const query = req.session.passport.user.UserType != userTypesEnumeration().admin
+        ? baseQuery + " AND u.UserID = " + req.session.passport.user.UserID
+        : baseQuery
+    console.log(query)
     db.query(query, (err, users) => {
         if (err) {
             console.error("❌ Failed to fetch eligible users for media:", err);
