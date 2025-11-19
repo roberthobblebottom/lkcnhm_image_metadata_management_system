@@ -144,6 +144,137 @@
       h2 {
         font-size: 1.5rem;
       }
+
+    }
+
+    /*
+Source - https://stackoverflow.com/a
+Posted by Arun Aravind, modified by community. See post 'Timeline' for change history
+Retrieved 2025-11-19, License - CC BY-SA 4.0
+*/
+
+    .dropdown-check-list {
+      display: inline-block;
+    }
+
+    .dropdown-check-list .anchor {
+      position: relative;
+      cursor: pointer;
+      width: 95%;
+      padding: 12px 15px;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      font-size: 15px;
+      transition: border-color 0.3s ease;
+      display: block;
+      /* padding: 5px 50px 5px 10px; */
+      border: 1px solid #ccc;
+    }
+
+    .dropdown-check-list .anchor:after {
+      position: absolute;
+      content: "";
+      border-left: 2px solid black;
+      border-top: 2px solid black;
+      padding: 5px;
+      right: 10px;
+      top: 20%;
+      -moz-transform: rotate(-135deg);
+      -ms-transform: rotate(-135deg);
+      -o-transform: rotate(-135deg);
+      -webkit-transform: rotate(-135deg);
+      transform: rotate(-135deg);
+    }
+
+    .dropdown-check-list .anchor:active:after {
+      right: 8px;
+      top: 21%;
+    }
+
+    .dropdown-check-list2 {
+      display: inline-block;
+    }
+
+    .dropdown-check-list2 .anchor2 {
+      position: relative;
+      cursor: pointer;
+      width: 95%;
+      padding: 12px 15px;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      font-size: 15px;
+      transition: border-color 0.3s ease;
+      display: block;
+      /* padding: 5px 50px 5px 10px; */
+      border: 1px solid #ccc;
+    }
+
+    .dropdown-check-list2 .anchor2:after {
+      position: absolute;
+      content: "";
+      border-left: 2px solid black;
+      border-top: 2px solid black;
+      padding: 5px;
+      right: 10px;
+      top: 20%;
+      -moz-transform: rotate(-135deg);
+      -ms-transform: rotate(-135deg);
+      -o-transform: rotate(-135deg);
+      -webkit-transform: rotate(-135deg);
+      transform: rotate(-135deg);
+    }
+
+    .dropdown-check-list2 .anchor2:active:after {
+      right: 8px;
+      top: 21%;
+    }
+
+    .dropdown-check-list2 ul.items {
+      padding: 2px;
+      display: none;
+      margin: 0;
+      border: 1px solid #ccc;
+      border-top: none;
+    }
+
+    .dropdown-check-list2 ul.items li {
+      list-style: none;
+    }
+
+    .dropdown-check-list2.visible .anchor {
+      color: #0094ff;
+    }
+
+    .dropdown-check-list2.visible .items {
+      display: block;
+    }
+
+    .dropdown-check-list ul.items {
+      padding: 2px;
+      display: none;
+      margin: 0;
+      border: 1px solid #ccc;
+      border-top: none;
+    }
+
+    .dropdown-check-list ul.items li {
+      list-style: none;
+    }
+
+    .dropdown-check-list.visible .anchor {
+      color: #0094ff;
+    }
+
+    .dropdown-check-list.visible .items {
+      display: block;
+    }
+
+    #list1 {
+      display: block;
+    }
+
+    #list2 {
+      display: block;
     }
   </style>
 </head>
@@ -152,28 +283,31 @@
   <%- include(currentUser.UserType==='admin' ? '../partials/sidenav-admin.ejs' : '../partials/sidenav-user' ) %>
     <main>
       <a href="/project/view-all"><button class="btn btn-secondary">Back to all Projects</button></a>
-      <h2>Create a New Project</h2>
-      <form id="projectForm">
+      <h2>Create a New Project </h2>
+      <form id="projectForm" action="/project/submit" method="POST">
+        <div class="'form-group">
+
+          <label for="projectName">Project Name</label>
+          <input type="text" id="projectName" name="projectName" required>
+        </div>
         <div class="form-group">
           <label for="projectOwner">Project Owner Full Name</label>
-          <select id="projectOwner" name="projectOwner" disabled=<%=currentUser.UserType=='projectOwner' ? true : false
-            %>
-            required>
-            <option value="">Select Requestor</option>
-            <% projectOwners.forEach(user=> { %>
-              <option value="<%= user.UserID %>" <%=currentUser.UserType=='projectOwner' ? 'selected' : '' %>
-                >
-                <%=user.FullName%>
-                  <%= user.Email %>
-              </option>
-              <% }) %>
+          <select id="projectOwner" name="projectOwner"
+            disabled="<%= currentUser.UserType === 'projectOwner' ? true : false%>"" required>
+                <option value="">Select Project Owner</option>
+                <% projectOwners.forEach(user=> { %>
+                  <option value=" <%=user.UserID %>" <%= currentUser.UserID==user.UserID ? 'selected' : '' %> %>
+              >
+              <%=user.FullName%>
+                </option>
+                <% }) %>
           </select>
           <div id="projectOwner-error" class="error-message">Please select a projectOwner</div>
         </div>
 
         <div class="form-group">
-          <label for="photographer">Photographer Full Name</label>
-          <select id="photographer" name="photographer" required>
+          <label for="photographer">Photographer(s)</label>
+          <!-- <select id="photographer" name="photographer" required>
             <option value="">Select Photographer</option>
             <% photographers.forEach(user=> { %>
               <option value="<%= user.UserID %>">
@@ -181,15 +315,24 @@
                   <%= user.Email %>
               </option>
               <% }) %>
-          </select>
+          </select> -->
+          <!-- <%=JSON.stringify(photographers)%> -->
+          <div id="list1" class="dropdown-check-list" tabindex="100">
+            <span class="anchor">Select Photographers</span>
+            <ul class="items" id="newSelectedPhotographersList">
+              <% photographers.forEach(photographer=>{ %>
+                <label class="dropdown-item">
+                  <input class='target' type="checkbox" id="<%=photographer%>Input" value=<%=photographer.UserID%>>
+                  <%=photographer.FullName%>
+                </label>
+                <%})%>
+
+
+            </ul>
+          </div>
           <div id="photographer-error" class="error-message">Please select a photographer</div>
         </div>
 
-        <div class="form-group">
-          <label for="requestDate">Date of Request</label>
-          <!-- <input type="datetime-local" id="requestDate" name="requestDate" required readonly> -->
-          <input type="date" id="requestDate" name="requestDate" required readonly>
-        </div>
 
         <div class="form-group">
           <label for="startDate">Imaging Start Date</label>
@@ -215,15 +358,23 @@
           <div id="specimenDetails-error" class="error-message">Please provide specimen details</div>
         </div>
 
-        <div class="form-group">
-          <label for="location">Specimen Location Full Name</label>
-          <input type="text" id="location" name="location" required>
-          <div id="location-error" class="error-message">Please specify the location</div>
-        </div>
+
 
         <div class="form-group">
           <label for="platform">Imaging Platform</label>
-          <input type="text" id="platform" name="platform">
+          <div id="list2" class="dropdown-check-list2" tabindex="100">
+            <span class="anchor2">Select ImagingPlatforms</span>
+            <ul class="items" id="newSelectedImagingPlatformsList">
+              <% imagingPlatforms.forEach(imagingPlatform=>{ %>
+                <label class="dropdown-item">
+                  <input class='target' type="checkbox" id="<%=imagingPlatform%>Input">
+                  <%=imagingPlatform%>
+                </label>
+                <%})%>
+
+
+            </ul>
+          </div>
         </div>
 
         <div class="form-group">
@@ -237,10 +388,25 @@
       </form>
     </main>
     <script>
+      var checkList = document.getElementById('list1');
+      checkList.getElementsByClassName('anchor')[0].onclick = function (evt) {
+        if (checkList.classList.contains('visible'))
+          checkList.classList.remove('visible');
+        else
+          checkList.classList.add('visible');
+      }
+
+      var checkList2 = document.getElementById('list2');
+      checkList2.getElementsByClassName('anchor2')[0].onclick = function (evt) {
+        if (checkList2.classList.contains('visible'))
+          checkList2.classList.remove('visible');
+        else
+          checkList2.classList.add('visible');
+      }
       // Initialize form with current datetime
       document.addEventListener('DOMContentLoaded', function () {
         // Set current datetime to requestDate field
-        document.getElementById('requestDate').value = new Date().toISOString().slice(0, 16).split('T')[0];
+        // document.getElementById('requestDate').value = new Date().toISOString().slice(0, 16).split('T')[0];
         // document.getElementById('startDate').value = ((new Date()).getDate() + 1).toISOString().slice(0, 16).split('T')[0];
         const now = new Date()
         now.setDate(new Date().getDate() + 1)
@@ -260,69 +426,29 @@
 
       // Update date constraints when dates change
       function updateDateConstraints() {
-        const requestDate = document.getElementById('requestDate').value;
+        // const requestDate = document.getElementById('requestDate').value;
         const startDate = document.getElementById('startDate').value;
         // Set minimum start date to be after request date
-        document.getElementById('startDate').min = requestDate;
+        // document.getElementById('startDate').min = requestDate;
 
         // Set minimum end date to be after start date (if start date is selected)
         if (startDate) {
           document.getElementById('endDate').min = startDate;
         } else {
-          document.getElementById('endDate').min = requestDate;
+          // document.getElementById('endDate').min = requestDate;
         }
       }
 
-      // Function to load users for dropdowns
-      // function loadUsers() {
-      //   fetch('/admin/admin/admin/admin/admin/admin/admin/get-users')
-      //     .then(res => {
-      //       if (!res.ok) {
-      //         throw new Error('Network response was not ok');
-      //       }
-      //       return res.json();
-      //     })
-      //     .then(data => {
-      //       if (data.projectOwners && Array.isArray(data.projectOwners)) {
-      //         const projectOwnerSelect = document.getElementById('projectOwner');
-      //         data.projectOwners.forEach(user => {
-      //           const option = document.createElement('option');
-      //           option.value = user.id;
-      //           option.textContent = user.username;
-      //           projectOwnerSelect.appendChild(option);
-      //         });
-      //       }
-
-      //       if (data.photographers && Array.isArray(data.photographers)) {
-      //         const photographerSelect = document.getElementById('photographer');
-      //         data.photographers.forEach(user => {
-      //           const option = document.createElement('option');
-      //           option.value = user.id;
-      //           option.textContent = user.username;
-      //           photographerSelect.appendChild(option);
-      //         });
-      //       }
-      //     })
-      //     .catch(err => {
-      //       console.error("Failed to load users:", err);
-      //       Swal.fire({
-      //         title: 'Error!',
-      //         text: 'Failed to load user data. Please refresh the page.',
-      //         icon: 'error',
-      //         confirmButtonText: 'OK'
-      //       });
-      //     });
-      // }
 
       // Function to setup form validation
       function setupFormValidation() {
         const form = document.getElementById('projectForm');
 
         // Add event listeners for date changes
-        document.getElementById('requestDate').addEventListener('change', function () {
-          updateDateConstraints();
-          validateDates();
-        });
+        // document.getElementById('requestDate').addEventListener('change', function () {
+        //   updateDateConstraints();
+        //   validateDates();
+        // });
 
         document.getElementById('startDate').addEventListener('change', function () {
           updateDateConstraints();
@@ -330,10 +456,10 @@
         });
 
         document.getElementById('endDate').addEventListener('change', validateDates);
-
         // Validate on submit
         form.addEventListener('submit', async function (e) {
           e.preventDefault();
+          console.log("add event listner for submit")
 
           // Reset error messages
           document.querySelectorAll('.error-message').forEach(el => {
@@ -349,10 +475,10 @@
             isValid = false;
           }
 
-          if (!form.photographer.value) {
-            document.getElementById('photographer-error').style.display = 'block';
-            isValid = false;
-          }
+          // if (!form.photographer.value) {
+          //   document.getElementById('photographer-error').style.display = 'block';
+          //   isValid = false;
+          // }
 
           // Check text areas
           if (!form.summary.value.trim()) {
@@ -365,11 +491,7 @@
             isValid = false;
           }
 
-          // Check location
-          if (!form.location.value.trim()) {
-            document.getElementById('location-error').style.display = 'block';
-            isValid = false;
-          }
+
 
           // Validate dates
           validateDates();
@@ -389,7 +511,6 @@
 
       // Date validation function
       function validateDates() {
-        const requestDate = new Date(document.getElementById('requestDate').value);
         const startDate = new Date(document.getElementById('startDate').value);
         const endDate = new Date(document.getElementById('endDate').value);
 
@@ -402,11 +523,7 @@
         document.getElementById('startDate').setCustomValidity('');
         document.getElementById('endDate').setCustomValidity('');
 
-        // Validate start date
-        if (document.getElementById('startDate').value && startDate < requestDate) {
-          startDateError.style.display = 'block';
-          document.getElementById('startDate').setCustomValidity('Start date must be after request date');
-        }
+
 
         // Validate end date
         if (document.getElementById('endDate').value && endDate < startDate) {
@@ -417,26 +534,51 @@
 
       // Function to handle form submission
       async function submitForm(form) {
+        console.log('in submitForm')
         const submitBtn = form.querySelector('button[type="submit"]');
         const originalBtnText = submitBtn.innerHTML;
 
         try {
           // Show loading state
+
+          selectedImagingPlatforms = [];
+          for (x of document.getElementById('newSelectedImagingPlatformsList').childNodes) {
+            if (x instanceof HTMLLabelElement) {
+              if (x.firstElementChild.checked) {
+                selectedImagingPlatforms.push(x.textContent.trim());
+              }
+            }
+          }
+          selectedPhotographers = [];
+          for (x of document.getElementById('newSelectedPhotographersList').childNodes) {
+            // console.log(x)
+            if (x instanceof HTMLLabelElement) {
+              if (x.firstElementChild.checked) {
+                // console.log("inner----", x.firstElementChild.value, ".....")
+                selectedPhotographers.push(x.firstElementChild.value);
+              }
+            }
+          }
+          console.log(selectedPhotographers)
           submitBtn.classList.add('loading');
           submitBtn.innerHTML = '<i class="fas fa-spinner"></i> Submitting...';
           submitBtn.disabled = true;
+          console.log(form.projectOwner.value)
+
+
+
+
           // Create a plain object from form data
           const formData = {
+            projectName: form.projectName.value,
             projectOwner: form.projectOwner.value,
-            photographer: form.photographer.value,
-            requestDate: form.requestDate.value,
             startDate: form.startDate.value,
             endDate: form.endDate.value,
             summary: form.summary.value,
             specimenDetails: form.specimenDetails.value,
-            location: form.location.value,
-            platform: form.platform.value || null,
-            comments: form.comments.value || null
+            comments: form.comments.value || null,
+            selectedImagingPlatforms: selectedImagingPlatforms,
+            selectedPhotographers: selectedPhotographers
           };
 
 
@@ -466,7 +608,7 @@
             icon: 'success',
             confirmButtonText: 'OK',
             confirmButtonColor: '#28a745',
-            timer: 3000,
+            timer: 1000,
             timerProgressBar: true
           });
 
@@ -479,12 +621,7 @@
           // Reset form (if no redirection)
           form.reset();
 
-          // Reset request date to current time
-          const requestDateField = document.getElementById('requestDate');
-          if (requestDateField) {
-            requestDateField.value = new Date().toISOString().slice(0, 16);
-            updateDateConstraints();
-          }
+
 
 
         } catch (error) {

@@ -246,7 +246,7 @@ Retrieved 2025-11-19, License - CC BY-SA 4.0
 
 
                 <div>
-                    <label for="PhotographerID">Photographer:</label>
+                    <label for="PhotographerID">Photographer(s):</label>
                     <div id="list1" class="dropdown-check-list" tabindex="100">
                         <span class="anchor">Select Photographers</span>
                         <ul class="items" id="newSelectedPhotographersList">
@@ -456,10 +456,8 @@ Retrieved 2025-11-19, License - CC BY-SA 4.0
                         }
                         selectedPhotographers = [];
                         for (x of document.getElementById('newSelectedPhotographersList').childNodes) {
-                            // console.log(x)
                             if (x instanceof HTMLLabelElement) {
                                 if (x.firstElementChild.checked) {
-                                    // console.log("inner----", x.firstElementChild.value, ".....")
                                     selectedPhotographers.push(x.firstElementChild.value);
                                 }
                             }

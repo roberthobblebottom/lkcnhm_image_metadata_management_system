@@ -22,13 +22,20 @@ router.get('/create', isAuthenticated, async (req, res) => {
         AND u.IsDeleted = 0
     `; // todo wrong user type id filter these are hard coded.
 
-    const [projectOwners] = await db.promise().query(getProjectOwners);
-    console.log(projectOwners)
-    const [photographers] = await db.promise().query(getPhotographers);
+    const [projectOwners, photographers] = await Promise.all(
+        [
+            db.promise().query(getProjectOwners),
+            db.promise().query(getPhotographers),
+        ]
+    )
+    // console.log('projectOwners', projectOwners)
+    // console.log(req.session.passport.user)
+
     res.render('project/create', {
         currentUser: req.session.passport.user,
-        projectOwners: projectOwners,
-        photographers: photographers,
+        projectOwners: projectOwners[0],
+        photographers: photographers[0],
+        imagingPlatforms: Object.values(imagingPlatformEnumeration()),
         title: "Project Form"
     });
 });
@@ -38,11 +45,11 @@ router.post('/submit', isAuthenticated, async (req, res) => {
     console.log("in /submit-project")
     try {
         const requiredFields = [
-            'projectOwner', 'photographer', 'requestDate',
+            'projectOwner', 'projectName',
             'startDate', 'endDate', 'summary',
-            'specimenDetails', 'location'
+            'specimenDetails',
         ];
-
+        console.log("req.body", req.body)
         const missingFields = requiredFields.filter(field => !req.body[field]);
 
         if (missingFields.length > 0) {
@@ -52,21 +59,12 @@ router.post('/submit', isAuthenticated, async (req, res) => {
             });
         }
 
-        const requestDate = new Date(req.body.requestDate);
         const startDate = new Date(req.body.startDate);
         const endDate = new Date(req.body.endDate);
-        console.log('requestDate' + requestDate)
-        if (isNaN(requestDate.getTime()) || isNaN(startDate.getTime()) || isNaN(endDate.getTime())) {
+        if (isNaN(startDate.getTime()) || isNaN(endDate.getTime())) {
             return res.status(400).json({
                 success: false,
                 message: "Invalid date format provided"
-            });
-        }
-
-        if (startDate < requestDate) {
-            return res.status(400).json({
-                success: false,
-                message: "Start date cannot be before request date"
             });
         }
 
@@ -86,18 +84,15 @@ router.post('/submit', isAuthenticated, async (req, res) => {
             });
         }
 
-        const requestStatus = "pending"; // Hardcoded for now – represents 'New'
 
         const insertQuery = `
       INSERT INTO Project (
+      ProjectName,
         ProjectOwnerID,
-        DateofRequest,
         ImagingStartDate,
         ImagingEndDate,
         SummaryofProject,
         DetailsOfSpecimens,
-        LocationsOfSpecimens,
-        ImagingPlatform,
         Comments,
         CreatedDate,
         CreatedByID,
@@ -105,39 +100,50 @@ router.post('/submit', isAuthenticated, async (req, res) => {
         UpdatedByID,
         IsDeleted,
         ProjectStatus
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, NOW(), ?, NOW(), ?, 0, ?)
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, NOW(), ?, NOW(), ?, 0, ?)
         `;
-        const updateQuery2 = `
-        INSERT INTO ProjectUserPhotographyLink(
-         PhotographerID,
-         ProjectID)
-         VALUES (?,?)
+        const insertPhotographersQuery = `
+        INSERT INTO ProjectUserPhotographyLink (PhotographerID,ProjectID)
+         VALUES ?
         `;
-        const result = await db.promise().query(insertQuery, [
+        const insertImagingPlatformsQuery = `
+        INSERT INTO ImagingPlatformInstance
+        (ImagingPlatform,ProjectID)
+         VALUES ?
+        `;
+        await db.promise().query(insertQuery, [
+            req.body.projectName,
             req.body.projectOwner,
-            req.body.requestDate,
             req.body.startDate,
             req.body.endDate,
             req.body.summary,
             req.body.specimenDetails,
-            req.body.location,
-            req.body.platform || null,
             req.body.comments || null,
             createdBy,
             createdBy,
-            projectStatus
+            projectStatusEnumeration().in_progress
         ]);
+
+        // Getting new project id
         const r2 = await db.promise().query(
             "SELECT ProjectID FROM Project ORDER BY ProjectID DESC LIMIT 1",
             [])
-        // console.log("r2", r2)
         projectID2 = r2[0][0].ProjectID
-        const r3 = await db.promise().query(updateQuery2, [
-            req.body.photographer,
-            projectID2
-        ])
-        // console.log('r3', r3)
-        console.log('📸 project inserted with ProjectStatus =', projectStatus, ' UserID:', projectID2);
+
+        photographersTuple = []
+        for (x of req.body.selectedPhotographers) {
+            photographersTuple.push([x, projectID2])
+        }
+        await db.promise().query(insertPhotographersQuery, [photographersTuple])
+
+        imagingPlatformsTuple = []
+        for (x of req.body.selectedImagingPlatforms) {
+            imagingPlatformsTuple.push([x, projectID2])
+        }
+
+        await db.promise().query(insertImagingPlatformsQuery, [imagingPlatformsTuple])
+
+        console.log('📸 project inserted with  UserID:', projectID2);
 
         const redirectUrl = `/project/view/${projectID2}`
         // Return success response
