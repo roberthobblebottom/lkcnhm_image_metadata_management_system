@@ -164,14 +164,10 @@ router.get('/view-all', isAuthenticated, (req, res) => {
             p.*,
             projectOwner.FullName AS projectOwnerName,
             projectOwner.Email,
-            photographer.FullName AS photographerName,
-            photographer.Email AS photographerEmail,
             cb.FullName AS CreatedByName,
             ub.FullName AS UpdatedByName
         FROM Project p
         LEFT JOIN User projectOwner ON p.ProjectOwnerID = projectOwner.UserID
-        JOIN ProjectUserPhotographyLink irupl ON irupl.ProjectID = p.ProjectID
-        JOIN User photographer on irupl.PhotographerID = photographer.UserID
         LEFT JOIN User cb ON p.CreatedByID = cb.UserID
         LEFT JOIN User ub ON p.UpdatedByID = ub.UserID
         ORDER BY p.CreatedDate DESC
@@ -182,14 +178,10 @@ router.get('/view-all', isAuthenticated, (req, res) => {
             p.*,
             projectOwner.FullName AS projectOwnerName,
             projectOwner.Email,
-            photographer.FullName AS photographerName,
-            photographer.Email AS photographerEmail,
             cb.FullName AS CreatedByName,
             ub.FullName AS UpdatedByName
         FROM Project p
         LEFT JOIN User projectOwner ON p.ProjectOwnerID = projectOwner.UserID
-        JOIN ProjectUserPhotographyLink irupl ON irupl.ProjectID = p.ProjectID
-        JOIN User photographer on irupl.PhotographerID = photographer.UserID
         LEFT JOIN User cb ON p.CreatedByID = cb.UserID
         LEFT JOIN User ub ON p.UpdatedByID = ub.UserID
         WHERE p.IsDeleted = 0
@@ -235,7 +227,6 @@ router.get('/view/:id', isAuthenticated, async (req, res) => {
         SELECT 
             p.*,
             projectOwner.FullName AS projectOwnerName,
-            photographer.FullName AS photographerName,
             p.ProjectStatus AS statusName,
             creator.Email AS CreatorEmail,
             creator.FullName AS CreatorName,
@@ -243,8 +234,6 @@ router.get('/view/:id', isAuthenticated, async (req, res) => {
             updater.FullName AS UpdaterName
         FROM Project p
         LEFT JOIN User projectOwner ON p.ProjectOwnerID = projectOwner.UserID
-        JOIN ProjectUserPhotographyLink irupl ON irupl.ProjectID = p.ProjectID
-        JOIN User photographer on irupl.PhotographerID = photographer.UserID
         LEFT JOIN User creator ON p.CreatedByID = creator.UserID
         LEFT JOIN User updater ON p.UpdatedByID = updater.UserID
         WHERE p.ProjectID = ?
@@ -252,14 +241,14 @@ router.get('/view/:id', isAuthenticated, async (req, res) => {
 
     const photographersQuery =
         `SELECT user.FullName FROM ProjectUserPhotographyLink pupl JOIN User user ON user.UserID = pupl.PhotographerID WHERE pupl.ProjectID = ?`;
-    const temp = (await db.promise().query(photographersQuery, [projectID]))[0]
+    const photographersTemp1 = (await db.promise().query(photographersQuery, [projectID]))[0]
     const photographers = []
-    console.log('temp', temp)
-    for (x of temp) {
+    console.log('temp', photographersTemp1)
+    for (x of photographersTemp1) {
         console.log(x)
         photographers.push(x.FullName)
     }
-    console.log(photographers)
+    console.log('photographers', photographers)
     db.query(query, [projectID], (err, results) => {
         if (err) {
             console.error('Error fetching project:', err);
@@ -284,7 +273,7 @@ router.get('/view/:id', isAuthenticated, async (req, res) => {
             CreatedDate: formatDate(results[0].CreatedDate),
             UpdatedDate: results[0].UpdatedDate ? formatDate(results[0].UpdatedDate) : null,
             IsDeleted: results[0].IsDeleted,
-            photographers: photographers.toString().replace(",", ", ")
+            photographers: photographers.length != 0 ? photographers.toString().replace(",", ", ") : 'Not Specified'
         };
 
         res.render('project/view', {
