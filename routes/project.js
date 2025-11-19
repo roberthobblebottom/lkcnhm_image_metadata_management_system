@@ -185,6 +185,7 @@ router.get('/view-all', isAuthenticated, async (req, res) => {
         LEFT JOIN User cb ON p.CreatedByID = cb.UserID
         LEFT JOIN User ub ON p.UpdatedByID = ub.UserID
         WHERE p.IsDeleted = 0
+        AND p.ProjectOwnerID = ?
         ORDER BY p.CreatedDate DESC
    `;
     const queryForPhotographers = `
@@ -196,10 +197,11 @@ router.get('/view-all', isAuthenticated, async (req, res) => {
 
     const user = req.session.passport.user
     const query = user.UserType != 'admin' ? queryForNonAdmin : queryForAdmin
+    console.log(query)
     const adminID = user.UserType != 'admin' ? [user.UserID] : []
 
     console.log("📩 Fetching Projects...");
-    const photographersTemp = (await db.promise().query(queryForPhotographers))[0]
+    const photographersTemp = (await db.promise().query(queryForPhotographers, [user.UserID]))[0]
     const photographers = {}
     for (x of photographersTemp) {
         photographers[x.ProjectID] = x.photographersNames
@@ -332,7 +334,6 @@ router.post('/delete/:id', isAuthenticated, (req, res) => {
         UpdatedDate = NOW()
         WHERE ProjectID = ?
         `;
-    console.log(req.user)
     db.query(query, [req.session.passport.user.UserID, projectID], (err, results) => {
         if (err) {
             console.error('Error soft deleting request:', err);
