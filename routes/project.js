@@ -84,7 +84,18 @@ router.post('/submit', isAuthenticated, async (req, res) => {
             });
         }
 
-
+        if (req.body.selectedImagingPlatforms.length == 0) {
+            return res.status(400).json({
+                success: false,
+                message: "there are no selected Imaging Platforms"
+            });
+        }
+        if (req.body.selectedPhotographers.length == 0) {
+            return res.status(400).json({
+                success: false,
+                message: "there are no selected selected photographers"
+            });
+        }
         const insertQuery = `
       INSERT INTO Project (
       ProjectName,
@@ -468,10 +479,14 @@ router.post('/edit/:id', isAuthenticated, async (req, res) => {
             return res.status(400).json({ success: false, message: 'Missing required fields' });
         }
 
-        if (newSelectedImagingPlatforms.length == 0) {
+        if (newSelectedImagingPlatforms.length == 0
+            || newSelectedImagingPlatforms.length == 1
+            && newSelectedImagingPlatforms[0] == '') {
             return res.status(400).json({ success: false, message: "No Selected Imaging Platforms" })
         }
-        if (newSelectedPhotographers.length == 0) {
+        if (newSelectedPhotographers.length == 0
+            || newSelectedPhotographers.length == 1
+            && newSelectedPhotographers[0] == '') {
             return res.status(400).json({ success: false, message: "no Selected Photographers" })
         }
 
