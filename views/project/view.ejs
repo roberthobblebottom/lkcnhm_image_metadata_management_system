@@ -375,7 +375,7 @@
                         <div class="detail-row">
                             <div class="detail-label">Photographer</div>
                             <div class="detail-value">
-                                <%= request.photographerName %>
+                                <%= request.photographers %>
                             </div>
                         </div>
 
@@ -413,12 +413,7 @@
                             </div>
                         </div>
 
-                        <div class="detail-row">
-                            <div class="detail-label">Reason for Status</div>
-                            <div class="detail-value">
-                                <%= request.ReasonForRequest || 'Not specified' %>
-                            </div>
-                        </div>
+
                     </div>
                 </div>
 
@@ -430,9 +425,9 @@
                 </div>
 
                 <div class="detail-row">
-                    <div class="detail-label">Specimen Details</div>
+                    <div class="detail-label">Specimens Details</div>
                     <div class="detail-value text-area-value">
-                        <%= request.DetailsofSpecimens %>
+                        <%= request.DetailsOfSpecimens %>
                     </div>
                 </div>
 

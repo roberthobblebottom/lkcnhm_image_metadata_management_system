@@ -4,7 +4,8 @@ const db = require("./db"); // Database connection
 const { isAuthenticated, isAdmin } = require("../middleware/auth"); // Middleware
 
 const { formatDate, formatDisplayDate, projectStatusEnumeration, projectTypeEnumeration,
-    mediaFormatEnumeration, imagingPlatformEnumeration, imageEditingToolEnumeration, userTypesEnumeration } = require('../middleware/utils');
+    mediaFormatEnumeration, imagingPlatformEnumeration, imageEditingToolEnumeration, userTypesEnumeration,
+    requestStatusEnumeration } = require('../middleware/utils');
 router.get('/create', isAuthenticated, async (req, res) => {
     const getProjectOwners = `
       SELECT u.UserID,u.FullName, u.Email, u.UserType 
@@ -94,7 +95,7 @@ router.post('/submit', isAuthenticated, async (req, res) => {
         ImagingStartDate,
         ImagingEndDate,
         SummaryofProject,
-        DetailsofSpecimens,
+        DetailsOfSpecimens,
         LocationsOfSpecimens,
         ImagingPlatform,
         Comments,
@@ -228,7 +229,7 @@ router.get('/view-all', isAuthenticated, (req, res) => {
 
 
 // View Request (GET)
-router.get('/view/:id', isAuthenticated, (req, res) => {
+router.get('/view/:id', isAuthenticated, async (req, res) => {
     const projectID = req.params.id;
     const query = `
         SELECT 
@@ -249,6 +250,16 @@ router.get('/view/:id', isAuthenticated, (req, res) => {
         WHERE p.ProjectID = ?
     `;
 
+    const photographersQuery =
+        `SELECT user.FullName FROM ProjectUserPhotographyLink pupl JOIN User user ON user.UserID = pupl.PhotographerID WHERE pupl.ProjectID = ?`;
+    const temp = (await db.promise().query(photographersQuery, [projectID]))[0]
+    const photographers = []
+    console.log('temp', temp)
+    for (x of temp) {
+        console.log(x)
+        photographers.push(x.FullName)
+    }
+    console.log(photographers)
     db.query(query, [projectID], (err, results) => {
         if (err) {
             console.error('Error fetching project:', err);
@@ -272,7 +283,8 @@ router.get('/view/:id', isAuthenticated, (req, res) => {
             ImagingEndDate: formatDate(results[0].ImagingEndDate),
             CreatedDate: formatDate(results[0].CreatedDate),
             UpdatedDate: results[0].UpdatedDate ? formatDate(results[0].UpdatedDate) : null,
-            IsDeleted: results[0].IsDeleted
+            IsDeleted: results[0].IsDeleted,
+            photographers: photographers.toString().replace(",", ", ")
         };
 
         res.render('project/view', {
@@ -349,20 +361,28 @@ router.get('/edit/:id', isAuthenticated, async (req, res) => {
             WHERE p.ProjectID = ?;
         `;
         // Get all needed data in parallel for better performance
-        const [requestResults, photographerResults, imagingPlatformResults1] = await Promise.all([
+        const [requestResults, imagingPlatformTemp, selectedPhotographersTemp, allPhotographers] = await Promise.all([
             db.promise().query(requestQuery, [projectID]),
-            db.promise().query("SELECT UserID, Email,FullName FROM User ORDER BY Email"),
             db.promise().query("SELECT ImagingPlatform FROM ImagingPlatformInstance WHERE ProjectID = ? ORDER BY ImagingPlatform",
                 [projectID]
             ),
-        ]);
-        const imagingPlatformResults = []
-        for (i of imagingPlatformResults1[0]) {
-            imagingPlatformResults.push(Object.values(i)[0]);
-        }
+            db.promise().query("SELECT user.UserID ,user.FullName FROM ProjectUserPhotographyLink p JOIN User user on user.UserID = p.PhotographerID WHERE p.ProjectID = ? ", [projectID])
+            , db.promise().query("SELECT UserID,FullName FROM User WHERE RequestStatus = '" + requestStatusEnumeration().approved + "'")
+        ])
         if (requestResults[0].length === 0) {
             return res.status(404).render('error', { message: 'Request not found' });
         }
+        const currentlySelectedPhotographers = []
+        for (i of selectedPhotographersTemp[0]) {
+            currentlySelectedPhotographers.push(i);
+        }
+        console.log('currentlySelectedPhotographersResults', currentlySelectedPhotographers)
+        console.log("all", allPhotographers[0])
+        const imagingPlatforms = []
+        for (i of imagingPlatformTemp[0]) {
+            imagingPlatforms.push(Object.values(i)[0]);
+        }
+
         // Format dates for display
         const request = {
             ...requestResults[0][0],
@@ -372,11 +392,12 @@ router.get('/edit/:id', isAuthenticated, async (req, res) => {
         };
         res.render(`project/edit`, {
             request: request,
-            photographers: photographerResults[0],
-            selectedImagingPlatforms: imagingPlatformResults,
+            allPhotographers: allPhotographers[0],
+            selectedPhotographers: currentlySelectedPhotographers,
             statuses: Object.values(projectStatusEnumeration()),
             projectTypes: Object.values(projectTypeEnumeration()),
             imagingPlatforms: Object.values(imagingPlatformEnumeration()),
+            selectedImagingPlatforms: imagingPlatforms,
             currentUser: req.user,
             title: "Edit Project"// Add title here
         });
@@ -400,18 +421,29 @@ router.post('/edit/:id', isAuthenticated, async (req, res) => {
             ImagingStartDate,
             ImagingEndDate,
             SummaryOfProject,
-            DetailsofSpecimens,
+            DetailsOfSpecimens,
             LocationsOfSpecimens,
             ProjectStatus,
-            selectedImagingPlatforms
+            selectedImagingPlatforms,
+            selectedPhotographers,
         } = req.body;
 
         newSelectedImagingPlatforms = selectedImagingPlatforms.split(",")
         console.log(newSelectedImagingPlatforms)
+
+        newSelectedPhotographers = selectedPhotographers.split(",")
+        console.log('newSelectedPhotographers', newSelectedPhotographers)
+
         // === 1. VALIDATION ===
-        if (!ImagingStartDate || !ImagingEndDate || (!ProjectStatus
-            && req.session.passport.user.UserType == userTypesEnumeration.admin)) {
+        if (!ImagingStartDate || !ImagingEndDate || !ProjectStatus) {
             return res.status(400).json({ success: false, message: 'Missing required fields' });
+        }
+
+        if (newSelectedImagingPlatforms.length == 0) {
+            return res.status(400).json({ success: false, message: "No Selected Imaging Platforms" })
+        }
+        if (newSelectedPhotographers.length == 0) {
+            return res.status(400).json({ success: false, message: "no Selected Photographers" })
         }
 
         // Date validation
@@ -434,31 +466,31 @@ router.post('/edit/:id', isAuthenticated, async (req, res) => {
             ImagingStartDate = ?,
             ImagingEndDate = ?,
             SummaryofProject = ?,
-            DetailsofSpecimens = ?,
+            DetailsOfSpecimens = ?,
             LocationsOfSpecimens = ?,
             ProjectStatus = ?,
             UpdatedByID = ?,
             UpdatedDate = NOW()
         WHERE ProjectID = ?
     `;
-        const updateQuery2 =
-            `
-        UPDATE ProjectUserPhotographyLink
-        SET PhotographerID = ?
-        WHERE ProjectID = ?
-        `;
+        // const updateQuery2 =
+        //     `
+        // UPDATE ProjectUserPhotographyLink
+        // SET PhotographerID = ?
+        // WHERE ProjectID = ?
+        // `;
 
+        /// IMAGING PLATFORMS OPERATIONS START
         const selectImagingQuery = `
-        SELECT ImagingPlatform FROM ImagingPlatformInstance WHERE ProjectID = ?
-        
-        `;
-
+        SELECT ImagingPlatform FROM ImagingPlatformInstance WHERE ProjectID = ?`;
         const temp = (await db.promise().query(selectImagingQuery, [projectID]))[0]
         currentSelectedImagingPlatforms = []
         for (x of temp) {
             currentSelectedImagingPlatforms.push(x.ImagingPlatform)
         }
         console.log("currentSelectedImagingPlatforms", currentSelectedImagingPlatforms)
+
+        //Getting differences
         const temp2 = newSelectedImagingPlatforms.filter((e) => !currentSelectedImagingPlatforms.includes(e))
         imagingPlatformsToBeAdded = []
         for (x of temp2) {
@@ -468,28 +500,60 @@ router.post('/edit/:id', isAuthenticated, async (req, res) => {
         imagingPlatformsToBeRemoved = currentSelectedImagingPlatforms.filter((e) => !newSelectedImagingPlatforms.includes(e))
         console.log('imagingPlatformsToBeRemoved', imagingPlatformsToBeRemoved)
 
+        //the update
         if (imagingPlatformsToBeRemoved.length != 0) {
             await db.promise().query("DELETE FROM ImagingPlatformInstance WHERE ImagingPlatform in (?) AND ProjectID =?", [imagingPlatformsToBeRemoved, projectID])
         }
         if (imagingPlatformsToBeAdded.length != 0) {
-
             await db.promise().query("INSERT INTO ImagingPlatformInstance(ImagingPlatform,ProjectID) VALUES ? ", [imagingPlatformsToBeAdded])
-
         }
+
+        /// IMAGING PLATFORMS OPERATIONS END
+        console.log("\n")
+
+        /// Photographers OPERATIONS START
+        const selectPhotographerQuery = `
+        SELECT PhotographerID FROM ProjectUserPhotographyLink WHERE ProjectID = ?`;
+        const temp3 = (await db.promise().query(selectPhotographerQuery, [projectID]))[0]
+        currentSelectedPhotographers = []
+        for (x of temp3) {
+            currentSelectedPhotographers.push(x.PhotographerID.toString())
+        }
+        console.log("currentSelectedPhotographers", currentSelectedPhotographers)
+
+        //Getting differences
+        const temp4 = newSelectedPhotographers.filter((e) => !currentSelectedPhotographers.includes(e))
+        photographersToBeAdded = []
+        for (x of temp4) {
+            photographersToBeAdded.push([x, projectID])
+        }
+        console.log('photographers to be added (photographerID,projectID)', photographersToBeAdded)
+        photographersToBeRemoved = currentSelectedPhotographers.filter((e) => !newSelectedPhotographers.includes(e))
+        console.log('photographersToBeRemoved', photographersToBeRemoved)
+        // return;
+        //the update
+        if (photographersToBeRemoved.length != 0) {
+            await db.promise().query("DELETE FROM ProjectUserPhotographyLink WHERE PhotographerID in (?) AND ProjectID =?", [photographersToBeRemoved, projectID])
+        }
+        if (photographersToBeAdded.length != 0) {
+            await db.promise().query("INSERT INTO ProjectUserPhotographyLink(PhotographerID,ProjectID) VALUES ? ", [photographersToBeAdded])
+        }
+        /// Photographers OPERATIONS END
+
         await db.promise().query(updateQuery, [
             startDate,
             endDate,
             SummaryOfProject || null,
-            DetailsofSpecimens || null,
+            DetailsOfSpecimens || null,
             LocationsOfSpecimens || null,
             ProjectStatus,
             req.session.passport.user.UserID,
             projectID
         ])
-        await db.promise().query(updateQuery2, [
-            PhotographerID,
-            projectID
-        ]);
+        // await db.promise().query(updateQuery2, [
+        //     PhotographerID,
+        //     projectID
+        // ]);
         // Return success response
         console.log("route edit here")
         res.json({

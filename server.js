@@ -69,9 +69,12 @@ app.get("/user/dashboard", isAuthenticated, (req, res) => {
 });
 
 app.get('/api/current-user', (req, res) => {
+
     if (req.session && req.session.passport.user) {
+        console.log(req.session.passport.user)
         res.json({
-            email: req.session.passport.user.Email,
+            Email: req.session.passport.user.Email,
+            FullName: req.session.passport.user.FullName,
             UserType: req.session.passport.user.UserType
         });
     } else {

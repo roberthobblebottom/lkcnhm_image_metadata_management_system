@@ -112,16 +112,19 @@
             margin: 0 auto;
         }
 
-        #imagingPlatformCheckboxes {
+        #imagingPlatformCheckboxes,
+        #photographersCheckboxes {
             display: none;
             border: 1px #dadada solid;
         }
 
-        #imagingPlatformCheckboxes label {
+        #imagingPlatformCheckboxes label,
+        #photographersCheckboxes label {
             display: block;
         }
 
-        #imagingPlatformCheckboxes label:hover {
+        #imagingPlatformCheckboxes label:hover,
+        #photographersCheckboxes label:hover {
             background-color: #1e90ff;
         }
 
@@ -131,7 +134,7 @@
 
         .selectBox select {
             width: 100%;
-            font-weight: bold;
+            /* font-weight: bold; */
         }
 
         .overSelect {
@@ -163,7 +166,7 @@
                         <select name="projectType" id="projectType" class="form-control">
                             <option value="">-- Select Project Type --</option>
                             <% projectTypes.forEach(projectType=> { %>
-                                <option value="<%= projectType %>" <%=request.projectType==projectType ? 'selected' : ''
+                                <option value="<%= projectType %>" <%=request.ProjectType==projectType ? 'selected' : ''
                                     %>
                                     >
                                     <%= projectType %>
@@ -176,24 +179,30 @@
 
                 <div class="form-group">
                     <label for="PhotographerID">Photographer:</label>
-                    <select name="PhotographerID" id="PhotographerID" class="form-control">
-                        <option value="">-- Select Photographer --</option>
-                        <% photographers.forEach(photographer=> { %>
-                            <option value="<%= photographer.UserID %>"
-                                <%=request.PhotographerUserID==photographer.UserID ? 'selected' : '' %>
-                                >
-                                <%= photographer.FullName %>
-                            </option>
-                            <% }) %>
-                    </select>
+
+
+                    <div class="selectBox" onclick="showCheckboxes('photographersCheckboxes')">
+                        <select name="ImagingPlatform" id="ImagingPlatform" class="form-control">
+                            <option>Select an option</option>
+                        </select>
+                        <div class="overSelect"></div>
+                    </div>
+                    <div id="photographersCheckboxes">
+                        <% allPhotographers.forEach(photographer=>{ %>
+                            <label for='<%=photographer%>Input'>
+                                <input type="checkbox" id="<%=photographer%>Input" <%=selectedPhotographers.some(e=>
+                                e.UserID === photographer.UserID) ?
+                                'checked' : '' %>
+                                value=<%=photographer.UserID%>
+                                    />
+                                    <%=photographer.FullName%>
+                            </label>
+                            <%})%>
+                    </div>
                 </div>
 
 
-                <div class="form-group">
-                    <label for="CreatedDate">Date Of Request:</label>
-                    <input type="date" id="CreatedDate" name="CreatedDate" value="<%= request.CreatedDate %>" readonly
-                        class="form-control-plaintext">
-                </div>
+
 
                 <div class="form-group">
                     <label for="ImagingStartDate">Imaging Start Date:</label>
@@ -213,27 +222,21 @@
                         required><%= request.SummaryOfProject %></textarea>
                 </div>
 
-
+                <div class="form-group">
+                    <label for="DetailsOfSpecimens">Details Of Specimens:</label>
+                    <textarea id="DetailsOfSpecimens" name="DetailsOfSpecimens" class="form-control"
+                        required><%= request.DetailsOfSpecimens %></textarea>
+                </div>
                 <div class="form-group">
                     <label for="ImagingPlatform">Imaging Platform:</label>
 
-                    <div class="selectBox" onclick="showCheckboxes()">
+                    <div class="selectBox" onclick="showCheckboxes('imagingPlatformCheckboxes')">
                         <select name="ImagingPlatform" id="ImagingPlatform" class="form-control">
                             <option>Select an option</option>
                         </select>
                         <div class="overSelect"></div>
                     </div>
-                    <!-- <select class='selectBox' name="ImagingPlatform" id="ImagingPlatform" class="form-control"
-                        onclick='showCheckboxes()' required>
-                        <option value="">-- Select Type --</option>
-                        <div class="overSelect"></div>
-                        <% imagingPlatforms.forEach(imagingPlatform=> { %>
-                            <option value="<%= imagingPlatform %>" <%=request.imagingPlatform=imagingPlatform
-                                ? 'selected' : '' %>>
-                                <%=imagingPlatform%>
-                            </option>
-                            <% }) %>
-                    </select> -->
+
                     <div id="imagingPlatformCheckboxes">
                         <% imagingPlatforms.forEach(imagingPlatform=>{ %>
                             <label for='<%=imagingPlatform%>Input'>
@@ -267,10 +270,8 @@
         <script>
             var expanded = false;
 
-            function showCheckboxes() {
-                var checkboxes = document.getElementById("imagingPlatformCheckboxes");
-                console.log('expanded: ' + expanded)
-                console.log('checkboxes: ' + checkboxes)
+            function showCheckboxes(id) {
+                var checkboxes = document.getElementById(id);
                 if (!expanded) {
                     checkboxes.style.display = "block";
                     expanded = true;
@@ -371,17 +372,25 @@
                         for (x of document.getElementById('imagingPlatformCheckboxes').childNodes) {
                             if (x instanceof HTMLLabelElement) {
                                 if (x.firstElementChild.checked) {
-
-                                    console.log(x.textContent.trim());
                                     selectedImagingPlatforms.push(x.textContent.trim());
                                 }
                             }
                         }
-
+                        selectedPhotographers = [];
+                        for (x of document.getElementById('photographersCheckboxes').childNodes) {
+                            if (x instanceof HTMLLabelElement) {
+                                if (x.firstElementChild.checked) {
+                                    console.log(x.firstElementChild.value)
+                                    selectedPhotographers.push(x.firstElementChild.value);
+                                }
+                            }
+                        }
 
                         const formData = new FormData(form);
                         formData.append('selectedImagingPlatforms', selectedImagingPlatforms);
+                        formData.append('selectedPhotographers', selectedPhotographers);
                         console.log(formData)
+                        // return;
                         const response = await fetch(form.action, {
                             method: 'POST',
                             headers: {
@@ -395,7 +404,7 @@
                                 icon: 'success',
                                 title: 'Success!',
                                 text: result.message,
-                                timer: 2000,
+                                timer: 1500,
                                 showConfirmButton: false
                             }).then(() => {
                                 window.location.href = result.redirectUrl;

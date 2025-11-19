@@ -35,7 +35,7 @@ CREATE TABLE Project (
         ImagingStartDate DATETIME NOT NULL,
         ImagingEndDate DATETIME NOT NULL,
         SummaryOfProject VARCHAR(255),
-        DetailsofSpecimens VARCHAR(255),
+        DetailsOfSpecimens VARCHAR(255),
         LocationsOfSpecimens VARCHAR(255),
         Comments VARCHAR(255),
         CreatedDate DATETIME NOT NULL ,
@@ -103,13 +103,13 @@ INSERT INTO User (Email,HashedPassword,PasswordSalt,UserType,FullName,CreatedByI
 VALUES ('p1@gmail.com',FROM_BASE64("sj1O+m695SCDA0cyNiHK/aEknLFcYPhoxP9YOZe0pvA="),'UkSbEVvinkts1Dbb','photographerOnly',"Ron Pass",'3','3','approved');
 
 
-INSERT INTO Project (ProjectOwnerID ,ProjectName ,ProjectType,ImagingStartDate ,ImagingEndDate ,CreatedDate ,UpdatedDate ,ProjectStatus,CreatedByID,UpdatedByID,SummaryOfProject,DetailsofSpecimens) 
+INSERT INTO Project (ProjectOwnerID ,ProjectName ,ProjectType,ImagingStartDate ,ImagingEndDate ,CreatedDate ,UpdatedDate ,ProjectStatus,CreatedByID,UpdatedByID,SummaryOfProject,DetailsOfSpecimens) 
 VALUES (1,"Ttest project 1","BDP",NOW(),DATE_ADD(NOW(), INTERVAL 2 DAY),NOW(),NOW(),'in progress','1','1','sample project summary','sample specimen details');
 INSERT INTO ProjectUserPhotographyLink (ProjectID,PhotographerID) VALUES ("1",'1'); 
 INSERT INTO ImagingPlatformInstance(ProjectID,ImagingPlatform) VALUES (1,'Olympus(L5)');
 INSERT INTO ImagingPlatformInstance(ProjectID,ImagingPlatform) VALUES (1,'VD(L4Prep)');
 
-INSERT INTO Project (ProjectOwnerID ,ProjectName,ProjectType,ImagingStartDate ,ImagingEndDate ,CreatedDate ,UpdatedDate ,ProjectStatus,CreatedByID,UpdatedByID,SummaryOfProject,DetailsofSpecimens) 
+INSERT INTO Project (ProjectOwnerID ,ProjectName,ProjectType,ImagingStartDate ,ImagingEndDate ,CreatedDate ,UpdatedDate ,ProjectStatus,CreatedByID,UpdatedByID,SummaryOfProject,DetailsOfSpecimens) 
 VALUES (2,"test project 2",'BDP',NOW(),DATE_ADD(NOW(),INTERVAL 2 DAY),NOW(),NOW(),'in progress','1','1','sample project summary','sample specimen details');
 INSERT INTO ProjectUserPhotographyLink (ProjectID,PhotographerID) VALUES ("2",2); 
 INSERT INTO ImagingPlatformInstance(ProjectID,ImagingPlatform) VALUES (2,'Leica(L5)');

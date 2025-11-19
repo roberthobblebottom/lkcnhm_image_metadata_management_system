@@ -33,9 +33,10 @@
       fetch("/api/current-user")
         .then(res => res.json())
         .then(data => {
-          const email = data.email; // trim after @
+          const email = data.Email; // trim after @
+          const fullName = data.FullName;
           const UserType = data.UserType;
-          document.getElementById("userGreeting").textContent = `Logged in as: ${email}\nRole: ${UserType}`;
+          document.getElementById("userGreeting").textContent = `Logged in as: ${fullName} \nEmail: ${email} \nRole: ${UserType}`;
         })
         .catch(() => {
           document.getElementById("userGreeting").textContent = "Welcome";
