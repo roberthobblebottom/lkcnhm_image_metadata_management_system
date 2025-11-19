@@ -445,6 +445,7 @@ router.post('/edit/:id', isAuthenticated, async (req, res) => {
 
         const projectID = req.params.id;
         const {
+            ProjectName,
             PhotographerID,
             ImagingStartDate,
             ImagingEndDate,
@@ -491,6 +492,7 @@ router.post('/edit/:id', isAuthenticated, async (req, res) => {
         const updateQuery = `
         UPDATE Project
     SET
+    projectName =?,
     ImagingStartDate = ?,
         ImagingEndDate = ?,
         SummaryofProject = ?,
@@ -569,6 +571,7 @@ router.post('/edit/:id', isAuthenticated, async (req, res) => {
         /// Photographers OPERATIONS END
 
         await db.promise().query(updateQuery, [
+            ProjectName,
             startDate,
             endDate,
             SummaryOfProject || null,
