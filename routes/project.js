@@ -254,15 +254,32 @@ router.get('/view/:id', isAuthenticated, async (req, res) => {
         `;
 
     const photographersQuery =
-        `SELECT user.FullName FROM ProjectUserPhotographyLink pupl JOIN User user ON user.UserID = pupl.PhotographerID WHERE pupl.ProjectID = ? `;
+        `SELECT user.FullName FROM ProjectUserPhotographyLink pupl 
+        JOIN User user ON user.UserID = pupl.PhotographerID
+        WHERE pupl.ProjectID = ? `;
+    const imagingPlatformsQuery = `
+    SELECT ImagingPlatform FROM ImagingPlatformInstance WHERE ProjectID = ?
+    `;
+
+
     const photographersTemp1 = (await db.promise().query(photographersQuery, [projectID]))[0]
     const photographers = []
     // console.log('temp', photographersTemp1)
     for (x of photographersTemp1) {
-        console.log(x)
         photographers.push(x.FullName)
     }
     console.log('photographers', photographers)
+
+
+
+    const imagingPlatformsTemp1 = (await db.promise().query(imagingPlatformsQuery, [projectID]))[0]
+    const imagingPlatforms = []
+    // console.log('temp', imagingPlatformsTemp1)
+    for (x of imagingPlatformsTemp1) {
+        imagingPlatforms.push(x.ImagingPlatform)
+    }
+    console.log('imagingPlatforms', imagingPlatforms)
+    // return
     db.query(query, [projectID], (err, results) => {
         if (err) {
             console.error('Error fetching project:', err);
@@ -287,7 +304,12 @@ router.get('/view/:id', isAuthenticated, async (req, res) => {
             CreatedDate: formatDate(results[0].CreatedDate),
             UpdatedDate: results[0].UpdatedDate ? formatDate(results[0].UpdatedDate) : null,
             IsDeleted: results[0].IsDeleted,
-            photographers: photographers.length != 0 ? photographers.toString().replace(",", ", ") : 'Not Specified'
+            photographers: photographers.length != 0
+                ? photographers.toString().replace(",", ", ")
+                : 'Not Specified',
+            imagingPlatforms: imagingPlatforms.length != 0
+                ? imagingPlatforms.toString().replace(",", ", ")
+                : 'Not Specified'
         };
 
         res.render('project/view', {
@@ -350,17 +372,12 @@ router.get('/edit/:id', isAuthenticated, async (req, res) => {
         const projectID = req.params.id;
         const requestQuery = `
             SELECT
-    p.*,
-        projectOwner.FullName AS RequestorName,
+            p.*,
+            projectOwner.FullName AS RequestorName,
             projectOwner.Email AS RequestorEmail,
-                projectOwner.UserID AS RequestorID,
-                    photographer.FullName AS PhotographerName,
-                        photographer.Email AS PhotographerEmail,
-                            photographer.UserID AS PhotographerUserID
+            projectOwner.UserID AS RequestorID
             FROM Project p
             JOIN User projectOwner ON p.ProjectOwnerID = projectOwner.UserID
-            JOIN ProjectUserPhotographyLink i ON p.ProjectID = i.ProjectID
-            JOIN User photographer ON i.PhotographerID = photographer.UserID 
             WHERE p.ProjectID = ?;
     `;
         // Get all needed data in parallel for better performance
@@ -393,7 +410,8 @@ router.get('/edit/:id', isAuthenticated, async (req, res) => {
             ImagingStartDate: formatDisplayDate(requestResults[0][0].ImagingStartDate),
             ImagingEndDate: formatDisplayDate(requestResults[0][0].ImagingEndDate)
         };
-        res.render(`project / edit`, {
+
+        res.render(`project/edit`, {
             request: request,
             allPhotographers: allPhotographers[0],
             selectedPhotographers: currentlySelectedPhotographers,
