@@ -2,7 +2,7 @@ const express = require("express");
 const router = express.Router();
 const db = require("./db"); // Database connection
 const { isAuthenticated, isAdmin } = require("../middleware/auth"); // Middleware
-const { userTypesEnumeration, imageEditingToolEnumeration, mediaFileFormatEnumeration, imagingPlatformEnumeration } = require("../middleware/utils");
+const { formatDisplayDate, userTypesEnumeration, imageEditingToolEnumeration, mediaFileFormatEnumeration, imagingPlatformEnumeration } = require("../middleware/utils");
 
 
 
@@ -153,6 +153,7 @@ router.get('/create-or-edit-for-project/:mediaID/:projectID/', isAuthenticated, 
         imagingPlatforms: Object.values(imagingPlatformEnumeration()),
         fileFormats: Object.values(mediaFileFormatEnumeration()),
         currentMedia,
+        imagingDate: formatDisplayDate(currentMedia.ImagingDate),
         project,  // contains projectID, photographerId, projectOwnerId + names
         title: 'Media Form'
     });
