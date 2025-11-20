@@ -254,122 +254,139 @@
         <a href="/media/view-all" class="btn btn-primary">
           <i class="fas fa-arrow-left"></i> Back to view all media
         </a>
-        <h2>Then, enter new image metadata entry </h2>
-        <!-- Hidden IDs -->
-        <input type="hidden" name="ProjectID" value="<%= project.ProjectID %>">
-        <input type="hidden" name="ProjectOwnerID" value="<%= project.ProjectOwnerID %>">
-        <input type="hidden" name="PhotographerID" value="<%= project.PhotographerID %>">
-        <!-- Requestor Full Name (readonly) -->
-        <div class="form-group">
-          <label>Project Owner Full Name</label>
-          <input type="text" value="<%= project.projectOwnerName %>" readonly>
-        </div>
+        <% if (currentMedia !='none' ) {%>
+          <h2>Then, edit image metadata entry </h2>
+          <%} else {%>
+            <h2>Then, enter new image metadata entry </h2>
+            <%}%>
+              <!-- Hidden IDs -->
+              <input type="hidden" name="ProjectID" value="<%= project.ProjectID %>">
+              <input type="hidden" name="ProjectOwnerID" value="<%= project.ProjectOwnerID %>">
+              <input type="hidden" name="PhotographerID" value="<%= project.PhotographerID %>">
+              <!-- Requestor Full Name (readonly) -->
+              <div class="form-group">
+                <label>Project Owner Full Name</label>
+                <input type="text" value="<%= project.projectOwnerName %>" readonly>
+              </div>
 
-        <!-- Photographer Full Name (readonly) -->
-        <div class="form-group">
-          <label>Photographer Full Name</label>
-          <input type="text" value="<%= project.photographerName %>" readonly>
-        </div>
+              <!-- Photographer Full Name (readonly) -->
+              <div class="form-group">
+                <label>Photographer Full Name</label>
+                <input type="text" value="<%= project.photographerName %>" readonly>
+              </div>
 
-        <!-- The rest of the form stays the same... -->
-        <div class="form-group">
-          <label for="mediaFileName">Media File Full Name</label>
-          <input type="text" name="mediaFileName" id="mediaFileName" value="RemoveThisLater.tiff" required>
-        </div>
+              <!-- The rest of the form stays the same... -->
+              <div class="form-group">
+                <label for="mediaFileName">Media File Full Name</label>
+                <input type="text" name="mediaFileName" id="mediaFileName"
+                  value="<%=currentMedia != 'none' ? currentMedia.FileName : 'REMOVE THIS LATER' %>" required>
+              </div>
 
-        <div class="form-group">
-          <label for="filePath">File Path</label>
-          <input type="text" name="filePath" id="filePath" value="REMOVE THIS LATER" required>
-        </div>
+              <div class="form-group">
+                <label for="filePath">File Path</label>
+                <input type="text" name="filePath" id="filePath"
+                  value="<%=currentMedia != 'none' ? currentMedia.FilePath : 'REMOVE THIS LATER' %>" required>
+              </div>
 
-        <div class="form-group">
-          <label for="catalogID">Catalog ID</label>
-          <input type="text" name="catalogID" id="catalogID" value="ZRCBDP0012345" required>
-        </div>
+              <div class="form-group">
+                <label for="catalogID">Catalog ID (default id is for testing purposes, remove later)</label>
+                <input type="text" name="catalogID" id="catalogID"
+                  value="<%=currentMedia != 'none' ? currentMedia.CatalogID : 'ZRCBDP0012345' %>" required>
+              </div>
 
-        <div class="form-group">
-          <label for="morphoID">Morpho ID</label>
-          <input type="text" name="morphoID" id="morphoID" value="REMOVE THIS LATER" required>
-        </div>
+              <div class="form-group">
+                <label for="morphoID">Morpho ID</label>
+                <input type="text" name="morphoID" id="morphoID"
+                  value="<%=currentMedia != 'none' ? currentMedia.MorphoID : 'REMOVE THIS LATER' %>" required>
+              </div>
 
-        <div class="form-group">
-          <label for="clusterID">Cluster ID</label>
-          <input type="text" name="clusterID" id="clusterID" value="3PZRCBDP1234567">
-        </div>
+              <div class="form-group">
+                <label for="clusterID">Cluster ID (default id is for testing purposes, remove later)</label>
+                <input type="text" name="clusterID" id="clusterID"
+                  value="<%=currentMedia != 'none' ? currentMedia.ClusterID: '3PZRCBDP1234567' %>">
+              </div>
 
-        <div class="form-group">
-          <label for="imagingDate">Date of Imaging</label>
-          <input type="date" name="imagingDate" id="imagingDate" required>
-        </div>
+              <div class="form-group">
+                <label for="imagingDate">Date of Imaging</label>
+                <input type="date" name="imagingDate" id="imagingDate"
+                  value="<%=currentMedia != 'none' ? currentMedia.ImagingDate : '' %>" required>
+              </div>
 
-        <div class="form-group">
-          <label for="resolution">Resolution</label>
-          <input type="text" name="resolution" id="resolution" value="REMOVE THIS LATER">
-        </div>
-
-
-
-        <div class="form-group">
-          <label for="fileSize">File Size in Bytes</label>
-          <input type="number" name="fileSizeBytes" id="fileSizeBytes" value="99999">
-        </div>
-
-        <div class="form-group">
-          <label for="fileFormat">Media File Format</label>
-          <select name="fileFormat" id="fileFormat" onchange="fileFormatOnChange()" requried>
-            <option value="">-- Select a media file format --</option>
-            <%fileFormats.forEach( fileFormat=>{%>
-              <option value="<%=fileFormat%>" <%=fileFormat=='.tiff' ? 'selected' : '' %>>
-                <%=fileFormat%>
-              </option>
-              <%})%>
-          </select>
-
-        </div>
-
-        <div class="form-group">
-          <label for="description">Description of Image</label>
-          <textarea name="description" id="description" required>REMOVE THIS LATER</textarea>
-        </div>
-
-        <div class="form-group">
-          <label for="imagingPlatform">imaging Platform</label>
-          <select name="imagingPlatform" id="imagingPlatform" requried>
-            <option value="">-- Select<%=imagingPlatforms%> a imaging platform --</option>
-            <%imagingPlatforms.forEach( imagingPlatform=>{%>
-              <option value="<%=imagingPlatform%>" <%=imagingPlatform=='Leica(L5)' ? 'selected' : '' %>>
-                <%=imagingPlatform%>
-              </option>
-              <%})%>
-          </select>
-        </div>
-
-        <div class="form-group">
-          <label for="imageEditingTool">Image Editing Tool</label>
-          <select name="imageEditingTool" id="imageEditingTool" requried>
-            <option value="">-- Select a image editing tool --</option>
-            <%imageEditingTools.forEach( imageEditingTool=>{%>
-              <option value="<%=imageEditingTool%>" <%=imageEditingTool=='photoshop' ? 'selected' : '' %>>
-                <%=imageEditingTool%>
-              </option>
-              <%})%>
-          </select>
-        </div>
-
-        <div class="form-group">
-          <label for="comments">Comments</label>
-          <textarea name="comments" id="comments">REMOVE THIS LATER</textarea>
-        </div>
+              <div class="form-group">
+                <label for="resolution">Resolution</label>
+                <input type="text" name="resolution" id="resolution"
+                  value="<%=currentMedia != 'none' ? currentMedia.Resolution : 'REMOVE THIS LATER' %>">
+              </div>
 
 
 
-        <p class="note">
-          💡 Note: If there is more than one image for a specimen, submit this form multiple times with different
-          image
-          details.
-        </p>
+              <div class="form-group">
+                <label for="fileSize">File Size in Bytes</label>
+                <input type="number" name="fileSizeBytes" id="fileSizeBytes"
+                  value="<%=currentMedia != 'none' ? currentMedia.FileSizeBytes : '999999' %>">
+              </div>
 
-        <button type="submit" class="submit-btn">Submit Media</button>
+              <div class="form-group">
+                <label for="fileFormat">Media File Format</label>
+                <select name="fileFormat" id="fileFormat" onchange="fileFormatOnChange()" requried>
+                  <option value="">-- Select a media file format --</option>
+                  <%fileFormats.forEach( fileFormat=>{%>
+                    <option value="<%=fileFormat%>" <%=fileFormat==(currentMedia !='none' ? currentMedia.FileFormat
+                      : '.tiff' ) ? 'selected' : '' %>>
+                      <%=fileFormat%>
+                    </option>
+                    <%})%>
+                </select>
+
+              </div>
+
+              <div class="form-group">
+                <label for="description">Description of Image</label>
+                <textarea name="description" id="description"
+                  required> <%=currentMedia != 'none' ? currentMedia.Description : 'REMOVE THIS LATER' %></textarea>
+              </div>
+
+              <div class="form-group">
+                <label for="imagingPlatform">imaging Platform</label>
+                <select name="imagingPlatform" id="imagingPlatform" requried>
+                  <option value="">-- Select<%=imagingPlatforms%> a imaging platform --</option>
+                  <%imagingPlatforms.forEach( imagingPlatform=>{%>
+                    <option value="<%=imagingPlatform%>" <%=imagingPlatform==(currentMedia !='none' ?
+                      currentMedia.ImagingPlatform : 'Leica(L5)' ) ? 'selected' : '' %>>
+                      <%=imagingPlatform%>
+                    </option>
+                    <%})%>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label for="imageEditingTool">Image Editing Tool</label>
+                <select name="imageEditingTool" id="imageEditingTool" requried>
+                  <option value="">-- Select a image editing tool --</option>
+                  <%imageEditingTools.forEach( imageEditingTool=>{%>
+                    <option value="<%=imageEditingTool%>" <%=imageEditingTool==(currentMedia !='none' ?
+                      currentMedia.ImageEditingTool : 'photoshop' ) ? 'selected' : '' %>>
+                      <%=imageEditingTool%>
+                    </option>
+                    <%})%>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label for="comments">Comments</label>
+                <textarea name="comments"
+                  id="comments"><%=currentMedia != 'none' ? currentMedia.Comments : 'REMOVE THIS LATER' %></textarea>
+              </div>
+
+
+
+              <p class="note">
+                💡 Note: If there is more than one image for a specimen, submit this form multiple times with different
+                image
+                details.
+              </p>
+
+              <button type="submit" class="submit-btn">Submit Media</button>
       </form>
 
   </div>
@@ -383,7 +400,7 @@
     };
     document.addEventListener("DOMContentLoaded", () => {
       const form = document.querySelector("form");
-      document.getElementById("imagingDate").valueAsDate = new Date();
+      // document.getElementById("imagingDate").valueAsDate = "<%=currentMedia%>" != 'none' ?<%=currentMedia.imagingDate %> : new Date();
       const fileNameInput = document.getElementById("mediaFileName");
       const fileFormat = document.getElementById("fileFormat");
       const validExtensions = "<%=fileFormats%>".split(",");

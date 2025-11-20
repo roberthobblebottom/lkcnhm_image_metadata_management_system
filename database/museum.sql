@@ -69,7 +69,7 @@ CREATE TABLE Media (
         MediaID INT AUTO_INCREMENT PRIMARY KEY,
         ProjectID INT NOT NULL,
         PhotographerID INT NOT NULL,
-        MediaFileName VARCHAR(255),
+        FileName VARCHAR(255),
         FilePath VARCHAR(255),
         CatalogID VARCHAR(100) NOT NULL,
         MorphoID VARCHAR(100),
@@ -116,7 +116,7 @@ INSERT INTO ImagingPlatformInstance(ProjectID,ImagingPlatform) VALUES (2,'Leica(
 
 
 
-INSERT INTO Media (ProjectID,PhotographerID,MediaFileName,FilePath,CatalogID,
+INSERT INTO Media (ProjectID,PhotographerID,FileName,FilePath,CatalogID,
 MorphoID,ClusterID,ImagingDate,Resolution,FileSizeBytes,FileFormat,Description,ImagingPlatform,ImageEditingTool,
 Comments,CreatedDate,CreatedByID,UpdatedDate,UpdatedByID) VALUES (
 1,1,"photo.png","filepath",'catelogid',"MorphoID","ClusterID",NOW(),

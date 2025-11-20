@@ -174,7 +174,7 @@
           <div class="detail-row">
             <div class="detail-label">File Name:</div>
             <div class="detail-value">
-              <%= media.MediaFileName || '-' %>
+              <%= media.FileName || '-' %>
             </div>
           </div>
 
@@ -295,7 +295,7 @@
                     <a href="/media/view-all" class="btn btn-primary">
                       <i class="fas fa-arrow-left"></i> Back to view all media
                     </a>
-                    <a href="/media/edit/<%= media.MediaId%>" class="btn btn-warning">
+                    <a href="/media/select-user-for/<%= mediaId%>/<%=media.ProjectID%>" class="btn btn-warning">
                       <i class="fas fa-edit"></i> Edit Request
                     </a>
                   </div>

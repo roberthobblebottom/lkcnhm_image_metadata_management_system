@@ -115,7 +115,7 @@
   <div class="main_con">
     <%- currentUser.UserType=='admin' ? include('../partials/sidenav-admin'): include('../partials/sidenav-user') %>
 
-      <a href="/media/select-user-for" class="btn">Add Media</a>
+      <a href="/media/select-user-for/create-for-media/none/" class="btn">Add Media</a>
 
       <%if (currentUser.UserType=='admin' ){%>
         <h2>All Photography Metadata Records</h2>
@@ -165,7 +165,7 @@
                           </td>
                           <%}%>
                             <td>
-                              <%= record.MediaFileName || 'Not specified' %>
+                              <%= record.FileName || 'Not specified' %>
                             </td>
                             <td>
                               <%= record.CatalogID || '-' %>
@@ -180,7 +180,8 @@
                               <%}%>
                                 <td class="action-btns">
                                   <a href="/media/view/<%= record.MediaID %>"><button class="btn-view">View</button></a>
-                                  <a href="/media/edit/<%= record.MediaID %>"><button class="btn-edit">Edit</button></a>
+                                  <a href="/media/select-user-for/<%=record.MediaID%>/<%=record.ProjectID%>"><button
+                                      class="btn-edit">Edit</button></a>
 
                                   <%if (!record.IsDeleted ){%>
                                     <form action="/media/delete/<%= record.MediaID %>" method="POST"

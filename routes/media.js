@@ -11,7 +11,7 @@ router.get('/view-all', isAuthenticated, (req, res) => {
     const baseQuery = `
       SELECT 
         m.MediaID,
-        m.MediaFileName,
+        m.FileName,
         m.FilePath,
         m.CatalogID,
         m.ImagingDate,
@@ -62,7 +62,9 @@ router.get('/view-all', isAuthenticated, (req, res) => {
 
 
 
-router.get('/select-user-for', isAuthenticated, (req, res) => {
+router.get('/select-user-for/:mediaID/:projectID', isAuthenticated, async (req, res) => {
+    const mediaID = req.params.mediaID;
+    const projectID = req.params.projectID;
     const baseQuery = `
             SELECT 
                 p.ProjectID,
@@ -90,31 +92,36 @@ router.get('/select-user-for', isAuthenticated, (req, res) => {
       `;
 
 
+
     const query = req.session.passport.user.UserType != userTypesEnumeration().admin
         ? baseQuery + " AND photographer.UserID = " + req.session.passport.user.UserID
         : baseQuery
-    console.log(query)
-    db.query(query, (err, users) => {
-        if (err) {
-            console.error("❌ Failed to fetch eligible users for media:", err);
-            return res.status(500).render('error', { message: 'Failed to load users for media upload' });
-        }
+    const users = (await db.promise().query(query))[0];
 
-        console.log(`📋 Found ${users.length} eligible users`);
-        // console.log("📋 User:", users);
-        res.render('media/user-list', {
-            users,
-            currentUser: req.session.passport.user,
-            title: 'Media Image List'
-        });
+    const currentProjectQuery = "SELECT ProjectID, ProjectName FROM Project WHERE ProjectID = " + projectID;
+    const currentProject = mediaID != 'create-for-media'
+        ? await db.promise().query(currentProjectQuery, [users.ProjectID])
+        : null;
+    // console.log(mediaID)
+    const isEdit = mediaID != 'create-for-media';
+    console.log('isEdit', isEdit)
+
+    res.render('media/user-list', {
+        users: users,
+        currentUser: req.session.passport.user,
+        title: 'Media Image List',
+        isEdit: isEdit,
+        mediaID: mediaID,
+        currentProject: mediaID != 'create-for-media' ? currentProject[0][0] : ""
     });
+
 });
 
 
 
-router.get('/create-for-project/:projectId', isAuthenticated, (req, res) => {
-    const projectId = req.params.projectId;
-
+router.get('/create-or-edit-for-project/:mediaID/:projectID/', isAuthenticated, async (req, res) => {
+    const projectID = req.params.projectID;
+    const mediaID = req.params.mediaID;
     const query = `
       SELECT 
         p.ProjectID,
@@ -131,32 +138,23 @@ router.get('/create-for-project/:projectId', isAuthenticated, (req, res) => {
       WHERE p.ProjectID = ? AND p.IsDeleted = 0
     `;
 
-    db.query(query, [projectId], (err, results) => {
-        if (err) {
-            console.error("❌ Error fetching Project:", err);
-            return res.status(500).render('error', {
-                message: "Failed to load Project details",
-                error: process.env.NODE_ENV === 'development' ? err : null
-            });
-        }
+    //For EDIT
+    const currentMediaQuery = mediaID != 'none' ? 'SELECT * FROM Media WHERE Media.MediaID = ' + mediaID : '';
 
-        if (results.length === 0) {
-            return res.status(404).render('error', {
-                message: "Project not found or deleted"
-            });
-        }
+    const project = (await db.promise().query(query, [projectID]))[0][0];
+    const currentMedia = mediaID != 'none' ? (await db.promise().query(currentMediaQuery))[0][0] : "none";
 
-        const project = results[0];
-        // console.log(imagingPlatformEnumeration())
-        console.log(Object.values(imagingPlatformEnumeration()))
-        res.render('media/create', {
-            currentUser: req.session.passport.user,
-            imageEditingTools: Object.values(imageEditingToolEnumeration()),
-            imagingPlatforms: Object.values(imagingPlatformEnumeration()),
-            fileFormats: Object.values(mediaFileFormatEnumeration()),
-            project,  // contains projectId, photographerId, projectOwnerId + names
-            title: 'Media Form'
-        });
+    console.log(project)
+    console.log('currentMedia', currentMedia)
+    // console.log(imagingPlatformEnumeration())
+    res.render('media/create-or-edit', {
+        currentUser: req.session.passport.user,
+        imageEditingTools: Object.values(imageEditingToolEnumeration()),
+        imagingPlatforms: Object.values(imagingPlatformEnumeration()),
+        fileFormats: Object.values(mediaFileFormatEnumeration()),
+        currentMedia,
+        project,  // contains projectID, photographerId, projectOwnerId + names
+        title: 'Media Form'
     });
 });
 
@@ -212,7 +210,7 @@ router.post('/submit', isAuthenticated, async (req, res) => {
       INSERT INTO Media (
         ProjectID,
         PhotographerID,
-        MediaFileName,
+        FileName,
         FilePath,
         CatalogID,
         MorphoID,
@@ -312,56 +310,44 @@ router.get('/view/:mediaId', isAuthenticated, (req, res) => {
 router.get('/edit/:mediaId', isAuthenticated, (req, res) => {
     const mediaId = req.params.mediaId;
 
-    if (mediaId) {
-        // Editing existing media
-        const query = `
+    const query = `
             SELECT m.*, 
                    p.ProjectOwnerID AS RequestorID,
-                   u1.Email AS projectOwnerName,
-                   photographer.Email AS photographerName
+                   projectOwner.FullName AS projectOwnerName,
+                   photographer.FullName AS photographerName
             FROM Media m
             JOIN Project p ON m.ProjectID = p.ProjectID
-            LEFT JOIN User u1 ON p.ProjectOwnerID = u1.UserID
-            JOIN ProjectUserPhotographyLink p ON p.ProjectID = p.ProjectID
-            JOIN User photographer ON p.PhotographerID = photgrapher.UserID  
+            LEFT JOIN User projectOwner ON p.ProjectOwnerID = projectOwner.UserID
+            JOIN ProjectUserPhotographyLink pupl ON pupl.ProjectID = p.ProjectID
+            JOIN User photographer ON pupl.PhotographerID = photographer.UserID  
 
             WHERE m.MediaID = ? AND m.IsDeleted = 0
         `;
 
-        db.query(query, [mediaId], (err, results) => {
-            if (err || results.length === 0) {
-                console.error("❌ Error fetching media:", err);
-                return res.status(404).render('error', {
-                    message: 'Media not found'
-                });
-            }
-
-            res.render('media-edit', {
-                media: results[0],
-                editing: true,
-                project: {
-                    ProjectID: results[0].ProjectID,
-                    ProjectOwnerID: results[0].RequestorID,
-                    PhotographerID: results[0].PhotographerID,
-                    projectOwnerName: results[0].projectOwnerName,
-                    photographerName: results[0].photographerName
-                }
+    db.query(query, [mediaId], (err, results) => {
+        if (err || results.length === 0) {
+            console.error("❌ Error fetching media:", err);
+            return res.status(404).render('error', {
+                message: 'Media not found'
             });
+        }
+
+        res.render('/select-user-for', {
+            media: results[0],
+            project: {
+                ProjectID: results[0].ProjectID,
+                ProjectOwnerID: results[0].RequestorID,
+                PhotographerID: results[0].PhotographerID,
+                projectOwnerName: results[0].projectOwnerName,
+                photographerName: results[0].photographerName
+            }
         });
-    } else {
-        // Creating new media - you'll need to pass project data
-        // This part depends on how you're creating new media
-        res.render('media-edit', {
-            media: null,
-            editing: false,
-            project: req.query.project || {},
-            title: "Media Edit" // You'll need to pass this
-        });
-    }
+    });
+
 });
 
 // Controller for handling form submission
-router.post('/save', isAuthenticated, (req, res) => {
+router.post('/edit', isAuthenticated, (req, res) => {
     const mediaData = req.body;
 
     const isEdit = mediaData.MediaID !== '';
@@ -370,7 +356,7 @@ router.post('/save', isAuthenticated, (req, res) => {
         // Update existing media
         const query = `
             UPDATE Media SET
-                MediaFileName = ?,
+                FileName = ?,
                 FilePath = ?,
                 CatalogID = ?,
                 MorphoID = ?,
@@ -418,7 +404,7 @@ router.post('/save', isAuthenticated, (req, res) => {
         // Create new media
         const query = `
             INSERT INTO Media (
-                ProjectID, PhotographerID, MediaFileName, FilePath,
+                ProjectID, PhotographerID, FileName, FilePath,
                 CatalogID, MorphoID, ClusterID, ImagingDate, Resolution,
                 FileSize, FileFormat, Description, CameraModel,
                 ImageEditingTool, Comments, CreatedByID, CreatedDate

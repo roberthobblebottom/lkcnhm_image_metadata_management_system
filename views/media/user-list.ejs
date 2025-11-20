@@ -108,67 +108,90 @@
 <body>
   <div class="main_con">
     <%- currentUser.UserType=='admin' ? include('../partials/sidenav-admin'): include('../partials/sidenav-user') %>
-      <a href="/media/view-all" class="btn btn-primary">
-        <i class="fas fa-arrow-left"></i> Back to view all media
-      </a>
-      <% if (currentUser.UserType=='admin' ){%>
-        <h2>📸 Firstly, Select project owner/photographer pair for Media Entry</h2>
 
-        <%} else {%>
-          <h2>📸 Firstly, Select the project that you are the photographer with for Media Entry</h2>
+      <% if(isEdit){%>
+        <h2> Edit Media Metadata Entry</h2>
+        <%}else{%>
+
+          <h2> Create Media Metadata Entry</h2>
           <%}%>
-            <% if (users.length===0) { %>
-              <p class="no-data">No projects found.</p>
-              <% } else { %>
-                <table>
-                  <thead>
-                    <tr>
-                      <th>Project ID</th>
-                      <th>Project Name</th>
-                      <th>Project Owner Full Name</th>
-                      <% if (currentUser.UserType=='admin' ){%>
-                        <th>Photographer</th>
+            <% if (currentUser.UserType=='admin' ){%>
+              <h4>📸 Firstly, Select project owner/photographer pair for Media Entry</h4>
+
+              <%} else {%>
+                <h4>📸 Firstly, Select the project that you are the photographer with for Media Entry</h4>
+                <%}%>
+                  <% if (users.length===0) { %>
+                    <p class="no-data">No projects found.</p>
+                    <% } else { %>
+
+                      <% if (isEdit) { %>
+                        <h4> Or, continue with this current project Project ID:<%=currentProject.ProjectID%>, Project
+                            Name:
+                            <%=currentProject.ProjectName%>
+                              <a href="/media/create-or-edit-for-project/<%=mediaID%>/<%=currentProject.ProjectID%>"
+                                class="btn-choose">continue</a>
+                        </h4>
+                        <a href="/media/view-all" class="btn btn-primary">
+                          <i class="fas fa-arrow-left"></i> Back to view all media
+                        </a>
                         <%}%>
-                          <th>Start Date</th>
-                          <th>End Date</th>
-                          <th>Action</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <% users.forEach(row=> { %>
-                      <tr>
-                        <td>
-                          <%= row.ProjectID %>
-                        </td>
-                        <td>
-                          <%=row.ProjectName%>
-                        </td>
-                        <td>
-                          <%= row.projectOwnerName %>
-                        </td>
+                          <table>
+                            <thead>
+                              <tr>
+                                <th>Project ID</th>
+                                <th>Project Name</th>
+                                <th>Project Owner Full Name</th>
+                                <% if (currentUser.UserType=='admin' ){%>
+                                  <th>Photographer</th>
+                                  <%}%>
+                                    <th>Start Date</th>
+                                    <th>End Date</th>
+                                    <th>Action</th>
+                              </tr>
+                            </thead>
+                            <tbody>
+                              <% users.forEach(row=> { if(row.ProjectID !=currentProject.ProjectID){ %>
+                                <tr>
+                                  <td>
+                                    <%= row.ProjectID %>
+                                  </td>
+                                  <td>
+                                    <%=row.ProjectName%>
+                                  </td>
+                                  <td>
+                                    <%= row.projectOwnerName %>
+                                  </td>
 
-                        <% if (currentUser.UserType=='admin' ){%>
-                          <td>
-                            <%= row.photographerName %>
-                          </td>
-                          <%}%>
-                            <td>
-                              <%= row.ImagingStartDate.toISOString().slice(0, 10) %>
-                            </td>
-                            <td>
-                              <%= row.ImagingEndDate.toISOString().slice(0, 10) %>
-                            </td>
-                            <td>
-                              <a href="/media/create-for-project/<%= row.ProjectID %>" class="btn-choose">add one</a>
-                              <a href="/media/csv-upload-for-project/<%= row.ProjectID %>" class="btn-choose">add
-                                many</a>
-                            </td>
-                      </tr>
-                      <% }) %>
-                  </tbody>
-                </table>
+                                  <% if (currentUser.UserType=='admin' ){%>
+                                    <td>
+                                      <%= row.photographerName %>
+                                    </td>
+                                    <%}%>
+                                      <td>
+                                        <%= row.ImagingStartDate.toISOString().slice(0, 10) %>
+                                      </td>
+                                      <td>
+                                        <%= row.ImagingEndDate.toISOString().slice(0, 10) %>
+                                      </td>
+                                      <td>
+                                        <% if(isEdit){%>
+                                          <a href="/media/edit/" class="btn-choose"> edit </a>
+                                          <%} else{%>
+                                            <a href="/media/create-or-edit-for-project/none/<%= row.ProjectID %>/"
+                                              class="btn-choose">add
+                                              one</a>
+                                            <a href="/media/csv-upload-for-project/<%= row.ProjectID %>"
+                                              class="btn-choose">add
+                                              many</a>
+                                            <%}%>
+                                      </td>
+                                </tr>
+                                <%}}) %>
+                            </tbody>
+                          </table>
 
-                <% } %>
+                          <% } %>
 
   </div>
 </body>
