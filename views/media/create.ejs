@@ -315,12 +315,12 @@
         </div>
 
         <div class="form-group">
-          <label for="mediaFileFormat">Media File Format</label>
-          <select name="mediaFileFormat" id="mediaFileFormat" onchange="mediaFileFormatOnChange()" requried>
+          <label for="fileFormat">Media File Format</label>
+          <select name="fileFormat" id="fileFormat" onchange="fileFormatOnChange()" requried>
             <option value="">-- Select a media file format --</option>
-            <%mediaFileFormats.forEach( mediaFileFormat=>{%>
-              <option value="<%=mediaFileFormat%>" <%=mediaFileFormat=='.tiff' ? 'selected' : '' %>>
-                <%=mediaFileFormat%>
+            <%fileFormats.forEach( fileFormat=>{%>
+              <option value="<%=fileFormat%>" <%=fileFormat=='.tiff' ? 'selected' : '' %>>
+                <%=fileFormat%>
               </option>
               <%})%>
           </select>
@@ -374,26 +374,26 @@
 
   </div>
   <script>
-    // import { mediaFileFormatEnumeration } from "../../middleware/utils";
-    function mediaFileFormatOnChange() {
+    // import { fileFormatEnumeration } from "../../middleware/utils";
+    function fileFormatOnChange() {
       const fileNameInput = document.getElementById("mediaFileName");
-      const mediaFileFormat = document.getElementById("mediaFileFormat");
+      const fileFormat = document.getElementById("fileFormat");
       const temp = fileNameInput.value.split(".")[0]
-      fileNameInput.value = temp + mediaFileFormat.value
+      fileNameInput.value = temp + fileFormat.value
     };
     document.addEventListener("DOMContentLoaded", () => {
       const form = document.querySelector("form");
       document.getElementById("imagingDate").valueAsDate = new Date();
       const fileNameInput = document.getElementById("mediaFileName");
-      const mediaFileFormat = document.getElementById("mediaFileFormat");
-      const validExtensions = "<%=mediaFileFormats%>".split(",");
-      mediaFileFormatOnChange()
+      const fileFormat = document.getElementById("fileFormat");
+      const validExtensions = "<%=fileFormats%>".split(",");
+      fileFormatOnChange()
       // Check for a valid file extension
       function isValidFileName(filename) {
         if (!filename) return false;
         const lower = filename.toLowerCase();
-        if (!lower.endsWith(mediaFileFormat.value)) return false
-        if (lower.replace(mediaFileFormat.value, "") == "") return false
+        if (!lower.endsWith(fileFormat.value)) return false
+        if (lower.replace(fileFormat.value, "") == "") return false
         return validExtensions.some(ext => lower.endsWith(ext));
       }
 

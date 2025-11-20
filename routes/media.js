@@ -20,13 +20,10 @@ router.get('/view-all', isAuthenticated, (req, res) => {
         m.CreatedDate,
         m.IsDeleted,
         p.ProjectID,
-        projectOwner.FullName AS projectOwnerName,
-        projectOwner.Email as projectOwnerEmail,
-        photographer.Email AS photographerEmail,
+        p.ProjectName,
         photographer.FullName As photographerName
       FROM Media m
       JOIN Project p ON m.ProjectID = p.ProjectID
-      JOIN User projectOwner ON p.ProjectOwnerID = projectOwner.UserID
       JOIN ProjectUserPhotographyLink pupl ON pupl.ProjectID = p.ProjectID
       JOIN User photographer ON pupl.PhotographerID = photographer.UserID  
 
@@ -156,7 +153,7 @@ router.get('/create-for-project/:projectId', isAuthenticated, (req, res) => {
             currentUser: req.session.passport.user,
             imageEditingTools: Object.values(imageEditingToolEnumeration()),
             imagingPlatforms: Object.values(imagingPlatformEnumeration()),
-            mediaFileFormats: Object.values(mediaFileFormatEnumeration()),
+            fileFormats: Object.values(mediaFileFormatEnumeration()),
             project,  // contains projectId, photographerId, projectOwnerId + names
             title: 'Media Form'
         });
@@ -178,7 +175,6 @@ router.post('/submit', isAuthenticated, async (req, res) => {
             clusterID,
             imagingDate,
             resolution,
-            colorDepth,
             fileSizeBytes,
             fileFormat,
             description,
