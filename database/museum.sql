@@ -79,7 +79,7 @@ CREATE TABLE Media (
         FileSizeBytes INT,
         FileFormat VARCHAR(50),
         Description VARCHAR(225),
-        CameraModel VARCHAR(255),
+        ImagingPlatform VARCHAR(255),
         ImageEditingTool VARCHAR(255),
         Comments VARCHAR(255),
         CreatedDate DATETIME,
@@ -117,11 +117,11 @@ INSERT INTO ImagingPlatformInstance(ProjectID,ImagingPlatform) VALUES (2,'Leica(
 
 
 INSERT INTO Media (ProjectID,PhotographerID,MediaFileName,FilePath,CatalogID,
-MorphoID,ClusterID,ImagingDate,Resolution,FileSizeBytes,FileFormat,Description,CameraModel,ImageEditingTool,
+MorphoID,ClusterID,ImagingDate,Resolution,FileSizeBytes,FileFormat,Description,ImagingPlatform,ImageEditingTool,
 Comments,CreatedDate,CreatedByID,UpdatedDate,UpdatedByID) VALUES (
 1,1,"photo.png","filepath",'catelogid',"MorphoID","ClusterID",NOW(),
 "1000 x 1000",1000,".png","Description",
-"nikon", "imaging editing tool", 'comments', NOW(),1,NOW(),1);
+"nikon_test", "imaging editing tool", 'comments', NOW(),1,NOW(),1);
 
 
 -- SELECT * FROM User WHERE Email = 'admin@gmail.com';

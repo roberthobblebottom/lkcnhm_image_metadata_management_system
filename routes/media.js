@@ -2,19 +2,13 @@ const express = require("express");
 const router = express.Router();
 const db = require("./db"); // Database connection
 const { isAuthenticated, isAdmin } = require("../middleware/auth"); // Middleware
-const { userTypesEnumeration } = require("../middleware/utils");
+const { userTypesEnumeration, imageEditingToolEnumeration, mediaFileFormatEnumeration, imagingPlatformEnumeration } = require("../middleware/utils");
 
-// router.get('/create', isAuthenticated, async (req, res) => {
 
-//     res.render('media/create', {
-//         currentUser: req.session.passport.user,
-//         title: "Media Form"
-//     });
-// });
 
 // ✅ Admin Media Management Main Page Controller
 router.get('/view-all', isAuthenticated, (req, res) => {
-    const query = `
+    const baseQuery = `
       SELECT 
         m.MediaID,
         m.MediaFileName,
@@ -24,6 +18,7 @@ router.get('/view-all', isAuthenticated, (req, res) => {
         m.Description,
         m.FileFormat,
         m.CreatedDate,
+        m.IsDeleted,
         p.ProjectID,
         projectOwner.FullName AS projectOwnerName,
         projectOwner.Email as projectOwnerEmail,
@@ -34,9 +29,12 @@ router.get('/view-all', isAuthenticated, (req, res) => {
       JOIN User projectOwner ON p.ProjectOwnerID = projectOwner.UserID
       JOIN ProjectUserPhotographyLink pupl ON pupl.ProjectID = p.ProjectID
       JOIN User photographer ON pupl.PhotographerID = photographer.UserID  
-      WHERE m.IsDeleted = 0
-      ORDER BY m.CreatedDate DESC
+
     `;
+    const user = req.session.passport.user
+    const query = user.UserType == userTypesEnumeration().admin
+        ? baseQuery + "\nORDER BY m.CreatedDate DESC"
+        : baseQuery + "\nWHERE m.IsDeleted = 0 AND photographer.UserID =" + user.UserID + " ORDER BY m.CreatedDate DESC";
 
     db.query(query, (err, results) => {
         if (err) {
@@ -54,7 +52,7 @@ router.get('/view-all', isAuthenticated, (req, res) => {
             title: "Media Management",
             mediaRecords: results,
             message: req.session.message || null,
-            currentUser: req.session.passport.user,
+            currentUser: user,
             title: "Admin Media "   // For success messages
         });
 
@@ -152,9 +150,13 @@ router.get('/create-for-project/:projectId', isAuthenticated, (req, res) => {
         }
 
         const project = results[0];
-
+        // console.log(imagingPlatformEnumeration())
+        console.log(Object.values(imagingPlatformEnumeration()))
         res.render('media/create', {
             currentUser: req.session.passport.user,
+            imageEditingTools: Object.values(imageEditingToolEnumeration()),
+            imagingPlatforms: Object.values(imagingPlatformEnumeration()),
+            mediaFileFormats: Object.values(mediaFileFormatEnumeration()),
             project,  // contains projectId, photographerId, projectOwnerId + names
             title: 'Media Form'
         });
@@ -180,7 +182,7 @@ router.post('/submit', isAuthenticated, async (req, res) => {
             fileSizeBytes,
             fileFormat,
             description,
-            cameraModel,
+            imagingPlatform,
             imageEditingTool,
             comments
         } = req.body;
@@ -200,8 +202,9 @@ router.post('/submit', isAuthenticated, async (req, res) => {
         if (!clusterID) missingFields.push("clusterID");
         if (!imagingDate) missingFields.push("imagingDate");
         if (!description) missingFields.push("description");
-        if (!cameraModel) missingFields.push("cameraModel");
-
+        if (!imagingPlatform) missingFields.push("imagingPlatform");
+        console.log('imagingPlatform', imagingPlatform)
+        console.log('createdBy', createdBy)
         if (missingFields.length > 0) {
             return res.status(400).json({
                 success: false,
@@ -223,14 +226,14 @@ router.post('/submit', isAuthenticated, async (req, res) => {
         FileSizeBytes,
         FileFormat,
         Description,
-        CameraModel,
+        imagingPlatform,
         ImageEditingTool,
         Comments,
         CreatedDate,
         CreatedByID,
         UpdatedDate,
         UpdatedByID
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW(), ?, NOW(),?)
+      ) VALUES (?,  ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW(), ?, NOW(),?)
     `;
 
         const values = [
@@ -243,11 +246,10 @@ router.post('/submit', isAuthenticated, async (req, res) => {
             clusterID,
             imagingDate,
             resolution || null,
-            colorDepth || null,
             fileSizeBytes || null,
             fileFormat || null,
             description,
-            cameraModel,
+            imagingPlatform,
             imageEditingTool || null,
             comments || null,
             createdBy,

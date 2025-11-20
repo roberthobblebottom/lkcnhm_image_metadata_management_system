@@ -77,6 +77,8 @@
 
     /* Input Fields */
     input[type="text"],
+    input[type="date"],
+    input[type='number'],
     input[type="datetime-local"],
     select,
     textarea {
@@ -272,27 +274,27 @@
         <!-- The rest of the form stays the same... -->
         <div class="form-group">
           <label for="mediaFileName">Media File Full Name</label>
-          <input type="text" name="mediaFileName" id="mediaFileName" required>
+          <input type="text" name="mediaFileName" id="mediaFileName" value="RemoveThisLater.tiff" required>
         </div>
 
         <div class="form-group">
           <label for="filePath">File Path</label>
-          <input type="text" name="filePath" id="filePath" required>
+          <input type="text" name="filePath" id="filePath" value="REMOVE THIS LATER" required>
         </div>
 
         <div class="form-group">
           <label for="catalogID">Catalog ID</label>
-          <input type="text" name="catalogID" id="catalogID" required>
+          <input type="text" name="catalogID" id="catalogID" value="ZRCBDP0012345" required>
         </div>
 
         <div class="form-group">
           <label for="morphoID">Morpho ID</label>
-          <input type="text" name="morphoID" id="morphoID" required>
+          <input type="text" name="morphoID" id="morphoID" value="REMOVE THIS LATER" required>
         </div>
 
         <div class="form-group">
           <label for="clusterID">Cluster ID</label>
-          <input type="text" name="clusterID" id="clusterID" required>
+          <input type="text" name="clusterID" id="clusterID" value="3PZRCBDP1234567">
         </div>
 
         <div class="form-group">
@@ -302,51 +304,61 @@
 
         <div class="form-group">
           <label for="resolution">Resolution</label>
-          <input type="text" name="resolution" id="resolution">
+          <input type="text" name="resolution" id="resolution" value="REMOVE THIS LATER">
         </div>
 
-        <!-- <div class="form-group">
-          <label for="colorDepth">Color Depth</label>
-          <select name="colorDepth" id="colorDepth" required>
-            <option value="">Select Color Depth</option>
-            <option>1-bit (Monochrome)</option>
-            <option>8-bit (256 Colors)</option>
-            <option>16-bit (High Color)</option>
-            <option>24-bit (True Color)</option>
-            <option>32-bit (True Color with transparency)</option>
-            <option>48-bit</option>
-            <option>64-bit</option>
-          </select>
-        </div> -->
+
 
         <div class="form-group">
           <label for="fileSize">File Size in Bytes</label>
-          <input type="number" name="fileSizeBytes" id="fileSizeBytes">
+          <input type="number" name="fileSizeBytes" id="fileSizeBytes" value="99999">
         </div>
 
         <div class="form-group">
-          <label for="fileFormat">File Format</label>
-          <input type="text" name="fileFormat" id="fileFormat">
+          <label for="mediaFileFormat">Media File Format</label>
+          <select name="mediaFileFormat" id="mediaFileFormat" onchange="mediaFileFormatOnChange()" requried>
+            <option value="">-- Select a media file format --</option>
+            <%mediaFileFormats.forEach( mediaFileFormat=>{%>
+              <option value="<%=mediaFileFormat%>" <%=mediaFileFormat=='.tiff' ? 'selected' : '' %>>
+                <%=mediaFileFormat%>
+              </option>
+              <%})%>
+          </select>
+
         </div>
 
         <div class="form-group">
           <label for="description">Description of Image</label>
-          <textarea name="description" id="description" required></textarea>
+          <textarea name="description" id="description" required>REMOVE THIS LATER</textarea>
         </div>
 
         <div class="form-group">
-          <label for="cameraModel">Camera Model</label>
-          <input type="text" name="cameraModel" id="cameraModel" required>
+          <label for="imagingPlatform">imaging Platform</label>
+          <select name="imagingPlatform" id="imagingPlatform" requried>
+            <option value="">-- Select<%=imagingPlatforms%> a imaging platform --</option>
+            <%imagingPlatforms.forEach( imagingPlatform=>{%>
+              <option value="<%=imagingPlatform%>" <%=imagingPlatform=='Leica(L5)' ? 'selected' : '' %>>
+                <%=imagingPlatform%>
+              </option>
+              <%})%>
+          </select>
         </div>
 
         <div class="form-group">
           <label for="imageEditingTool">Image Editing Tool</label>
-          <input type="text" name="imageEditingTool" id="imageEditingTool">
+          <select name="imageEditingTool" id="imageEditingTool" requried>
+            <option value="">-- Select a image editing tool --</option>
+            <%imageEditingTools.forEach( imageEditingTool=>{%>
+              <option value="<%=imageEditingTool%>" <%=imageEditingTool=='photoshop' ? 'selected' : '' %>>
+                <%=imageEditingTool%>
+              </option>
+              <%})%>
+          </select>
         </div>
 
         <div class="form-group">
           <label for="comments">Comments</label>
-          <textarea name="comments" id="comments"></textarea>
+          <textarea name="comments" id="comments">REMOVE THIS LATER</textarea>
         </div>
 
 
@@ -362,17 +374,26 @@
 
   </div>
   <script>
-    import { mediaFormatEnumeration } from "../../middleware/utils";
+    // import { mediaFileFormatEnumeration } from "../../middleware/utils";
+    function mediaFileFormatOnChange() {
+      const fileNameInput = document.getElementById("mediaFileName");
+      const mediaFileFormat = document.getElementById("mediaFileFormat");
+      const temp = fileNameInput.value.split(".")[0]
+      fileNameInput.value = temp + mediaFileFormat.value
+    };
     document.addEventListener("DOMContentLoaded", () => {
       const form = document.querySelector("form");
+      document.getElementById("imagingDate").valueAsDate = new Date();
       const fileNameInput = document.getElementById("mediaFileName");
-      const validExtensions = Object.values(mediaFormatEnumeration());
-
+      const mediaFileFormat = document.getElementById("mediaFileFormat");
+      const validExtensions = "<%=mediaFileFormats%>".split(",");
+      mediaFileFormatOnChange()
       // Check for a valid file extension
       function isValidFileName(filename) {
         if (!filename) return false;
-        console.log("HERE")
         const lower = filename.toLowerCase();
+        if (!lower.endsWith(mediaFileFormat.value)) return false
+        if (lower.replace(mediaFileFormat.value, "") == "") return false
         return validExtensions.some(ext => lower.endsWith(ext));
       }
 
@@ -381,23 +402,33 @@
         let errorMessages = [];
 
         if (!isValidFileName(fileName)) {
-          errorMessages.push("📁 The media file name must include a valid extension like `.jpg`, `.png`, `.tiff`, etc.");
+          errorMessages.push("📁 The media file name must include a valid extension like `.jpg`, `.png`, `.tiff`, etc. AND must the the same as media File Format from selection drop down box.\n\n");
           fileNameInput.style.borderColor = "red";
         } else {
           fileNameInput.style.borderColor = "";
         }
-        const colorDepth = document.getElementById("colorDepth").value;
-        if (!colorDepth) {
-          Swal.fire({
-            icon: "warning",
-            title: "Color Depth Required",
-            text: "Please select a valid color depth option before submitting.",
-            confirmButtonColor: "#007bff"
-          });
-          return; // Stop form submission
+        const catalogIDRegex = /^[A-Z]{6}\d{7}$/;
+        console.log(!catalogIDRegex.test(document.getElementById('catalogID').value))
+        if (!catalogIDRegex.test(document.getElementById('catalogID').value)) {
+          errorMessages.push("catalogID is not in the correct format. Example of a correct format: ZRCBDP0012345. 6 capital letters and then 7 numbers. \n\n");
+          fileNameInput.style.borderColor = "red";
+        } else {
+          fileNameInput.style.borderColor = "";
         }
-
-
+        // if (!regex.test(document.getElementById('morphoID').value)) {
+        //   errorMessages.push("morphoID is not in the correct format. Example of a correct format: ZRCBDP0012345. 6 capital letters and then 7 numbers. \n\n ");
+        //   fileNameInput.style.borderColor = "red";
+        // } else {
+        //   fileNameInput.style.borderColor = "";
+        // }
+        const clusterIDRegex = /^[\d][A-Z]{7}\d{7}$/
+        const clusterID = document.getElementById('clusterID').value
+        if (!clusterIDRegex.test(clusterID) && clusterID != "") {
+          errorMessages.push("clusterID is not in the correct format. Example of a correct format:3PZRCBDP1234567,  1 number, 7 capital letters and then 7 numbers. \n\n ");
+          fileNameInput.style.borderColor = "red";
+        } else {
+          fileNameInput.style.borderColor = "";
+        }
         if (errorMessages.length > 0) {
           e.preventDefault(); // prevent form submission
           Swal.fire({

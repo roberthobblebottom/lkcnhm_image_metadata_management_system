@@ -26,7 +26,8 @@ app.use(
         secret: process.env.SessionSecret,
         resave: false,
         saveUninitialized: false,
-        cookie: { secure: false, httpOnly: true, maxAge: 1000 * 60 * 60 } // 1-hour expiry
+        cookie: { secure: false, httpOnly: true, } // 1-hour expiry
+        //maxAge: 1000 * 60 * 60 
     })
 );
 app.use(passport.session())

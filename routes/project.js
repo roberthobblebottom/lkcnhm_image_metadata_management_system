@@ -4,7 +4,7 @@ const db = require("./db"); // Database connection
 const { isAuthenticated, isAdmin } = require("../middleware/auth"); // Middleware
 
 const { formatDate, formatDisplayDate, projectStatusEnumeration, projectTypeEnumeration,
-    mediaFormatEnumeration, imagingPlatformEnumeration, imageEditingToolEnumeration, userTypesEnumeration,
+    mediaFileFormatEnumeration, imagingPlatformEnumeration, imageEditingToolEnumeration, userTypesEnumeration,
     requestStatusEnumeration } = require('../middleware/utils');
 router.get('/create', isAuthenticated, async (req, res) => {
     const getProjectOwners = `

@@ -94,6 +94,20 @@
       color: gray;
       margin-top: 20px;
     }
+
+    .status-approved {
+      color: green;
+      font-weight: bold;
+    }
+
+    .status-rejected {
+      color: red;
+      font-weight: bold;
+    }
+
+    .btn-restore {
+      background: #54d300;
+    }
   </style>
 </head>
 
@@ -118,7 +132,12 @@
                 <th>File Name</th>
                 <th>Catalog ID</th>
                 <th>Imaging Date</th>
-                <th>Actions</th>
+                <%if (currentUser.UserType=='admin' ){%>
+                  <th>
+                    Is Deleted?
+                  </th>
+                  <%}%>
+                    <th>Actions</th>
               </tr>
             </thead>
             <tbody>
@@ -147,14 +166,27 @@
                   <td>
                     <%= record.ImagingDate?.toISOString().slice(0, 10) %>
                   </td>
-                  <td class="action-btns">
-                    <a href="/media/view/<%= record.MediaID %>"><button class="btn-view">View</button></a>
-                    <a href="/media/edit/<%= record.MediaID %>"><button class="btn-edit">Edit</button></a>
-                    <form action="/media/delete/<%= record.MediaID %>" method="POST" style="display:inline;"
-                      onsubmit="return confirm('Are you sure you want to delete this media record?');">
-                      <button type="submit" class="btn-delete">Delete</button>
-                    </form>
-                  </td>
+                  <%if (currentUser.UserType=='admin' ){%>
+                    <td class="<%= !record.IsDeleted  ? 'status-approved' :  'status-rejected'  %>">
+                      <%=!record.IsDeleted? 'Active' : 'Deleted' %>
+                    </td>
+                    <%}%>
+                      <td class="action-btns">
+                        <a href="/media/view/<%= record.MediaID %>"><button class="btn-view">View</button></a>
+                        <a href="/media/edit/<%= record.MediaID %>"><button class="btn-edit">Edit</button></a>
+
+                        <%if (!record.IsDeleted ){%>
+                          <form action="/media/delete/<%= record.MediaID %>" method="POST" style="display:inline;"
+                            onsubmit="return confirm('Are you sure you want to delete this media record?');">
+                            <button type="submit" class="btn-delete">Delete</button>
+                          </form>
+                          <%} else {%>
+                            <form action="/media/restore/<%= record.MediaID %>" method="POST" style="display:inline;"
+                              onsubmit="return confirm('Are you sure you want to restore this media record?');">
+                              <button type="submit" class="btn-restore">restore</button>
+                            </form>
+                            <%}%>
+                      </td>
                 </tr>
                 <% }) %>
             </tbody>

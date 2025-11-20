@@ -34,10 +34,10 @@ const projectTypeEnumeration = () => {
         StudentProject: 'StudentProject', Visitor: 'Visitor'
     }
 };
-const mediaFormatEnumeration = () => {
+const mediaFileFormatEnumeration = () => {
     return {
-        jpg: ".jpg", jpeg: ".jpeg", png: ".png", gif: ".gif",
-        tiff: ".tiff", bmp: ".bmp", svg: ".svg", raw: ".raw"
+        jpg: ".jpg", jpeg: ".jpeg", png: ".png",
+        tiff: ".tiff", svg: ".svg", raw: ".raw"
     };
 }
 
@@ -55,7 +55,8 @@ const imagingPlatformEnumeration = () => {
 
 const imageEditingToolEnumeration = () => {
     return {
-        photoshop: "photoshop"
+        photoshop: "photoshop",
+        gimp: "gimp"
     }
 }
 
@@ -69,5 +70,5 @@ const userTypesEnumeration = () => {
 
 module.exports = {
     formatDate, formatDisplayDate, requestStatusEnumeration, projectStatusEnumeration, projectTypeEnumeration,
-    mediaFormatEnumeration, imagingPlatformEnumeration, imageEditingToolEnumeration, userTypesEnumeration
+    mediaFileFormatEnumeration, imagingPlatformEnumeration, imageEditingToolEnumeration, userTypesEnumeration
 };
