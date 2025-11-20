@@ -111,52 +111,64 @@
       <a href="/media/view-all" class="btn btn-primary">
         <i class="fas fa-arrow-left"></i> Back to view all media
       </a>
-      <h2>📸 Firstly, Select project owner/photographer pair for Media Entry</h2>
+      <% if (currentUser.UserType=='admin' ){%>
+        <h2>📸 Firstly, Select project owner/photographer pair for Media Entry</h2>
 
-      <% if (users.length===0) { %>
-        <p class="no-data">No projects found.</p>
-        <% } else { %>
-          <table>
-            <thead>
-              <tr>
-                <th>Project ID</th>
-                <th>Project Owner Full Name</th>
-                <th>Photographer</th>
-                <th>Start Date</th>
-                <th>End Date</th>
-                <th>Action</th>
-              </tr>
-            </thead>
-            <tbody>
-              <% users.forEach(row=> { %>
-                <tr>
-                  <td>
-                    <%= row.ProjectID %>
-                  </td>
-                  <td>
-                    <%= row.projectOwnerName %>
-                      <%=row.projectOwnerEmail%>
-                  </td>
-                  <td>
-                    <%= row.photographerName %>
-                      <%=row.photographerEmail%>
-                  </td>
-                  <td>
-                    <%= row.ImagingStartDate.toISOString().slice(0, 10) %>
-                  </td>
-                  <td>
-                    <%= row.ImagingEndDate.toISOString().slice(0, 10) %>
-                  </td>
-                  <td>
-                    <a href="/media/create-for-project/<%= row.ProjectID %>" class="btn-choose">add one</a>
-                    <a href="/media/csv-upload-for-project/<%= row.ProjectID %>" class="btn-choose">add many</a>
-                  </td>
-                </tr>
-                <% }) %>
-            </tbody>
-          </table>
+        <%} else {%>
+          <h2>📸 Firstly, Select the project that you are the photographer with for Media Entry</h2>
+          <%}%>
+            <% if (users.length===0) { %>
+              <p class="no-data">No projects found.</p>
+              <% } else { %>
+                <table>
+                  <thead>
+                    <tr>
+                      <th>Project ID</th>
+                      <th>Project Name</th>
+                      <th>Project Owner Full Name</th>
+                      <% if (currentUser.UserType=='admin' ){%>
+                        <th>Photographer</th>
+                        <%}%>
+                          <th>Start Date</th>
+                          <th>End Date</th>
+                          <th>Action</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <% users.forEach(row=> { %>
+                      <tr>
+                        <td>
+                          <%= row.ProjectID %>
+                        </td>
+                        <td>
+                          <%=row.ProjectName%>
+                        </td>
+                        <td>
+                          <%= row.projectOwnerName %>
+                        </td>
 
-          <% } %>
+                        <% if (currentUser.UserType=='admin' ){%>
+                          <td>
+                            <%= row.photographerName %>
+                          </td>
+                          <%}%>
+                            <td>
+                              <%= row.ImagingStartDate.toISOString().slice(0, 10) %>
+                            </td>
+                            <td>
+                              <%= row.ImagingEndDate.toISOString().slice(0, 10) %>
+                            </td>
+                            <td>
+                              <a href="/media/create-for-project/<%= row.ProjectID %>" class="btn-choose">add one</a>
+                              <a href="/media/csv-upload-for-project/<%= row.ProjectID %>" class="btn-choose">add
+                                many</a>
+                            </td>
+                      </tr>
+                      <% }) %>
+                  </tbody>
+                </table>
+
+                <% } %>
 
   </div>
 </body>

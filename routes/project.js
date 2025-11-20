@@ -35,6 +35,7 @@ router.get('/create', isAuthenticated, async (req, res) => {
         currentUser: req.session.passport.user,
         projectOwners: projectOwners[0],
         photographers: photographers[0],
+        projectTypes: Object.values(projectTypeEnumeration()),
         imagingPlatforms: Object.values(imagingPlatformEnumeration()),
         title: "Project Form"
     });
@@ -45,7 +46,7 @@ router.post('/submit', isAuthenticated, async (req, res) => {
     console.log("in /submit-project")
     try {
         const requiredFields = [
-            'projectOwner', 'projectName',
+            'projectOwner', 'projectName', 'projectType',
             'startDate', 'endDate', 'summary',
             'specimenDetails',
         ];
@@ -99,6 +100,7 @@ router.post('/submit', isAuthenticated, async (req, res) => {
         const insertQuery = `
       INSERT INTO Project (
       ProjectName,
+      ProjectType,
         ProjectOwnerID,
         ImagingStartDate,
         ImagingEndDate,
@@ -111,7 +113,7 @@ router.post('/submit', isAuthenticated, async (req, res) => {
         UpdatedByID,
         IsDeleted,
         ProjectStatus
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, NOW(), ?, NOW(), ?, 0, ?)
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, NOW(), ?, NOW(), ?, 0, ?)
         `;
         const insertPhotographersQuery = `
         INSERT INTO ProjectUserPhotographyLink (PhotographerID,ProjectID)
@@ -124,6 +126,7 @@ router.post('/submit', isAuthenticated, async (req, res) => {
         `;
         await db.promise().query(insertQuery, [
             req.body.projectName,
+            req.body.projectType,
             req.body.projectOwner,
             req.body.startDate,
             req.body.endDate,

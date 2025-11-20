@@ -304,7 +304,18 @@ Retrieved 2025-11-19, License - CC BY-SA 4.0
           </select>
           <div id="projectOwner-error" class="error-message">Please select a projectOwner</div>
         </div>
+        <div class="form-group">
+          <label>Project Type</label>
+          <select name="projectType" id="projectType" class="form-control" required>
+            <option value="">-- Select Project Type --</option>
+            <% projectTypes.forEach(projectType=> { %>
+              <option value="<%= projectType %>">
+                <%= projectType %>
+              </option>
+              <% }) %>
+          </select>
 
+        </div>
         <div class="form-group">
           <label for="photographer">Photographer(s)</label>
           <!-- <select id="photographer" name="photographer" required>
@@ -572,6 +583,7 @@ Retrieved 2025-11-19, License - CC BY-SA 4.0
           const formData = {
             projectName: form.projectName.value,
             projectOwner: form.projectOwner.value,
+            projectType: form.projectType.value,
             startDate: form.startDate.value,
             endDate: form.endDate.value,
             summary: form.summary.value,

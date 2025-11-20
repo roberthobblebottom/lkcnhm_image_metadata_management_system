@@ -297,7 +297,7 @@
 
         <div class="form-group">
           <label for="imagingDate">Date of Imaging</label>
-          <input type="datetime-local" name="imagingDate" id="imagingDate" required>
+          <input type="date" name="imagingDate" id="imagingDate" required>
         </div>
 
         <div class="form-group">
@@ -362,39 +362,40 @@
 
   </div>
   <script>
+    import { mediaFormatEnumeration } from "../../middleware/utils";
     document.addEventListener("DOMContentLoaded", () => {
       const form = document.querySelector("form");
       const fileNameInput = document.getElementById("mediaFileName");
-
-      const validExtensions = [".jpg", ".jpeg", ".png", ".gif", ".tiff", ".bmp", ".svg", ".raw"];
+      const validExtensions = Object.values(mediaFormatEnumeration());
 
       // Check for a valid file extension
-      // function isValidFileName(filename) {
-      //   if (!filename) return false;
-      //   const lower = filename.toLowerCase();
-      //   return validExtensions.some(ext => lower.endsWith(ext));
-      // }
+      function isValidFileName(filename) {
+        if (!filename) return false;
+        console.log("HERE")
+        const lower = filename.toLowerCase();
+        return validExtensions.some(ext => lower.endsWith(ext));
+      }
 
       form.addEventListener("submit", (e) => {
         const fileName = fileNameInput.value.trim();
         let errorMessages = [];
 
-        // if (!isValidFileName(fileName)) {
-        //   errorMessages.push("📁 The media file name must include a valid extension like `.jpg`, `.png`, `.tiff`, etc.");
-        //   fileNameInput.style.borderColor = "red";
-        // } else {
-        //   fileNameInput.style.borderColor = "";
-        // }
-        // const colorDepth = document.getElementById("colorDepth").value;
-        // if (!colorDepth) {
-        //   Swal.fire({
-        //     icon: "warning",
-        //     title: "Color Depth Required",
-        //     text: "Please select a valid color depth option before submitting.",
-        //     confirmButtonColor: "#007bff"
-        //   });
-        //   return; // Stop form submission
-        // }
+        if (!isValidFileName(fileName)) {
+          errorMessages.push("📁 The media file name must include a valid extension like `.jpg`, `.png`, `.tiff`, etc.");
+          fileNameInput.style.borderColor = "red";
+        } else {
+          fileNameInput.style.borderColor = "";
+        }
+        const colorDepth = document.getElementById("colorDepth").value;
+        if (!colorDepth) {
+          Swal.fire({
+            icon: "warning",
+            title: "Color Depth Required",
+            text: "Please select a valid color depth option before submitting.",
+            confirmButtonColor: "#007bff"
+          });
+          return; // Stop form submission
+        }
 
 
         if (errorMessages.length > 0) {

@@ -71,6 +71,7 @@ router.get('/select-user-for', isAuthenticated, (req, res) => {
     const baseQuery = `
             SELECT 
                 p.ProjectID,
+                p.ProjectName,
                 u.UserID AS user_id,
                 u.FullName AS projectOwnerName,
                 u.Email AS projectOwnerEmail,
@@ -95,7 +96,7 @@ router.get('/select-user-for', isAuthenticated, (req, res) => {
 
 
     const query = req.session.passport.user.UserType != userTypesEnumeration().admin
-        ? baseQuery + " AND u.UserID = " + req.session.passport.user.UserID
+        ? baseQuery + " AND photographer.UserID = " + req.session.passport.user.UserID
         : baseQuery
     console.log(query)
     db.query(query, (err, users) => {
