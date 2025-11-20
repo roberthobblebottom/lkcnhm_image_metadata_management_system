@@ -307,46 +307,6 @@ router.get('/view/:mediaId', isAuthenticated, (req, res) => {
     });
 });
 
-// Controller for rendering the edit form
-router.get('/edit/:mediaId', isAuthenticated, (req, res) => {
-    const mediaId = req.params.mediaId;
-
-    const query = `
-            SELECT m.*, 
-                   p.ProjectOwnerID AS RequestorID,
-                   projectOwner.FullName AS projectOwnerName,
-                   photographer.FullName AS photographerName
-            FROM Media m
-            JOIN Project p ON m.ProjectID = p.ProjectID
-            LEFT JOIN User projectOwner ON p.ProjectOwnerID = projectOwner.UserID
-            JOIN ProjectUserPhotographyLink pupl ON pupl.ProjectID = p.ProjectID
-            JOIN User photographer ON pupl.PhotographerID = photographer.UserID  
-
-            WHERE m.MediaID = ? AND m.IsDeleted = 0
-        `;
-
-    db.query(query, [mediaId], (err, results) => {
-        if (err || results.length === 0) {
-            console.error("❌ Error fetching media:", err);
-            return res.status(404).render('error', {
-                message: 'Media not found'
-            });
-        }
-
-        res.render('/select-user-for', {
-            media: results[0],
-            project: {
-                ProjectID: results[0].ProjectID,
-                ProjectOwnerID: results[0].RequestorID,
-                PhotographerID: results[0].PhotographerID,
-                projectOwnerName: results[0].projectOwnerName,
-                photographerName: results[0].photographerName
-            }
-        });
-    });
-
-});
-
 // Controller for handling form submission
 router.post('/edit', isAuthenticated, (req, res) => {
     const mediaData = req.body;
@@ -462,6 +422,42 @@ router.post('/delete/:mediaId', isAuthenticated, (req, res) => {
             const updateQuery = `
                 UPDATE Media 
                 SET IsDeleted = 1, 
+                    UpdatedByID = ?, 
+                    UpdatedDate = NOW() 
+                WHERE MediaID = ?
+            `;
+
+            return db.promise().query(updateQuery, [userId, mediaId]);
+        })
+        .then(() => {
+            // req.flash('success', 'Media has been archived successfully');
+            res.redirect('/media/view-all');
+        })
+        .catch(error => {
+            console.error("❌ Error soft deleting media:", error);
+            req.flash('error', 'Error archiving media');
+            res.redirect('/media/view-all');
+        });
+});
+
+router.post('/restore/:mediaId', isAuthenticated, (req, res) => {
+    const mediaId = req.params.mediaId;
+    const userId = req.session.passport.user.UserID;
+
+    // First verify the media exists and isn't already restored
+    const checkQuery = 'SELECT * FROM Media WHERE MediaID = ? AND IsDeleted = 1';
+
+    db.promise().query(checkQuery, [mediaId])
+        .then(([results]) => {
+            if (results.length === 0) {
+                req.flash('error', 'Media not found or already restored');
+                return res.redirect('/media/view-all');
+            }
+
+            // Perform soft restore
+            const updateQuery = `
+                UPDATE Media 
+                SET IsDeleted = 0, 
                     UpdatedByID = ?, 
                     UpdatedDate = NOW() 
                 WHERE MediaID = ?

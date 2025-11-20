@@ -5,8 +5,8 @@ USE museum;
 CREATE TABLE User (
     UserID INT AUTO_INCREMENT PRIMARY KEY,
     Email VARCHAR(255) UNIQUE NOT NULL,
-    HashedPassword BLOB NOT NULL,
-    PasswordSalt VARCHAR(255) NOT NULL,
+    HashedPassword BLOB(255) NOT NULL,
+    PasswordSalt VARCHAR(255) NOT NULL UNIQUE,
     TemporaryPassword VARCHAR(50) NULL,
     UserType ENUM('photographerOnly','projectOwner','admin') NOT NULL,
     FullName VARCHAR(255) NOT NULL,
@@ -28,7 +28,7 @@ CREATE TABLE User (
 CREATE TABLE Project (
         ProjectID INT AUTO_INCREMENT PRIMARY KEY,
         ProjectOwnerID INT NOT NULL,
-        ProjectName VARCHAR(255) NOT NULL,
+        ProjectName VARCHAR(255) NOT NULL UNIQUE,
         ProjectType 
         ENUM('BDP','GalleryBDP','InternalResearch','StudentProject','Visitor') 
         NOT NULL,
