@@ -160,6 +160,19 @@
     .btn-warning:hover {
       background-color: #e0a800;
     }
+
+    .status-approved {
+      text-align: center;
+      color: green;
+      font-weight: bold;
+    }
+
+    .status-rejected {
+
+      text-align: center;
+      color: red;
+      font-weight: bold;
+    }
   </style>
 </head>
 
@@ -171,6 +184,13 @@
         </h2>
 
         <div class="media-details">
+          <div class="detail-row">
+            <div class="detail-label">Photographer's Name:</div>
+            <div class="detail-value">
+              <%= media.photographerName|| '-' %>
+            </div>
+          </div>
+
           <div class="detail-row">
             <div class="detail-label">File Name:</div>
             <div class="detail-value">
@@ -189,6 +209,13 @@
             <div class="detail-label">Project ID:</div>
             <div class="detail-value">
               <%= media.ProjectID %>
+            </div>
+          </div>
+
+          <div class="detail-row">
+            <div class="detail-label">Project Name:</div>
+            <div class="detail-value">
+              <%= media.projectName %>
             </div>
           </div>
 
@@ -284,6 +311,13 @@
               </div>
             </div>
             <% } %>
+
+              <div class="detail-row">
+                <div class="detail-label">Is Deleted:</div>
+                <div class="<%= !media.IsDeleted  ? 'status-approved' :  'status-rejected'  %>">
+                  <%=!media.IsDeleted? 'Active' : 'Deleted' %>
+                </div>
+              </div>
 
               <% if (['.jpg', '.jpeg' , '.png' , '.gif' ].some(ext=> media.FilePath.toLowerCase().endsWith(ext))) { %>
                 <div class="media-preview">

@@ -108,33 +108,32 @@
 <body>
   <div class="main_con">
     <%- currentUser.UserType=='admin' ? include('../partials/sidenav-admin'): include('../partials/sidenav-user') %>
-
+      <a href="/media/view-all" class="btn btn-primary">
+        <i class="fas fa-arrow-left"></i> Back to view all media
+      </a>
       <% if(isEdit){%>
         <h2> Edit Media Metadata Entry</h2>
         <%}else{%>
-
           <h2> Create Media Metadata Entry</h2>
           <%}%>
+
             <% if (currentUser.UserType=='admin' ){%>
               <h4>📸 Firstly, Select project owner/photographer pair for Media Entry</h4>
-
               <%} else {%>
                 <h4>📸 Firstly, Select the project that you are the photographer with for Media Entry</h4>
                 <%}%>
+
                   <% if (users.length===0) { %>
                     <p class="no-data">No projects found.</p>
                     <% } else { %>
-
                       <% if (isEdit) { %>
                         <h4> Or, continue with this current project Project ID:<%=currentProject.ProjectID%>, Project
                             Name:
-                            <%=currentProject.ProjectName%>
-                              <a href="/media/create-or-edit-for-project/<%=mediaID%>/<%=currentProject.ProjectID%>"
-                                class="btn-choose">continue</a>
+                            <%=currentProject.ProjectName%>, Photographer: <%=currentProject.FullName%>
+                                <a href="/media/create-or-edit-for-project/<%=mediaID%>/<%=currentProject.ProjectID%>"
+                                  class="btn-choose">continue</a>
                         </h4>
-                        <a href="/media/view-all" class="btn btn-primary">
-                          <i class="fas fa-arrow-left"></i> Back to view all media
-                        </a>
+
                         <%}%>
                           <table>
                             <thead>
@@ -176,12 +175,13 @@
                                       </td>
                                       <td>
                                         <% if(isEdit){%>
-                                          <a href="/media/edit/" class="btn-choose"> edit </a>
+                                          <a href="/media/create-or-edit-for-project/<%=mediaID%>/<%=row.ProjectID%>"
+                                            class="btn-choose"> edit </a>
                                           <%} else{%>
                                             <a href="/media/create-or-edit-for-project/none/<%= row.ProjectID %>/"
                                               class="btn-choose">add
                                               one</a>
-                                            <a href="/media/csv-upload-for-project/<%= row.ProjectID %>"
+                                            <a href="/media/upload-bulk-metadata/<%= row.ProjectID %>/<%= row.PhotographerID%>"
                                               class="btn-choose">add
                                               many</a>
                                             <%}%>

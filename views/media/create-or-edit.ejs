@@ -250,29 +250,33 @@
   <div class="main_con">
     <%- currentUser.UserType=='admin' ? include('../partials/sidenav-admin'): include('../partials/sidenav-user') %>
       <!-- 📸 MEDIA SUBMISSION FORM (UPDATED) -->
-      <form action="/media/submit" method="POST">
-        <a href="/media/view-all" class="btn btn-primary">
-          <i class="fas fa-arrow-left"></i> Back to view all media
-        </a>
+
+      <form id="main-form" action="/<%=currentMedia == 'none' ? 'media/submit' : 'media/edit' %>" method="POST">
+
         <% if (currentMedia !='none' ) {%>
           <h2>Then, edit image metadata entry </h2>
           <%} else {%>
             <h2>Then, enter new image metadata entry </h2>
             <%}%>
+              <a href="/media/select-user-for/<%=currentMedia.MediaID%>/<%=project.ProjectID%>/"
+                class="btn btn-primary">
+                <i class="fas fa-arrow-left"></i> Back to selecting project owner/ photographer pairs
+              </a>
               <!-- Hidden IDs -->
               <input type="hidden" name="ProjectID" value="<%= project.ProjectID %>">
               <input type="hidden" name="ProjectOwnerID" value="<%= project.ProjectOwnerID %>">
               <input type="hidden" name="PhotographerID" value="<%= project.PhotographerID %>">
+              <input type="hidden" name="MediaID" value="<%= currentMedia.MediaID %>">
               <!-- Requestor Full Name (readonly) -->
               <div class="form-group">
                 <label>Project Owner Full Name</label>
-                <input type="text" value="<%= project.projectOwnerName %>" readonly>
+                <input type="text" id="projectOwnerName" value="<%= project.projectOwnerName %>" readonly>
               </div>
 
               <!-- Photographer Full Name (readonly) -->
               <div class="form-group">
                 <label>Photographer Full Name</label>
-                <input type="text" value="<%= project.photographerName %>" readonly>
+                <input type="text" id="photographerName" value="<%= project.photographerName %>" readonly>
               </div>
 
               <!-- The rest of the form stays the same... -->
@@ -302,7 +306,7 @@
               </div>
 
               <div class="form-group">
-                <label for="clusterID">Cluster ID (default id ZRCBDP0012345 is for testing purposes, remove
+                <label for="clusterID">Cluster ID (default id 3PZRCBDP1234567 is for testing purposes, remove
                   later)</label>
                 <input type="text" name="clusterID" id="clusterID"
                   value="<%=currentMedia != 'none' ? currentMedia.ClusterID: '3PZRCBDP1234567' %>">
@@ -401,7 +405,7 @@
       fileNameInput.value = temp + fileFormat.value
     };
     document.addEventListener("DOMContentLoaded", () => {
-      const form = document.querySelector("form");
+      const form = document.getElementById("main-form");
       // document.getElementById("imagingDate").valueAsDate = "<%=currentMedia%>" != 'none' ?<%=currentMedia.imagingDate %> : new Date();
       const fileNameInput = document.getElementById("mediaFileName");
       const fileFormat = document.getElementById("fileFormat");
@@ -416,10 +420,11 @@
         return validExtensions.some(ext => lower.endsWith(ext));
       }
 
-      form.addEventListener("submit", (e) => {
+      form.addEventListener("submit", async (e) => {
+
+        e.preventDefault();
         const fileName = fileNameInput.value.trim();
         let errorMessages = [];
-
         if (!isValidFileName(fileName)) {
           errorMessages.push("📁 The media file name must include a valid extension like `.jpg`, `.png`, `.tiff`, etc. AND must the the same as media File Format from selection drop down box.\n\n");
           fileNameInput.style.borderColor = "red";
@@ -427,7 +432,6 @@
           fileNameInput.style.borderColor = "";
         }
         const catalogIDRegex = /^[A-Z]{6}\d{7}$/;
-        console.log(!catalogIDRegex.test(document.getElementById('catalogID').value))
         if (!catalogIDRegex.test(document.getElementById('catalogID').value)) {
           errorMessages.push("catalogID is not in the correct format. Example of a correct format: ZRCBDP0012345. 6 capital letters and then 7 numbers. \n\n");
           fileNameInput.style.borderColor = "red";
@@ -448,9 +452,8 @@
         } else {
           fileNameInput.style.borderColor = "";
         }
-
-        const resolutionRegex = /^\dx\d$/;
-        if (!resolutionRegex.test(document.getElementById('resolution').value.lower())) {
+        const resolutionRegex = /^\d{1,5}x\d{1,5}$/;
+        if (!resolutionRegex.test(document.getElementById('resolution').value.toLowerCase())) {
           errorMessages.push("resolution is not in the correct format. example format: 1440x720 \n\n");
           fileNameInput.style.borderColor = "red";
         } else {
@@ -464,6 +467,71 @@
             html: errorMessages.join("<br>"),
             confirmButtonColor: '#007bff'
           });
+        } else {
+          const formData = JSON.stringify({
+            ProjectID: form.ProjectID.value,
+            ProjectOwnerID: form.ProjectOwnerID.value,
+            PhotographerID: form.PhotographerID.value,
+            fileName: form.mediaFileName.value,
+            filePath: form.filePath.value,
+            catalogID: form.catalogID.value,
+            morphoID: form.morphoID.value,
+            clusterID: form.clusterID.value,
+            imagingDate: form.imagingDate.value,
+            resolution: form.resolution.value,
+            fileSizeBytes: form.fileSizeBytes.value,
+            fileFormat: form.fileFormat.value,
+            description: form.description.value,
+            imagingPlatform: form.imagingPlatform.value,
+            imageEditingTool: form.imageEditingTool.value,
+            comments: form.comments.value,
+            MediaID: form.MediaID.value
+          })
+          // console.log(formData)
+          const submitBtn = form.querySelector('button[type="submit"]');
+          const originalBtnText = submitBtn.innerHTML;
+          submitBtn.classList.add('loading');
+          submitBtn.innerHTML = '<i class="fas fa-spinner"></i> Submitting...';
+          submitBtn.disabled = true;
+          const response = await fetch("/<%=currentMedia == 'none' ? 'media/submit' : 'media/edit' %>", {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            body: formData
+          });
+          if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.message || "Submission failed with status " + response.status);
+          }
+
+          const data = await response.json();
+          if (!data.success) {
+            throw new Error(data.message || "Submission failed");
+          }
+
+          // Show success message
+          await Swal.fire({
+            title: 'Success!',
+            text: 'project submitted successfully!',
+            icon: 'success',
+            confirmButtonText: 'OK',
+            confirmButtonColor: '#28a745',
+            timer: 1000,
+            timerProgressBar: true
+          });
+
+          console.log(data.redirectUrl)
+          // Redirect if URL is provided
+          if (data.redirectUrl) {
+            window.location.href = data.redirectUrl;
+            return; // Stop further execution
+          }
+
+          // Reset form (if no redirection)
+          form.reset();
+
+
         }
       });
     });

@@ -570,11 +570,9 @@ Retrieved 2025-11-19, License - CC BY-SA 4.0
               }
             }
           }
-          console.log(selectedPhotographers)
           submitBtn.classList.add('loading');
           submitBtn.innerHTML = '<i class="fas fa-spinner"></i> Submitting...';
           submitBtn.disabled = true;
-          console.log(form.projectOwner.value)
 
 
 
@@ -594,7 +592,6 @@ Retrieved 2025-11-19, License - CC BY-SA 4.0
           };
 
 
-          console.log('before response ' + formData)
           const response = await fetch('/project/submit', {
             method: 'POST',
             headers: {
@@ -608,7 +605,6 @@ Retrieved 2025-11-19, License - CC BY-SA 4.0
           }
 
           const data = await response.json();
-          console.log('c')
           if (!data.success) {
             throw new Error(data.message || "Submission failed");
           }

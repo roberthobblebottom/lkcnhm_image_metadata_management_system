@@ -4,7 +4,14 @@ const db = require("./db"); // Database connection
 const { isAuthenticated, isAdmin } = require("../middleware/auth"); // Middleware
 const { formatDisplayDate, userTypesEnumeration, imageEditingToolEnumeration, mediaFileFormatEnumeration, imagingPlatformEnumeration } = require("../middleware/utils");
 
+const multer = require('multer');
 
+const fs = require("fs");
+const path = require("path");
+const { errorMonitor } = require("events");
+const upload = multer({
+    dest: "upload-bulk-metadata/" // "uploads"
+});
 
 // ✅ Admin Media Management Main Page Controller
 router.get('/view-all', isAuthenticated, (req, res) => {
@@ -98,9 +105,12 @@ router.get('/select-user-for/:mediaID/:projectID', isAuthenticated, async (req, 
         : baseQuery
     const users = (await db.promise().query(query))[0];
 
-    const currentProjectQuery = "SELECT ProjectID, ProjectName FROM Project WHERE ProjectID = " + projectID;
+    const currentProjectQuery = `SELECT p.ProjectID, p.ProjectName, photographer.FullName FROM Project p
+    JOIN ProjectUserPhotographyLink pupl ON pupl.ProjectID = p.ProjectID
+    JOIN User photographer ON pupl.PhotographerID = photographer.UserID
+    WHERE p.ProjectID = ?  `;
     const currentProject = mediaID != 'create-for-media'
-        ? await db.promise().query(currentProjectQuery, [users.ProjectID])
+        ? await db.promise().query(currentProjectQuery, [projectID])
         : null;
     // console.log(mediaID)
     const isEdit = mediaID != 'create-for-media';
@@ -153,21 +163,133 @@ router.get('/create-or-edit-for-project/:mediaID/:projectID/', isAuthenticated, 
         imagingPlatforms: Object.values(imagingPlatformEnumeration()),
         fileFormats: Object.values(mediaFileFormatEnumeration()),
         currentMedia,
-        imagingDate: formatDisplayDate(currentMedia.ImagingDate),
+        imagingDate: currentMedia != 'none' ? formatDisplayDate(currentMedia.ImagingDate) : '',
         project,  // contains projectID, photographerId, projectOwnerId + names
         title: 'Media Form'
     });
 });
 
+router.get('/upload-bulk-metadata/:projectID/:photographerID', isAuthenticated, (req, res) => {
+    console.log('upload bulk metadata GET')
+    const projectID = req.params.projectID;
+    const photographerID = req.params.photographerID;
+    res.render('media/upload-bulk-metadata', {
+        projectID,
+        photographerID,
+        currentUser: req.session.passport.user,
+        title: 'Media Form'
+    });
+});
+
+router.post('/upload-bulk-metadata/:projectID/:photographerID', upload.single("bulk-metadata"), isAuthenticated, async (req, res) => {
+    console.log("post upload bulk metadata")
 
 
+    // console.log('req.file', req.file);
+    const absolutePath = path.join(__dirname, req.file.path).replace("/routes", "");
+    // console.log('absolutePath', absolutePath)
+    const jsonString = fs.readFileSync(absolutePath, "utf-8");
+    const newRowsTemp = jsonString.split('\n').slice(1)
+    const column_names = ['ProjectID', 'PhotographerID', 'FileName', 'FilePath', 'CatalogID',
+        'MorphoID', 'ClusterID', 'ImagingDate',
+        , 'Resolution', 'FileSizeBytes', 'FileFormat', 'Description', 'ImagingPlatform', 'ImageEditingTool',
+        'Comments', 'CreatedDate', 'CreatedByID', 'UpdatedDate', 'UpdatedByID']
+    function isValidFileName(filename) {
+        if (!filename) return false;
+        const lower = filename.toLowerCase();
+        if (!lower.endsWith(fileFormat.value)) return false
+        if (lower.replace(fileFormat.value, "") == "") return false
+        return validExtensions.some(ext => lower.endsWith(ext));
+    }
+    newTable = []
+    for (i = 0; i < newRowsTemp.length; i++) {
+        var temp = newRowsTemp[i].split(',')
+        const newRow = [req.params.projectID, req.params.photographerID]
+        for (j = 0; j < temp.length; j++) {
+            const element = temp[j].replaceAll("NOW()", "2025-11-22 00:00:00") // Date is a placeholder TODO: Change this later
+                .replaceAll("\"", "")
+                .replaceAll("\'", "")
+                .replaceAll(".", "\.")
+                .trim()
+            // errorMessage = element == "" || element == null
+            //     ? "This feature" + column_names[j] + "is an empty string or a null value. \n"
+            //     : ""
+            // switch (j) {
+            //     case 3: //File Name
+            //         errorMessage += !isValidFileName(element)
+            //             ? `📁 The media file name must include a valid extension like`
+            //             + Object.values(mediaFileFormatEnumeration()) + '\n'
+            //             : ''
+            //     case 4: // CatalogID
+            //         errorMessage += !/^[A-Z]{6}\d{7}$/.test(element)
+            //             ? "catalogID is not in the correct format. Example of a correct format: ZRCBDP0012345. 6 capital letters and then 7 numbers.\n"
+            //             : ""
+            //     case 6: //ClusterID
+            //         errorMessage += !/^[A-Z]{6}\d{7}$/.test(element)
+            //             ? "catalogID is not in the correct format. Example of a correct format: ZRCBDP0012345. 6 capital letters and then 7 numbers. \n"
+            //             : ""
+            //     case 7: //ImagingDate
+            //         errorMessage += isNaN(new Date(element))
+            //             ? "Invalid Imaging Date format. \n"
+            //             : ""
+            //     case 8://Resolution
+            //         errorMessage
+            //             += /^\d{1,5}x\d{1,5}$/.test(element)
+            //                 ? "resolution is not in the correct format. example format: 1440x720 \n"
+            //                 : ""
+            //     case 9: //FileSizeBytes
+            //         errorMessage += isNaN(parseInt(element))
+            //             ? "file size must be in integer" : ""
+            //     case 10: // FileFormat
+            //         errorMessage += 
+
+            // }
+            newRow.push("\"" + element.toString() + "\"")
+        }
+        newTable.push("(" + newRow.toString() + ")")
+    }
+    console.log('newRows', newTable)
+    // return
+
+
+    const insertQuery = `
+      INSERT INTO Media(
+                        ProjectID,
+                        PhotographerID,
+                        FileName,
+                        FilePath,
+                        CatalogID,
+                        MorphoID,
+                        ClusterID,
+                        ImagingDate,
+                        Resolution,
+                        FileSizeBytes,
+                        FileFormat,
+                        Description,
+                        imagingPlatform,
+                        ImageEditingTool,
+                        Comments,
+                        CreatedDate,
+                        CreatedByID,
+                        UpdatedDate,
+                        UpdatedByID
+                    ) VALUES` + newTable;
+
+    await db.promise().query(insertQuery);
+
+    console.log("✅ bulk metadata submitted successfully")
+
+
+    res.redirect(`/media/view-all`);
+
+});
 router.post('/submit', isAuthenticated, async (req, res) => {
     try {
         const {
             ProjectID,
             ProjectOwnerID,
             PhotographerID,
-            mediaFileName,
+            fileName,
             filePath,
             catalogID,
             morphoID,
@@ -190,7 +312,7 @@ router.post('/submit', isAuthenticated, async (req, res) => {
         if (!ProjectID) missingFields.push("ProjectID");
         if (!ProjectOwnerID) missingFields.push("RequestorID");
         if (!PhotographerID) missingFields.push("PhotographerID");
-        if (!mediaFileName) missingFields.push("mediaFileName");
+        if (!fileName) missingFields.push("fileName");
         if (!filePath) missingFields.push("filePath");
         if (!catalogID) missingFields.push("catalogID");
         if (!morphoID) missingFields.push("morphoID");
@@ -208,42 +330,42 @@ router.post('/submit', isAuthenticated, async (req, res) => {
         }
 
         const insertQuery = `
-      INSERT INTO Media (
-        ProjectID,
-        PhotographerID,
-        FileName,
-        FilePath,
-        CatalogID,
-        MorphoID,
-        ClusterID,
-        ImagingDate,
-        Resolution,
-        FileSizeBytes,
-        FileFormat,
-        Description,
-        imagingPlatform,
-        ImageEditingTool,
-        Comments,
-        CreatedDate,
-        CreatedByID,
-        UpdatedDate,
-        UpdatedByID
-      ) VALUES (?,  ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW(), ?, NOW(),?)
-    `;
+      INSERT INTO Media(
+                            ProjectID,
+                            PhotographerID,
+                            FileName,
+                            FilePath,
+                            CatalogID,
+                            MorphoID,
+                            ClusterID,
+                            ImagingDate,
+                            Resolution,
+                            FileSizeBytes,
+                            FileFormat,
+                            Description,
+                            imagingPlatform,
+                            ImageEditingTool,
+                            Comments,
+                            CreatedDate,
+                            CreatedByID,
+                            UpdatedDate,
+                            UpdatedByID
+                        ) VALUES(?,  ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW(), ?, NOW(),?)
+                            `;
 
         const values = [
             ProjectID,
             PhotographerID,
-            mediaFileName,
+            fileName,
             filePath,
-            catalogID,
-            morphoID,
-            clusterID,
-            imagingDate,
+            catalogID || null,
+            morphoID || null,
+            clusterID || null,
+            imagingDate || null,
             resolution || null,
             fileSizeBytes || null,
             fileFormat || null,
-            description,
+            description || null,
             imagingPlatform,
             imageEditingTool || null,
             comments || null,
@@ -255,8 +377,11 @@ router.post('/submit', isAuthenticated, async (req, res) => {
 
         console.log("✅ Media submitted successfully, ID:", result.insertId);
 
-
-        res.redirect(`/media/view/${result.insertId}`);
+        res.json({
+            success: true,
+            message: "Media metadata sucessfully created",
+            redirectUrl: `/media/view/${result.insertId}`
+        });
 
     } catch (error) {
         console.error("❌ Media submission failed:", error);
@@ -272,16 +397,20 @@ router.get('/view/:mediaId', isAuthenticated, (req, res) => {
     const mediaId = req.params.mediaId;
 
     const query = `
-      SELECT 
-        m.*,
-        u1.Email AS CreatedByName,
-        u2.Email AS UpdatedByName
+                    SELECT
+                    m.*,
+                        u1.Email AS CreatedByName,
+                            u2.Email AS UpdatedByName,
+                                photographer.FullName As photographerName,
+                                    project.ProjectName as projectName
       FROM Media m
       LEFT JOIN User u1 ON m.CreatedByID = u1.UserID
       LEFT JOIN User u2 ON m.UpdatedByID = u2.UserID
+      JOIN User photographer ON m.PhotographerID = photographer.UserID  
+      JOIN Project project ON m.ProjectID = project.ProjectID
       WHERE m.MediaID = ? AND m.IsDeleted = 0
       ORDER BY m.CreatedDate DESC
-    `;
+                        `;
 
     db.query(query, [mediaId], (err, results) => {
         if (err) {
@@ -310,97 +439,59 @@ router.get('/view/:mediaId', isAuthenticated, (req, res) => {
 // Controller for handling form submission
 router.post('/edit', isAuthenticated, (req, res) => {
     const mediaData = req.body;
-
-    const isEdit = mediaData.MediaID !== '';
-
-    if (isEdit) {
-        // Update existing media
-        const query = `
+    // Update existing media
+    const query = `
             UPDATE Media SET
-                FileName = ?,
-                FilePath = ?,
-                CatalogID = ?,
-                MorphoID = ?,
-                ClusterID = ?,
-                ImagingDate = ?,
-                Resolution = ?,
-                FileSize = ?,
-                FileFormat = ?,
-                Description = ?,
-                CameraModel = ?,
-                ImageEditingTool = ?,
-                Comments = ?,
-                UpdatedDate = NOW(),
-                UpdatedByID = ?
-            WHERE MediaID = ?
-        `;
-        const updatedBy = req.session.passport.user.UserID;
-        const params = [
-            mediaData.mediaFileName,
-            mediaData.filePath,
-            mediaData.catalogID,
-            mediaData.morphoID,
-            mediaData.clusterID,
-            mediaData.imagingDate,
-            mediaData.resolution,
-            mediaData.colorDepth,
-            mediaData.fileSize,
-            mediaData.fileFormat,
-            mediaData.description,
-            mediaData.cameraModel,
-            mediaData.imageEditingTool,
-            mediaData.comments,
-            updatedBy, // current user making the update
-            mediaData.MediaID
-        ];
+                    FileName = ?,
+                        FilePath = ?,
+                        CatalogID = ?,
+                        MorphoID = ?,
+                        ClusterID = ?,
+                        ImagingDate = ?,
+                        Resolution = ?,
+                        FileSizeBytes = ?,
+                        FileFormat = ?,
+                        Description = ?,
+                        ImagingPlatform = ?,
+                        ImageEditingTool = ?,
+                        Comments = ?,
+                        UpdatedDate = NOW(),
+                        UpdatedByID = ?
+                            WHERE MediaID = ?
+                                `;
+    const updatedBy = req.session.passport.user.UserID;
+    const params = [
+        mediaData.fileName,
+        mediaData.filePath,
+        mediaData.catalogID,
+        mediaData.morphoID,
+        mediaData.clusterID,
+        mediaData.imagingDate,
+        mediaData.resolution,
+        mediaData.fileSizeBytes,
+        mediaData.fileFormat,
+        mediaData.description,
+        mediaData.imagingPlatform,
+        mediaData.imageEditingTool,
+        mediaData.comments,
+        updatedBy, // current user making the update
+        mediaData.MediaID
+    ];
+    console.log('mediaData', mediaData)
+    console.log('params', params)
 
-        db.query(query, params, (err, result) => {
-            if (err) {
-                console.error("❌ Error updating media:", err);
-                return res.status(500).json({ success: false, message: 'Error updating media' });
-            }
-            res.json({ success: true, message: 'Media updated successfully' });
+    db.query(query, params, (err, result) => {
+        if (err) {
+            console.error("❌ Error updating media:", err);
+            return res.status(500).json({ success: false, message: 'Error updating media' });
+        }
+        res.json({
+            success: true,
+            message: "sucessfully edited media",
+            redirectUrl: '/media/view/' + mediaData.MediaID
         });
-    } else {
-        // Create new media
-        const query = `
-            INSERT INTO Media (
-                ProjectID, PhotographerID, FileName, FilePath,
-                CatalogID, MorphoID, ClusterID, ImagingDate, Resolution,
-                FileSize, FileFormat, Description, CameraModel,
-                ImageEditingTool, Comments, CreatedByID, CreatedDate
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW())
-        `;
+    });
 
-        const params = [
-            mediaData.ProjectID,
-            mediaData.PhotographerID,
-            mediaData.mediaFileName,
-            mediaData.filePath,
-            mediaData.catalogID,
-            mediaData.morphoID,
-            mediaData.clusterID,
-            mediaData.imagingDate,
-            mediaData.resolution,
-            mediaData.colorDepth,
-            mediaData.fileSize,
-            mediaData.fileFormat,
-            mediaData.description,
-            mediaData.cameraModel,
-            mediaData.imageEditingTool,
-            mediaData.comments,
-            req.user.id
-        ];
-
-        db.query(query, params, (err, result) => {
-            if (err) {
-                console.error("❌ Error creating media:", err);
-                return res.status(500).json({ success: false, message: 'Error creating media' });
-            }
-            res.json({ success: true, message: 'Media created successfully', mediaId: result.insertId });
-            // res.redirect(`/admin/view-all-media/view/${result.insertId}`); // Redirect to the view page of the newly created media
-        });
-    }
 });
 
 // Soft delete media by setting IsDelete = 1 and redirect
@@ -421,11 +512,11 @@ router.post('/delete/:mediaId', isAuthenticated, (req, res) => {
             // Perform soft delete
             const updateQuery = `
                 UPDATE Media 
-                SET IsDeleted = 1, 
-                    UpdatedByID = ?, 
-                    UpdatedDate = NOW() 
+                SET IsDeleted = 1,
+                        UpdatedByID = ?,
+                        UpdatedDate = NOW() 
                 WHERE MediaID = ?
-            `;
+                        `;
 
             return db.promise().query(updateQuery, [userId, mediaId]);
         })
@@ -457,11 +548,11 @@ router.post('/restore/:mediaId', isAuthenticated, (req, res) => {
             // Perform soft restore
             const updateQuery = `
                 UPDATE Media 
-                SET IsDeleted = 0, 
-                    UpdatedByID = ?, 
-                    UpdatedDate = NOW() 
+                SET IsDeleted = 0,
+                        UpdatedByID = ?,
+                        UpdatedDate = NOW() 
                 WHERE MediaID = ?
-            `;
+                        `;
 
             return db.promise().query(updateQuery, [userId, mediaId]);
         })
