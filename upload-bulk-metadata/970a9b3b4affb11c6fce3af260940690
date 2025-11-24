@@ -1,3 +1,0 @@
-FileName,FilePath,CatalogID,MorphoID,ClusterID,ImagingDate,Resolution,FileSizeBytes,FileFormat,Description,ImagingPlatform,ImageEditingTool,Comments,CreatedDate,CreatedByID,UpdatedDate,UpdatedByID
-"photo.png","filepath",'catelogid',"MorphoID","ClusterID",NOW(),"1000x1000",1000,".png","Description","nikon_test", "imaging editing tool", 'comments', NOW(),1,NOW(),1
-"photo2.png","filepath",'catelogid',"MorphoID","ClusterID",NOW(),"1000x1000",1000,".png","Description2","nikon_test2", "imaging editing tool2", 'comments2', NOW(),1,NOW(),1
