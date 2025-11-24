@@ -251,7 +251,7 @@
     <%- currentUser.UserType=='admin' ? include('../partials/sidenav-admin'): include('../partials/sidenav-user') %>
       <!-- 📸 MEDIA SUBMISSION FORM (UPDATED) -->
 
-      <form id="main-form" action="/<%=currentMedia == 'none' ? 'media/submit' : 'media/edit' %>" method="POST">
+      <form id="main-form" action="/<%=currentMedia == 'none' ? 'media/create' : 'media/edit' %>" method="POST">
 
         <% if (currentMedia !='none' ) {%>
           <h2>Then, edit image metadata entry </h2>
@@ -493,7 +493,7 @@
           submitBtn.classList.add('loading');
           submitBtn.innerHTML = '<i class="fas fa-spinner"></i> Submitting...';
           submitBtn.disabled = true;
-          const response = await fetch("/<%=currentMedia == 'none' ? 'media/submit' : 'media/edit' %>", {
+          const response = await fetch("/<%=currentMedia == 'none' ? 'media/create' : 'media/edit' %>", {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json'

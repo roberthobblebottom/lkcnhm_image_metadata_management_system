@@ -516,7 +516,7 @@
             comments: form.comments.value || null
           };
 
-          const response = await fetch('/submit', {
+          const response = await fetch('/create', {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json'

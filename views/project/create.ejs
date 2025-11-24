@@ -284,7 +284,7 @@ Retrieved 2025-11-19, License - CC BY-SA 4.0
     <main>
       <a href="/project/view-all"><button class="btn btn-secondary">Back to all Projects</button></a>
       <h2>Create a New Project </h2>
-      <form id="projectForm" action="/project/submit" method="POST">
+      <form id="projectForm" action="/project/create" method="POST">
         <div class="'form-group">
 
           <label for="projectName">Project Name</label>
@@ -592,7 +592,7 @@ Retrieved 2025-11-19, License - CC BY-SA 4.0
           };
 
 
-          const response = await fetch('/project/submit', {
+          const response = await fetch('/project/create', {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json'

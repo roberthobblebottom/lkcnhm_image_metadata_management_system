@@ -283,7 +283,7 @@ router.post('/upload-bulk-metadata/:projectID/:photographerID', upload.single("b
     res.redirect(`/media/view-all`);
 
 });
-router.post('/submit', isAuthenticated, async (req, res) => {
+router.post('/create', isAuthenticated, async (req, res) => {
     try {
         const {
             ProjectID,

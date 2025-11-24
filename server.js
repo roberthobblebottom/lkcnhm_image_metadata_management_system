@@ -225,7 +225,7 @@ app.get("/check-email", (req, res) => {
 });
 
 
-app.post('/submit', isAuthenticated, (req, res) => {
+app.post('/create', isAuthenticated, (req, res) => {
     const { email, ContactNumber, organisation, UserType, comments } = req.body;
     const created_by = req.session.passport.user.UserID;
     const date_of_req = new Date().toISOString().slice(0, 19).replace("T", " ");

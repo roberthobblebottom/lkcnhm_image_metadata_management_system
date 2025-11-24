@@ -42,8 +42,8 @@ router.get('/create', isAuthenticated, async (req, res) => {
 });
 
 //  for creation of new project
-router.post('/submit', isAuthenticated, async (req, res) => {
-    console.log("in /submit-project")
+router.post('/create', isAuthenticated, async (req, res) => {
+    console.log("in /create-project")
     try {
         const requiredFields = [
             'projectOwner', 'projectName', 'projectType',
