@@ -197,6 +197,24 @@
                 font-size: 1.5rem;
             }
         }
+
+        input[type="submit"] {
+            background-color: #007bff;
+            color: #fff;
+            border: none;
+            padding: 0.75rem 2rem;
+            /* font-size: 1rem; */
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+            font-weight: 600;
+            font-size: 1rem;
+            font-family: 'Segoe UI', sans-serif;
+        }
+
+        button[type="submit"]:hover {
+            background-color: #0056b3;
+        }
     </style>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
@@ -208,58 +226,59 @@
 
 
             </br>
-            <form id='fileUploadForm' action="/media/upload-bulk-metadata/<%=projectID%>/<%=photographerID%>"
-                method="POST" enctype="multipart/form-data">
+            <form id='fileUploadForm'>
                 <h1>📸 Upload Metadata in Bulk</h1></br>
                 <input type="hidden" name="projectID" value="<%= projectID %>">
-                <input type="hidden" name="photographerID" value="<%= photographerID %>">
-                <h3>File (CSV only):</h3> <input type="file" name="bulk-metadata" accept=".csv" />
+                <input type="hidden" name="photographerID" id="photographerID" value="<%= photographerID %>">
+                <h3>File (CSV only):</h3> <input id="fileInput" type="file" name="bulk-metadata" accept=".csv" />
                 </br>
-                <input type="submit" class="btn"></input>
+                <input type="submit" class="btn" value="Upload"></input>
             </form>
 
     </div>
     <script>
         document.addEventListener("DOMContentLoaded", () => {
-
             const form = document.getElementById('fileUploadForm');
             form.addEventListener('submit', async (e) => {
-                const formdata = new FormData(form);
-                console.log(formdata)
-                return;
-                const response = await fetch('/media/upload-bulk-metadata/<%=projectID%>/<photographerID>', {
+                // const formdata = new FormData(form);
+                e.preventDefault()
+                const formData = new FormData(form)
+                const response = await fetch('/media/upload-bulk-metadata/<%=projectID%>/<%=photographerID%>', {
                     method: 'POST',
                     enctype: "multipart/form-data",
-                    headers: {
-                        'Content-Type': "multipart/form-data"
-                    },
-                    body: JSON.stringify(formdata)
+                    body: formData
                 });
+                console.log(response)
                 if (!response.ok) {
                     const errorData = await response.json();
                     throw new Error(errorData.message || "Submission failed with status " + response.status);
                 }
 
                 const data = await response.json();
-                console.log('c')
-                if (!data.success) {
+                if (!data.success)
                     throw new Error(data.message || "Submission failed");
-                }
+
 
                 // Show success message
                 await Swal.fire({
                     title: 'Success!',
-                    text: 'project submitted successfully!',
+                    text: 'CSV metadata upload is successfully!',
                     icon: 'success',
                     confirmButtonText: 'OK',
                     confirmButtonColor: '#28a745',
                     timer: 1000,
                     timerProgressBar: true
                 });
+                // Redirect if URL is provided
+                if (data.redirectUrl) {
+                    window.location.href = data.redirectUrl;
+                    return; // Stop further execution
+                }
+
+                // Reset form (if no redirection)
+                form.reset();
             });
-        })
-
-
+        });
     </script>
 
 

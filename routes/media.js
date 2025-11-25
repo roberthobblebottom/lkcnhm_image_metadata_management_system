@@ -72,6 +72,8 @@ router.get('/view-all', isAuthenticated, (req, res) => {
 router.get('/select-user-for/:mediaID/:projectID', isAuthenticated, async (req, res) => {
     const mediaID = req.params.mediaID;
     const projectID = req.params.projectID;
+
+    const isEdit = mediaID != 'create-mode';
     const baseQuery = `
             SELECT 
                 p.ProjectID,
@@ -100,29 +102,35 @@ router.get('/select-user-for/:mediaID/:projectID', isAuthenticated, async (req, 
 
 
 
-    const query = req.session.passport.user.UserType != userTypesEnumeration().admin
-        ? baseQuery + " AND photographer.UserID = " + req.session.passport.user.UserID
-        : baseQuery
-    const users = (await db.promise().query(query))[0];
 
-    const currentProjectQuery = `SELECT p.ProjectID, p.ProjectName, photographer.FullName FROM Project p
+
+    const currentProjectQuery = `SELECT p.ProjectID, 
+    p.ProjectName,
+    photographer.FullName, 
+    photographer.UserID photographerID
+    FROM Project p
     JOIN ProjectUserPhotographyLink pupl ON pupl.ProjectID = p.ProjectID
     JOIN User photographer ON pupl.PhotographerID = photographer.UserID
     WHERE p.ProjectID = ?  `;
-    const currentProject = mediaID != 'create-for-media'
+    const currentProject = isEdit
         ? await db.promise().query(currentProjectQuery, [projectID])
         : null;
-    // console.log(mediaID)
-    const isEdit = mediaID != 'create-for-media';
-    console.log('isEdit', isEdit)
 
+    const query = req.session.passport.user.UserType != userTypesEnumeration().admin
+        ? baseQuery + " AND photographer.UserID = " + req.session.passport.user.UserID
+        : baseQuery
+    const query2 = isEdit
+        ? query + " AND photographer.UserID !=" + currentProject[0][0].photographerID
+        : query
+    const users = (await db.promise().query(query2))[0];
+    console.log('isEdit', isEdit)
     res.render('media/user-list', {
         users: users,
         currentUser: req.session.passport.user,
         title: 'Media Image List',
         isEdit: isEdit,
         mediaID: mediaID,
-        currentProject: mediaID != 'create-for-media' ? currentProject[0][0] : ""
+        currentProject: mediaID != 'create-mode' ? currentProject[0][0] : ""
     });
 
 });
@@ -149,22 +157,21 @@ router.get('/create-or-edit-for-project/:mediaID/:projectID/', isAuthenticated, 
     `;
 
     //For EDIT
-    const currentMediaQuery = mediaID != 'none' ? 'SELECT * FROM Media WHERE Media.MediaID = ' + mediaID : '';
+    const currentMediaQuery = mediaID != 'create-mode' ? 'SELECT * FROM Media WHERE Media.MediaID = ' + mediaID : '';
 
-    const project = (await db.promise().query(query, [projectID]))[0][0];
-    const currentMedia = mediaID != 'none' ? (await db.promise().query(currentMediaQuery))[0][0] : "none";
+    const projects = (await db.promise().query(query, [projectID]))[0][0];
+    const currentMedia = mediaID != 'create-mode' ? (await db.promise().query(currentMediaQuery))[0][0] : "create-mode";
 
-    console.log(project)
+    console.log(projects)
     console.log('currentMedia', currentMedia)
-    // console.log(imagingPlatformEnumeration())
     res.render('media/create-or-edit', {
         currentUser: req.session.passport.user,
         imageEditingTools: Object.values(imageEditingToolEnumeration()),
         imagingPlatforms: Object.values(imagingPlatformEnumeration()),
         fileFormats: Object.values(mediaFileFormatEnumeration()),
         currentMedia,
-        imagingDate: currentMedia != 'none' ? formatDisplayDate(currentMedia.ImagingDate) : '',
-        project,  // contains projectID, photographerId, projectOwnerId + names
+        imagingDate: currentMedia != 'create-mode' ? formatDisplayDate(currentMedia.ImagingDate) : '',
+        project: projects,  // contains projectID, photographerId, projectOwnerId + names
         title: 'Media Form'
     });
 });
@@ -185,9 +192,9 @@ router.post('/upload-bulk-metadata/:projectID/:photographerID', upload.single("b
     console.log("post upload bulk metadata")
 
 
-    // console.log('req.file', req.file);
+    console.log('req.file', req.file);
     const absolutePath = path.join(__dirname, req.file.path).replace("/routes", "");
-    // console.log('absolutePath', absolutePath)
+    console.log('absolutePath', absolutePath)
     const jsonString = fs.readFileSync(absolutePath, "utf-8");
     const newRowsTemp = jsonString.split('\n').slice(1)
     const column_names = ['ProjectID', 'PhotographerID', 'FileName', 'FilePath', 'CatalogID',
@@ -274,14 +281,18 @@ router.post('/upload-bulk-metadata/:projectID/:photographerID', upload.single("b
                         UpdatedDate,
                         UpdatedByID
                     ) VALUES` + newTable;
-
+    // return
     await db.promise().query(insertQuery);
 
     console.log("✅ bulk metadata submitted successfully")
 
 
-    res.redirect(`/media/view-all`);
-
+    // res.redirect(`/media/view-all`);
+    res.json({
+        success: true,
+        message: "Media metadata bulk upload sucessful",
+        redirectUrl: '/media/view-all'
+    });
 });
 router.post('/create', isAuthenticated, async (req, res) => {
     try {
@@ -331,27 +342,27 @@ router.post('/create', isAuthenticated, async (req, res) => {
 
         const insertQuery = `
       INSERT INTO Media(
-                            ProjectID,
-                            PhotographerID,
-                            FileName,
-                            FilePath,
-                            CatalogID,
-                            MorphoID,
-                            ClusterID,
-                            ImagingDate,
-                            Resolution,
-                            FileSizeBytes,
-                            FileFormat,
-                            Description,
-                            imagingPlatform,
-                            ImageEditingTool,
-                            Comments,
-                            CreatedDate,
-                            CreatedByID,
-                            UpdatedDate,
-                            UpdatedByID
-                        ) VALUES(?,  ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW(), ?, NOW(),?)
-                            `;
+            ProjectID,
+            PhotographerID,
+            FileName,
+            FilePath,
+            CatalogID,
+            MorphoID,
+            ClusterID,
+            ImagingDate,
+            Resolution,
+            FileSizeBytes,
+            FileFormat,
+            Description,
+            imagingPlatform,
+            ImageEditingTool,
+            Comments,
+            CreatedDate,
+            CreatedByID,
+            UpdatedDate,
+            UpdatedByID
+        ) VALUES(?,  ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW(), ?, NOW(),?)
+        `;
 
         const values = [
             ProjectID,
@@ -380,7 +391,7 @@ router.post('/create', isAuthenticated, async (req, res) => {
         res.json({
             success: true,
             message: "Media metadata sucessfully created",
-            redirectUrl: `/media/view/${result.insertId}`
+            redirectUrl: `/ media / view / ${result.insertId} `
         });
 
     } catch (error) {
@@ -397,12 +408,12 @@ router.get('/view/:mediaId', isAuthenticated, (req, res) => {
     const mediaId = req.params.mediaId;
 
     const query = `
-                    SELECT
-                    m.*,
-                        u1.Email AS CreatedByName,
-                            u2.Email AS UpdatedByName,
-                                photographer.FullName As photographerName,
-                                    project.ProjectName as projectName
+    SELECT
+    m.*,
+        u1.Email AS CreatedByName,
+            u2.Email AS UpdatedByName,
+                photographer.FullName As photographerName,
+                    project.ProjectName as projectName
       FROM Media m
       LEFT JOIN User u1 ON m.CreatedByID = u1.UserID
       LEFT JOIN User u2 ON m.UpdatedByID = u2.UserID
@@ -410,7 +421,7 @@ router.get('/view/:mediaId', isAuthenticated, (req, res) => {
       JOIN Project project ON m.ProjectID = project.ProjectID
       WHERE m.MediaID = ? AND m.IsDeleted = 0
       ORDER BY m.CreatedDate DESC
-                        `;
+        `;
 
     db.query(query, [mediaId], (err, results) => {
         if (err) {
@@ -442,23 +453,23 @@ router.post('/edit', isAuthenticated, (req, res) => {
     // Update existing media
     const query = `
             UPDATE Media SET
-                    FileName = ?,
-                        FilePath = ?,
-                        CatalogID = ?,
-                        MorphoID = ?,
-                        ClusterID = ?,
-                        ImagingDate = ?,
-                        Resolution = ?,
-                        FileSizeBytes = ?,
-                        FileFormat = ?,
-                        Description = ?,
-                        ImagingPlatform = ?,
-                        ImageEditingTool = ?,
-                        Comments = ?,
-                        UpdatedDate = NOW(),
-                        UpdatedByID = ?
-                            WHERE MediaID = ?
-                                `;
+    FileName = ?,
+        FilePath = ?,
+        CatalogID = ?,
+        MorphoID = ?,
+        ClusterID = ?,
+        ImagingDate = ?,
+        Resolution = ?,
+        FileSizeBytes = ?,
+        FileFormat = ?,
+        Description = ?,
+        ImagingPlatform = ?,
+        ImageEditingTool = ?,
+        Comments = ?,
+        UpdatedDate = NOW(),
+        UpdatedByID = ?
+            WHERE MediaID = ?
+                `;
     const updatedBy = req.session.passport.user.UserID;
     const params = [
         mediaData.fileName,
@@ -513,10 +524,10 @@ router.post('/delete/:mediaId', isAuthenticated, (req, res) => {
             const updateQuery = `
                 UPDATE Media 
                 SET IsDeleted = 1,
-                        UpdatedByID = ?,
-                        UpdatedDate = NOW() 
+        UpdatedByID = ?,
+        UpdatedDate = NOW() 
                 WHERE MediaID = ?
-                        `;
+        `;
 
             return db.promise().query(updateQuery, [userId, mediaId]);
         })
@@ -549,10 +560,10 @@ router.post('/restore/:mediaId', isAuthenticated, (req, res) => {
             const updateQuery = `
                 UPDATE Media 
                 SET IsDeleted = 0,
-                        UpdatedByID = ?,
-                        UpdatedDate = NOW() 
+        UpdatedByID = ?,
+        UpdatedDate = NOW() 
                 WHERE MediaID = ?
-                        `;
+        `;
 
             return db.promise().query(updateQuery, [userId, mediaId]);
         })

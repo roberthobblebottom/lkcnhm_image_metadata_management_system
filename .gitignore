@@ -2,3 +2,4 @@
 upload-bulk-metadata
 # database/
 node_modules/
+.prettierignore
