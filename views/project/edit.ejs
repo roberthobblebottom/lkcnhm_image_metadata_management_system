@@ -17,7 +17,7 @@
             padding: 20px;
         }
 
-        h1 {
+        h2 {
             text-align: center;
             color: #333;
             margin-bottom: 30px;
@@ -31,6 +31,12 @@
             padding: 30px;
             border-radius: 12px;
             box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+        }
+
+        .top-group {
+            max-width: 700px;
+            margin: auto;
+            padding: 2rem;
         }
 
         .form-group {
@@ -47,13 +53,19 @@
         input[type="text"],
         input[type="date"],
         select,
+        .anchor,
         textarea {
             width: 95%;
             padding: 12px 15px;
             border: 1px solid #ccc;
+            background: #fff;
             border-radius: 8px;
             font-size: 15px;
             transition: border-color 0.3s ease;
+        }
+
+        select {
+            width: 100%;
         }
 
         input:focus,
@@ -76,6 +88,10 @@
             color: #555;
         }
 
+        button i {
+            margin-right: 8px;
+        }
+
         .btn {
             padding: 10px 18px;
             font-size: 16px;
@@ -95,7 +111,7 @@
             background-color: #0056b3;
         }
 
-        .btn-secondary {
+        /* .btn-secondary {
             background-color: #452dff;
             color: white;
             margin-top: 0px;
@@ -105,11 +121,28 @@
 
         .btn-secondary:hover {
             background-color: #431eff;
-        }
+        } */
 
         a button {
             display: block;
             margin: 0 auto;
+        }
+
+        button[type="submit"] {
+            background-color: #007bff;
+            color: #fff;
+            border: none;
+            padding: 0.75rem 2rem;
+            font-size: 1rem;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        button[type="submit"]:hover,
+        .btn-secondary:hover,
+        .btn-primary:hover {
+            background-color: #0056b3;
         }
 
         #imagingPlatformCheckboxes {
@@ -159,7 +192,7 @@ Retrieved 2025-11-19, License - CC BY-SA 4.0
             position: relative;
             cursor: pointer;
             width: 95%;
-            padding: 12px 15px;
+            padding: 0.75rem;
             border: 1px solid #ccc;
             border-radius: 8px;
             font-size: 15px;
@@ -211,6 +244,7 @@ Retrieved 2025-11-19, License - CC BY-SA 4.0
 
         #list1 {
             display: block;
+            margin-bottom: 2%;
         }
     </style>
 </head>
@@ -218,9 +252,11 @@ Retrieved 2025-11-19, License - CC BY-SA 4.0
 <body>
     <%- include(currentUser.UserType=='admin' ? '../partials/sidenav-admin.ejs' : '../partials/sidenav-user' ) %>
         <main>
-            <a href="/project/view-all"><button class="btn btn-secondary">Back to All
-                    Projects</button></a>
-            <h1>Edit Project</h1>
+            <div class="top-group">
+                <a href="/project/view-all"><button class="btn btn-primary">Back to All
+                        Projects</button></a>
+                <h2>Edit Project</h2>
+            </div>
             <form id='editForm' action="/project/edit/<%= request.ProjectID %>" method="POST">
                 <div class="form-group">
                     <label>Project Name</label>
@@ -335,7 +371,7 @@ Retrieved 2025-11-19, License - CC BY-SA 4.0
                     </select>
                 </div>
 
-                <button type="submit" class="btn btn-primary">Save Changes</button>
+                <button type="submit" class="btn btn-primary"><i class="fas fa-paper-plane"></i>Save Changes</button>
             </form>
 
             <br>

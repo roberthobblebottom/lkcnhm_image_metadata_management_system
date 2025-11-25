@@ -344,11 +344,11 @@
                         Name: <%= request.ProjectName %>
                     </h1>
                     <p class="text-muted mb-0">Created on <%= request.CreatedDate %> by <%= request.CreatorName
-                                || 'System' %>, <%= request.CreatorEmail %>
+                                || 'System' %>
                     </p>
                     <% if (request.UpdatedDate) { %>
                         <p class="text-muted">Last updated on <%= request.UpdatedDate %> by <%= request.UpdaterName
-                                    || 'System' %>, <%= request.UpdaterEmail%>
+                                    || 'System' %>
                         </p>
                         <% } %>
                             <% if(request.isDeleted){%>

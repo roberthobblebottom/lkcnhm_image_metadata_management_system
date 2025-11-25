@@ -80,7 +80,8 @@
         input[type="date"],
         input[type='number'],
         input[type="datetime-local"],
-        select,
+        input[type="file"],
+        input[type='submit'] select,
         textarea {
             width: 95%;
             padding: 0.75rem 1rem;
@@ -196,51 +197,6 @@
                 font-size: 1.5rem;
             }
         }
-
-        /* Animation Effects */
-        @keyframes fadeIn {
-            from {
-                opacity: 0;
-                transform: translateY(10px);
-            }
-
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        form {
-            animation: fadeIn 0.5s ease-out;
-        }
-
-        /* Hidden Fields */
-        input[type="hidden"] {
-            display: none;
-        }
-
-        /* input:invalid, select:invalid, textarea:invalid {
-  border-color: red;
-} */
-        .btn-primary {
-            background-color: #007bff;
-            border: none;
-            color: #fff;
-        }
-
-        .btn-primary:hover {
-            background-color: #0056b3;
-        }
-
-        .btn-warning {
-            background-color: #07daff;
-            border: none;
-            color: #212529;
-        }
-
-        .btn-warning:hover {
-            background-color: #e0a800;
-        }
     </style>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
@@ -252,13 +208,14 @@
 
 
             </br>
-            <h1>📸 Upload Bulk Meta Data</h1></br>
             <form id='fileUploadForm' action="/media/upload-bulk-metadata/<%=projectID%>/<%=photographerID%>"
                 method="POST" enctype="multipart/form-data">
+                <h1>📸 Upload Metadata in Bulk</h1></br>
                 <input type="hidden" name="projectID" value="<%= projectID %>">
                 <input type="hidden" name="photographerID" value="<%= photographerID %>">
-                File (CSV only): <input type="file" name="bulk-metadata" accept=".csv" />
-                <input type="submit" id="btn" />
+                <h3>File (CSV only):</h3> <input type="file" name="bulk-metadata" accept=".csv" />
+                </br>
+                <input type="submit" class="btn"></input>
             </form>
 
     </div>

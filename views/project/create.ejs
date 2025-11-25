@@ -47,6 +47,12 @@
       box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
     }
 
+    .top-group {
+      max-width: 700px;
+      margin: auto;
+      padding: 2rem;
+    }
+
     .form-group {
       margin-bottom: 1.5rem;
     }
@@ -59,7 +65,8 @@
     }
 
     input[type="text"],
-    input[type="datetime-local"],
+    input[type="date"],
+    .anchor,
     select,
     textarea {
       width: 100%;
@@ -106,7 +113,9 @@
       transition: background-color 0.3s ease;
     }
 
-    button[type="submit"]:hover {
+    button[type="submit"]:hover,
+    .btn-secondary:hover,
+    .btn-primary:hover {
       background-color: #0056b3;
     }
 
@@ -117,23 +126,13 @@
     .btn-primary {
       background-color: #007bff;
       color: white;
+      margin-right: 100%;
+      width: 100px;
     }
 
-    .btn-primary:hover {
-      background-color: #0056b3;
-    }
 
-    .btn-secondary {
-      background-color: #452dff;
-      color: white;
-      margin-top: 0px;
-      margin-bottom: 10px;
 
-    }
 
-    .btn-secondary:hover {
-      background-color: #431eff;
-    }
 
     /* Responsive Enhancements */
     @media (max-width: 600px) {
@@ -147,6 +146,10 @@
 
     }
 
+    #list2 {
+      width: 100%;
+    }
+
     /*
 Source - https://stackoverflow.com/a
 Posted by Arun Aravind, modified by community. See post 'Timeline' for change history
@@ -157,11 +160,12 @@ Retrieved 2025-11-19, License - CC BY-SA 4.0
       display: inline-block;
     }
 
+
     .dropdown-check-list .anchor {
       position: relative;
       cursor: pointer;
-      width: 95%;
-      padding: 12px 15px;
+      width: 100%;
+      padding: 0.75rem;
       border: 1px solid #ccc;
       border-radius: 8px;
       font-size: 15px;
@@ -198,8 +202,9 @@ Retrieved 2025-11-19, License - CC BY-SA 4.0
     .dropdown-check-list2 .anchor2 {
       position: relative;
       cursor: pointer;
-      width: 95%;
-      padding: 12px 15px;
+      width: 100%;
+      /* padding: 12px 15px; */
+      padding: 0.75rem;
       border: 1px solid #ccc;
       border-radius: 8px;
       font-size: 15px;
@@ -272,38 +277,38 @@ Retrieved 2025-11-19, License - CC BY-SA 4.0
     #list1 {
       display: block;
     }
-
-    #list2 {
-      display: block;
-    }
   </style>
 </head>
 
 <body>
   <%- include(currentUser.UserType==='admin' ? '../partials/sidenav-admin.ejs' : '../partials/sidenav-user' ) %>
     <main>
-      <a href="/project/view-all"><button class="btn btn-secondary">Back to all Projects</button></a>
-      <h2>Create a New Project </h2>
+      <div class="top-group">
+        <a href="/project/view-all"><button class="btn btn-primary">Back to all Projects</button></a>
+        <h2>Create a New Project </h2>
+      </div>
       <form id="projectForm" action="/project/create" method="POST">
-        <div class="'form-group">
+        <div class="form-group">
 
           <label for="projectName">Project Name</label>
           <input type="text" id="projectName" name="projectName" required>
         </div>
+
         <div class="form-group">
-          <label for="projectOwner">Project Owner Full Name</label>
-          <select id="projectOwner" name="projectOwner"
-            disabled="<%= currentUser.UserType === 'projectOwner' ? true : false%>"" required>
-                <option value="">Select Project Owner</option>
-                <% projectOwners.forEach(user=> { %>
-                  <option value=" <%=user.UserID %>" <%= currentUser.UserID==user.UserID ? 'selected' : '' %> %>
-              >
-              <%=user.FullName%>
-                </option>
-                <% }) %>
+          <label for="projectOwner">Project Owner Full Name </label>
+          <select id="projectOwner" name="projectOwner" "<%=currentUser.UserType==='admin' ? '' : 'disabled'%>"
+            required>
+            <option value="">Select Project Owner</option>
+            <% projectOwners.forEach(user=> { %>
+              <option value=" <%=user.UserID %>" <%=currentUser.UserID==user.UserID ? 'selected' : '' %>
+                >
+                <%=user.FullName%>
+              </option>
+              <% }) %>
           </select>
           <div id="projectOwner-error" class="error-message">Please select a projectOwner</div>
         </div>
+
         <div class="form-group">
           <label>Project Type</label>
           <select name="projectType" id="projectType" class="form-control" required>
@@ -318,16 +323,7 @@ Retrieved 2025-11-19, License - CC BY-SA 4.0
         </div>
         <div class="form-group">
           <label for="photographer">Photographer(s)</label>
-          <!-- <select id="photographer" name="photographer" required>
-            <option value="">Select Photographer</option>
-            <% photographers.forEach(user=> { %>
-              <option value="<%= user.UserID %>">
-                <%=user.FullName%>
-                  <%= user.Email %>
-              </option>
-              <% }) %>
-          </select> -->
-          <!-- <%=JSON.stringify(photographers)%> -->
+
           <div id="list1" class="dropdown-check-list" tabindex="100">
             <span class="anchor">Select Photographers</span>
             <ul class="items" id="newSelectedPhotographersList">
@@ -416,8 +412,6 @@ Retrieved 2025-11-19, License - CC BY-SA 4.0
       }
       // Initialize form with current datetime
       document.addEventListener('DOMContentLoaded', function () {
-        // Set current datetime to requestDate field
-        // document.getElementById('requestDate').value = new Date().toISOString().slice(0, 16).split('T')[0];
         // document.getElementById('startDate').value = ((new Date()).getDate() + 1).toISOString().slice(0, 16).split('T')[0];
         const now = new Date()
         now.setDate(new Date().getDate() + 1)
@@ -455,11 +449,7 @@ Retrieved 2025-11-19, License - CC BY-SA 4.0
       function setupFormValidation() {
         const form = document.getElementById('projectForm');
 
-        // Add event listeners for date changes
-        // document.getElementById('requestDate').addEventListener('change', function () {
-        //   updateDateConstraints();
-        //   validateDates();
-        // });
+
 
         document.getElementById('startDate').addEventListener('change', function () {
           updateDateConstraints();
@@ -486,10 +476,7 @@ Retrieved 2025-11-19, License - CC BY-SA 4.0
             isValid = false;
           }
 
-          // if (!form.photographer.value) {
-          //   document.getElementById('photographer-error').style.display = 'block';
-          //   isValid = false;
-          // }
+
 
           // Check text areas
           if (!form.summary.value.trim()) {
