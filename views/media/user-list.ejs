@@ -6,6 +6,9 @@
   <meta charset="UTF-8" />
   <title></title>
   <link rel="stylesheet" href="/css/admin-users.css" />
+  <link rel="stylesheet" href="https://cdn.datatables.net/2.3.5/css/dataTables.dataTables.css" />
+  <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+  <script src="https://cdn.datatables.net/2.3.5/js/dataTables.js"></script>
   <style>
     body {
       font-family: 'Segoe UI', sans-serif;
@@ -149,7 +152,7 @@
             <% } else { %>
 
 
-              <table>
+              <table id="dataTable">
                 <thead>
                   <tr>
                     <th>Project ID</th>
@@ -209,5 +212,7 @@
 
   </div>
 </body>
-
+<script>
+  new DataTable('#dataTable')
+</script>
 </html>

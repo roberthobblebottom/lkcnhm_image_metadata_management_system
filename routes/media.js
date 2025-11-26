@@ -391,7 +391,7 @@ router.post('/create', isAuthenticated, async (req, res) => {
         res.json({
             success: true,
             message: "Media metadata sucessfully created",
-            redirectUrl: `/ media / view / ${result.insertId} `
+            redirectUrl: `/media/view/${result.insertId} `
         });
 
     } catch (error) {

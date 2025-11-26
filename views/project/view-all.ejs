@@ -8,6 +8,8 @@
 
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+  <script src="https://cdn.datatables.net/2.3.5/js/dataTables.js"></script>
   <style>
     body {
       font-family: 'Segoe UI', sans-serif;
@@ -99,13 +101,13 @@
       <center>
         <h2 style="margin-left: 35%;margin-top: 40px;">Project Management</h2>
       </center>
-      <div style="text-align: right; margin-right: -260px;">
+      <div style="text-align: right; ">
         <a href="/project/create"><button class="btn">Add Project</button></a>
       </div>
       <% if (projects.length===0) { %>
         <p class="no-data">No projects found.</p>
         <% } else { %>
-          <table style="width: 130%; ">
+          <table id='dataTable'>
             <thead>
               <tr>
                 <th>ID</th>
@@ -186,6 +188,7 @@
 
   <script>
     // SweetAlert setup for delete confirmation
+    let table = new DataTable('#dataTable')
     document.querySelectorAll('.delete-btn').forEach(button => {
       button.addEventListener('click', function (event) {
         event.preventDefault();
