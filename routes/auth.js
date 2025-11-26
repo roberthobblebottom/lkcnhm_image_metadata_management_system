@@ -4,14 +4,13 @@ const db = require("./db");
 const passport = require('passport');
 const LocalStrategy = require('passport-local');
 const crypto = require('crypto');
-
 const userTypesEnumeration = require('../middleware/utils').userTypesEnumeration;
+
 passport.use(new LocalStrategy(async function verify(username, password, cb) {
     //Do not change the variable name from username to email, it doesn't work.
     const query = "SELECT PasswordSalt, HashedPassword, UserID,UserType,FullName,Email FROM User WHERE Email = ?";
     const [result] = await db.promise().query(query, [username]).catch(
         error => {
-
             console.error("❌ Database Error:", error);
             return cb(null, false, { message: "Database error" })
         }
@@ -28,10 +27,7 @@ passport.use(new LocalStrategy(async function verify(username, password, cb) {
     console.log("🆔 Found User:", user.Email);
 
     crypto.pbkdf2(password, user.PasswordSalt, 310000, 32, 'sha256', function (err, hashedPassword) {
-        if (err) { return cb(err); }
-        console.log("hashed password from log form", hashedPassword.toString('base64'))
-        // console.log("database hashed password", user.HashedPassword)
-
+        if (err) return cb(err);
         if (!crypto.timingSafeEqual(user.HashedPassword, hashedPassword)) {
             console.log("❌ Invalid Password");
             return cb(null, false, { message: 'Incorrect username or password.' });
@@ -55,14 +51,10 @@ passport.serializeUser((user, done) => {
 
 // retrieving session data
 passport.deserializeUser((user, cb) => {
-    process.nextTick(function () {
-        return cb(null, user);
-    });
+    process.nextTick(function () { return cb(null, user) });
 })
 
 
-// router.use(passport.initialize())
-// router.use(passport.session())
 router.post("/register", (req, res) => {
     const { email, password } = req.body;
     console.log(`🔹 Register Attempt: ${email}`);
@@ -108,18 +100,11 @@ router.post("/login",
             failureMessage: "CUSTOM",// not working
         },
             (err, user, info) => {
-
-                if (err) {
-                    return next(err);
-                }
-                if (!user) {
-                    return res.status(401).send(info);
-                }
+                if (err) return next(err);
+                if (!user) return res.status(401).send(info);
                 req.login(user, (err) => { // I am not suppose to use this as password authenticate already does it, but somehow this guy's code from stackoverflow works
-                    if (err) {
-                        console.log('err')
-                        return res.status(500).json({ error: "Login failed." });
-                    }
+                    if (err) return res.status(500).json({ error: "Login failed." });
+
                     // 🔄 Update LastLoginDate
                     const updateQuery = "UPDATE User SET LastLoginDate = NOW() WHERE UserID = ?";
                     db.query(updateQuery, [user.UserID], (updateErr) => {
@@ -135,9 +120,6 @@ router.post("/login",
                                 console.error("❌ Session Save Error:", err);
                                 return res.status(500).json({ error: "Session error" });
                             }
-
-                            // console.log("✅ Login Successful! User:", req.session.passport.user.LoginEmail,);
-
                             return res.json({
                                 success: true,
                                 redirect: user.UserType === userTypesEnumeration.admin ? "/admin/dashboard" : "/user/dashboard"
@@ -163,7 +145,6 @@ router.get("/logout", (req, res) => {
             console.warn("⚠️ Logout Attempt Without Login");
             return res.redirect('/');
         }
-
         console.log(`🔹 Logout Attempt: ${req.session.passport.user.Email}`);
 
         req.session.destroy((err) => {
@@ -177,7 +158,7 @@ router.get("/logout", (req, res) => {
     } catch (error) {
         console.error("❌ Logout Try-Catch Error:", error);
         res.status(500).json({ error: "Something went wrong during logout" });
-     }
+    }
 });
 
 

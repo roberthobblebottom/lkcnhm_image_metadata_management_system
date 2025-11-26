@@ -1,14 +1,11 @@
 const express = require("express");
 const router = express.Router();
 const db = require("./db"); // Database connection
-const { isAuthenticated, isAdmin } = require("../middleware/auth"); // Middleware
+const { isAuthenticated } = require("../middleware/auth"); // Middleware
 const { formatDisplayDate, userTypesEnumeration, imageEditingToolEnumeration, mediaFileFormatEnumeration, imagingPlatformEnumeration } = require("../middleware/utils");
-
 const multer = require('multer');
-
 const fs = require("fs");
 const path = require("path");
-const { errorMonitor } = require("events");
 const upload = multer({
     dest: "upload-bulk-metadata/" // "uploads"
 });
@@ -33,7 +30,6 @@ router.get('/view-all', isAuthenticated, (req, res) => {
       JOIN Project p ON m.ProjectID = p.ProjectID
       JOIN ProjectUserPhotographyLink pupl ON pupl.ProjectID = p.ProjectID
       JOIN User photographer ON pupl.PhotographerID = photographer.UserID  
-
     `;
     const user = req.session.passport.user
     const query = user.UserType == userTypesEnumeration().admin
@@ -67,12 +63,9 @@ router.get('/view-all', isAuthenticated, (req, res) => {
     });
 });
 
-
-
 router.get('/select-user-for/:mediaID/:projectID', isAuthenticated, async (req, res) => {
     const mediaID = req.params.mediaID;
     const projectID = req.params.projectID;
-
     const isEdit = mediaID != 'create-mode';
     const baseQuery = `
             SELECT 
@@ -92,30 +85,23 @@ router.get('/select-user-for/:mediaID/:projectID', isAuthenticated, async (req, 
             JOIN User u ON p.ProjectOwnerID = u.UserID
             JOIN ProjectUserPhotographyLink pupl ON pupl.ProjectID = p.ProjectID
             JOIN User photographer ON pupl.PhotographerID = photographer.UserID  
-
             WHERE 
                 u.IsDeleted = 0 AND 
                 p.IsDeleted = 0 AND
                 photographer.IsDeleted = 0
-
       `;
 
-
-
-
-
     const currentProjectQuery = `SELECT p.ProjectID, 
-    p.ProjectName,
-    photographer.FullName, 
-    photographer.UserID photographerID
-    FROM Project p
-    JOIN ProjectUserPhotographyLink pupl ON pupl.ProjectID = p.ProjectID
-    JOIN User photographer ON pupl.PhotographerID = photographer.UserID
-    WHERE p.ProjectID = ?  `;
+                        p.ProjectName,
+                        photographer.FullName, 
+                        photographer.UserID photographerID
+                        FROM Project p
+                        JOIN ProjectUserPhotographyLink pupl ON pupl.ProjectID = p.ProjectID
+                        JOIN User photographer ON pupl.PhotographerID = photographer.UserID
+                        WHERE p.ProjectID = ?  `;
     const currentProject = isEdit
         ? await db.promise().query(currentProjectQuery, [projectID])
         : null;
-
     const query = req.session.passport.user.UserType != userTypesEnumeration().admin
         ? baseQuery + " AND photographer.UserID = " + req.session.passport.user.UserID
         : baseQuery
@@ -151,14 +137,11 @@ router.get('/create-or-edit-for-project/:mediaID/:projectID/', isAuthenticated, 
       JOIN User projectOwner ON p.ProjectOwnerID = projectOwner.UserID
       JOIN ProjectUserPhotographyLink pupl ON pupl.ProjectID = p.ProjectID
       JOIN User photographer ON pupl.PhotographerID = photographer.UserID  
-
-
       WHERE p.ProjectID = ? AND p.IsDeleted = 0
     `;
 
     //For EDIT
     const currentMediaQuery = mediaID != 'create-mode' ? 'SELECT * FROM Media WHERE Media.MediaID = ' + mediaID : '';
-
     const projects = (await db.promise().query(query, [projectID]))[0][0];
     const currentMedia = mediaID != 'create-mode' ? (await db.promise().query(currentMediaQuery))[0][0] : "create-mode";
 
@@ -247,8 +230,7 @@ router.post('/upload-bulk-metadata/:projectID/:photographerID', upload.single("b
                     break;
                 case c.ImagingDate:
                     if (isNaN(new Date(element)))
-                        errorMessage = errorMessage
-                            + errorMessageBuilder("Invalid Imaging Date format.")
+                        errorMessage = errorMessage + errorMessageBuilder("Invalid Imaging Date format.")
                     break;
                 case c.Resolution:
                     if (!/^\d{1,5}x\d{1,5}$/.test(element))
@@ -301,7 +283,6 @@ router.post('/upload-bulk-metadata/:projectID/:photographerID', upload.single("b
         newTable.push("(" + newRow.toString() + ")")
     }
     console.log('newRows', newTable)
-    // return
     if (errorMessage.length > 0) {
         console.log('there is error Message\n', errorMessage)
         res.json({
@@ -332,14 +313,11 @@ router.post('/upload-bulk-metadata/:projectID/:photographerID', upload.single("b
                         CreatedByID,
                         UpdatedDate,
                         UpdatedByID
-                    ) VALUES` + newTable;
-    // return
+        ) VALUES` + newTable;
     await db.promise().query(insertQuery);
 
     console.log("✅ bulk metadata submitted successfully")
 
-
-    // res.redirect(`/media/view-all`);
     res.json({
         success: true,
         message: "Media metadata bulk upload sucessful",
@@ -461,18 +439,18 @@ router.get('/view/:mediaId', isAuthenticated, (req, res) => {
 
     const query = `
     SELECT
-    m.*,
+        m.*,
         u1.Email AS CreatedByName,
-            u2.Email AS UpdatedByName,
-                photographer.FullName As photographerName,
-                    project.ProjectName as projectName
-      FROM Media m
-      LEFT JOIN User u1 ON m.CreatedByID = u1.UserID
-      LEFT JOIN User u2 ON m.UpdatedByID = u2.UserID
-      JOIN User photographer ON m.PhotographerID = photographer.UserID  
-      JOIN Project project ON m.ProjectID = project.ProjectID
-      WHERE m.MediaID = ? AND m.IsDeleted = 0
-      ORDER BY m.CreatedDate DESC
+        u2.Email AS UpdatedByName,
+        photographer.FullName As photographerName,
+        project.ProjectName as projectName
+    FROM Media m
+    LEFT JOIN User u1 ON m.CreatedByID = u1.UserID
+    LEFT JOIN User u2 ON m.UpdatedByID = u2.UserID
+    JOIN User photographer ON m.PhotographerID = photographer.UserID  
+    JOIN Project project ON m.ProjectID = project.ProjectID
+    WHERE m.MediaID = ? AND m.IsDeleted = 0
+    ORDER BY m.CreatedDate DESC
         `;
 
     db.query(query, [mediaId], (err, results) => {
@@ -489,7 +467,7 @@ router.get('/view/:mediaId', isAuthenticated, (req, res) => {
                 message: 'Media record not found'
             });
         }
-        console.log(results[0])
+        
         res.render('media/view', {
             currentUser: req.session.passport.user,
             media: results[0], // Since we're querying by ID, we'll only get one record
@@ -504,8 +482,8 @@ router.post('/edit', isAuthenticated, (req, res) => {
     const mediaData = req.body;
     // Update existing media
     const query = `
-            UPDATE Media SET
-    FileName = ?,
+        UPDATE Media SET
+        FileName = ?,
         FilePath = ?,
         CatalogID = ?,
         MorphoID = ?,
@@ -520,7 +498,7 @@ router.post('/edit', isAuthenticated, (req, res) => {
         Comments = ?,
         UpdatedDate = NOW(),
         UpdatedByID = ?
-            WHERE MediaID = ?
+        WHERE MediaID = ?
                 `;
     const updatedBy = req.session.passport.user.UserID;
     const params = [
@@ -543,7 +521,7 @@ router.post('/edit', isAuthenticated, (req, res) => {
     console.log('mediaData', mediaData)
     console.log('params', params)
 
-    db.query(query, params, (err, result) => {
+    db.query(query, params, (err) => {
         if (err) {
             console.error("❌ Error updating media:", err);
             return res.status(500).json({ success: false, message: 'Error updating media' });
@@ -584,7 +562,6 @@ router.post('/delete/:mediaId', isAuthenticated, (req, res) => {
             return db.promise().query(updateQuery, [userId, mediaId]);
         })
         .then(() => {
-            // req.flash('success', 'Media has been archived successfully');
             res.redirect('/media/view-all');
         })
         .catch(error => {
@@ -620,7 +597,6 @@ router.post('/restore/:mediaId', isAuthenticated, (req, res) => {
             return db.promise().query(updateQuery, [userId, mediaId]);
         })
         .then(() => {
-            // req.flash('success', 'Media has been archived successfully');
             res.redirect('/media/view-all');
         })
         .catch(error => {
@@ -629,4 +605,5 @@ router.post('/restore/:mediaId', isAuthenticated, (req, res) => {
             res.redirect('/media/view-all');
         });
 });
+
 module.exports = router;

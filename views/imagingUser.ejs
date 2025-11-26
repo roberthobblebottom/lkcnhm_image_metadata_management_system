@@ -157,10 +157,10 @@
                           <%= req.RequestStatusName %>
                         </td>
                         <td>
-                          <%= req.reason_for_req || '-' %>
+                          <%= req.reason_for_req %>
                         </td>
                         <td>
-                          <%= req.comments || '-' %>
+                          <%= req.comments %>
                         </td>
                         <td><a href="/view/<%= req.id %>" class="view-btn">View</a></td>
                       </tr>
@@ -218,10 +218,10 @@
                                 <%= req.RequestStatusName %>
                               </td>
                               <td>
-                                <%= req.reason_for_req || '-' %>
+                                <%= req.reason_for_req %>
                               </td>
                               <td>
-                                <%= req.comments || '-' %>
+                                <%= req.comments %>
                               </td>
                               <td><a href="/view/<%= req.id %>" class="view-btn">View</a></td>
                             </tr>

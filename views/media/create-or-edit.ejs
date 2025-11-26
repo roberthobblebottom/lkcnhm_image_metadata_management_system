@@ -256,153 +256,141 @@
 <body>
   <div class="main_con">
     <%- currentUser.UserType=='admin' ? include('../partials/sidenav-admin'): include('../partials/sidenav-user') %>
-      <!-- 📸 MEDIA SUBMISSION FORM (UPDATED) -->
+    <!-- 📸 MEDIA SUBMISSION FORM (UPDATED) -->
 
-      <form id="main-form" action="/<%=currentMedia == 'create-mode' ? 'media/create' : 'media/edit' %>" method="POST">
-        <div id="top-panel">
-          <a href="/media/select-user-for/<%=currentMedia.MediaID%>/<%=project.ProjectID%>/" class="btn btn-primary">
-            <i class="fas fa-arrow-left"></i> Back to selecting project owner/ photographer pairs
-          </a>
-          <%=currentMedia%>
-          <h2>
-            <%= currentMedia !='create-mode' ? "Then, edit image metadata entry " :"Then, enter new image metadata entry" %>
-          </h2>
+    <form id="main-form" action="/<%=currentMedia == 'create-mode' ? 'media/create' : 'media/edit' %>" method="POST">
+      <div id="top-panel">
+        <a href="/media/select-user-for/<%=currentMedia.MediaID%>/<%=project.ProjectID%>/" class="btn btn-primary">
+          <i class="fas fa-arrow-left"></i> Back to selecting project owner/ photographer pairs
+        </a>
+        <%=currentMedia%>
+        <h2>
+          <%= currentMedia !='create-mode' ? "Then, edit image metadata entry " :"Then, enter new image metadata entry" %>
+        </h2>
 
-        </div>
-        <!-- Hidden IDs -->
-        <input type="hidden" name="ProjectID" value="<%= project.ProjectID %>">
-        <input type="hidden" name="ProjectOwnerID" value="<%= project.ProjectOwnerID %>">
-        <input type="hidden" name="PhotographerID" value="<%= project.PhotographerID %>">
-        <input type="hidden" name="MediaID" value="<%= currentMedia.MediaID %>">
-        <!-- Requestor Full Name (readonly) -->
-        <div class="form-group">
-          <label>Project Owner Full Name</label>
-          <input type="text" id="projectOwnerName" value="<%= project.projectOwnerName %>" readonly>
-        </div>
+      </div>
+      <!-- Hidden IDs -->
+      <input type="hidden" name="ProjectID" value="<%= project.ProjectID %>">
+      <input type="hidden" name="ProjectOwnerID" value="<%= project.ProjectOwnerID %>">
+      <input type="hidden" name="PhotographerID" value="<%= project.PhotographerID %>">
+      <input type="hidden" name="MediaID" value="<%= currentMedia.MediaID %>">
+      <!-- Requestor Full Name (readonly) -->
+      <div class="form-group">
+        <label>Project Owner Full Name</label>
+        <input type="text" id="projectOwnerName" value="<%= project.projectOwnerName %>" readonly>
+      </div>
 
-        <!-- Photographer Full Name (readonly) -->
-        <div class="form-group">
-          <label>Photographer Full Name</label>
-          <input type="text" id="photographerName" value="<%= project.photographerName %>" readonly>
-        </div>
+      <!-- Photographer Full Name (readonly) -->
+      <div class="form-group">
+        <label>Photographer Full Name</label>
+        <input type="text" id="photographerName" value="<%= project.photographerName %>" readonly>
+      </div>
 
-        <!-- The rest of the form stays the same... -->
-        <div class="form-group">
-          <label for="mediaFileName">Media File Full Name</label>
-          <input type="text" name="mediaFileName" id="mediaFileName"
-            value="<%=currentMedia != 'create-mode' ? currentMedia.FileName : 'REMOVE THIS LATER' %>" required>
-        </div>
+      <!-- The rest of the form stays the same... -->
+      <div class="form-group">
+        <label for="mediaFileName">Media File Full Name</label>
+        <input type="text" name="mediaFileName" id="mediaFileName" value="<%=currentMedia != 'create-mode' ? currentMedia.FileName : 'REMOVE THIS LATER' %>" required>
+      </div>
 
-        <div class="form-group">
-          <label for="filePath">File Path</label>
-          <input type="text" name="filePath" id="filePath"
-            value="<%=currentMedia != 'create-mode' ? currentMedia.FilePath : 'REMOVE THIS LATER' %>" required>
-        </div>
+      <div class="form-group">
+        <label for="filePath">File Path</label>
+        <input type="text" name="filePath" id="filePath" value="<%=currentMedia != 'create-mode' ? currentMedia.FilePath : 'REMOVE THIS LATER' %>" required>
+      </div>
 
-        <div class="form-group">
-          <label for="catalogID">Catalog ID (default id ZRCBDP0012345 is for testing purposes, remove
-            later)</label>
-          <input type="text" name="catalogID" id="catalogID"
-            value="<%=currentMedia != 'create-mode' ? currentMedia.CatalogID : 'ZRCBDP0012345' %>" required>
-        </div>
+      <div class="form-group">
+        <label for="catalogID">Catalog ID (default id ZRCBDP0012345 is for testing purposes, remove
+          later)</label>
+        <input type="text" name="catalogID" id="catalogID" value="<%=currentMedia != 'create-mode' ? currentMedia.CatalogID : 'ZRCBDP0012345' %>" required>
+      </div>
 
-        <div class="form-group">
-          <label for="morphoID">Morpho ID</label>
-          <input type="text" name="morphoID" id="morphoID"
-            value="<%=currentMedia != 'create-mode' ? currentMedia.MorphoID : 'REMOVE THIS LATER' %>" required>
-        </div>
+      <div class="form-group">
+        <label for="morphoID">Morpho ID</label>
+        <input type="text" name="morphoID" id="morphoID" value="<%=currentMedia != 'create-mode' ? currentMedia.MorphoID : 'REMOVE THIS LATER' %>" required>
+      </div>
 
-        <div class="form-group">
-          <label for="clusterID">Cluster ID (default id 3PZRCBDP1234567 is for testing purposes, remove
-            later)</label>
-          <input type="text" name="clusterID" id="clusterID"
-            value="<%=currentMedia != 'create-mode' ? currentMedia.ClusterID: '3PZRCBDP1234567' %>">
-        </div>
+      <div class="form-group">
+        <label for="clusterID">Cluster ID (default id 3PZRCBDP1234567 is for testing purposes, remove
+          later)</label>
+        <input type="text" name="clusterID" id="clusterID" value="<%=currentMedia != 'create-mode' ? currentMedia.ClusterID: '3PZRCBDP1234567' %>">
+      </div>
 
-        <div class="form-group">
-          <label for="imagingDate">Date of Imaging</label>
-          <input type="date" name="imagingDate" id="imagingDate"
-            value="<%=currentMedia != 'create-mode' ? imagingDate : new Date() %>" required>
-        </div>
+      <div class="form-group">
+        <label for="imagingDate">Date of Imaging</label>
+        <input type="date" name="imagingDate" id="imagingDate" value="<%=currentMedia != 'create-mode' ? imagingDate : new Date() %>" required>
+      </div>
 
-        <div class="form-group">
-          <label for="resolution">Resolution</label>
-          <input type="text" name="resolution" id="resolution"
-            value="<%=currentMedia != 'create-mode' ? currentMedia.Resolution : '1x1' %>">
-        </div>
+      <div class="form-group">
+        <label for="resolution">Resolution</label>
+        <input type="text" name="resolution" id="resolution" value="<%=currentMedia != 'create-mode' ? currentMedia.Resolution : '1x1' %>">
+      </div>
 
 
 
-        <div class="form-group">
-          <label for="fileSize">File Size in Bytes</label>
-          <input type="number" name="fileSizeBytes" id="fileSizeBytes"
-            value="<%=currentMedia != 'create-mode' ? currentMedia.FileSizeBytes : '999999' %>">
-        </div>
+      <div class="form-group">
+        <label for="fileSize">File Size in Bytes</label>
+        <input type="number" name="fileSizeBytes" id="fileSizeBytes" value="<%=currentMedia != 'create-mode' ? currentMedia.FileSizeBytes : '999999' %>">
+      </div>
 
-        <div class="form-group">
-          <label for="fileFormat">Media File Format</label>
-          <select name="fileFormat" id="fileFormat" onchange="fileFormatOnChange()" requried>
-            <option value="">-- Select a media file format --</option>
-            <%fileFormats.forEach( fileFormat=>{%>
-              <option value="<%=fileFormat%>" <%=fileFormat==(currentMedia !='create-mode' ? currentMedia.FileFormat : '.tiff'
+      <div class="form-group">
+        <label for="fileFormat">Media File Format</label>
+        <select name="fileFormat" id="fileFormat" onchange="fileFormatOnChange()" requried>
+          <option value="">-- Select a media file format --</option>
+          <%fileFormats.forEach( fileFormat=>{%>
+          <option value="<%=fileFormat%>" <%=fileFormat==(currentMedia !='create-mode' ? currentMedia.FileFormat : '.tiff'
                 ) ? 'selected' : '' %>>
-                <%=fileFormat%>
-              </option>
-              <%})%>
-          </select>
+            <%=fileFormat%>
+          </option>
+          <%})%>
+        </select>
 
-        </div>
+      </div>
 
-        <div class="form-group">
-          <label for="description">Description of Image</label>
-          <textarea name="description" id="description"
-            required> <%=currentMedia != 'create-mode' ? currentMedia.Description : 'REMOVE THIS LATER' %></textarea>
-        </div>
+      <div class="form-group">
+        <label for="description">Description of Image</label>
+        <textarea name="description" id="description" required> <%=currentMedia != 'create-mode' ? currentMedia.Description : 'REMOVE THIS LATER' %></textarea>
+      </div>
 
-        <div class="form-group">
-          <label for="imagingPlatform">imaging Platform</label>
-          <select name="imagingPlatform" id="imagingPlatform" requried>
-            <option value="">-- Select a imaging platform --</option>
-            <%imagingPlatforms.forEach( imagingPlatform=>{%>
-              <option value="<%=imagingPlatform%>" <%=imagingPlatform==(currentMedia !='create-mode' ?
+      <div class="form-group">
+        <label for="imagingPlatform">imaging Platform</label>
+        <select name="imagingPlatform" id="imagingPlatform" requried>
+          <option value="">-- Select a imaging platform --</option>
+          <%imagingPlatforms.forEach( imagingPlatform=>{%>
+          <option value="<%=imagingPlatform%>" <%=imagingPlatform==(currentMedia !='create-mode' ?
                 currentMedia.ImagingPlatform : 'Leica(L5)' ) ? 'selected' : '' %>>
-                <%=imagingPlatform%>
-              </option>
-              <%})%>
-          </select>
-        </div>
+            <%=imagingPlatform%>
+          </option>
+          <%})%>
+        </select>
+      </div>
 
-        <div class="form-group">
-          <label for="imageEditingTool">Image Editing Tool</label>
-          <select name="imageEditingTool" id="imageEditingTool" requried>
-            <option value="">-- Select a image editing tool --</option>
-            <%imageEditingTools.forEach( imageEditingTool=>{%>
-              <option value="<%=imageEditingTool%>" <%=imageEditingTool==(currentMedia !='create-mode' ?
+      <div class="form-group">
+        <label for="imageEditingTool">Image Editing Tool</label>
+        <select name="imageEditingTool" id="imageEditingTool" requried>
+          <option value="">-- Select a image editing tool --</option>
+          <%imageEditingTools.forEach( imageEditingTool=>{%>
+          <option value="<%=imageEditingTool%>" <%=imageEditingTool==(currentMedia !='create-mode' ?
                 currentMedia.ImageEditingTool : 'photoshop' ) ? 'selected' : '' %>>
-                <%=imageEditingTool%>
-              </option>
-              <%})%>
-          </select>
-        </div>
+            <%=imageEditingTool%>
+          </option>
+          <%})%>
+        </select>
+      </div>
 
-        <div class="form-group">
-          <label for="comments">Comments</label>
-          <textarea name="comments"
-            id="comments"><%=currentMedia != 'create-mode' ? currentMedia.Comments : 'REMOVE THIS LATER' %></textarea>
-        </div>
+      <div class="form-group">
+        <label for="comments">Comments</label>
+        <textarea name="comments" id="comments"><%=currentMedia != 'create-mode' ? currentMedia.Comments : 'REMOVE THIS LATER' %></textarea>
+      </div>
 
+      <p class="note">
+        💡 Note: If there is more than one image for a specimen, submit this form multiple times with different
+        image
+        details.
+      </p>
 
-
-        <p class="note">
-          💡 Note: If there is more than one image for a specimen, submit this form multiple times with different
-          image
-          details.
-        </p>
-
-        <div class="buttons">
-          <button type="submit"><i class="fas fa-paper-plane"></i> Submit Media</button>
-        </div>
-      </form>
+      <div class="buttons">
+        <button type="submit"><i class="fas fa-paper-plane"></i> Submit Media</button>
+      </div>
+    </form>
 
   </div>
   <script>

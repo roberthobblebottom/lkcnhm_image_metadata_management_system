@@ -2,116 +2,116 @@
 <html lang="en">
 
 <head>
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    <link rel="stylesheet" href="/css/admin-users.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Edit Project</title>
-    <style>
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: #f4f7f9;
-            margin: 0;
-            padding: 20px;
-        }
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <link rel="stylesheet" href="/css/admin-users.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Edit Project</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: #f4f7f9;
+      margin: 0;
+      padding: 20px;
+    }
 
-        h2 {
-            text-align: center;
-            color: #333;
-            margin-bottom: 30px;
-            margin-top: -50px;
-        }
+    h2 {
+      text-align: center;
+      color: #333;
+      margin-bottom: 30px;
+      margin-top: -50px;
+    }
 
-        form {
-            max-width: 750px;
-            margin: auto;
-            background: #fff;
-            padding: 30px;
-            border-radius: 12px;
-            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
-        }
+    form {
+      max-width: 750px;
+      margin: auto;
+      background: #fff;
+      padding: 30px;
+      border-radius: 12px;
+      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+    }
 
-        .top-group {
-            max-width: 700px;
-            margin: auto;
-            padding: 2rem;
-        }
+    .top-group {
+      max-width: 700px;
+      margin: auto;
+      padding: 2rem;
+    }
 
-        .form-group {
-            margin-bottom: 20px;
-        }
+    .form-group {
+      margin-bottom: 20px;
+    }
 
-        label {
-            display: block;
-            margin-bottom: 8px;
-            font-weight: 600;
-            color: #444;
-        }
+    label {
+      display: block;
+      margin-bottom: 8px;
+      font-weight: 600;
+      color: #444;
+    }
 
-        input[type="text"],
-        input[type="date"],
-        select,
-        .anchor,
-        textarea {
-            width: 95%;
-            padding: 12px 15px;
-            border: 1px solid #ccc;
-            background: #fff;
-            border-radius: 8px;
-            font-size: 15px;
-            transition: border-color 0.3s ease;
-        }
+    input[type="text"],
+    input[type="date"],
+    select,
+    .anchor,
+    textarea {
+      width: 95%;
+      padding: 12px 15px;
+      border: 1px solid #ccc;
+      background: #fff;
+      border-radius: 8px;
+      font-size: 15px;
+      transition: border-color 0.3s ease;
+    }
 
-        select {
-            width: 100%;
-        }
+    select {
+      width: 100%;
+    }
 
-        input:focus,
-        select:focus,
-        textarea:focus {
-            border-color: #007bff;
-            outline: none;
-        }
+    input:focus,
+    select:focus,
+    textarea:focus {
+      border-color: #007bff;
+      outline: none;
+    }
 
-        textarea {
-            resize: vertical;
-            min-height: 100px;
-        }
+    textarea {
+      resize: vertical;
+      min-height: 100px;
+    }
 
-        .form-control-plaintext {
-            background-color: #f8f9fa;
-            border: none;
-            padding: 10px 15px;
-            font-size: 16px;
-            color: #555;
-        }
+    .form-control-plaintext {
+      background-color: #f8f9fa;
+      border: none;
+      padding: 10px 15px;
+      font-size: 16px;
+      color: #555;
+    }
 
-        button i {
-            margin-right: 8px;
-        }
+    button i {
+      margin-right: 8px;
+    }
 
-        .btn {
-            padding: 10px 18px;
-            font-size: 16px;
-            font-weight: 500;
-            border-radius: 8px;
-            cursor: pointer;
-            border: none;
-            transition: background 0.3s ease;
-        }
+    .btn {
+      padding: 10px 18px;
+      font-size: 16px;
+      font-weight: 500;
+      border-radius: 8px;
+      cursor: pointer;
+      border: none;
+      transition: background 0.3s ease;
+    }
 
-        .btn-primary {
-            background-color: #007bff;
-            color: white;
-        }
+    .btn-primary {
+      background-color: #007bff;
+      color: white;
+    }
 
-        .btn-primary:hover {
-            background-color: #0056b3;
-        }
+    .btn-primary:hover {
+      background-color: #0056b3;
+    }
 
-        /* .btn-secondary {
+    /* .btn-secondary {
             background-color: #452dff;
             color: white;
             margin-top: 0px;
@@ -123,436 +123,425 @@
             background-color: #431eff;
         } */
 
-        a button {
-            display: block;
-            margin: 0 auto;
-        }
+    a button {
+      display: block;
+      margin: 0 auto;
+    }
 
-        button[type="submit"] {
-            background-color: #007bff;
-            color: #fff;
-            border: none;
-            padding: 0.75rem 2rem;
-            font-size: 1rem;
-            border-radius: 8px;
-            cursor: pointer;
-            transition: background-color 0.3s ease;
-        }
+    button[type="submit"] {
+      background-color: #007bff;
+      color: #fff;
+      border: none;
+      padding: 0.75rem 2rem;
+      font-size: 1rem;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
 
-        button[type="submit"]:hover,
-        .btn-secondary:hover,
-        .btn-primary:hover {
-            background-color: #0056b3;
-        }
+    button[type="submit"]:hover,
+    .btn-secondary:hover,
+    .btn-primary:hover {
+      background-color: #0056b3;
+    }
 
-        #imagingPlatformCheckboxes {
-            display: none;
-            border: 1px #dadada solid;
-        }
+    #imagingPlatformCheckboxes {
+      display: none;
+      border: 1px #dadada solid;
+    }
 
-        #imagingPlatformCheckboxes label {
-            display: block;
-        }
+    #imagingPlatformCheckboxes label {
+      display: block;
+    }
 
-        #imagingPlatformCheckboxes label:hover {
-            background-color: #1e90ff;
-        }
-
-
-
-        .selectBox {
-            position: relative;
-        }
-
-        .selectBox select {
-            width: 100%;
-        }
-
-        .overSelect {
-            position: absolute;
-            left: 0;
-            right: 0;
-            top: 0;
-            bottom: 0;
-        }
+    #imagingPlatformCheckboxes label:hover {
+      background-color: #1e90ff;
+    }
 
 
-        /*
+
+    .selectBox {
+      position: relative;
+    }
+
+    .selectBox select {
+      width: 100%;
+    }
+
+    .overSelect {
+      position: absolute;
+      left: 0;
+      right: 0;
+      top: 0;
+      bottom: 0;
+    }
+
+
+    /*
 Source - https://stackoverflow.com/a
 Posted by Arun Aravind, modified by community. See post 'Timeline' for change history
 Retrieved 2025-11-19, License - CC BY-SA 4.0
 */
 
-        .dropdown-check-list {
-            display: inline-block;
-        }
+    .dropdown-check-list {
+      display: inline-block;
+    }
 
-        .dropdown-check-list .anchor {
-            position: relative;
-            cursor: pointer;
-            width: 95%;
-            padding: 0.75rem;
-            border: 1px solid #ccc;
-            border-radius: 8px;
-            font-size: 15px;
-            transition: border-color 0.3s ease;
-            display: block;
-            /* padding: 5px 50px 5px 10px; */
-            border: 1px solid #ccc;
-        }
+    .dropdown-check-list .anchor {
+      position: relative;
+      cursor: pointer;
+      width: 95%;
+      padding: 0.75rem;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      font-size: 15px;
+      transition: border-color 0.3s ease;
+      display: block;
+      /* padding: 5px 50px 5px 10px; */
+      border: 1px solid #ccc;
+    }
 
-        .dropdown-check-list .anchor:after {
-            position: absolute;
-            content: "";
-            border-left: 2px solid black;
-            border-top: 2px solid black;
-            padding: 5px;
-            right: 10px;
-            top: 20%;
-            -moz-transform: rotate(-135deg);
-            -ms-transform: rotate(-135deg);
-            -o-transform: rotate(-135deg);
-            -webkit-transform: rotate(-135deg);
-            transform: rotate(-135deg);
-        }
+    .dropdown-check-list .anchor:after {
+      position: absolute;
+      content: "";
+      border-left: 2px solid black;
+      border-top: 2px solid black;
+      padding: 5px;
+      right: 10px;
+      top: 20%;
+      -moz-transform: rotate(-135deg);
+      -ms-transform: rotate(-135deg);
+      -o-transform: rotate(-135deg);
+      -webkit-transform: rotate(-135deg);
+      transform: rotate(-135deg);
+    }
 
-        .dropdown-check-list .anchor:active:after {
-            right: 8px;
-            top: 21%;
-        }
+    .dropdown-check-list .anchor:active:after {
+      right: 8px;
+      top: 21%;
+    }
 
-        .dropdown-check-list ul.items {
-            padding: 2px;
-            display: none;
-            margin: 0;
-            border: 1px solid #ccc;
-            border-top: none;
-        }
+    .dropdown-check-list ul.items {
+      padding: 2px;
+      display: none;
+      margin: 0;
+      border: 1px solid #ccc;
+      border-top: none;
+    }
 
-        .dropdown-check-list ul.items li {
-            list-style: none;
-        }
+    .dropdown-check-list ul.items li {
+      list-style: none;
+    }
 
-        .dropdown-check-list.visible .anchor {
-            color: #0094ff;
-        }
+    .dropdown-check-list.visible .anchor {
+      color: #0094ff;
+    }
 
-        .dropdown-check-list.visible .items {
-            display: block;
-        }
+    .dropdown-check-list.visible .items {
+      display: block;
+    }
 
-        #list1 {
-            display: block;
-            margin-bottom: 2%;
-        }
+    #list1 {
+      display: block;
+      margin-bottom: 2%;
+    }
 
-        .buttons {
-            text-align: center;
-        }
-    </style>
+    .buttons {
+      text-align: center;
+    }
+  </style>
 </head>
 
 <body>
-    <%- include(currentUser.UserType=='admin' ? '../partials/sidenav-admin.ejs' : '../partials/sidenav-user' ) %>
-        <main>
-            <div class="top-group">
-                <a href="/project/view-all"><button class="btn btn-primary">Back to All
-                        Projects</button></a>
-                <h2>Edit Project</h2>
-            </div>
-            <form id='editForm' action="/project/edit/<%= request.ProjectID %>" method="POST">
-                <div class="form-group">
-                    <label>Project Name</label>
+  <%- include(currentUser.UserType=='admin' 
+  ? '../partials/sidenav-admin.ejs' 
+  : '../partials/sidenav-user' ) %>
+  <main>
+    <div class="top-group">
+      <a href="/project/view-all">
+        <button class="btn btn-primary">
+          Back to All Projects
+        </button>
+      </a>
+      <h2>Edit Project</h2>
+    </div>
+    <form id='editForm' action="/project/edit/<%= request.ProjectID %>" method="POST">
+      <div class="form-group">
+        <label>Project Name</label>
+        <input type="text" id="ProjectName" name="ProjectName" value="<%= request.ProjectName %>" class="form-control" required>
+      </div>
+
+      <div class="form-group">
+        <label>Project Owner</label>
+        <p class="form-control-static">
+          <%= request.RequestorName || 'Not specified' %>
+        </p>
+      </div>
+
+      <div class="form-group">
+        <label>Project Type</label>
+        <%= request.RequestorType %>
+        <select name="projectType" id="projectType" class="form-control">
+          <option value="">-- Select Project Type --</option>
+          <% projectTypes.forEach(projectType=> { %>
+          <option value="<%= projectType %>" <%=request.ProjectType==projectType ? 'selected' : ''%>>
+            <%= projectType %>
+          </option>
+          <% }) %>
+        </select>
+      </div>
+
+      <div>
+        <label for="PhotographerID">Photographer(s):</label>
+        <div id="list1" class="dropdown-check-list" tabindex="100">
+          <span class="anchor">Select Photographers</span>
+          <ul class="items" id="newSelectedPhotographersList">
+            <% allPhotographers.forEach(photographer=>{ %>
+            <label class="dropdown-item">
+              <input class='target' type="checkbox" id="<%=photographer%>Input" <%=selectedPhotographers.some(
+                e=>e.UserID === photographer.UserID) ? 'checked' : '' %> value=<%=photographer.UserID%>>
+              <%=photographer.FullName%>
+            </label>
+            <%})%>
+          </ul>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="ImagingStartDate">Imaging Start Date:</label>
+        <input type="date" id="ImagingStartDate" name="ImagingStartDate" value="<%= request.ImagingStartDate %>" class="form-control" required>
+      </div>
+
+      <div class="form-group">
+        <label for="ImagingEndDate">Imaging End Date:</label>
+        <input type="date" id="ImagingEndDate" name="ImagingEndDate" value="<%= request.ImagingEndDate %>" class="form-control" required>
+      </div>
+
+      <div class="form-group">
+        <label for="SummaryOfProject">Summary of Project:</label>
+        <textarea id="SummaryOfProject" name="SummaryOfProject" class="form-control" required>
+            <%= request.SummaryOfProject %>
+        </textarea>
+      </div>
+
+      <div class="form-group">
+        <label for="DetailsOfSpecimens">Details Of Specimens:</label>
+        <textarea id="DetailsOfSpecimens" name="DetailsOfSpecimens" class="form-control" required>
+            <%= request.DetailsOfSpecimens %>
+        </textarea>
+      </div>
+      <div class="form-group">
+        <label for="ImagingPlatform">Imaging Platform:</label>
+
+        <div class="selectBox" onclick="showImagingCheckboxes()">
+          <select name="ImagingPlatform" id="ImagingPlatform" class="form-control">
+            <option>Select an option</option>
+          </select>
+          <div class="overSelect"></div>
+        </div>
+        <div id="imagingPlatformCheckboxes">
+          <% imagingPlatforms.forEach(imagingPlatform=>{ %>
+          <label for='<%=imagingPlatform%>Input'>
+            <input type="checkbox" id="<%=imagingPlatform%>Input" <%=selectedImagingPlatforms.includes(imagingPlatform) ? 'checked' : '' %> />
+            <%=imagingPlatform%>
+          </label>
+          <%})%>
+        </div>
+
+      </div>
+      <div class=" form-group">
+        <label for="ProjectStatus">Status:</label>
+        <select name="ProjectStatus" id="ProjectStatus" class="form-control" required>
+          <option value="">-- Select Type --</option>
+          <% statuses.forEach(status=> { %>
+          <option value="<%= status %>" <%=request.ProjectStatus==status ? ' selected' : '' %>>
+            <%= status%>
+          </option>
+          <% }) %>
+        </select>
+      </div>
+      <div class='buttons'>
+        <button type="submit" class="btn btn-primary">
+            <i class="fas fa-paper-plane" ></i>
+            Save Changes
+        </button>
+      </div>
+    </form>
+
+    <br>
+
+  </main>
+  <script>
+    var imagingPlatformExpanded = false;
+
+    function showImagingCheckboxes() {
+      var checkboxes = document.getElementById('imagingPlatformCheckboxes')
+      if (!imagingPlatformExpanded) {
+        checkboxes.style.display = "block";
+        imagingPlatformExpanded = true;
+      } else {
+        checkboxes.style.display = "none";
+        imagingPlatformExpanded = false;
+      }
+    }
+    var photographersExpanded = false;
 
 
-                    <input type="text" id="ProjectName" name="ProjectName" value="<%= request.ProjectName %>"
-                        class="form-control" required>
-                </div>
-                <div class="form-group">
-                    <label>Project Owner</label>
-                    <p class="form-control-static">
-                        <%= request.RequestorName || 'Not specified' %>
-                    </p>
-                </div>
-                <div class="form-group">
-                    <label>Project Type</label>
-                    <%= request.RequestorType %>
-                        <select name="projectType" id="projectType" class="form-control">
-                            <option value="">-- Select Project Type --</option>
-                            <% projectTypes.forEach(projectType=> { %>
-                                <option value="<%= projectType %>" <%=request.ProjectType==projectType ? 'selected' : ''
-                                    %>
-                                    >
-                                    <%= projectType %>
-                                </option>
-                                <% }) %>
-                        </select>
+    var checkList = document.getElementById('list1');
+    checkList.getElementsByClassName('anchor')[0].onclick = function(evt) {
+      if (checkList.classList.contains('visible'))
+        checkList.classList.remove('visible');
+      else
+        checkList.classList.add('visible');
+    }
 
-                </div>
+    document.addEventListener('DOMContentLoaded', function() {
+      const form = document.getElementById('editForm')
 
+      const requestDate = new Date('<%= request.DateofRequest %>');
+      const startDateInput = document.getElementById('ImagingStartDate');
+      const endDateInput = document.getElementById('ImagingEndDate');
+      const currentUser = '<%= currentUser%>'
+      if (currentUser.UserType === 'admin') {
+        const statusSelect = document.getElementById('ProjectStatus');
+        const reasonField = document.getElementById('ReasonForRequest');
+      }
+      // Set minimum dates
+      startDateInput.min = '<%= request.DateofRequest %>';
+      endDateInput.min = '<%= request.ImagingStartDate %>';
 
-                <div>
-                    <label for="PhotographerID">Photographer(s):</label>
-                    <div id="list1" class="dropdown-check-list" tabindex="100">
-                        <span class="anchor">Select Photographers</span>
-                        <ul class="items" id="newSelectedPhotographersList">
-                            <% allPhotographers.forEach(photographer=>{ %>
-                                <label class="dropdown-item">
-                                    <input class='target' type="checkbox" id="<%=photographer%>Input"
-                                        <%=selectedPhotographers.some(e=>
-                                    e.UserID === photographer.UserID) ?
-                                    'checked' : '' %>
-                                    value=<%=photographer.UserID%>>
-                                        <%=photographer.FullName%>
-                                </label>
-                                <%})%>
+      // Real-time validation
+      startDateInput.addEventListener('change', function() {
+        const startDate = new Date(this.value);
+        endDateInput.min = this.value;
 
+        if (startDate < requestDate) {
+          Swal.fire({
+            icon: 'error',
+            title: 'Invalid Date',
+            text: 'Start date must be on or after request date'
+          });
+          this.value = '<%= request.ImagingStartDate %>';
+        }
+      });
 
-                        </ul>
-                    </div>
+      endDateInput.addEventListener('change', function() {
+        const startDate = new Date(startDateInput.value);
+        const endDate = new Date(this.value);
 
+        if (endDate < startDate) {
+          Swal.fire({
+            icon: 'error',
+            title: 'Invalid Date',
+            text: 'End date must be on or after start date'
+          });
+          this.value = '<%= request.ImagingEndDate %>';
+        }
+      });
+      // Form submission handler
+      form.addEventListener('submit', async function(e) {
+        e.preventDefault();
+        // Validate dates
+        const startDate = new Date(startDateInput.value);
+        const endDate = new Date(endDateInput.value);
+        if (startDate < requestDate) {
+          Swal.fire({
+            icon: 'error',
+            title: 'Invalid Date',
+            text: 'Start date must be on or after request date'
+          });
+          return;
+        }
 
-                </div>
-
-
-
-
-                <div class="form-group">
-                    <label for="ImagingStartDate">Imaging Start Date:</label>
-                    <input type="date" id="ImagingStartDate" name="ImagingStartDate"
-                        value="<%= request.ImagingStartDate %>" class="form-control" required>
-                </div>
-
-                <div class="form-group">
-                    <label for="ImagingEndDate">Imaging End Date:</label>
-                    <input type="date" id="ImagingEndDate" name="ImagingEndDate" value="<%= request.ImagingEndDate %>"
-                        class="form-control" required>
-                </div>
-
-                <div class="form-group">
-                    <label for="SummaryOfProject">Summary of Project:</label>
-                    <textarea id="SummaryOfProject" name="SummaryOfProject" class="form-control"
-                        required><%= request.SummaryOfProject %></textarea>
-                </div>
-
-                <div class="form-group">
-                    <label for="DetailsOfSpecimens">Details Of Specimens:</label>
-                    <textarea id="DetailsOfSpecimens" name="DetailsOfSpecimens" class="form-control"
-                        required><%= request.DetailsOfSpecimens %></textarea>
-                </div>
-                <div class="form-group">
-                    <label for="ImagingPlatform">Imaging Platform:</label>
-
-                    <div class="selectBox" onclick="showImagingCheckboxes()">
-                        <select name="ImagingPlatform" id="ImagingPlatform" class="form-control">
-                            <option>Select an option</option>
-                        </select>
-                        <div class="overSelect"></div>
-                    </div>
-
-                    <div id="imagingPlatformCheckboxes">
-                        <% imagingPlatforms.forEach(imagingPlatform=>{ %>
-                            <label for='<%=imagingPlatform%>Input'>
-                                <input type="checkbox" id="<%=imagingPlatform%>Input"
-                                    <%=selectedImagingPlatforms.includes(imagingPlatform) ? 'checked' : '' %>
-                                />
-                                <%=imagingPlatform%>
-                            </label>
-                            <%})%>
-                    </div>
-
-                </div>
-                <div class=" form-group">
-                    <label for="ProjectStatus">Status:</label>
-                    <select name="ProjectStatus" id="ProjectStatus" class="form-control" required>
-                        <option value="">-- Select Type --</option>
-                        <% statuses.forEach(status=> { %>
-                            <option value="<%= status %>" <%=request.ProjectStatus==status ? ' selected' : '' %>>
-                                <%= status%>
-                            </option>
-                            <% }) %>
-                    </select>
-                </div>
-                <div class='buttons'>
-                    <button type="submit" class="btn btn-primary"><i class="fas fa-paper-plane"></i>Save
-                        Changes</button>
-                </div>
-            </form>
-
-            <br>
-
-        </main>
-        <script>
-            var imagingPlatformExpanded = false;
-
-            function showImagingCheckboxes() {
-                var checkboxes = document.getElementById('imagingPlatformCheckboxes')
-                if (!imagingPlatformExpanded) {
-                    checkboxes.style.display = "block";
-                    imagingPlatformExpanded = true;
-                } else {
-                    checkboxes.style.display = "none";
-                    imagingPlatformExpanded = false;
-                }
-            }
-            var photographersExpanded = false;
-
-
-            var checkList = document.getElementById('list1');
-            checkList.getElementsByClassName('anchor')[0].onclick = function (evt) {
-                if (checkList.classList.contains('visible'))
-                    checkList.classList.remove('visible');
-                else
-                    checkList.classList.add('visible');
-            }
-
-            document.addEventListener('DOMContentLoaded', function () {
-                const form = document.getElementById('editForm')
-
-                const requestDate = new Date('<%= request.DateofRequest %>');
-                const startDateInput = document.getElementById('ImagingStartDate');
-                const endDateInput = document.getElementById('ImagingEndDate');
-                const currentUser = '<%= currentUser%>'
-                if (currentUser.UserType === 'admin') {
-                    const statusSelect = document.getElementById('ProjectStatus');
-                    const reasonField = document.getElementById('ReasonForRequest');
-                }
-                // Set minimum dates
-                startDateInput.min = '<%= request.DateofRequest %>';
-                endDateInput.min = '<%= request.ImagingStartDate %>';
-
-                // Real-time validation
-                startDateInput.addEventListener('change', function () {
-                    const startDate = new Date(this.value);
-                    endDateInput.min = this.value;
-
-                    if (startDate < requestDate) {
-                        Swal.fire({
-                            icon: 'error',
-                            title: 'Invalid Date',
-                            text: 'Start date must be on or after request date'
-                        });
-                        this.value = '<%= request.ImagingStartDate %>';
-                    }
-                });
-
-                endDateInput.addEventListener('change', function () {
-                    const startDate = new Date(startDateInput.value);
-                    const endDate = new Date(this.value);
-
-                    if (endDate < startDate) {
-                        Swal.fire({
-                            icon: 'error',
-                            title: 'Invalid Date',
-                            text: 'End date must be on or after start date'
-                        });
-                        this.value = '<%= request.ImagingEndDate %>';
-                    }
-                });
-                // Form submission handler
-                form.addEventListener('submit', async function (e) {
-                    e.preventDefault();
-                    // Validate dates
-                    const startDate = new Date(startDateInput.value);
-                    const endDate = new Date(endDateInput.value);
-                    if (startDate < requestDate) {
-                        Swal.fire({
-                            icon: 'error',
-                            title: 'Invalid Date',
-                            text: 'Start date must be on or after request date'
-                        });
-                        return;
-                    }
-
-                    if (endDate < startDate) {
-                        Swal.fire({
-                            icon: 'error',
-                            title: 'Invalid Date',
-                            text: 'End date must be on or after start date'
-                        });
-                        return;
-                    }
-                    if (currentUser.UserType === 'admin') {
-                        // Validate reason if status changed
-                        if (statusSelect.value !== '<%= request.RequestStatusID %>' && !reasonField.value.trim()) {
-                            Swal.fire({
-                                icon: 'error',
-                                title: 'Missing Reason',
-                                text: 'Please provide a reason for status change'
-                            });
-                            return;
-                        }
-                        // Validate that a valid status is selected
-                        if (statusSelect.value === '') {
-                            Swal.fire({
-                                icon: 'error',
-                                title: 'Invalid Status',
-                                text: 'Please select a valid status.'
-                            });
-                            return;
-                        }
-                    }
-                    // Submit form via AJAX
-                    try {
-                        selectedImagingPlatforms = [];
-                        for (x of document.getElementById('imagingPlatformCheckboxes').childNodes) {
-                            if (x instanceof HTMLLabelElement) {
-                                if (x.firstElementChild.checked) {
-                                    selectedImagingPlatforms.push(x.textContent.trim());
-                                }
-                            }
-                        }
-                        selectedPhotographers = [];
-                        for (x of document.getElementById('newSelectedPhotographersList').childNodes) {
-                            if (x instanceof HTMLLabelElement) {
-                                if (x.firstElementChild.checked) {
-                                    selectedPhotographers.push(x.firstElementChild.value);
-                                }
-                            }
-                        }
-                        console.log(selectedPhotographers)
-                        // return;
-                        const formData = new FormData(form);
-                        formData.append('selectedImagingPlatforms', selectedImagingPlatforms);
-                        formData.append('selectedPhotographers', selectedPhotographers);
-                        console.log(formData)
-                        // return;
-                        const response = await fetch(form.action, {
-                            method: 'POST',
-                            headers: {
-                                'Content-Type': 'application/json'
-                            },
-                            body: JSON.stringify(Object.fromEntries(formData))
-                        });
-                        const result = await response.json();
-                        if (result.success) {
-                            Swal.fire({
-                                icon: 'success',
-                                title: 'Success!',
-                                text: result.message,
-                                timer: 1500,
-                                showConfirmButton: false
-                            }).then(() => {
-                                window.location.href = result.redirectUrl;
-                            });
-                        } else {
-                            Swal.fire({
-                                icon: 'error',
-                                title: 'Error',
-                                text: result.message
-                            });
-                        }
-                    } catch (error) {
-                        console.error('Error:', error);
-                        Swal.fire({
-                            icon: 'error',
-                            title: 'Error',
-                            text: 'An error occurred while updating the request'
-                        });
-                    }
-                });
+        if (endDate < startDate) {
+          Swal.fire({
+            icon: 'error',
+            title: 'Invalid Date',
+            text: 'End date must be on or after start date'
+          });
+          return;
+        }
+        if (currentUser.UserType === 'admin') {
+          // Validate reason if status changed
+          if (statusSelect.value !== '<%= request.RequestStatusID %>' && !reasonField.value.trim()) {
+            Swal.fire({
+              icon: 'error',
+              title: 'Missing Reason',
+              text: 'Please provide a reason for status change'
             });
-        </script>
+            return;
+          }
+          // Validate that a valid status is selected
+          if (statusSelect.value === '') {
+            Swal.fire({
+              icon: 'error',
+              title: 'Invalid Status',
+              text: 'Please select a valid status.'
+            });
+            return;
+          }
+        }
+        // Submit form via AJAX
+        try {
+          selectedImagingPlatforms = [];
+          for (x of document.getElementById('imagingPlatformCheckboxes').childNodes) {
+            if (x instanceof HTMLLabelElement) {
+              if (x.firstElementChild.checked) {
+                selectedImagingPlatforms.push(x.textContent.trim());
+              }
+            }
+          }
+          selectedPhotographers = [];
+          for (x of document.getElementById('newSelectedPhotographersList').childNodes) {
+            if (x instanceof HTMLLabelElement) {
+              if (x.firstElementChild.checked) {
+                selectedPhotographers.push(x.firstElementChild.value);
+              }
+            }
+          }
+          console.log(selectedPhotographers)
+          // return;
+          const formData = new FormData(form);
+          formData.append('selectedImagingPlatforms', selectedImagingPlatforms);
+          formData.append('selectedPhotographers', selectedPhotographers);
+          console.log(formData)
+          // return;
+          const response = await fetch(form.action, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(Object.fromEntries(formData))
+          });
+          const result = await response.json();
+          if (result.success) {
+            Swal.fire({
+              icon: 'success',
+              title: 'Success!',
+              text: result.message,
+              timer: 1500,
+              showConfirmButton: false
+            }).then(() => {
+              window.location.href = result.redirectUrl;
+            });
+          } else {
+            Swal.fire({
+              icon: 'error',
+              title: 'Error',
+              text: result.message
+            });
+          }
+        } catch (error) {
+          console.error('Error:', error);
+          Swal.fire({
+            icon: 'error',
+            title: 'Error',
+            text: 'An error occurred while updating the request'
+          });
+        }
+      });
+    });
+  </script>
 
 
 </body>

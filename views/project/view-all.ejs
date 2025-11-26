@@ -5,7 +5,6 @@
   <meta charset="UTF-8" />
   <title>Projects</title>
   <link rel="stylesheet" href="/css/admin.css" />
-
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
   <link rel="stylesheet" href="https://cdn.datatables.net/2.3.5/css/dataTables.dataTables.css" />
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
@@ -31,7 +30,6 @@
       border-radius: 6px;
       text-decoration: none;
       font-weight: 600;
-      float: right;
       margin-top: 50px;
     }
 
@@ -97,101 +95,80 @@
 
 <body>
   <div class="main_con">
-    <%- include('../partials/sidenav-admin') %>
+    <%- currentUser.UserType=='admin' 
+    ? include('../partials/sidenav-admin')
+    : include('../partials/sidenav-user') %>
+    <center>
+      <h2 style="margin-left: 35%;margin-top: 40px;">Project Management</h2>
+    </center>
+    <div style="text-align: right; ">
+      <a href="/project/create"><button class="btn">Add Project</button></a>
+    </div>
+    <% if (projects.length===0) { %>
+    <p class="no-data">No projects found.</p>
+    <% } else { %>
+    <table id='dataTable'>
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Project Name</th>
+          <% if (currentUser.UserType=='admin' ) {%>
+          <th>Project Owner</th>
+          <%}%>
+          <th>Project Type</th>
+          <th>Photographer</th>
+          <th>Start</th>
+          <th>End</th>
+          <th>Status</th>
+          <% if(currentUser.UserType=='admin' ){%>
+          <th>Delete Flag</th>
+          <%}%>
+          <th>Actions</th>
+        </tr>
+      </thead>
+    <tbody>
+      <% projects.forEach(request=> { %>
+        <tr>
+          <td><%= request.ProjectID %></td>
+          <td><%=request.ProjectName %></td>
+          <% if (currentUser.UserType=='admin' ) {%>
+          <td><%= request.projectOwnerName  %></td>
+          <%}%>
+          <td><%= request.ProjectType %></td>
+          <td><%= photographers[request.ProjectID] %></td>
+          <td> <%= request.ImagingStartDate?.toDateString() %></td>
+          <td> <%= request.ImagingEndDate?.toDateString()%></td>
+          <td> <%=request.ProjectStatus %></td>
+          <% if(currentUser.UserType=='admin' ){%>
+          <td class="<%= !request.IsDeleted  ? 'status-approved' :  'status-rejected'  %>">
+            <%= request.IsDeleted ? 'Deleted' : 'Active' %>
+          </td>
+          <%}%>
+          <td>
+          <a href="/project/view/<%= request.ProjectID %>" class="view-btn">View</a>
+          <a href="/project/edit/<%= request.ProjectID %>" class="edit-btn">Edit</a>
 
-      <center>
-        <h2 style="margin-left: 35%;margin-top: 40px;">Project Management</h2>
-      </center>
-      <div style="text-align: right; ">
-        <a href="/project/create"><button class="btn">Add Project</button></a>
-      </div>
-      <% if (projects.length===0) { %>
-        <p class="no-data">No projects found.</p>
-        <% } else { %>
-          <table id='dataTable'>
-            <thead>
-              <tr>
-                <th>ID</th>
-                <th>Project Name</th>
-                <% if (currentUser.UserType=='admin' ) {%>
-                  <th>Project Owner</th>
-                  <%}%>
-                    <th>Project Type</th>
-                    <th>Photographer</th>
-                    <th>Start</th>
-                    <th>End</th>
-                    <th>Status</th>
-
-                    <% if(currentUser.UserType=='admin' ){%>
-                      <th>Delete Flag</th>
-                      <%}%>
-                        <th>Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              <% projects.forEach(request=> { %>
-                <tr>
-                  <td>
-                    <%= request.ProjectID || 'Not specified' %>
-                  </td>
-                  <td>
-                    <%=request.ProjectName %>
-                  </td>
-                  <% if (currentUser.UserType=='admin' ) {%>
-                    <td>
-                      <%= request.projectOwnerName || 'Not specified' %>
-                    </td>
-
-                    <%}%>
-                      <td>
-                        <%= request.ProjectType %>
-                      </td>
-                      <td>
-                        <%= photographers[request.ProjectID]|| 'Not specified' %>
-                      </td>
-
-                      <td>
-                        <%= request.ImagingStartDate?.toDateString() %>
-                      </td>
-                      <td>
-                        <%= request.ImagingEndDate?.toDateString()%>
-                      </td>
-                      <td>
-                        <%=request.ProjectStatus %>
-                      </td>
-                      <% if(currentUser.UserType=='admin' ){%>
-                        <td class="<%= !request.IsDeleted  ? 'status-approved' :  'status-rejected'  %>">
-                          <%= request.IsDeleted ? 'Deleted' : 'Active' %>
-                        </td>
-                        <%}%>
-                          <td>
-                            <a href="/project/view/<%= request.ProjectID %>" class="view-btn">View</a>
-                            <a href="/project/edit/<%= request.ProjectID %>" class="edit-btn">Edit</a>
-                            <% if(request.IsDeleted){%>
-                              <form action="/project/restore/<%= request.ProjectID %>" method="POST"
-                                onsubmit="return confirm('Are you sure you want to restore this request?');"
-                                style="display:inline;">
-                                <button type="submit" class="edit-btn">Restore</button>
-                                <%} else {%>
-                                  <form action="/project/delete/<%= request.ProjectID %>" method="POST"
-                                    onsubmit="return confirm('Are you sure you want to delete this request?');"
-                                    style="display:inline;">
-                                    <button type="submit" class="delete-btn">Delete</button>
-                                  </form>
-                                  <%}%>
-                          </td>
-                </tr>
-                <% }) %>
-            </tbody>
-          </table>
-          <% } %>
+          <% if(request.IsDeleted){%>
+          <form action="/project/restore/<%= request.ProjectID %>" method="POST" onsubmit="return confirm('Are you sure you want to restore this request?');" style="display:inline;">
+            <button type="submit" class="edit-btn">Restore</button>
+          </form>
+          <%} else {%>
+          <form action="/project/delete/<%= request.ProjectID %>" method="POST" onsubmit="return confirm('Are you sure you want to delete this request?');" style="display:inline;">
+            <button type="submit" class="delete-btn">Delete</button>
+          </form>
+          <%}%>
+          </td>
+        </tr>
+        <% }) %>
+          </tbody>
+    </table>
+    <% } %>
   </div>
 
   <script>
-    // SweetAlert setup for delete confirmation
-    let table = new DataTable('#dataTable')
+    new DataTable('#dataTable')
     document.querySelectorAll('.delete-btn').forEach(button => {
-      button.addEventListener('click', function (event) {
+      button.addEventListener('click', function(event) {
         event.preventDefault();
         Swal.fire({
           title: 'Are you sure?',

@@ -145,7 +145,7 @@
                         <td <!--
                           class="<%= req.ProjectStatus === 'approved' ? 'status-approved' : req.ProjectStatus === 'rejected' ? 'status-rejected' : '-' %>">
                           -->
-                          <%= req.ProjectStatus || '-' %>
+                          <%= req.ProjectStatus %>
                         </td>
                         <td>
                           <a href="/user/project/view/<%= req.ProjectID %>" class="view-btn">View</a>

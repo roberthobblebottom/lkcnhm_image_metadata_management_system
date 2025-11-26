@@ -123,96 +123,86 @@
 
 <body>
   <div class="main_con">
-    <%- currentUser.UserType=='admin' ? include('../partials/sidenav-admin'): include('../partials/sidenav-user') %>
-      <div id="top-panel">
-        <a href="/media/view-all" class="btn btn-primary">
-          <i class="fas fa-arrow-left"></i> Back to view all media
-        </a>
-        <h2>
-          <%=isEdit==true ? 'Edit' : 'Create' %> Media Metadata Entry
-        </h2>
-      </div>
+    <%- currentUser.UserType=='admin' 
+    ? include('../partials/sidenav-admin')
+    : include('../partials/sidenav-user') %>
 
-      <h4>
-        <%= currentUser.UserType=='admin' ? 'Firstly, Select project owner/photographer pair for Media Entry'
+    <div id="top-panel">
+      <a href="/media/view-all" class="btn btn-primary">
+        <i class="fas fa-arrow-left"></i> Back to view all media
+      </a>
+      <h2>
+        <%=isEdit==true ? 'Edit' : 'Create' %> Media Metadata Entry
+      </h2>
+    </div>
+
+    <h4>
+      <%= currentUser.UserType=='admin' ? 'Firstly, Select project owner/photographer pair for Media Entry'
           : " Firstly, Select the project that you are the photographer with for Media Entry if there are any others" %>
-      </h4>
-      <% if (isEdit) { %>
-        <h4> Or, continue with this current project</h4>
-        <h4>Project ID:<%=currentProject.ProjectID%>, Project
-            Name:
-            <%=currentProject.ProjectName%>, Photographer: <%=currentProject.FullName%>
-                <a href="/media/create-or-edit-for-project/<%=mediaID%>/<%=currentProject.ProjectID%>"
-                  class="btn-choose">continue</a>
-        </h4>
-        <%}%>
+    </h4>
 
-          <% if (users.length===0) { %>
-            <p class="no-data">No projects found.</p>
-            <% } else { %>
+    <% if (isEdit) { %>
+    <h4> Or, continue with this current project</h4>
+    <h4>
+      Project ID:<%=currentProject.ProjectID%>, Project Name:
+      <%=currentProject.ProjectName%>, Photographer: <%=currentProject.FullName%>
+      <a href="/media/create-or-edit-for-project/<%=mediaID%>/<%=currentProject.ProjectID%>" class="btn-choose">
+        continue
+      </a>
+    </h4>
+    <%}%>
 
-
-              <table id="dataTable">
-                <thead>
-                  <tr>
-                    <th>Project ID</th>
-                    <th>Project Name</th>
-                    <th>Project Owner Full Name</th>
-                    <% if (currentUser.UserType=='admin' ){%>
-                      <th>Photographer</th>
-                      <%}%>
-                        <th>Start Date</th>
-                        <th>End Date</th>
-                        <th>Action</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <% users.forEach(row=> { if(row.ProjectID !=currentProject.ProjectID){ %>
-                    <tr>
-                      <td>
-                        <%= row.ProjectID %>
-                      </td>
-                      <td>
-                        <%=row.ProjectName%>
-                      </td>
-                      <td>
-                        <%= row.projectOwnerName %>
-                      </td>
-
-                      <% if (currentUser.UserType=='admin' ){%>
-                        <td>
-                          <%= row.photographerName %>
-                        </td>
-                        <%}%>
-                          <td>
-                            <%= row.ImagingStartDate.toISOString().slice(0, 10) %>
-                          </td>
-                          <td>
-                            <%= row.ImagingEndDate.toISOString().slice(0, 10) %>
-                          </td>
-                          <td>
-                            <% if(isEdit){%>
-                              <a href="/media/create-or-edit-for-project/<%=mediaID%>/<%=row.ProjectID%>"
-                                class="btn-choose"> edit </a>
-                              <%} else{%>
-                                <a href="/media/create-or-edit-for-project/create-mode/<%= row.ProjectID %>/"
-                                  class="btn-choose">add
-                                  one</a>
-                                <a href="/media/upload-bulk-metadata/<%= row.ProjectID %>/<%= row.PhotographerID%>"
-                                  class="btn-choose">add
-                                  many</a>
-                                <%}%>
-                          </td>
-                    </tr>
-                    <%}}) %>
-                </tbody>
-              </table>
-
-              <% } %>
-
+    <% if (users.length===0) { %>
+    <p class="no-data">No projects found.</p>
+    <% } else { %>
+    <table id="dataTable">
+      <thead>
+        <tr>
+          <th>Project ID</th>
+          <th>Project Name</th>
+          <th>Project Owner Full Name</th>
+          <% if (currentUser.UserType=='admin' ){%>
+          <th>Photographer</th>
+          <%}%>
+          <th>Start Date</th>
+          <th>End Date</th>
+          <th>Action</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% users.forEach(row=> { if(row.ProjectID !=currentProject.ProjectID){ %>
+        <tr>
+          <td> <%= row.ProjectID %></td>
+          <td><%=row.ProjectName%></td>
+          <td><%= row.projectOwnerName %></td>
+          <% if (currentUser.UserType=='admin' ){%>
+          <td> <%= row.photographerName %></td>
+          <%}%>
+          <td><%= row.ImagingStartDate.toISOString().slice(0, 10) %></td>
+          <td><%= row.ImagingEndDate.toISOString().slice(0, 10) %></td>
+          <td>
+            <% if(isEdit){%>
+            <a href="/media/create-or-edit-for-project/<%=mediaID%>/<%=row.ProjectID%>" class="btn-choose">
+              edit
+            </a>
+            <%} else {%>
+            <a href="/media/create-or-edit-for-project/create-mode/<%= row.ProjectID %>/" class="btn-choose">
+              add one
+            </a>
+            <a href="/media/upload-bulk-metadata/<%= row.ProjectID %>/<%= row.PhotographerID%>" class="btn-choose">
+              add many
+            </a>
+            <%}%>
+          </td>
+        </tr>
+        <%}}) %>
+            </tbody>
+    </table>
+    <% } %>
   </div>
 </body>
 <script>
   new DataTable('#dataTable')
 </script>
+
 </html>
