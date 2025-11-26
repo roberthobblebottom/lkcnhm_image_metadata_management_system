@@ -232,7 +232,7 @@
                 <input type="hidden" name="photographerID" id="photographerID" value="<%= photographerID %>">
                 <h3>File (CSV only):</h3> <input id="fileInput" type="file" name="bulk-metadata" accept=".csv" />
                 </br>
-                <input type="submit" class="btn" value="Upload"></input>
+                <input type="submit" class="btn" id="submitButton" value="Upload"></input>
             </form>
 
     </div>
@@ -242,41 +242,61 @@
             form.addEventListener('submit', async (e) => {
                 // const formdata = new FormData(form);
                 e.preventDefault()
-                const formData = new FormData(form)
-                const response = await fetch('/media/upload-bulk-metadata/<%=projectID%>/<%=photographerID%>', {
-                    method: 'POST',
-                    enctype: "multipart/form-data",
-                    body: formData
-                });
-                console.log(response)
-                if (!response.ok) {
-                    const errorData = await response.json();
-                    throw new Error(errorData.message || "Submission failed with status " + response.status);
+                const submitBtn = document.getElementById('submitButton');
+                var data = null
+                try {
+                    const formData = new FormData(form)
+                    const response = await fetch('/media/upload-bulk-metadata/<%=projectID%>/<%=photographerID%>', {
+                        method: 'POST',
+                        enctype: "multipart/form-data",
+                        body: formData
+                    });
+                    submitBtn.value = '<i class="fas fa-spinner"></i> Submitting...';
+                    submitBtn.disabled = true;
+                    console.log(response)
+                    if (!response.ok) {
+                        const errorData = await response.json();
+                        throw new Error(errorData.message || "Submission failed with status " + response.status);
+                    }
+                    console.log('before await res json')
+                    data = await response.json();
+                    console.log(data)
+
+                    if (!data.success)
+                        throw new Error(data.message || "Submission failed");
+
+
+                    // Show success message
+                    await Swal.fire({
+                        title: 'Success!',
+                        text: 'CSV metadata upload is successfully!',
+                        icon: 'success',
+                        confirmButtonText: 'OK',
+                        confirmButtonColor: '#28a745',
+                        timer: 1000,
+                        timerProgressBar: true
+                    });
+                    // Redirect if URL is provided
+                    if (data.redirectUrl) {
+                        window.location.href = data.redirectUrl;
+                        return; // Stop further execution
+                    }
+
+                    // Reset form (if no redirection)
+                    form.reset();
+                } catch (error) {
+                    await Swal.fire({
+                        title: 'Error!',
+                        text: error.message,
+                        icon: 'error',
+                        confirmButtonText: 'OK',
+                        confirmButtonColor: '#dc3545'
+                    });
+                } finally {
+                    submitBtn.disabled = false;
+                    submitBtn.value = "Upload"
                 }
 
-                const data = await response.json();
-                if (!data.success)
-                    throw new Error(data.message || "Submission failed");
-
-
-                // Show success message
-                await Swal.fire({
-                    title: 'Success!',
-                    text: 'CSV metadata upload is successfully!',
-                    icon: 'success',
-                    confirmButtonText: 'OK',
-                    confirmButtonColor: '#28a745',
-                    timer: 1000,
-                    timerProgressBar: true
-                });
-                // Redirect if URL is provided
-                if (data.redirectUrl) {
-                    window.location.href = data.redirectUrl;
-                    return; // Stop further execution
-                }
-
-                // Reset form (if no redirection)
-                form.reset();
             });
         });
     </script>

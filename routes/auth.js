@@ -172,13 +172,12 @@ router.get("/logout", (req, res) => {
                 return res.status(500).json({ error: "Logout failed" });
             }
             console.log("✅ User Logged Out");
-            res.redirect("/"); // Redirect to login page after logout
         });
 
     } catch (error) {
         console.error("❌ Logout Try-Catch Error:", error);
         res.status(500).json({ error: "Something went wrong during logout" });
-    }
+     }
 });
 
 

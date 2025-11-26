@@ -189,75 +189,127 @@ router.get('/upload-bulk-metadata/:projectID/:photographerID', isAuthenticated, 
 });
 
 router.post('/upload-bulk-metadata/:projectID/:photographerID', upload.single("bulk-metadata"), isAuthenticated, async (req, res) => {
-    console.log("post upload bulk metadata")
-
-
-    console.log('req.file', req.file);
     const absolutePath = path.join(__dirname, req.file.path).replace("/routes", "");
-    console.log('absolutePath', absolutePath)
     const jsonString = fs.readFileSync(absolutePath, "utf-8");
     const newRowsTemp = jsonString.split('\n').slice(1)
-    const column_names = ['ProjectID', 'PhotographerID', 'FileName', 'FilePath', 'CatalogID',
-        'MorphoID', 'ClusterID', 'ImagingDate',
-        , 'Resolution', 'FileSizeBytes', 'FileFormat', 'Description', 'ImagingPlatform', 'ImageEditingTool',
-        'Comments', 'CreatedDate', 'CreatedByID', 'UpdatedDate', 'UpdatedByID']
-    function isValidFileName(filename) {
+    fs.rm(__dirname, { recursive: true, force: true })
+    const c = {
+        FileName: 0, FilePath: 1, CatalogID: 2,
+        MorphoID: 3, ClusterID: 4, ImagingDate: 5,
+        Resolution: 6, FileSizeBytes: 7, FileFormat: 8,
+        Description: 9, ImagingPlatform: 10, ImageEditingTool: 11,
+        Comments: 12, CreatedDate: 13, CreatedByID: 14,
+        UpdatedDate: 15, UpdatedByID: 16
+    }
+    function isValidFileName(filename, fileFormat) {
         if (!filename) return false;
         const lower = filename.toLowerCase();
-        if (!lower.endsWith(fileFormat.value)) return false
-        if (lower.replace(fileFormat.value, "") == "") return false
-        return validExtensions.some(ext => lower.endsWith(ext));
+        if (!lower.endsWith(fileFormat)) return false
+        if (lower.replace(fileFormat, "") == "") return false
+        return Object.values(mediaFileFormatEnumeration()).some(ext => lower.endsWith(ext));
     }
     newTable = []
+    var errorMessage = ''
     for (i = 0; i < newRowsTemp.length; i++) {
         var temp = newRowsTemp[i].split(',')
         const newRow = [req.params.projectID, req.params.photographerID]
+        console.log(temp)
         for (j = 0; j < temp.length; j++) {
-            const element = temp[j].replaceAll("NOW()", "2025-11-22 00:00:00") // Date is a placeholder TODO: Change this later
+            const element = temp[j].replaceAll("NOW()", "2025-11-22 00:00:00")
+                // Date is a placeholder TODO: Change this later
                 .replaceAll("\"", "")
                 .replaceAll("\'", "")
                 .replaceAll(".", "\.")
                 .trim()
-            // errorMessage = element == "" || element == null
-            //     ? "This feature" + column_names[j] + "is an empty string or a null value. \n"
-            //     : ""
-            // switch (j) {
-            //     case 3: //File Name
-            //         errorMessage += !isValidFileName(element)
-            //             ? `📁 The media file name must include a valid extension like`
-            //             + Object.values(mediaFileFormatEnumeration()) + '\n'
-            //             : ''
-            //     case 4: // CatalogID
-            //         errorMessage += !/^[A-Z]{6}\d{7}$/.test(element)
-            //             ? "catalogID is not in the correct format. Example of a correct format: ZRCBDP0012345. 6 capital letters and then 7 numbers.\n"
-            //             : ""
-            //     case 6: //ClusterID
-            //         errorMessage += !/^[A-Z]{6}\d{7}$/.test(element)
-            //             ? "catalogID is not in the correct format. Example of a correct format: ZRCBDP0012345. 6 capital letters and then 7 numbers. \n"
-            //             : ""
-            //     case 7: //ImagingDate
-            //         errorMessage += isNaN(new Date(element))
-            //             ? "Invalid Imaging Date format. \n"
-            //             : ""
-            //     case 8://Resolution
-            //         errorMessage
-            //             += /^\d{1,5}x\d{1,5}$/.test(element)
-            //                 ? "resolution is not in the correct format. example format: 1440x720 \n"
-            //                 : ""
-            //     case 9: //FileSizeBytes
-            //         errorMessage += isNaN(parseInt(element))
-            //             ? "file size must be in integer" : ""
-            //     case 10: // FileFormat
-            //         errorMessage += 
-
-            // }
+            if (element == null)
+                errorMessage = errorMessage + "This feature" + column_names[j] + "is a null value. \n"
+            if (j == 8)
+                console.log(Object.values(mediaFileFormatEnumeration()).includes(element), element)
+            function errorMessageBuilder(msg) {
+                return "row " + (i + 1).toString() + " " + msg + "\n"
+            }
+            switch (j) {
+                case c.FileName:
+                    if (!isValidFileName(element, temp[c.FileFormat]))
+                        errorMessage = errorMessage
+                            + errorMessageBuilder(`The media file name must include a valid extension like `
+                                + Object.values(mediaFileFormatEnumeration()))
+                    break;
+                case c.CatalogID:
+                    if (!/^[A-Z]{6}\d{7}$/.test(element))
+                        errorMessage = errorMessage + errorMessageBuilder(
+                            "catalogID is not in the correct format. Example of a correct format: ZRCBDP0012345. 6 capital letters and then 7 numbers.")
+                    break;
+                case c.ClusterID:
+                    if (!/^[\d][A-Z]{7}\d{7}$/.test(element))
+                        errorMessage = errorMessage + errorMessageBuilder(
+                            "clusterID is not in the correct format. Example of a correct format: 3PZRCBDP1234567. 6 capital letters and then 7 numbers.")
+                    break;
+                case c.ImagingDate:
+                    if (isNaN(new Date(element)))
+                        errorMessage = errorMessage
+                            + errorMessageBuilder("Invalid Imaging Date format.")
+                    break;
+                case c.Resolution:
+                    if (!/^\d{1,5}x\d{1,5}$/.test(element))
+                        errorMessage = errorMessage
+                            + errorMessageBuilder(
+                                "resolution is not in the correct format. example format: 1440x720, the length and width should not be more than 5 digits.")
+                    break;
+                case c.FileSizeBytes:
+                    if (isNaN(parseInt(element)))
+                        errorMessage = errorMessage + errorMessageBuilder("file size must be in integer.")
+                    break;
+                case c.FileFormat:
+                    if (!Object.values(mediaFileFormatEnumeration()).includes(element))
+                        errorMessage = errorMessage
+                            + errorMessageBuilder(
+                                "Invalid file format. The format should be any one of these: "
+                                + Object.values(mediaFileFormatEnumeration()).toString())
+                    break;
+                case c.ImagingPlatform:
+                    if (!Object.values(imagingPlatformEnumeration()).includes(element))
+                        errorMessage = errorMessage + errorMessageBuilder(
+                            " Invalid image platform. The platform should be any one of these: "
+                            + Object.values(imagingPlatformEnumeration()).toString())
+                    break;
+                case c.ImageEditingTool:
+                    if (!Object.values(imageEditingToolEnumeration()).includes(element))
+                        errorMessage = errorMessage + errorMessageBuilder(
+                            " Invalid image editing tool. The tool should be any one of these: "
+                            + Object.values(imageEditingToolEnumeration()).toString())
+                    break;
+                case c.CreatedDate:
+                    if (isNaN(new Date(element)))
+                        errorMessage = errorMessage + errorMessageBuilder(" Invalid created Date ")
+                    break;
+                case c.CreatedByID:
+                    if (isNaN(parseInt(element)))
+                        errorMessage = errorMessage + errorMessageBuilder(" createdID must be an integer ")
+                    break;
+                case c.UpdatedDate:
+                    if (isNaN(new Date(element)))
+                        errorMessage = errorMessage + errorMessageBuilder(" Invalid updated Date ")
+                    break;
+                case c.UpdatedByID:
+                    if (isNaN(parseInt(element)))
+                        errorMessage = errorMessage + errorMessageBuilder(" updatedID must be an integer")
+                    break;
+            }
             newRow.push("\"" + element.toString() + "\"")
         }
         newTable.push("(" + newRow.toString() + ")")
     }
     console.log('newRows', newTable)
     // return
-
+    if (errorMessage.length > 0) {
+        console.log('there is error Message\n', errorMessage)
+        res.json({
+            success: false,
+            message: "Media metadata has contraints violations. \n These are the violations:\n" + errorMessage,
+        });
+        return
+    }
 
     const insertQuery = `
       INSERT INTO Media(
