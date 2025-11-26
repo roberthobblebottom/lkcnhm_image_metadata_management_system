@@ -8,7 +8,7 @@ const crypto = require('crypto');
 const userTypesEnumeration = require('../middleware/utils').userTypesEnumeration;
 passport.use(new LocalStrategy(async function verify(username, password, cb) {
     //Do not change the variable name from username to email, it doesn't work.
-    const query = "SELECT * FROM User WHERE Email = ?";
+    const query = "SELECT PasswordSalt, HashedPassword, UserID,UserType,FullName,Email FROM User WHERE Email = ?";
     const [result] = await db.promise().query(query, [username]).catch(
         error => {
 
