@@ -175,7 +175,6 @@ router.post('/upload-bulk-metadata/:projectID/:photographerID', upload.single("b
     const absolutePath = path.join(__dirname, req.file.path).replace("/routes", "");
     const jsonString = fs.readFileSync(absolutePath, "utf-8");
     const newRowsTemp = jsonString.split('\n').slice(1)
-    fs.rm(__dirname, { recursive: true, force: true })
     const c = {
         FileName: 0, FilePath: 1, CatalogID: 2,
         MorphoID: 3, ClusterID: 4, ImagingDate: 5,
