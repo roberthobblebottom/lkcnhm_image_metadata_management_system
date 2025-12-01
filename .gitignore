@@ -9,4 +9,5 @@ node_modules/
 *.png*
 *.raw
 .~*
+*.venv*
 pipeline/output.csv
