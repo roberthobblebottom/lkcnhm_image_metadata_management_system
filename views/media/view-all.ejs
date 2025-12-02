@@ -118,7 +118,7 @@
   <div class="main_con">
     <%- currentUser.UserType=='admin' ? include('../partials/sidenav-admin'): include('../partials/sidenav-user') %>
 
-    <a href="/media/select-user-for/create-mode/none/" class="btn">Add Media(s)</a>
+    <a href="/media/create-or-edit-for-project/create-mode/" class="btn">Add Media(s)</a>
     <%if (currentUser.UserType=='admin' ){%>
     <h2>All Photography Metadata Records</h2>
     <%} else {%>
@@ -165,7 +165,7 @@
           <%}%>
           <td class="action-btns">
             <a href="/media/view/<%= record.MediaID %>"><button class="btn-view">View</button></a>
-          <a href="/media/select-user-for/<%=record.MediaID%>/<%=record.ProjectID%>"><button class="btn-edit">Edit</button></a>
+          <a href="/media/create-or-edit-for-project/<%=record.MediaID%>"><button class="btn-edit">Edit</button></a>
 
           <%if (!record.IsDeleted ){%>
           <form action="/media/delete/<%= record.MediaID %>" method="POST" style="display:inline;" onsubmit="return confirm('Are you sure you want to delete this media record?');">

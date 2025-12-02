@@ -6,16 +6,19 @@ import polars as pl
 from polars import lit, col, when
 from os.path import isdir, getsize
 from glob import glob
+import configparser
 # from PIL import ExifTags
 
 # IFD_CODE_LOOKUP = {i.value: i.name for i in ExifTags.IFD}
 
 
-def recursion(path, project_name, photographer_name, output):
+def recursion(path, output, photographerID):
     for file_or_folder_path in glob(path + "/*"):
         if isdir(file_or_folder_path):
             return recursion(
-                file_or_folder_path, project_name, photographer_name, output
+                file_or_folder_path,
+                output,
+                photographerID,
             )
         if file_or_folder_path.split(".")[-1] not in ["tiff", "raw", "tif", "jpg"]:
             print("not an image")
@@ -25,6 +28,7 @@ def recursion(path, project_name, photographer_name, output):
         exifData = Image.open(file_or_folder_path).getexif()
 
         new_row = {}
+        new_row["PhotographerID"] = photographerID
         new_row["FilePath"] = file_or_folder_path
         new_row["FileName"] = file_or_folder_path.split("/")[-1]
 
@@ -39,8 +43,6 @@ def recursion(path, project_name, photographer_name, output):
         new_row["FileFormat"] = "." + part_with_fileFormat[1]
 
         new_row["FileSizeBytes"] = getsize(file_or_folder_path)
-        new_row["ProjectName"] = project_name
-        new_row["PhotographerName"] = photographer_name
 
         f = [
             "DateTime",
@@ -75,8 +77,7 @@ def recursion(path, project_name, photographer_name, output):
                 "FileName",
                 "FilePath",
                 "FileSizeBytes",
-                "ProjectName",
-                "PhotographerName",
+                "PhotographerID",
                 "DateTime",
                 "ImagingEditingTool",
                 "ImageWidth",
@@ -90,23 +91,30 @@ def recursion(path, project_name, photographer_name, output):
         output.append(new_row)
 
 
-if __name__ == "__main__":
+def main():
     pl.Config.set_tbl_rows(100)
     pl.Config.set_tbl_cols(100)
     start = timer()
     output = []
     dir = "./*"
-    # First two for loops is to find the two folders
-    # which will later be extracted for the project name and photographer name pairs
-    for f1 in [x for x in glob(dir) if isdir(x)]:
-        for f2 in [x for x in glob(f1 + "/*") if isdir(x)]:
-            for f3 in glob(f2 + "/*"):
-                recursion(
-                    path=f3,
-                    project_name=f1.split("/")[1],
-                    photographer_name=f2.split("/")[2],
-                    output=output,
-                )
+    config = configparser.ConfigParser()
+    config.read("config.ini")
+    try:
+        photographerID = int(config["DEFAULT"]["photographerID"])
+    except Exception:
+        print("Error, photographerID is not an integer. Exiting")
+        return
+
+    if photographerID <= 0:
+        print("Error: photographerID can only be a positive integer. Exiting... ")
+        return
+
+    for f3 in glob(dir):
+        recursion(
+            path=f3,
+            output=output,
+            photographerID=photographerID,
+        )
 
     stop = timer()
     print("estimated time taken ", timedelta(seconds=stop - start))
@@ -128,3 +136,7 @@ if __name__ == "__main__":
     )
     print(df.head())
     df.write_csv("output.csv")
+
+
+if __name__ == "__main__":
+    main()

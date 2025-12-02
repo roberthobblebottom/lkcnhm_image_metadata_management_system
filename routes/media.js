@@ -62,99 +62,101 @@ router.get('/view-all', isAuthenticated, (req, res) => {
         }
     });
 });
+//OLD
+// router.get('/select-user-for/:mediaID/:projectID', isAuthenticated, async (req, res) => {
+//     const mediaID = req.params.mediaID;
+//     const projectID = req.params.projectID;
+//     const isEdit = mediaID != 'create-mode';
+//     const baseQuery = `
+//             SELECT 
+//                 p.ProjectID,
+//                 p.ProjectName,
+//                 u.UserID AS user_id,
+//                 u.FullName AS projectOwnerName,
+//                 u.Email AS projectOwnerEmail,
+//                 u.ContactNumber,
+//                 u.Organisation,
+//                 p.ImagingStartDate,
+//                 p.ImagingEndDate
+//             FROM Project p
+//             JOIN User u ON p.ProjectOwnerID = u.UserID
+//             WHERE 
+//                 u.IsDeleted = 0 AND 
+//                 p.IsDeleted = 0 AND
+//       `;
 
-router.get('/select-user-for/:mediaID/:projectID', isAuthenticated, async (req, res) => {
+//     const currentProjectQuery = `SELECT p.ProjectID, 
+//                         p.ProjectName,
+//                         p.ProjectID
+//                         FROM Project p
+//                         WHERE p.ProjectID = ?  `;
+//     const currentProject = isEdit
+//         ? await db.promise().query(currentProjectQuery, [projectID])
+//         : null;
+//     const query = req.session.passport.user.UserType != userTypesEnumeration().admin
+//         ? baseQuery + " AND photographer.UserID = " + req.session.passport.user.UserID
+//         : baseQuery
+//     const query2 = isEdit
+//         ? query + " AND photographer.UserID !=" + currentProject[0][0].photographerID
+//         : query
+//     const users = (await db.promise().query(query2))[0];
+//     console.log('isEdit', isEdit)
+//     res.render('media/user-list', {
+//         users: users,
+//         currentUser: req.session.passport.user,
+//         title: 'Media Image List',
+//         isEdit: isEdit,
+//         mediaID: mediaID,
+//         currentProject: mediaID != 'create-mode' ? currentProject[0][0] : ""
+//     });
+
+// });
+
+
+
+router.get('/create-or-edit-for-project/:mediaID/', isAuthenticated, async (req, res) => {
     const mediaID = req.params.mediaID;
-    const projectID = req.params.projectID;
-    const isEdit = mediaID != 'create-mode';
-    const baseQuery = `
-            SELECT 
-                p.ProjectID,
-                p.ProjectName,
-                u.UserID AS user_id,
-                u.FullName AS projectOwnerName,
-                u.Email AS projectOwnerEmail,
-                u.ContactNumber,
-                u.Organisation,
-                photographer.FullName as photographerName,
-                photographer.Email as photographerEmail,
-                photographer.UserID as PhotographerID,
-                p.ImagingStartDate,
-                p.ImagingEndDate
-            FROM Project p
-            JOIN User u ON p.ProjectOwnerID = u.UserID
-            JOIN ProjectUserPhotographyLink pupl ON pupl.ProjectID = p.ProjectID
-            JOIN User photographer ON pupl.PhotographerID = photographer.UserID  
-            WHERE 
-                u.IsDeleted = 0 AND 
-                p.IsDeleted = 0 AND
-                photographer.IsDeleted = 0
-      `;
-
-    const currentProjectQuery = `SELECT p.ProjectID, 
-                        p.ProjectName,
-                        photographer.FullName, 
-                        photographer.UserID photographerID
-                        FROM Project p
-                        JOIN ProjectUserPhotographyLink pupl ON pupl.ProjectID = p.ProjectID
-                        JOIN User photographer ON pupl.PhotographerID = photographer.UserID
-                        WHERE p.ProjectID = ?  `;
-    const currentProject = isEdit
-        ? await db.promise().query(currentProjectQuery, [projectID])
-        : null;
-    const query = req.session.passport.user.UserType != userTypesEnumeration().admin
-        ? baseQuery + " AND photographer.UserID = " + req.session.passport.user.UserID
-        : baseQuery
-    const query2 = isEdit
-        ? query + " AND photographer.UserID !=" + currentProject[0][0].photographerID
-        : query
-    const users = (await db.promise().query(query2))[0];
-    console.log('isEdit', isEdit)
-    res.render('media/user-list', {
-        users: users,
-        currentUser: req.session.passport.user,
-        title: 'Media Image List',
-        isEdit: isEdit,
-        mediaID: mediaID,
-        currentProject: mediaID != 'create-mode' ? currentProject[0][0] : ""
-    });
-
-});
-
-
-
-router.get('/create-or-edit-for-project/:mediaID/:projectID/', isAuthenticated, async (req, res) => {
-    const projectID = req.params.projectID;
-    const mediaID = req.params.mediaID;
-    const query = `
-      SELECT 
-        p.ProjectID,
-        p.ProjectOwnerID,
-        projectOwner.FullName AS projectOwnerName,
-        photographer.Email AS photographerName,
-        photographer.UserID AS PhotographerID 
-      FROM Project p
-      JOIN User projectOwner ON p.ProjectOwnerID = projectOwner.UserID
-      JOIN ProjectUserPhotographyLink pupl ON pupl.ProjectID = p.ProjectID
-      JOIN User photographer ON pupl.PhotographerID = photographer.UserID  
-      WHERE p.ProjectID = ? AND p.IsDeleted = 0
-    `;
+    const allPhotographersQuery = `
+    SELECT FullName, UserID, UserType FROM User WHERE IsDeleted = 0;
+  `;
+    const allPhotographers = (await db.promise().query(allPhotographersQuery))[0];
+    const allProjects = (await db.promise().query("SELECT * FROM Project WHERE IsDeleted = 0"))[0]
 
     //For EDIT
-    const currentMediaQuery = mediaID != 'create-mode' ? 'SELECT * FROM Media WHERE Media.MediaID = ' + mediaID : '';
-    const projects = (await db.promise().query(query, [projectID]))[0][0];
-    const currentMedia = mediaID != 'create-mode' ? (await db.promise().query(currentMediaQuery))[0][0] : "create-mode";
-    // const ImagingEditingTools = ()[0]
-    console.log(projects)
-    console.log('currentMedia', currentMedia)
+    const currentMediaQuery = `SELECT Media.*,
+        projectOwner.FullName projectOwnerName,Project.ProjectName , projectOwner.UserID
+        FROM Media
+        JOIN Project ON Media.ProjectID = Project.ProjectID
+        JOIN User projectOwner ON Project.ProjectOwnerID = projectOwner.UserID
+        WHERE Media.MediaID = ` + mediaID;
+    const toBeEditedMedia = mediaID != 'create-mode'
+        ? (await db.promise().query(currentMediaQuery))[0][0] : "create-mode";
+
+    const toBeEditedPhotographerQuery = `
+                SELECT FullName, UserID
+                FROM User
+                JOIN ProjectUserPhotographyLink pupl
+                ON pupl.PhotographerID = User.UserID
+                WHERE IsDeleted = 0
+                AND User.UserID = 
+                `+ toBeEditedMedia.PhotographerID;
+    const toBeEditedPhotographer = mediaID != 'create-mode'
+        ? (await db.promise().query(toBeEditedPhotographerQuery))[0][0]
+        : "create-mode";
+
+    console.log('currentMedia', toBeEditedMedia)
     res.render('media/create-or-edit', {
         currentUser: req.session.passport.user,
         imageEditingTools: req.session['imageEditingTools'],
         imagingPlatforms: Object.values(imagingPlatformEnumeration()),
+        allPhotographers,
+        allProjects,
         fileFormats: Object.values(mediaFileFormatEnumeration()),
-        currentMedia,
-        imagingDate: currentMedia != 'create-mode' ? formatDisplayDate(currentMedia.ImagingDate) : '',
-        project: projects,  // contains projectID, photographerId, projectOwnerId + names
+        toBeEditedMedia,
+        toBeEditedPhotographer,
+        toBeEditedImagingDate: toBeEditedMedia != 'create-mode'
+            ? formatDisplayDate(toBeEditedMedia.ImagingDate)
+            : new Date(),
         title: 'Media Form'
     });
 });
@@ -171,7 +173,10 @@ router.get('/upload-bulk-metadata/:projectID/:photographerID', isAuthenticated, 
     });
 });
 
-router.post('/upload-bulk-metadata/:projectID/:photographerID', upload.single("bulk-metadata"), isAuthenticated, async (req, res) => {
+router.post('/upload-bulk-metadata/:projectID/:photographerID',
+    upload.single("bulk-metadata"),
+    isAuthenticated,
+    async (req, res) => {
     const absolutePath = path.join(__dirname, req.file.path).replace("/routes", "");
     const jsonString = fs.readFileSync(absolutePath, "utf-8");
     const newRowsTemp = jsonString.split('\n').slice(1)
@@ -418,10 +423,10 @@ router.post('/create', isAuthenticated, async (req, res) => {
         if (newImageEditingTool != null && !req.session['imageEditingTools'].includes(newImageEditingTool))
             await db.promise().query(
                 "ALTER TABLE Media MODIFY COLUMN `ImageEditingTool` enum('"
-            +req.session['imageEditingTools'].join("','")+
-                "','"+newImageEditingTool+"')")
-            const [result] = await db.promise().query(insertQuery, values);
-            req.session["imageEditingTools"].push(newImageEditingTool)
+                + req.session['imageEditingTools'].join("','") +
+                "','" + newImageEditingTool + "')")
+        const [result] = await db.promise().query(insertQuery, values);
+        req.session["imageEditingTools"].push(newImageEditingTool)
 
         console.log("✅ Media submitted successfully, ID:", result.insertId);
 
@@ -474,7 +479,7 @@ router.get('/view/:mediaId', isAuthenticated, (req, res) => {
                 message: 'Media record not found'
             });
         }
-        
+
         res.render('media/view', {
             currentUser: req.session.passport.user,
             media: results[0], // Since we're querying by ID, we'll only get one record
@@ -504,7 +509,9 @@ router.post('/edit', isAuthenticated, (req, res) => {
         ImageEditingTool = ?,
         Comments = ?,
         UpdatedDate = NOW(),
-        UpdatedByID = ?
+        UpdatedByID = ?,
+        ProjectID =?,
+        PhotographerID = ?
         WHERE MediaID = ?
                 `;
     const updatedBy = req.session.passport.user.UserID;
@@ -523,7 +530,9 @@ router.post('/edit', isAuthenticated, (req, res) => {
         mediaData.imageEditingTool,
         mediaData.comments,
         updatedBy, // current user making the update
-        mediaData.MediaID
+        mediaData.MediaID,
+        mediaData.projectID,
+        mediaData.photographerID
     ];
     console.log('mediaData', mediaData)
     console.log('params', params)
