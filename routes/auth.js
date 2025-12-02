@@ -129,7 +129,6 @@ router.post("/login",
                             .replaceAll("enum(", "")
                             .replaceAll("'", "")
                             .split(",")
-                        console.log(ip.at(-1))
                         ip.splice(ip.length - 1,1, ip.at(-1).replace(")",""))
                         req.session['imagingPlatforms'] = ip
                         console.log('imagingPlatforms', req.session['imagingPlatforms'])

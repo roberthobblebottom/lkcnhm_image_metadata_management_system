@@ -485,8 +485,8 @@
           });
         } else {
           console.log(form.imageEditingTool.value)
-          imagingPlatforms = "<%=ImagingPlatforms%>"
-          imagingEditingTools = "<%=imagingEditingTools>"
+          imagingPlatforms = "<%=imagingPlatforms%>"
+          imageEditingTools = "<%=imageEditingTools%>"
           const formData = JSON.stringify({
             ProjectID: form.ProjectID.value,
             ProjectOwnerID: form.ProjectOwnerID.value,
@@ -503,8 +503,8 @@
             description: form.description.value,
             imagingPlatform: form.imagingPlatform.value,
             imageEditingTool: form.imageEditingTool.value,
-            newImagingPlatform: (!imagingPlatforms.include(formimagePlatform.value)) ? form.imagingPlatform.value : null,
-            newImagingEditingTool: (!imagingEditingTools.include(formimageEditingTool.value)) ? form.imagingEditingTool.value : null,
+            newImagingPlatform: (!imagingPlatforms.includes(form.imagingPlatform.value)) ? form.imagingPlatform.value : null,
+            newImageEditingTool: (!imageEditingTools.includes(form.imageEditingTool.value)) ? form.imageEditingTool.value : null,
             comments: form.comments.value,
             MediaID: form.MediaID.value
           })

@@ -56,6 +56,7 @@ def recursion(path, project_name, photographer_name, output):
             if tagname in f:
                 value = exifData.get(tagid)
                 value = value.hex().decode() if isinstance(value, bytes) else value
+                value = value.split(" ")[0] if tagname == "DateTime" else value
                 new_row[tagname] = str(value)
 
             # if type(value) is bytes:
@@ -117,9 +118,9 @@ if __name__ == "__main__":
             .then(pl.concat_str(col("ImageLength"), lit("x"), col("ImageWidth")))
             .otherwise(lit("")),
             DateTime=col("DateTime").str.to_datetime(
-                "%Y:%m:%d %H:%M:%S", ambiguous="null", strict=False
+                "%Y:%m:%d", ambiguous="null", strict=False
             ),
-            ImagingPlatform=when((col("Make") != "") | (col("Model") != ""))
+            imagingPlatform=when((col("Make") != "") | (col("Model") != ""))
             .then(pl.concat_str(col("Make"), lit(" "), col("Model")))
             .otherwise(lit("")),
         )

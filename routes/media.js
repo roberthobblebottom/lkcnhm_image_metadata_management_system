@@ -149,7 +149,7 @@ router.get('/create-or-edit-for-project/:mediaID/:projectID/', isAuthenticated, 
     console.log('currentMedia', currentMedia)
     res.render('media/create-or-edit', {
         currentUser: req.session.passport.user,
-        imageEditingTools: Object.values(imageEditingToolEnumeration()),
+        imageEditingTools: req.session['imageEditingTools'],
         imagingPlatforms: Object.values(imagingPlatformEnumeration()),
         fileFormats: Object.values(mediaFileFormatEnumeration()),
         currentMedia,
@@ -179,7 +179,7 @@ router.post('/upload-bulk-metadata/:projectID/:photographerID', upload.single("b
         FileName: 0, FilePath: 1, CatalogID: 2,
         MorphoID: 3, ClusterID: 4, ImagingDate: 5,
         Resolution: 6, FileSizeBytes: 7, FileFormat: 8,
-        Description: 9, ImagingPlatform: 10, ImageEditingTool: 11,
+        Description: 9, imagingPlatform: 10, ImageEditingTool: 11,
         Comments: 12, CreatedDate: 13, CreatedByID: 14,
         UpdatedDate: 15, UpdatedByID: 16
     }
@@ -248,7 +248,7 @@ router.post('/upload-bulk-metadata/:projectID/:photographerID', upload.single("b
                                 "Invalid file format. The format should be any one of these: "
                                 + Object.values(mediaFileFormatEnumeration()).toString())
                     break;
-                case c.ImagingPlatform:
+                case c.imagingPlatform:
                     if (!Object.values(imagingPlatformEnumeration()).includes(element))
                         errorMessage = errorMessage + errorMessageBuilder(
                             " Invalid image platform. The platform should be any one of these: "
@@ -342,7 +342,7 @@ router.post('/create', isAuthenticated, async (req, res) => {
             imagingPlatform,
             imageEditingTool,
             newImagingPlatform,
-            newImagingEditingTool,
+            newImageEditingTool,
             comments
         } = req.body;
 
@@ -414,13 +414,14 @@ router.post('/create', isAuthenticated, async (req, res) => {
             createdBy,
             updatedBy
         ];
-        if (newImagingEditingTool != null)
-        // await db.promise().query(
-        //     "ALTER TABLE Media MODIFY `ImagingEditingTool` enum(
-        
-        //     )"
-        // )
-        // const [result] = await db.promise().query(insertQuery, values);
+
+        if (newImageEditingTool != null && !req.session['imageEditingTools'].includes(newImageEditingTool))
+            await db.promise().query(
+                "ALTER TABLE Media MODIFY COLUMN `ImageEditingTool` enum('"
+            +req.session['imageEditingTools'].join("','")+
+                "','"+newImageEditingTool+"')")
+            const [result] = await db.promise().query(insertQuery, values);
+            req.session["imageEditingTools"].push(newImageEditingTool)
 
         console.log("✅ Media submitted successfully, ID:", result.insertId);
 
