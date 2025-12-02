@@ -260,7 +260,7 @@
 
     <form id="main-form" action="/<%=currentMedia == 'create-mode' ? 'media/create' : 'media/edit' %>" method="POST">
       <div id="top-panel">
-        <a href="/media/select-user-for/<%=currentMedia.MediaID%>/<%=project.ProjectID%>/" class="btn btn-primary">
+        <a href="/media/select-user-for/<%=currentMedia != 'create-mode' ? currentMedia.MediaID: 'create-mode'%>/<%=project.ProjectID%>/" class="btn btn-primary">
           <i class="fas fa-arrow-left"></i> Back to selecting project owner/ photographer pairs
         </a>
         <h2>
