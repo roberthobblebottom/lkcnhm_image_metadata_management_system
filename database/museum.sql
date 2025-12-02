@@ -45,7 +45,7 @@ CREATE TABLE Project (
         UpdatedByID INT NOT NULL,
         IsDeleted BOOL NOT NULL DEFAULT 0,
         ProjectStatus 
-        ENUM('in progress','on hiatus','completed, pending metadata upload','completed') 
+        ENUM('started','on hiatus','completed') 
         NOT NULL,
         FOREIGN KEY (ProjectOwnerID) REFERENCES User(UserID),
         FOREIGN KEY (UpdatedByID) REFERENCES User(UserID),

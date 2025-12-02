@@ -22,9 +22,8 @@ const requestStatusEnumeration = () => {
 };
 const projectStatusEnumeration = () => {
     return {
-        in_progress: 'in progress',
+        in_progress: 'started',
         on_hiatus: 'on hiatus',
-        completed_pending_metadata_upload: 'completed, pending metadata upload',
         completed: 'completed'
     }
 };
