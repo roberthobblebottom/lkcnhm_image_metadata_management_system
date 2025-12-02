@@ -144,7 +144,7 @@ router.get('/create-or-edit-for-project/:mediaID/:projectID/', isAuthenticated, 
     const currentMediaQuery = mediaID != 'create-mode' ? 'SELECT * FROM Media WHERE Media.MediaID = ' + mediaID : '';
     const projects = (await db.promise().query(query, [projectID]))[0][0];
     const currentMedia = mediaID != 'create-mode' ? (await db.promise().query(currentMediaQuery))[0][0] : "create-mode";
-
+    // const ImagingEditingTools = ()[0]
     console.log(projects)
     console.log('currentMedia', currentMedia)
     res.render('media/create-or-edit', {
@@ -341,6 +341,8 @@ router.post('/create', isAuthenticated, async (req, res) => {
             description,
             imagingPlatform,
             imageEditingTool,
+            newImagingPlatform,
+            newImagingEditingTool,
             comments
         } = req.body;
 
@@ -412,8 +414,13 @@ router.post('/create', isAuthenticated, async (req, res) => {
             createdBy,
             updatedBy
         ];
-
-        const [result] = await db.promise().query(insertQuery, values);
+        if (newImagingEditingTool != null)
+        // await db.promise().query(
+        //     "ALTER TABLE Media MODIFY `ImagingEditingTool` enum(
+        
+        //     )"
+        // )
+        // const [result] = await db.promise().query(insertQuery, values);
 
         console.log("✅ Media submitted successfully, ID:", result.insertId);
 

@@ -107,14 +107,32 @@ router.post("/login",
 
                     // 🔄 Update LastLoginDate
                     const updateQuery = "UPDATE User SET LastLoginDate = NOW() WHERE UserID = ?";
-                    db.query(updateQuery, [user.UserID], (updateErr) => {
+                    db.query(updateQuery, [user.UserID], async (updateErr) => {
                         if (updateErr) {
                             console.error("❌ Failed to update LastLoginDate:", updateErr);
                             // Not blocking login if date update fails
                         } else {
                             console.log("🕓 LastLoginDate updated");
                         }
+                        req.session['imageEditingTools'] = (await db.promise().query(
+                            "SHOW COLUMNS FROM Media LIKE 'ImageEditingTool' "))
+                        [0][0]["Type"]
+                            .replace("enum(", "")
+                            .replace(")", "")
+                            .replaceAll("'", "")
+                            .split(",")
 
+                        console.log('imageEditingTools', req.session['imageEditingTools'])
+                        const ip = (await db.promise().query(
+                            "SHOW COLUMNS FROM Media LIKE 'imagingPlatform' "))
+                        [0][0]["Type"]
+                            .replaceAll("enum(", "")
+                            .replaceAll("'", "")
+                            .split(",")
+                        console.log(ip.at(-1))
+                        ip.splice(ip.length - 1,1, ip.at(-1).replace(")",""))
+                        req.session['imagingPlatforms'] = ip
+                        console.log('imagingPlatforms', req.session['imagingPlatforms'])
                         req.session.save(err => {
                             if (err) {
                                 console.error("❌ Session Save Error:", err);
