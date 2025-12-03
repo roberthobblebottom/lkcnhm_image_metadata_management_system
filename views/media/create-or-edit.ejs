@@ -280,14 +280,14 @@
          ? 'text'
          : 'hidden'  %> name="MediaID" value="<%= toBeEditedMedia.MediaID %>">
 
-      <!-- Requestor Full Name (readonly) -->
       <div class="form-group">
         <label>Project  Name</label>
-        <select name="projectName" id="projectName" requried>
+        <select name="projectName" id="projectName" requried
+        <%= currentUser.UserType != 'admin' ? 'disabled' : ''%>>
           <option value="">-- Select a project --</option>
           <%allProjects.forEach( u=>{%>
           <option value="<%=u.ProjectID%>" <%=u.ProjectName==(toBeEditedMedia !='create-mode' ?
-                toBeEditedMedia.ProjectName : '' ) ? 'selected' : '' %>>
+                toBeEditedMedia.ProjectName : 'test project 1' ) ? 'selected' : '' %>>
             <%=u.ProjectName%>
           </option>
           <%})%>
@@ -297,12 +297,13 @@
       <!-- Photographer Full Name (readonly) -->
       <div class="form-group">
         <label>Photographer Full Name</label>
-        <!-- <input type="text" id="photographerName" value="<%= toBeEditedPhotographer.FullName %>" > -->
-        <select name="photographerName" id="photographerName" requried>
+        <select name="photographerName" id="photographerName" requried
+        <%= currentUser.UserType == 'photographerOnly' ? 'disabled' : ''%>
+        >
           <option value="">-- Select a photographer--</option>
           <%allPhotographers.forEach( photographer=>{%>
           <option value="<%=photographer.UserID%>" <%=photographer.FullName==(toBeEditedMedia !='create-mode' ?
-                toBeEditedPhotographer.FullName : '' ) ? 'selected' : '' %>>
+                toBeEditedPhotographer.FullName : currentUser.FullName) ? 'selected' : '' %>>
             <%=photographer.FullName%>
           </option>
           <%})%>
@@ -380,6 +381,8 @@
             <%=imagingPlatform%>
           </option>
           <%})%>
+
+          <option value="" onclick="enterNewImagingPlatform()"> Enter new Imaging Platform </option>
         </select>
       </div>
 
@@ -423,8 +426,7 @@
       const temp = fileNameInput.value.split(".")[0]
       fileNameInput.value = temp + fileFormat.value
     };
-
-    function enterNewImagingEditingTool() {
+function enterNewImagingEditingTool() {
       console.log('enterNewImagingEditingTool')
       Swal.fire({
         title: "Add new Imaging Editing Tool",
@@ -435,6 +437,24 @@
       }).then((result) => {
         if (result.value) {
           const select = document.getElementById("imageEditingTool")
+          var option = document.createElement('option')
+          option.text = option.value = result.value
+          select.add(option, 1)
+          select.value = option.text
+        }
+      });
+    }
+    function enterNewImagingPlatform() {
+      console.log('enterNewImagingPlatform')
+      Swal.fire({
+        title: "Add new Imaging Platform",
+        text: "Add new Imaging Platform",
+        input: 'text',
+        showCancelButton: true,
+        inputPlaceholder: "Enter it here."
+      }).then((result) => {
+        if (result.value) {
+          const select = document.getElementById("imagingPlatform")
           var option = document.createElement('option')
           option.text = option.value = result.value
           select.add(option, 1)

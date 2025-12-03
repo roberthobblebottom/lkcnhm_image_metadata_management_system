@@ -121,10 +121,10 @@ router.post("/login",
                             .replace(")", "")
                             .replaceAll("'", "")
                             .split(",")
-
                         console.log('imageEditingTools', req.session['imageEditingTools'])
+
                         const ip = (await db.promise().query(
-                            "SHOW COLUMNS FROM Media LIKE 'imagingPlatform' "))
+                            "SHOW COLUMNS FROM Media LIKE 'ImagingPlatform' "))
                         [0][0]["Type"]
                             .replaceAll("enum(", "")
                             .replaceAll("'", "")
@@ -132,6 +132,7 @@ router.post("/login",
                         ip.splice(ip.length - 1,1, ip.at(-1).replace(")",""))
                         req.session['imagingPlatforms'] = ip
                         console.log('imagingPlatforms', req.session['imagingPlatforms'])
+
                         req.session.save(err => {
                             if (err) {
                                 console.error("❌ Session Save Error:", err);
@@ -170,6 +171,7 @@ router.get("/logout", (req, res) => {
                 return res.status(500).json({ error: "Logout failed" });
             }
             console.log("✅ User Logged Out");
+            return res.redirect('/');
         });
 
     } catch (error) {

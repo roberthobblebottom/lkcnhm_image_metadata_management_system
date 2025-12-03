@@ -56,7 +56,7 @@ CREATE TABLE ImagingPlatformInstance(
         ImagingPlatformInstanceID INT AUTO_INCREMENT PRIMARY KEY,
         ProjectID INT NOT NULL,
         ImagingPlatform ENUM('Leica(L5)','Mitutoyo(L5)','Olympus(L4Prep)',
-        'Olympus(L5)','Passport(L5)','VD(L4Prep)','Other') NOT NULL,
+        'Olympus(L5)','Passport(L5)','VD(L4Prep)') NOT NULL,
         FOREIGN KEY (ProjectID) REFERENCES Project(ProjectID)
 );
 
@@ -107,6 +107,7 @@ INSERT INTO User (Email,HashedPassword,PasswordSalt,UserType,FullName,
 CreatedByID,UpdatedByID,RequestStatus) 
 VALUES ('r1@gmail.com',FROM_BASE64("hwXpWnraI+KqYkaChBAc4EjTdAEtXxKZXBn/cMss2/4="),
 'ZdYThKAg1ZD4ULyd','projectOwner',"Zesty wong",'2','2','approved');
+
 INSERT INTO User (Email,HashedPassword,PasswordSalt,UserType,FullName,
 CreatedByID,UpdatedByID,RequestStatus) 
 VALUES ('p1@gmail.com',FROM_BASE64("sj1O+m695SCDA0cyNiHK/aEknLFcYPhoxP9YOZe0pvA="),
@@ -116,7 +117,7 @@ VALUES ('p1@gmail.com',FROM_BASE64("sj1O+m695SCDA0cyNiHK/aEknLFcYPhoxP9YOZe0pvA=
 INSERT INTO Project (ProjectOwnerID ,ProjectName ,ProjectType,ImagingStartDate ,ImagingEndDate ,
 CreatedDate ,UpdatedDate ,ProjectStatus,CreatedByID,UpdatedByID,SummaryOfProject,DetailsOfSpecimens) 
 VALUES (1,"test project 1","BDP",NOW(),DATE_ADD(NOW(), INTERVAL 2 DAY),NOW(),NOW(),
-'in progress','1','1','sample project summary','sample specimen details');
+'started','1','1','sample project summary','sample specimen details');
 INSERT INTO ProjectUserPhotographyLink (ProjectID,PhotographerID) VALUES ("1",'1'); 
 INSERT INTO ImagingPlatformInstance(ProjectID,ImagingPlatform) VALUES (1,'Olympus(L5)');
 INSERT INTO ImagingPlatformInstance(ProjectID,ImagingPlatform) VALUES (1,'VD(L4Prep)');
@@ -124,7 +125,7 @@ INSERT INTO ImagingPlatformInstance(ProjectID,ImagingPlatform) VALUES (1,'VD(L4P
 INSERT INTO Project (ProjectOwnerID ,ProjectName,ProjectType,ImagingStartDate ,ImagingEndDate ,
 CreatedDate ,UpdatedDate ,ProjectStatus,CreatedByID,UpdatedByID,SummaryOfProject,DetailsOfSpecimens) 
 VALUES (2,"test project 2",'BDP',NOW(),DATE_ADD(NOW(),INTERVAL 2 DAY),NOW(),NOW(),
-'in progress','1','1','sample project summary','sample specimen details');
+'started','1','1','sample project summary','sample specimen details');
 INSERT INTO ProjectUserPhotographyLink (ProjectID,PhotographerID) VALUES ("2",2); 
 INSERT INTO ImagingPlatformInstance(ProjectID,ImagingPlatform) VALUES (2,'Leica(L5)');
 

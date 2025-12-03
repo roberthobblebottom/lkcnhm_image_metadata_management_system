@@ -117,13 +117,18 @@
 <body>
   <div class="main_con">
     <%- currentUser.UserType=='admin' ? include('../partials/sidenav-admin'): include('../partials/sidenav-user') %>
-
-    <a href="/media/create-or-edit-for-project/create-mode/" class="btn">Add Media(s)</a>
-    <%if (currentUser.UserType=='admin' ){%>
+<%if (currentUser.UserType=='admin' ){%>
     <h2>All Photography Metadata Records</h2>
     <%} else {%>
     <h2>Your Photography Metadata Records</h2>
     <%}%>
+
+ <% if (disableCreateMedia){ %>
+You do not have any projects you can add media to.
+    <% }else{ %>
+    <a href="/media/create-or-edit-for-project/create-mode/" class="btn">Add Media(s)</a>
+    <%}%>
+    
             
     <% if (mediaRecords.length===0) { %>
     <p class="no-data">No media records found.</p>
