@@ -35,10 +35,11 @@ router.get('/view-all', isAuthenticated, async (req, res) => {
         ? baseQuery + "\nORDER BY m.CreatedDate DESC"
         : baseQuery + "\nWHERE m.IsDeleted = 0 AND photographer.UserID =" + user.UserID + " ORDER BY m.CreatedDate DESC";
     
-    const anyLinks = (await db.promise().query(`SELECT * 
+    const anyLinks = (await db.promise().query(`
+        SELECT * 
         FROM ProjectUserPhotographyLink pupl 
         RIGHT JOIN Project p ON p.ProjectID = pupl.ProjectID
-         WHERE pupl.PhotographerID = ? OR p.ProjectOwnerID = ? LIMIT 1`, [user.UserID,user.UserID]))[0];
+        WHERE pupl.PhotographerID = ? OR p.ProjectOwnerID = ? LIMIT 1`, [user.UserID,user.UserID]))[0];
     console.log('anyLinks',anyLinks)
     console.log( user.UserType != userTypesEnumeration().admin)
     db.query(query, (err, results) => {

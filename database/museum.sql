@@ -1,4 +1,5 @@
 -- REMEMBER WHEN UPDATING ENUMS, UPDATE MIDDLEWARE/UTILS ENUM LIKE OBJECT TOO
+-- When creating Project Entry, there needs to be a ProjectuserPhotographyLink Entry that reflects the project owner being a photographer too.
 DROP DATABASE IF EXISTS museum;
 CREATE DATABASE museum;
 USE museum;
@@ -118,6 +119,7 @@ INSERT INTO Project (ProjectOwnerID ,ProjectName ,ProjectType,ImagingStartDate ,
 CreatedDate ,UpdatedDate ,ProjectStatus,CreatedByID,UpdatedByID,SummaryOfProject,DetailsOfSpecimens) 
 VALUES (1,"test project 1","BDP",NOW(),DATE_ADD(NOW(), INTERVAL 2 DAY),NOW(),NOW(),
 'started','1','1','sample project summary','sample specimen details');
+-- link the project owner as a phtogragpher
 INSERT INTO ProjectUserPhotographyLink (ProjectID,PhotographerID) VALUES ("1",'1'); 
 INSERT INTO ImagingPlatformInstance(ProjectID,ImagingPlatform) VALUES (1,'Olympus(L5)');
 INSERT INTO ImagingPlatformInstance(ProjectID,ImagingPlatform) VALUES (1,'VD(L4Prep)');
@@ -126,6 +128,7 @@ INSERT INTO Project (ProjectOwnerID ,ProjectName,ProjectType,ImagingStartDate ,I
 CreatedDate ,UpdatedDate ,ProjectStatus,CreatedByID,UpdatedByID,SummaryOfProject,DetailsOfSpecimens) 
 VALUES (2,"test project 2",'BDP',NOW(),DATE_ADD(NOW(),INTERVAL 2 DAY),NOW(),NOW(),
 'started','1','1','sample project summary','sample specimen details');
+-- link the project owner as a phtogragpher
 INSERT INTO ProjectUserPhotographyLink (ProjectID,PhotographerID) VALUES ("2",2); 
 INSERT INTO ImagingPlatformInstance(ProjectID,ImagingPlatform) VALUES (2,'Leica(L5)');
 
