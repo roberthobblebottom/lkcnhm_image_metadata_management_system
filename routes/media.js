@@ -1,14 +1,13 @@
 const express = require("express");
 const router = express.Router();
-const db = require("./db"); // Database connection
-const { isAuthenticated } = require("../middleware/auth"); // Middleware
-const { formatDisplayDate, userTypesEnumeration, imageEditingToolEnumeration, mediaFileFormatEnumeration, imagingPlatformEnumeration } = require("../middleware/utils");
+const db = require("./db"); 
+const { isAuthenticated } = require("../middleware/auth"); 
+const { formatDisplayDate, userTypesEnumeration, imageEditingToolEnumeration,
+    mediaFileFormatEnumeration, imagingPlatformEnumeration } = require("../middleware/utils");
 const multer = require('multer');
 const fs = require("fs");
 const path = require("path");
-const upload = multer({
-    dest: "upload-bulk-metadata/" // "uploads"
-});
+const upload = multer({    dest: "upload-bulk-metadata/"});
 
 // ✅ Admin Media Management Main Page Controller
 router.get('/view-all', isAuthenticated, (req, res) => {
@@ -116,13 +115,11 @@ router.get('/view-all', isAuthenticated, (req, res) => {
 
 router.get('/create-or-edit-for-project/:mediaID/', isAuthenticated, async (req, res) => {
     const mediaID = req.params.mediaID;
-    const allPhotographersQuery = `
-    SELECT FullName, UserID, UserType FROM User WHERE IsDeleted = 0;
-  `;
+    const allPhotographersQuery = `SELECT FullName, UserID, UserType FROM User WHERE IsDeleted = 0;`;
     const allPhotographers = (await db.promise().query(allPhotographersQuery))[0];
     const allProjects = (await db.promise().query("SELECT * FROM Project WHERE IsDeleted = 0"))[0]
 
-    //For EDIT
+    //For EDIT only
     const currentMediaQuery = `SELECT Media.*,
         projectOwner.FullName projectOwnerName,Project.ProjectName , projectOwner.UserID
         FROM Media
@@ -143,6 +140,7 @@ router.get('/create-or-edit-for-project/:mediaID/', isAuthenticated, async (req,
     const toBeEditedPhotographer = mediaID != 'create-mode'
         ? (await db.promise().query(toBeEditedPhotographerQuery))[0][0]
         : "create-mode";
+    // End of EDIT section
 
     console.log('currentMedia', toBeEditedMedia)
     res.render('media/create-or-edit', {
@@ -495,23 +493,23 @@ router.post('/edit', isAuthenticated, (req, res) => {
     // Update existing media
     const query = `
         UPDATE Media SET
-        FileName = ?,
-        FilePath = ?,
-        CatalogID = ?,
-        MorphoID = ?,
-        ClusterID = ?,
-        ImagingDate = ?,
-        Resolution = ?,
-        FileSizeBytes = ?,
-        FileFormat = ?,
-        Description = ?,
-        ImagingPlatform = ?,
-        ImageEditingTool = ?,
-        Comments = ?,
-        UpdatedDate = NOW(),
-        UpdatedByID = ?,
-        ProjectID =?,
-        PhotographerID = ?
+            FileName = ?,
+            FilePath = ?,
+            CatalogID = ?,
+            MorphoID = ?,
+            ClusterID = ?,
+            ImagingDate = ?,
+            Resolution = ?,
+            FileSizeBytes = ?,
+            FileFormat = ?,
+            Description = ?,
+            ImagingPlatform = ?,
+            ImageEditingTool = ?,
+            Comments = ?,
+            UpdatedDate = NOW(),
+            UpdatedByID = ?,
+            ProjectID =?,
+            PhotographerID = ?
         WHERE MediaID = ?
                 `;
     const updatedBy = req.session.passport.user.UserID;
@@ -530,9 +528,9 @@ router.post('/edit', isAuthenticated, (req, res) => {
         mediaData.imageEditingTool,
         mediaData.comments,
         updatedBy, // current user making the update
-        mediaData.MediaID,
         mediaData.projectID,
-        mediaData.photographerID
+        mediaData.photographerID,
+        mediaData.MediaID
     ];
     console.log('mediaData', mediaData)
     console.log('params', params)
@@ -566,20 +564,17 @@ router.post('/delete/:mediaId', isAuthenticated, (req, res) => {
                 return res.redirect('/media/view-all');
             }
 
-            // Perform soft delete
             const updateQuery = `
                 UPDATE Media 
                 SET IsDeleted = 1,
-        UpdatedByID = ?,
-        UpdatedDate = NOW() 
+                    UpdatedByID = ?,
+                    UpdatedDate = NOW() 
                 WHERE MediaID = ?
         `;
 
             return db.promise().query(updateQuery, [userId, mediaId]);
         })
-        .then(() => {
-            res.redirect('/media/view-all');
-        })
+        .then(() => res.redirect('/media/view-all'))
         .catch(error => {
             console.error("❌ Error soft deleting media:", error);
             req.flash('error', 'Error archiving media');
@@ -601,20 +596,17 @@ router.post('/restore/:mediaId', isAuthenticated, (req, res) => {
                 return res.redirect('/media/view-all');
             }
 
-            // Perform soft restore
             const updateQuery = `
                 UPDATE Media 
                 SET IsDeleted = 0,
-        UpdatedByID = ?,
-        UpdatedDate = NOW() 
+                    UpdatedByID = ?,
+                    UpdatedDate = NOW() 
                 WHERE MediaID = ?
-        `;
+            `;
 
             return db.promise().query(updateQuery, [userId, mediaId]);
         })
-        .then(() => {
-            res.redirect('/media/view-all');
-        })
+        .then(() => res.redirect('/media/view-all'))
         .catch(error => {
             console.error("❌ Error soft deleting media:", error);
             req.flash('error', 'Error archiving media');
