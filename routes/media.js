@@ -346,7 +346,10 @@ router.post('/create', isAuthenticated, async (req, res) => {
             imageEditingTool,
             newImagingPlatform,
             newImageEditingTool,
-            comments
+            comments,
+            MediaID,
+            projectID,
+            photographerID
         } = req.body;
 
         console.log("📤 Media submission data:", req.body);
@@ -354,9 +357,8 @@ router.post('/create', isAuthenticated, async (req, res) => {
         const updatedBy = createdBy;
         // Validation: required fields
         const missingFields = [];
-        if (!ProjectID) missingFields.push("ProjectID");
-        if (!ProjectOwnerID) missingFields.push("RequestorID");
-        if (!PhotographerID) missingFields.push("PhotographerID");
+        if (!projectID) missingFields.push("ProjectID");
+        if (!photographerID) missingFields.push("PhotographerID");
         if (!fileName) missingFields.push("fileName");
         if (!filePath) missingFields.push("filePath");
         if (!catalogID) missingFields.push("catalogID");
@@ -399,8 +401,8 @@ router.post('/create', isAuthenticated, async (req, res) => {
         `;
 
         const values = [
-            ProjectID,
-            PhotographerID,
+            projectID,
+            photographerID,
             fileName,
             filePath,
             catalogID || null,
