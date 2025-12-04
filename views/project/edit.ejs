@@ -298,8 +298,7 @@ Retrieved 2025-11-19, License - CC BY-SA 4.0
           <ul class="items" id="newSelectedPhotographersList">
             <% allPhotographers.forEach(photographer=>{ %>
             <label class="dropdown-item">
-              <input class='target' type="checkbox" id="<%=photographer%>Input" <%=selectedPhotographers.some(
-                e=>e.UserID === photographer.UserID) ? 'checked' : '' %> value=<%=photographer.UserID%>>
+              <input class='target' type="checkbox" id="<%=photographer%>Input" <%=selectedPhotographers.some(e=>e.UserID === photographer.UserID) ? 'checked' : '' %> value=<%=photographer.UserID%> <%=photographer.UserID == currentUser.UserID ? 'disabled' : '' %>>
               <%=photographer.FullName%>
             </label>
             <%})%>
@@ -362,8 +361,8 @@ Retrieved 2025-11-19, License - CC BY-SA 4.0
       </div>
       <div class='buttons'>
         <button type="submit" class="btn btn-primary">
-            <i class="fas fa-paper-plane" ></i>
-            Save Changes
+          <i class="fas fa-paper-plane"></i>
+          Save Changes
         </button>
       </div>
     </form>

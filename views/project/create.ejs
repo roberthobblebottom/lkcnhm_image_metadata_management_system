@@ -329,14 +329,13 @@ Retrieved 2025-11-19, License - CC BY-SA 4.0
             <ul class="items" id="newSelectedPhotographersList">
               <% photographers.forEach(photographer=>{ %>
                 <label class="dropdown-item">
-                  <input class='target' type="checkbox" id="<%=photographer%>Input" value=<%=photographer.UserID%>>
+                  <input class='target'   type="checkbox" id="<%=photographer%>Input" value=<%=photographer.UserID%> <%=photographer.UserID == currentUser.UserID ? 'checked disabled' : '' %>  >
                   <%=photographer.FullName%>
                 </label>
                 <%})%>
-
-
             </ul>
           </div>
+
           <div id="photographer-error" class="error-message">Please select a photographer</div>
         </div>
 

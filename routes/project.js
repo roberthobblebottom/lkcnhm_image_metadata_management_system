@@ -80,8 +80,8 @@ router.post("/create", isAuthenticated, async (req, res) => {
             });
         }
 
-        const createdBy = req.session.passport.user.UserID;
-        if (!createdBy) {
+        const userID = req.session.passport.user.UserID;
+        if (!userID) {
             console.error("User ID not found in session");
             return res.status(401).json({
                 success: false,
@@ -95,10 +95,17 @@ router.post("/create", isAuthenticated, async (req, res) => {
                 message: "there are no selected Imaging Platforms",
             });
         }
+        console.log('req.body.selectedPhotographers',  req.body.selectedPhotographers)
+        console.log(req.session.passport.user.UserID)
         if (req.body.selectedPhotographers.length == 0) {
             return res.status(400).json({
                 success: false,
                 message: "there are no selected selected photographers",
+            });
+        } else if (req.body.selectedPhotographers.includes(userID.toString())){
+            return res.status(400).json({
+                success: false,
+                message: "Photographers must include him or herself.",
             });
         }
         const insertQuery = `
@@ -139,8 +146,8 @@ router.post("/create", isAuthenticated, async (req, res) => {
                 req.body.summary,
                 req.body.specimenDetails,
                 req.body.comments || null,
-                createdBy,
-                createdBy,
+                userID,
+                userID,
                 projectStatusEnumeration().in_progress,
             ]);
 
@@ -149,6 +156,7 @@ router.post("/create", isAuthenticated, async (req, res) => {
             .promise()
             .query("SELECT ProjectID FROM Project ORDER BY ProjectID DESC LIMIT 1");
         projectID2 = r2[0][0].ProjectID;
+
 
         photographersTuple = [];
         for (x of req.body.selectedPhotographers) {
@@ -481,7 +489,8 @@ router.get("/edit/:id", isAuthenticated, async (req, res) => {
 
 router.post("/edit/:id", isAuthenticated, async (req, res) => {
     try {
-        if (!req.session.passport.user || !req.session.passport.user.UserID) {
+        const userID = req.session.passport.user.UserID
+        if (!req.session.passport.user || !userID) {
             console.error("❌ No user in session");
             return res
                 .status(401)
@@ -523,16 +532,18 @@ router.post("/edit/:id", isAuthenticated, async (req, res) => {
                 .status(400)
                 .json({ success: false, message: "No Selected Imaging Platforms" });
         }
-        if (
-            newSelectedPhotographers.length == 0 ||
-            (newSelectedPhotographers.length == 1 &&
-                newSelectedPhotographers[0] == "")
-        ) {
+        if (newSelectedPhotographers.length == 0) {
             return res
                 .status(400)
                 .json({ success: false, message: "no Selected Photographers" });
+        } 
+        if (!newSelectedPhotographers.includes(userID.toString())) {
+            return res.status(400).json({
+                success: false,
+                message: "Photographers must include him or herself.",
+            });
         }
-
+    
         // Date validation
         const startDate = new Date(ImagingStartDate);
         const endDate = new Date(ImagingEndDate);
