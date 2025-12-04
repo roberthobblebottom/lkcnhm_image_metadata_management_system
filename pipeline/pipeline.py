@@ -12,13 +12,19 @@ import configparser
 # IFD_CODE_LOOKUP = {i.value: i.name for i in ExifTags.IFD}
 
 
-def recursion(path, output, photographerID):
+def recursion(
+    path,
+    output,
+    photographerID,
+    # projectID
+):
     for file_or_folder_path in glob(path + "/*"):
         if isdir(file_or_folder_path):
             return recursion(
                 file_or_folder_path,
                 output,
                 photographerID,
+                # projectID
             )
         if file_or_folder_path.split(".")[-1] not in ["tiff", "raw", "tif", "jpg"]:
             print("not an image")
@@ -28,10 +34,11 @@ def recursion(path, output, photographerID):
         exifData = Image.open(file_or_folder_path).getexif()
 
         new_row = {}
+        # new_row["ProjectName"] = projectID
         new_row["PhotographerID"] = photographerID
-        new_row["FilePath"] = file_or_folder_path
+        new_row["FilePath"] = file_or_folder_path.replace("./", "")
         new_row["FileName"] = file_or_folder_path.split("/")[-1]
-
+        new_row["FileFormat"] = "." + file_or_folder_path.split(".")[-1]
         fileNameArray = new_row["FileName"].split(
             " "
         )  # MAY BE CHANGE TO ANOTHER SEPERATOR
@@ -72,11 +79,14 @@ def recursion(path, output, photographerID):
         new_row = (
             pl.DataFrame(new_row)
             .rename({"Software": "ImagingEditingTool"})
+            .rename({"UserComment": "Comment"})
             .select(
                 "MorphoID",
                 "FileName",
                 "FilePath",
                 "FileSizeBytes",
+                "FileFormat",
+                # "ProjectName",
                 "PhotographerID",
                 "DateTime",
                 "ImagingEditingTool",
@@ -84,7 +94,7 @@ def recursion(path, output, photographerID):
                 "ImageLength",
                 "Make",
                 "Model",
-                "UserComment",
+                "Comment",
             )
         )
         print(new_row.transpose(include_header=True))
@@ -109,11 +119,12 @@ def main():
         print("Error: photographerID can only be a positive integer. Exiting... ")
         return
 
-    for f3 in glob(dir):
+    for f3 in [x for x in glob(dir) if isdir(x)]:
         recursion(
             path=f3,
             output=output,
             photographerID=photographerID,
+            # projectID = f3.split("/")[-1]
         )
 
     stop = timer()
