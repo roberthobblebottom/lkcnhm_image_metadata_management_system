@@ -102,7 +102,7 @@ router.post("/create", isAuthenticated, async (req, res) => {
                 success: false,
                 message: "there are no selected selected photographers",
             });
-        } else if (req.body.selectedPhotographers.includes(userID.toString())){
+        } else if (!req.body.selectedPhotographers.includes(userID.toString())){
             return res.status(400).json({
                 success: false,
                 message: "Photographers must include him or herself.",
@@ -168,7 +168,6 @@ router.post("/create", isAuthenticated, async (req, res) => {
         for (x of req.body.selectedImagingPlatforms) {
             imagingPlatformsTuple.push([x, projectID2]);
         }
-
         await db
             .promise()
             .query(insertImagingPlatformsQuery, [imagingPlatformsTuple]);
