@@ -75,7 +75,7 @@ CREATE TABLE Media (
         PhotographerID INT NOT NULL,
         FileName VARCHAR(100) NOT NULL ,
         FilePath VARCHAR(200) NOT NULL ,
-        CatalogID VARCHAR(100) NOT NULL,
+        CatalogID VARCHAR(100) ,
         MorphoID VARCHAR(100),
         ClusterID VARCHAR(100),
         ImagingDate DATETIME,

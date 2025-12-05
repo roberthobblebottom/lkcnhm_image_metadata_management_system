@@ -33,6 +33,7 @@
       float: right;
       margin-top: 50px;
       margin-bottom: 50px;
+      margin-left: 10px;
     }
 
     h2 {
@@ -117,16 +118,17 @@
 <body>
   <div class="main_con">
     <%- currentUser.UserType=='admin' ? include('../partials/sidenav-admin'): include('../partials/sidenav-user') %>
-<%if (currentUser.UserType=='admin' ){%>
+    <%if (currentUser.UserType=='admin' ){%>
     <h2>All Photography Metadata Records</h2>
     <%} else {%>
     <h2>Your Photography Metadata Records</h2>
     <%}%>
 
- <% if (disableCreateMedia){ %>
-You do not have any projects you can add media to.
+    <% if (disableCreateMedia){ %>
+    You do not have any projects you can add media to.
     <% }else{ %>
     <a href="/media/create-or-edit-for-project/create-mode/" class="btn">Add Media(s)</a>
+    <a href="/media/upload-bulk-metadata/" class="btn"> Upload Bulk MetaData</a>
     <%}%>
     
             

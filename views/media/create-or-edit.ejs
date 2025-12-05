@@ -274,8 +274,8 @@
           ? "Then, edit image metadata entry " :"Then, enter new image metadata entry" %>
         </h2>
       </div>
+      
       <!-- Hidden IDs -->
-
       <input readonly type=<%=toBeEditedMedia != 'create-mode'
          ? 'text'
          : 'hidden'  %> name="MediaID" value="<%= toBeEditedMedia.MediaID %>">
@@ -407,8 +407,7 @@
 
 
       <p class="note">
-        💡 Note: If there is more than one image for a specimen, submit this form multiple times with different
-        image
+        💡 Note: If there is more than one image for a specimen, please use the pipeline script to capture the metadata
         details.
       </p>
 

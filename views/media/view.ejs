@@ -190,7 +190,7 @@
         <div class="detail-row">
           <div class="detail-label">Photographer's Name:</div>
           <div class="detail-value">
-            <%= media.photographerName|| '-' %>
+            <%= media.photographerName%>
           </div>
         </div>
 
@@ -322,12 +322,7 @@
           </div>
         </div>
 
-        <% if (['.jpg', '.jpeg' , '.png' , '.gif' ].some(ext=> media.FilePath.toLowerCase().endsWith(ext))) { %>
-        <div class="media-preview">
-          <div class="detail-label">Preview:</div>
-          <img src="<%= media.FilePath %>" alt="Media preview">
-        </div>
-        <% } %>
+     
 
         <div class="mt-4 d-flex justify-content-between">
           <a href="/media/view-all" class="btn btn-primary">

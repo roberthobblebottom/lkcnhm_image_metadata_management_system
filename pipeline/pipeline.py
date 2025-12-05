@@ -46,8 +46,7 @@ def recursion(
         new_row["MorphoID"] = fileNameArray[0]
 
         part_with_fileFormat = fileNameArray[-1].split(".")
-        new_row["Description"] = part_with_fileFormat[0]
-        new_row["FileFormat"] = "." + part_with_fileFormat[1]
+        new_row["Comments"] = part_with_fileFormat[0]
 
         new_row["FileSizeBytes"] = getsize(file_or_folder_path)
 
@@ -58,7 +57,7 @@ def recursion(
             "ImageLength",
             "Make",
             "Model",
-            "UserComment",
+            "Comments",
         ]
         for tagid in exifData:
             tagname = TAGS.get(tagid, tagid)
@@ -67,34 +66,35 @@ def recursion(
                 value = value.hex().decode() if isinstance(value, bytes) else value
                 value = value.split(" ")[0] if tagname == "DateTime" else value
                 new_row[tagname] = str(value)
+        
 
             # if type(value) is bytes:
             #     new_row[str(tagname)] = "BINARY NOT CAPTURED"
             # else:
             #     new_row[str(tagname)] = str(value) if value is not None else ""
-
         for x1 in f:
             if x1 not in list(new_row.keys()):
                 new_row[x1] = ""
         new_row = (
             pl.DataFrame(new_row)
             .rename({"Software": "ImagingEditingTool"})
-            .rename({"UserComment": "Comment"})
+            .rename({"DateTime":"ImagingDate"})
             .select(
                 "MorphoID",
+                "CatalogID",
                 "FileName",
                 "FilePath",
                 "FileSizeBytes",
                 "FileFormat",
                 # "ProjectName",
                 "PhotographerID",
-                "DateTime",
+                "ImagingDate",
                 "ImagingEditingTool",
                 "ImageWidth",
                 "ImageLength",
                 "Make",
                 "Model",
-                "Comment",
+                "Comments",
             )
         )
         print(new_row.transpose(include_header=True))
@@ -136,7 +136,7 @@ def main():
             Resolution=when((col("ImageLength") != "") | (col("ImageWidth") != ""))
             .then(pl.concat_str(col("ImageLength"), lit("x"), col("ImageWidth")))
             .otherwise(lit("")),
-            DateTime=col("DateTime").str.to_datetime(
+            ImagingDate=col("ImagingDate").str.to_datetime(
                 "%Y:%m:%d", ambiguous="null", strict=False
             ),
             imagingPlatform=when((col("Make") != "") | (col("Model") != ""))

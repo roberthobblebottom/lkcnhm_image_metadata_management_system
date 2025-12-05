@@ -36,7 +36,7 @@ const projectTypeEnumeration = () => {
 const mediaFileFormatEnumeration = () => {
     return {
         jpg: ".jpg", jpeg: ".jpeg", png: ".png",
-        tiff: ".tiff", svg: ".svg", raw: ".raw"
+        tiff: ".tiff",tif: ".tif", svg: ".svg", raw: ".raw"
     };
 }
 
@@ -52,12 +52,7 @@ const imagingPlatformEnumeration = () => {
     };
 }
 
-const imageEditingToolEnumeration = () => {
-    return {
-        photoshop: "photoshop",
-        gimp: "gimp"
-    }
-}
+
 
 const userTypesEnumeration = () => {
     return {
@@ -69,5 +64,5 @@ const userTypesEnumeration = () => {
 
 module.exports = {
     formatDate, formatDisplayDate, requestStatusEnumeration, projectStatusEnumeration, projectTypeEnumeration,
-    mediaFileFormatEnumeration, imagingPlatformEnumeration, imageEditingToolEnumeration, userTypesEnumeration
+    mediaFileFormatEnumeration, imagingPlatformEnumeration, userTypesEnumeration
 };
