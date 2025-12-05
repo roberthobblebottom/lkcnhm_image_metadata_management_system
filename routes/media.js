@@ -371,7 +371,7 @@ router.post('/upload-bulk-metadata/:projectID',
                 "ALTER TABLE Media MODIFY COLUMN `ImageEditingTool` enum('"
                 + req.session['imageEditingTools'].join("','") +
                 "','" + newImageEditingTools.join("','") + "')")
-        req.session["imageEditingTools"].push(newImageEditingTools)
+        req.session["imageEditingTools"] = req.session["imageEditingTools"].concat(newImageEditingTools)
 
         if (newImagingPlatforms != null
             && newImagingPlatforms != ""
@@ -380,7 +380,7 @@ router.post('/upload-bulk-metadata/:projectID',
                 "ALTER TABLE Media MODIFY COLUMN `ImagingPlatform` enum('"
                 + req.session['imagingPlatforms'].join("','") +
                 "','" + newImagingPlatforms.join("','") + "')")
-        req.session["imagingPlatforms"].push(newImagingPlatforms)
+        req.session["imagingPlatforms"] = req.session["imagingPlatforms"].concat(newImagingPlatforms)
 
         const insertQuery = `
       INSERT INTO Media(

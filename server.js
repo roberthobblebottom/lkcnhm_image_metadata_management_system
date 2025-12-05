@@ -76,7 +76,8 @@ app.get('/api/current-user', (req, res) => {
         res.json({
             Email: req.session.passport.user.Email,
             FullName: req.session.passport.user.FullName,
-            UserType: req.session.passport.user.UserType
+            UserType: req.session.passport.user.UserType,
+            UserID: req.session.passport.user.UserID
         });
     } else {
         res.status(401).json({ error: "Not logged in" });

@@ -15,7 +15,10 @@
     </div>
     <ul class="nav-links">
       <li>
-        <div id="userGreeting"></div>
+<div id="fullName"></div>
+        <div id="email"></div>
+        <div id="userType"></div>
+        <div id="userID"></div>
       </li>
       <li class="active"><a href="/user/dashboard"><i class="fas fa-chart-line"></i><span>Dashboard</span></a></li>
       <li><a href="/imagingUser"><i class="fas fa-users"></i><span>Imaging User Management</span></a></li>
@@ -37,8 +40,12 @@
         .then(data => {
           const email = data.Email;
           const fullName = data.FullName;
-          const UserType = data.UserType;
-          document.getElementById("userGreeting").textContent = `Logged in as: ${fullName}\nEmail: ${email}\nRole: ${UserType}`;
+          const userType = data.UserType;
+          const userID = data.UserID;
+          document.getElementById("fullName").textContent = `Logged in as: ${fullName}`
+          document.getElementById("email").textContent=`Email: ${email}`;
+          document.getElementById("userType").textContent=`Role: ${userType}`;
+          document.getElementById("userID").textContent=`UserID: ${userID}`;
           document.getElementById("projectManagement").hidden = UserType == 'photographerOnly' ? true : false
         })
         .catch(() => {

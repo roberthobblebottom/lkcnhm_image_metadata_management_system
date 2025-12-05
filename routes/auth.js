@@ -4,7 +4,7 @@ const db = require("./db");
 const passport = require('passport');
 const LocalStrategy = require('passport-local');
 const crypto = require('crypto');
-const userTypesEnumeration = require('../middleware/utils').userTypesEnumeration;
+const { userTypesEnumeration } = require('../middleware/utils');
 
 passport.use(new LocalStrategy(async function verify(username, password, cb) {
     //Do not change the variable name from username to email, it doesn't work.
@@ -25,6 +25,7 @@ passport.use(new LocalStrategy(async function verify(username, password, cb) {
 
     const user = result[0];
     console.log("🆔 Found User:", user.Email);
+    console.log(user.UserID)
 
     crypto.pbkdf2(password, user.PasswordSalt, 310000, 32, 'sha256', function (err, hashedPassword) {
         if (err) return cb(err);
@@ -121,7 +122,6 @@ router.post("/login",
                             .replace(")", "")
                             .replaceAll("'", "")
                             .split(",")
-                        console.log('imageEditingTools', req.session['imageEditingTools'])
 
                         const ip = (await db.promise().query(
                             "SHOW COLUMNS FROM Media LIKE 'ImagingPlatform' "))
@@ -131,8 +131,7 @@ router.post("/login",
                             .split(",")
                         ip.splice(ip.length - 1,1, ip.at(-1).replace(")",""))
                         req.session['imagingPlatforms'] = ip
-                        console.log('imagingPlatforms', req.session['imagingPlatforms'])
-
+                        console.log('user',user.UserID)
                         req.session.save(err => {
                             if (err) {
                                 console.error("❌ Session Save Error:", err);
@@ -140,7 +139,7 @@ router.post("/login",
                             }
                             return res.json({
                                 success: true,
-                                redirect: user.UserType === userTypesEnumeration.admin ? "/admin/dashboard" : "/user/dashboard"
+                                redirect: user.UserType === userTypesEnumeration().admin ? "/admin/dashboard" : "/user/dashboard"
                             });
                         });
                     });

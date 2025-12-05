@@ -15,7 +15,10 @@
     </div>
     <ul class="nav-links">
       <li>
-        <div id="userGreeting"></div>
+        <div id="fullName"></div>
+        <div id="email"></div>
+        <div id="userType"></div>
+        <div id="userID"></div>
       </li>
       <li class="active"><a href="/admin/dashboard"><i class="fas fa-chart-line"></i><span>Dashboard</span></a>
       </li>
@@ -35,11 +38,15 @@
         .then(data => {
           const email = data.Email; // trim after @
           const fullName = data.FullName;
-          const UserType = data.UserType;
-          document.getElementById("userGreeting").textContent = `Logged in as: ${fullName} \nEmail: ${email} \nRole: ${UserType}`;
+          const userType = data.UserType;
+          const userID = data.UserID;
+          document.getElementById("fullName").textContent = `Logged in as: ${fullName}`;
+          document.getElementById("email").textContent=`Email: ${email}`;
+          document.getElementById("userType").textContent=`Role: ${userType}`;
+          document.getElementById("userID").textContent=`UserID: ${userID}`;
         })
         .catch(() => {
-          document.getElementById("userGreeting").textContent = "Welcome";
+          document.getElementById("fullName").textContent = "Welcome";
         });
     });
 
