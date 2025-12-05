@@ -8,6 +8,7 @@ const multer = require('multer');
 const fs = require("fs");
 const path = require("path");
 const { Callbacks } = require("jquery");
+const { default: DataTable } = require("datatables.net-buttons-dt");
 const upload = multer({ dest: "upload-bulk-metadata/" });
 
 // ✅ Admin Media Management Main Page Controller
@@ -200,7 +201,7 @@ router.post('/upload-bulk-metadata/:projectID',
         console.log('absolutePath', absolutePath)
         const jsonString = fs.readFileSync(absolutePath, "utf-8");
         const newRowsTemp = jsonString.split('\n').slice(1)
-        fs.rm(absolutePath, callback = (err) => { 
+        fs.rm(absolutePath, callback = (err) => {
             if (err) {
                 // File deletion failed
                 console.error(err.message);
@@ -209,7 +210,7 @@ router.post('/upload-bulk-metadata/:projectID',
             console.log("File deleted successfully");
         })
         const newRowColumns = {
-            MorphoID: 0,CatalogID:1, FileName: 2, FilePath: 3,
+            MorphoID: 0, CatalogID: 1, FileName: 2, FilePath: 3,
             FileSizeBytes: 4, FileFormat: 5, PhotographerID: 6,
             ImagingDate: 7, ImageEditingTool: 8,
             Comments: 9, Resolution: 10,
@@ -235,25 +236,23 @@ router.post('/upload-bulk-metadata/:projectID',
             // console.log(newRowTempSplited)
             const newRow = [projectID]
             for (j = 0; j < newRowTempSplited.length; j++) {
-                const elementTemp = newRowTempSplited[j].replaceAll("NOW()", "2025-11-22 00:00:00")
-                    // Date is a placeholder TODO: Change this later
+                const elementTemp = newRowTempSplited[j]
                     .replaceAll("\"", "")
                     .replaceAll("\'", "")
                     .replaceAll(".", "\.")
-                    .replaceAll(",","\,")
-                    .replaceAll("(","\(")
-                    .replaceAll(")","\)")
+                    .replaceAll(",", "\,")
+                    .replaceAll("(", "\(")
+                    .replaceAll(")", "\)")
                     .trim()
+                const forNullHandling = [newRowColumns.ImagingPlatform, newRowColumns.ImageEditingTool,
+                newRowColumns.ImagingDate, newRowColumns.Resolution]
                 const element = elementTemp == ""
-                    && (j == newRowColumns.ImagingPlatform
-                    || j == newRowColumns.ImageEditingTool
-                    || j == newRowColumns.ImagingDate
-                || j == newRowColumns.Resolution)
-                    ? "NULL" : elementTemp
-                if (element == null)
-                    errorMessage = errorMessage + "This feature" + newRowColumns[j] + "is a null value. \n"
+                    && forNullHandling.includes(j)
+                    ? null : elementTemp
+                if (element == null && !forNullHandling.includes(j))
+                    errorMessage = errorMessage + "This feature", newRowColumns[j], "is a null value. \n"
                 function errorMessageBuilder(msg) {
-                    return "row " + (i + 1).toString() + " " + msg + "\n"
+                    return "row " + (i + 1).toString() + " " + msg + "\n" + element
                 }
                 switch (j) {
                     case newRowColumns.FileName:
@@ -263,7 +262,6 @@ router.post('/upload-bulk-metadata/:projectID',
                                     + Object.values(mediaFileFormatEnumeration()))
                         break;
                     case newRowColumns.CatalogID:
-                        console.log(element)
                         if (!/^[A-Z]{6}\d{7,8}$/.test(element))
                             errorMessage = errorMessage + errorMessageBuilder(
                                 "catalogID is not in the correct format. Example of a correct format: ZRCBDP0012345. 6 capital letters and then 7 numbers.")
@@ -274,11 +272,13 @@ router.post('/upload-bulk-metadata/:projectID',
                                 "clusterID is not in the correct format. Example of a correct format: 3PZRCBDP1234567.1 number, 7 capital letters and then 7 numbers.")
                         break;
                     case newRowColumns.ImagingDate:
-                        if (isNaN(new Date(element)) && element != "NULL")
+                        // console.log(i,element)
+                        if (isNaN(new Date(element)) && element != null)
                             errorMessage = errorMessage + errorMessageBuilder("Invalid Imaging Date format.")
                         break;
                     case newRowColumns.Resolution:
-                        if (!/^\d{1,5}x\d{1,5}$/.test(element) && element !="NULL")
+                        // console.log(element)
+                        if (!/^\d{1,5}x\d{1,5}$/.test(element) && element != null)
                             errorMessage = errorMessage
                                 + errorMessageBuilder(
                                     "resolution is not in the correct format. example format: 1440x720, the length and width should not be more than 5 digits.")
@@ -303,7 +303,7 @@ router.post('/upload-bulk-metadata/:projectID',
                         // } else
                         if (!req.session.imagingPlatforms.includes(element)
                             && !newImagingPlatforms.includes(element)
-                            && element != "NULL" && element != "") {
+                            && element != null && element != "") {
                             newImagingPlatforms.push(element)
                         }
                         break;
@@ -315,43 +315,27 @@ router.post('/upload-bulk-metadata/:projectID',
                         // } else
                         if (!req.session.imageEditingTools.includes(element)
                             && !newImageEditingTools.includes(element)
-                            && element != "NULL" && element != "") {
+                            && element != null && element != "") {
                             newImageEditingTools.push(element)
                         }
                         break;
-                    case newRowColumns.CreatedDate:
-                        if (isNaN(new Date(element)))
-                            errorMessage = errorMessage + errorMessageBuilder(" Invalid created Date ")
-                        break;
-                    case newRowColumns.CreatedByID:
-                        if (isNaN(parseInt(element)))
-                            errorMessage = errorMessage + errorMessageBuilder(" createdID must be an integer ")
-                        break;
-                    case newRowColumns.UpdatedDate:
-                        if (isNaN(new Date(element)))
-                            errorMessage = errorMessage + errorMessageBuilder(" Invalid updated Date ")
-                        break;
-                    case newRowColumns.UpdatedByID:
-                        if (isNaN(parseInt(element)))
-                            errorMessage = errorMessage + errorMessageBuilder(" updatedID must be an integer")
-                        break;
+
                     case newRowColumns.PhotographerID:
                         if (isNaN(parseInt(element)))
                             errorMessage = errorMessage + errorMessageBuilder(" PhotographerID must be an integer ")
 
                 }
-                if (element == "NULL")
+                if (element == null)
                     newRow.push(element)
                 else
-                    newRow.push("\"" + element.toString() + "\"")
+                    newRow.push(element.toString())
             }
-            newRow.push("NOW()")
+            newRow.push(new Date())
             newRow.push(user.UserID)
-            newRow.push("NOW()")
+            newRow.push(new Date())
             newRow.push(user.UserID)
-            newTable.push("(" + newRow.toString() + ")")
+            newTable.push(newRow)
         }
-        // console.log('newTable', newTable)
         if (errorMessage.length > 0) {
             console.log('there is error Message\n', errorMessage)
             res.json({
@@ -360,28 +344,30 @@ router.post('/upload-bulk-metadata/:projectID',
             });
             return
         }
-        console.log(req.session["imageEditingTools"])
-        console.log(req.session['imagingPlatforms'])
-        console.log('newImageEditingTools',newImageEditingTools)
-        console.log('newImagingPlatforms',newImagingPlatforms)
+        // console.log(req.session["imageEditingTools"])
+        // console.log(req.session['imagingPlatforms'])
+        // console.log('newImageEditingTools', newImageEditingTools)
+        // console.log('newImagingPlatforms', newImagingPlatforms)
+        console.log('newTable', newTable)
+        const allImageEditingTools = req.session['imageEditingTools'].concat(newImageEditingTools)
         if (newImageEditingTools != null
             && newImageEditingTools != ""
             && !req.session['imageEditingTools'].includes(newImageEditingTools))
             await db.promise().query(
-                "ALTER TABLE Media MODIFY COLUMN `ImageEditingTool` enum('"
-                + req.session['imageEditingTools'].join("','") +
-                "','" + newImageEditingTools.join("','") + "')")
-        req.session["imageEditingTools"] = req.session["imageEditingTools"].concat(newImageEditingTools)
-
+                "ALTER TABLE Media MODIFY COLUMN `ImageEditingTool` enum(?)",
+                [allImageEditingTools]
+            )
+        req.session["imageEditingTools"] = allImageEditingTools
+        const allImagingPlatforms = req.session["imagingPlatforms"].concat(newImagingPlatforms)
         if (newImagingPlatforms != null
             && newImagingPlatforms != ""
             && !req.session['imagingPlatforms'].includes(newImagingPlatforms))
             await db.promise().query(
-                "ALTER TABLE Media MODIFY COLUMN `ImagingPlatform` enum('"
-                + req.session['imagingPlatforms'].join("','") +
-                "','" + newImagingPlatforms.join("','") + "')")
-        req.session["imagingPlatforms"] = req.session["imagingPlatforms"].concat(newImagingPlatforms)
+                "ALTER TABLE Media MODIFY COLUMN `ImagingPlatform` enum(?)",
+                [allImagingPlatforms])
+        req.session["imagingPlatforms"] = allImagingPlatforms
 
+        // console.log('newTable',newTable)
         const insertQuery = `
       INSERT INTO Media(
             ProjectID,
@@ -393,8 +379,8 @@ router.post('/upload-bulk-metadata/:projectID',
             CreatedByID ,
             UpdatedDate ,
             UpdatedByID 
-        ) VALUES` + newTable;
-        await db.promise().query(insertQuery);
+        ) VALUES ?` ;
+        await db.promise().query(insertQuery, [newTable]);
 
 
 
@@ -560,6 +546,7 @@ router.post('/edit', isAuthenticated, async (req, res) => {
         WHERE MediaID = ?
                 `;
     const updatedBy = req.session.passport.user.UserID;
+    console.log('mediaData.imageEditingTool', mediaData.imageEditingTool)
     const params = [
         mediaData.fileName,
         mediaData.filePath,
@@ -590,18 +577,16 @@ router.post('/edit', isAuthenticated, async (req, res) => {
         && newImageEditingTool != ""
         && !req.session['imageEditingTools'].includes(newImageEditingTool)) {
         await db.promise().query(
-            "ALTER TABLE Media MODIFY COLUMN `ImageEditingTool` enum('"
-            + req.session['imageEditingTools'].join("','") +
-            "','" + newImageEditingTool + "')")
+            "ALTER TABLE Media MODIFY COLUMN `ImageEditingTool` enum(?)",
+            req.session.imageEditingTools.concat(newImageEditingTools))
         req.session["imageEditingTools"].push(newImageEditingTool)
     }
     if (newImagingPlatform != null
         && newImagingPlatform != ""
         && !req.session['imagingPlatforms'].includes(newImagingPlatform)) {
         await db.promise().query(
-            "ALTER TABLE Media MODIFY COLUMN `ImagingPlatform` enum('"
-            + req.session['imagingPlatforms'].join("','") +
-            "','" + newImagingPlatform + "')")
+            "ALTER TABLE Media MODIFY COLUMN `ImagingPlatform` enum(?)",
+            req.session.imagingPlatforms.concat(newImagingPlatforms))
         req.session["imagingPlatforms"].push(newImagingPlatform)
     }
     req.session.save()
@@ -617,8 +602,8 @@ router.post('/edit', isAuthenticated, async (req, res) => {
             redirectUrl: '/media/view/' + mediaData.MediaID
         });
     });
-
 });
+
 router.get('/view/:mediaId', isAuthenticated, (req, res) => {
     const mediaId = req.params.mediaId;
 
