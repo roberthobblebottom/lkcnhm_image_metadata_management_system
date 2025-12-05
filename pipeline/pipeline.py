@@ -29,7 +29,9 @@ def recursion(
         if file_or_folder_path.split(".")[-1] not in ["tiff", "raw", "tif", "jpg"]:
             print("not an image")
             continue
-
+        if "LABEL" in file_or_folder_path :
+            print("label or thumb file, skipping")
+            continue
         # This line may be the bottleneck in terms of throughput and speed
         exifData = Image.open(file_or_folder_path).getexif()
 
@@ -66,7 +68,6 @@ def recursion(
                 value = value.hex().decode() if isinstance(value, bytes) else value
                 value = value.split(" ")[0] if tagname == "DateTime" else value
                 new_row[tagname] = str(value)
-        
 
             # if type(value) is bytes:
             #     new_row[str(tagname)] = "BINARY NOT CAPTURED"
@@ -78,7 +79,7 @@ def recursion(
         new_row = (
             pl.DataFrame(new_row)
             .rename({"Software": "ImagingEditingTool"})
-            .rename({"DateTime":"ImagingDate"})
+            .rename({"DateTime": "ImagingDate"})
             .select(
                 "MorphoID",
                 "CatalogID",
