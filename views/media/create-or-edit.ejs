@@ -274,16 +274,15 @@
           ? "Then, edit image metadata entry " :"Then, enter new image metadata entry" %>
         </h2>
       </div>
-      
+
       <!-- Hidden IDs -->
       <input readonly type=<%=toBeEditedMedia != 'create-mode'
          ? 'text'
          : 'hidden'  %> name="MediaID" value="<%= toBeEditedMedia.MediaID %>">
 
       <div class="form-group">
-        <label>Project  Name</label>
-        <select name="projectName" id="projectName" requried
-        <%= currentUser.UserType != 'admin' ? 'disabled' : ''%>>
+        <label>Project Name</label>
+        <select name="projectName" id="projectName" requried <%= currentUser.UserType != 'admin' ? 'disabled' : ''%>>
           <option value="">-- Select a project --</option>
           <%allProjects.forEach( u=>{%>
           <option value="<%=u.ProjectID%>" <%=u.ProjectName==(toBeEditedMedia !='create-mode' ?
@@ -297,9 +296,7 @@
       <!-- Photographer Full Name (readonly) -->
       <div class="form-group">
         <label>Photographer Full Name</label>
-        <select name="photographerName" id="photographerName" requried
-        <%= currentUser.UserType == 'photographerOnly' ? 'disabled' : ''%>
-        >
+        <select name="photographerName" id="photographerName" requried <%= currentUser.UserType == 'photographerOnly' ? 'disabled' : ''%>>
           <option value="">-- Select a photographer--</option>
           <%allPhotographers.forEach( photographer=>{%>
           <option value="<%=photographer.UserID%>" <%=photographer.FullName==(toBeEditedMedia !='create-mode' ?
@@ -340,17 +337,17 @@
 
       <div class="form-group">
         <label for="imagingDate">Date of Imaging</label>
-        <input type="date" name="imagingDate" id="imagingDate" value="<%=toBeEditedImagingDate%>" required>
+        <input type="date" name="imagingDate" id="imagingDate" value="<%=toBeEditedImagingDate%>">
       </div>
 
       <div class="form-group">
         <label for="resolution">Resolution</label>
-        <input type="text" name="resolution" id="resolution" value="<%=toBeEditedMedia != 'create-mode' ? toBeEditedMedia.Resolution : '1x1' %>">
+        <input required readonly ="text" name="resolution" id="resolution" value="<%=toBeEditedMedia != 'create-mode' ? toBeEditedMedia.Resolution : '1x1' %>">
       </div>
 
       <div class="form-group">
         <label for="fileSize">File Size in Bytes</label>
-        <input type="number" name="fileSizeBytes" id="fileSizeBytes" value="<%=toBeEditedMedia != 'create-mode' ? toBeEditedMedia.FileSizeBytes : '999999' %>">
+        <input required type="number" name="fileSizeBytes" id="fileSizeBytes" value="<%=toBeEditedMedia != 'create-mode' ? toBeEditedMedia.FileSizeBytes : '999999' %>">
       </div>
 
       <div class="form-group">
@@ -368,12 +365,12 @@
 
       <div class="form-group">
         <label for="description">Description of Image</label>
-        <textarea name="description" id="description" required> <%=toBeEditedMedia != 'create-mode' ? toBeEditedMedia.Description : 'REMOVE THIS LATER' %></textarea>
+        <textarea name="description" id="description" > <%=toBeEditedMedia != 'create-mode' ? toBeEditedMedia.Description : 'REMOVE THIS LATER' %></textarea>
       </div>
 
       <div class="form-group">
         <label for="imagingPlatform">imaging Platform</label>
-        <select name="imagingPlatform" id="imagingPlatform" requried>
+        <select name="imagingPlatform" id="imagingPlatform">
           <option value="">-- Select a imaging platform --</option>
           <%imagingPlatforms.forEach( imagingPlatform=>{%>
           <option value="<%=imagingPlatform%>" <%=imagingPlatform==(toBeEditedMedia !='create-mode' ?
@@ -388,7 +385,7 @@
 
       <div class="form-group">
         <label for="imageEditingTool">Image Editing Tool</label>
-        <select name="imageEditingTool" id="imageEditingTool" requried>
+        <select name="imageEditingTool" id="imageEditingTool">
           <option value="">-- Select a image editing tool --</option>
           <%imageEditingTools.forEach( imageEditingTool=>{%>
           <option value="<%=imageEditingTool%>" <%=imageEditingTool==(toBeEditedMedia !='create-mode' ?
@@ -425,7 +422,8 @@
       const temp = fileNameInput.value.split(".")[0]
       fileNameInput.value = temp + fileFormat.value
     };
-function enterNewImagingEditingTool() {
+
+    function enterNewImagingEditingTool() {
       console.log('enterNewImagingEditingTool')
       Swal.fire({
         title: "Add new Imaging Editing Tool",
@@ -443,6 +441,7 @@ function enterNewImagingEditingTool() {
         }
       });
     }
+
     function enterNewImagingPlatform() {
       console.log('enterNewImagingPlatform')
       Swal.fire({
@@ -532,12 +531,12 @@ function enterNewImagingEditingTool() {
             morphoID: form.morphoID.value,
             clusterID: form.clusterID.value,
             imagingDate: form.imagingDate.value,
-            resolution: form.resolution.value ==  "" ? null: form.resolution.value,
+            resolution: form.resolution.value == "" ? null : form.resolution.value,
             fileSizeBytes: form.fileSizeBytes.value,
             fileFormat: form.fileFormat.value,
             description: form.description.value,
-            imagingPlatform: form.imagingPlatform.value == "" ? null: form.imagingPlatform.value,
-            imageEditingTool: form.imageEditingTool.value == "" ? null: form.imageEditingTool.value,
+            imagingPlatform: form.imagingPlatform.value == "" ? null : form.imagingPlatform.value,
+            imageEditingTool: form.imageEditingTool.value == "" ? null : form.imageEditingTool.value,
             newImagingPlatform: (!imagingPlatforms.includes(form.imagingPlatform.value)) ? form.imagingPlatform.value : null,
             newImageEditingTool: (!imageEditingTools.includes(form.imageEditingTool.value)) ? form.imageEditingTool.value : null,
             comments: form.comments.value,
@@ -559,38 +558,51 @@ function enterNewImagingEditingTool() {
             },
             body: formData
           });
-          if (!response.ok) {
-            const errorData = await response.json();
-            throw new Error(errorData.message || "Submission failed with status " + response.status);
+          try {
+            if (!response.ok) {
+              const errorData = await response.json();
+              throw new Error(errorData.message || "Submission failed with status " + response.status);
+            }
+
+            const data = await response.json();
+            if (!data.success) {
+              throw new Error(data.message || "Submission failed");
+            }
+
+
+            // Show success message
+            await Swal.fire({
+              title: 'Success!',
+              text: 'project submitted successfully!',
+              icon: 'success',
+              confirmButtonText: 'OK',
+              confirmButtonColor: '#28a745',
+              timer: 1000,
+              timerProgressBar: true
+            });
+
+            console.log(data.redirectUrl)
+            // Redirect if URL is provided
+            if (data.redirectUrl) {
+              window.location.href = data.redirectUrl;
+              return; // Stop further execution
+            }
+
+            // Reset form (if no redirection)
+            form.reset();
+
+          } catch (error) {
+            await Swal.fire({
+              title: 'Error!',
+              text: error.message,
+              icon: 'error',
+              confirmButtonText: 'OK',
+              confirmButtonColor: '#dc3545'
+            });
+          } finally {
+            submitBtn.disabled = false;
+            submitBtn.value = "Upload"
           }
-
-          const data = await response.json();
-          if (!data.success) {
-            throw new Error(data.message || "Submission failed");
-          }
-
-          // Show success message
-          await Swal.fire({
-            title: 'Success!',
-            text: 'project submitted successfully!',
-            icon: 'success',
-            confirmButtonText: 'OK',
-            confirmButtonColor: '#28a745',
-            timer: 1000,
-            timerProgressBar: true
-          });
-
-          console.log(data.redirectUrl)
-          // Redirect if URL is provided
-          if (data.redirectUrl) {
-            window.location.href = data.redirectUrl;
-            return; // Stop further execution
-          }
-
-          // Reset form (if no redirection)
-          form.reset();
-
-
         }
       });
     });

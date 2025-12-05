@@ -348,7 +348,7 @@ router.post('/upload-bulk-metadata/:projectID',
         // console.log(req.session['imagingPlatforms'])
         // console.log('newImageEditingTools', newImageEditingTools)
         // console.log('newImagingPlatforms', newImagingPlatforms)
-        console.log('newTable', newTable)
+        // console.log('newTable', newTable)
         const allImageEditingTools = req.session['imageEditingTools'].concat(newImageEditingTools)
         if (newImageEditingTools != null
             && newImageEditingTools != ""
@@ -426,10 +426,10 @@ router.post('/create', isAuthenticated, async (req, res) => {
         if (!filePath) missingFields.push("filePath");
         if (!catalogID) missingFields.push("catalogID");
         if (!morphoID) missingFields.push("morphoID");
-        if (!clusterID) missingFields.push("clusterID");
-        if (!imagingDate) missingFields.push("imagingDate");
+        // if (!clusterID) missingFields.push("clusterID");
+        // if (!imagingDate) missingFields.push("imagingDate");
         if (!description) missingFields.push("description");
-        if (!imagingPlatform) missingFields.push("imagingPlatform");
+        // if (!imagingPlatform) missingFields.push("imagingPlatform");
         console.log('imagingPlatform', imagingPlatform)
         console.log('createdBy', createdBy)
         if (missingFields.length > 0) {
@@ -487,18 +487,17 @@ router.post('/create', isAuthenticated, async (req, res) => {
             && newImageEditingTool != ""
             && !req.session['imageEditingTools'].includes(newImageEditingTool))
             await db.promise().query(
-                "ALTER TABLE Media MODIFY COLUMN `ImageEditingTool` enum('"
-                + req.session['imageEditingTools'].join("','") +
-                "','" + newImageEditingTool + "')")
+                "ALTER TABLE Media MODIFY COLUMN `ImageEditingTool` enum(?)",
+                 req.session['imageEditingTools'].concat(newImageEditingTool)
+                )
         req.session["imageEditingTools"].push(newImageEditingTool)
 
         if (newImagingPlatform != null
             && newImagingPlatform != ""
             && !req.session['imagingPlatforms'].includes(newImagingPlatform))
             await db.promise().query(
-                "ALTER TABLE Media MODIFY COLUMN `ImagingPlatform` enum('"
-                + req.session['imagingPlatforms'].join("','") +
-                "','" + newImagingPlatform + "')")
+                "ALTER TABLE Media MODIFY COLUMN `ImagingPlatform` enum(?)",
+                req.session['imagingPlatforms'].concat(newImagingPlatform))
         req.session["imagingPlatforms"].push(newImagingPlatform)
 
         const [result] = await db.promise().query(insertQuery, values);
