@@ -7,6 +7,7 @@ const { formatDisplayDate, userTypesEnumeration, imageEditingToolEnumeration,
 const multer = require('multer');
 const fs = require("fs");
 const path = require("path");
+const { Callbacks } = require("jquery");
 const upload = multer({ dest: "upload-bulk-metadata/" });
 
 // ✅ Admin Media Management Main Page Controller
@@ -199,12 +200,20 @@ router.post('/upload-bulk-metadata/:projectID',
         console.log('absolutePath', absolutePath)
         const jsonString = fs.readFileSync(absolutePath, "utf-8");
         const newRowsTemp = jsonString.split('\n').slice(1)
+        fs.rm(absolutePath, callback = (err) => { 
+            if (err) {
+                // File deletion failed
+                console.error(err.message);
+                return;
+            }
+            console.log("File deleted successfully");
+        })
         const newRowColumns = {
             MorphoID: 0,CatalogID:1, FileName: 2, FilePath: 3,
             FileSizeBytes: 4, FileFormat: 5, PhotographerID: 6,
             ImagingDate: 7, ImageEditingTool: 8,
             Comments: 9, Resolution: 10,
-            imagingPlatform: 11
+            ImagingPlatform: 11
         }
         const user = req.session.passport.user
         function isValidFileName(filename, fileFormat) {
@@ -223,7 +232,7 @@ router.post('/upload-bulk-metadata/:projectID',
             if (newRowTempSplited.length == 1 && newRowTempSplited[0] == "") {
                 continue
             }
-            console.log(newRowTempSplited)
+            // console.log(newRowTempSplited)
             const newRow = [projectID]
             for (j = 0; j < newRowTempSplited.length; j++) {
                 const elementTemp = newRowTempSplited[j].replaceAll("NOW()", "2025-11-22 00:00:00")
@@ -231,12 +240,15 @@ router.post('/upload-bulk-metadata/:projectID',
                     .replaceAll("\"", "")
                     .replaceAll("\'", "")
                     .replaceAll(".", "\.")
+                    .replaceAll(",","\,")
+                    .replaceAll("(","\(")
+                    .replaceAll(")","\)")
                     .trim()
                 const element = elementTemp == ""
-                    && (j == newRowColumns.imagingPlatform
-                    || j == newRowColumns.imagingPlatforms
-                    || newRowColumns.ImagingDate
-                || newRowColumns.Resolution)
+                    && (j == newRowColumns.ImagingPlatform
+                    || j == newRowColumns.ImageEditingTool
+                    || j == newRowColumns.ImagingDate
+                || j == newRowColumns.Resolution)
                     ? "NULL" : elementTemp
                 if (element == null)
                     errorMessage = errorMessage + "This feature" + newRowColumns[j] + "is a null value. \n"
@@ -266,7 +278,6 @@ router.post('/upload-bulk-metadata/:projectID',
                             errorMessage = errorMessage + errorMessageBuilder("Invalid Imaging Date format.")
                         break;
                     case newRowColumns.Resolution:
-                        console.log(element)
                         if (!/^\d{1,5}x\d{1,5}$/.test(element) && element !="NULL")
                             errorMessage = errorMessage
                                 + errorMessageBuilder(
@@ -283,7 +294,7 @@ router.post('/upload-bulk-metadata/:projectID',
                                     "Invalid file format. The format should be any one of these: "
                                     + Object.values(mediaFileFormatEnumeration()).toString())
                         break;
-                    case newRowColumns.imagingPlatform:
+                    case newRowColumns.ImagingPlatform:
                         // if (!Object.values(imagingPlatformEnumeration()).includes(element)) {
                         //     errorMessage = errorMessage + errorMessageBuilder(
                         //         " Invalid image platform. The platform should be any one of these: "
@@ -292,7 +303,7 @@ router.post('/upload-bulk-metadata/:projectID',
                         // } else
                         if (!req.session.imagingPlatforms.includes(element)
                             && !newImagingPlatforms.includes(element)
-                            && element != "") {
+                            && element != "NULL" && element != "") {
                             newImagingPlatforms.push(element)
                         }
                         break;
@@ -304,7 +315,7 @@ router.post('/upload-bulk-metadata/:projectID',
                         // } else
                         if (!req.session.imageEditingTools.includes(element)
                             && !newImageEditingTools.includes(element)
-                            && element != "") {
+                            && element != "NULL" && element != "") {
                             newImageEditingTools.push(element)
                         }
                         break;

@@ -84,7 +84,7 @@ CREATE TABLE Media (
         FileFormat ENUM(".jpg", ".jpeg", ".png",".tiff", ".svg", ".raw",".tif") NOT NULL,
         Description VARCHAR(225),
         ImagingPlatform ENUM('Leica(L5)','Mitutoyo(L5)','Olympus(L4Prep)',
-        'Olympus(L5)','Passport(L5)','VD(L4Prep)','Other'),
+        'Olympus(L5)','Passport(L5)','VD(L4Prep)'),
         ImageEditingTool ENUM('photoshop','gimp'),
         Comments VARCHAR(255),
         CreatedDate DATETIME NOT NULL,
