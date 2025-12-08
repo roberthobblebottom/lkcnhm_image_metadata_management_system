@@ -50,16 +50,14 @@ router.get(
       FROM Media m
       JOIN Project p ON m.ProjectID = p.ProjectID
       JOIN ProjectUserPhotographyLink pupl ON pupl.ProjectID = p.ProjectID
-      JOIN User photographer ON pupl.PhotographerID = photographer.UserID  
+      JOIN User photographer ON m.PhotographerID = photographer.UserID  
     `;
     const user = req.session.passport.user;
     const query =
       user.UserType == userTypesEnumeration().admin
         ? baseQuery + "\nORDER BY m.CreatedDate DESC"
         : baseQuery +
-          "\nWHERE m.IsDeleted = 0 AND photographer.UserID =" +
-          user.UserID +
-          " ORDER BY m.CreatedDate DESC";
+          "\nWHERE m.IsDeleted = 0 AND (photographer.UserID =? )  ORDER BY m.CreatedDate DESC";
 
     const anyLinks = (
       await db.promise().query<RowDataPacket[]>(
@@ -71,7 +69,8 @@ router.get(
         [user.UserID, user.UserID]
       )
     )[0];
-    db.query(query, (err: any, results: any) => {
+
+    db.query(query, [user.UserID], (err: any, results: any) => {
       if (err) {
         console.error("Database error:", err);
         // Render the media page with empty results and error message
@@ -81,7 +80,6 @@ router.get(
           errorMessage: "Failed to load media data. Please try again later.",
         });
       }
-
       // Successful query
       res.render("media/view-all", {
         title: "Media Management",
@@ -176,12 +174,17 @@ router.get(
     }
   ) => {
     const mediaID = req.params.mediaID;
-    const allPhotographersQuery = `SELECT FullName, UserID, UserType FROM User WHERE IsDeleted = 0;`;
+    const allPhotographersQuery = `SELECT FullName, UserID, UserType FROM User JOIN ProjectUserPhotographyLink pupl ON pupl.PhotographerID = User.UserID
+              JOIN Project ON Project.ProjectID = pupl.ProjectID
+              WHERE User.IsDeleted = 0 AND User.RequestStatus = 'approved' AND User.UserID =? `;
     const allPhotographers = (
-      await db.promise().query(allPhotographersQuery)
+      await db.promise().query(allPhotographersQuery,[req.session.passport.user.UserID])
     )[0];
     const allProjects = (
-      await db.promise().query("SELECT * FROM Project WHERE IsDeleted = 0")
+      await db.promise().query(`SELECT * FROM Project 
+        JOIN ProjectUserPhotographyLink pupl ON pupl.ProjectID = Project.ProjectID 
+        WHERE Project.IsDeleted = 0 AND pupl.PhotographerID = ?`, [req.session.passport.user.UserID]
+      )
     )[0];
 
     //For EDIT only
@@ -634,6 +637,7 @@ router.post(
       // if (!imagingPlatform) missingFields.push("imagingPlatform");
       console.log("imagingPlatform", imagingPlatform);
       console.log("createdBy", createdBy);
+      console.log("photographerID",photographerID)
       if (missingFields.length > 0) {
         return res.status(400).json({
           success: false,

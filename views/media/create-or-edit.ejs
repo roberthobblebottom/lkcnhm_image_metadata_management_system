@@ -282,7 +282,7 @@
 
       <div class="form-group">
         <label>Project Name</label>
-        <select name="projectName" id="projectName" requried <%= currentUser.UserType != 'admin' ? 'disabled' : ''%>>
+        <select name="projectName" id="projectName" requried <%= currentUser.UserType == 'phtographerOnly' ? 'disabled' : ''%>>
           <option value="">-- Select a project --</option>
           <%allProjects.forEach( u=>{%>
           <option value="<%=u.ProjectID%>" <%=u.ProjectName==(toBeEditedMedia !='create-mode' ?
@@ -544,6 +544,7 @@
             projectID: form.projectName.value,
             photographerID: form.photographerName.value
           })
+          console.log("HERERERERER")
           console.log(formData)
 
           const submitBtn = form.querySelector('button[type="submit"]');
