@@ -272,8 +272,8 @@ router.get("/view-all", isAuthenticated,isAdminOrProjectOwner, async (req, res) 
 });
 
 // View Request (GET)
-router.get("/view/:id", isAuthenticated,isAdminOrProjectOwner, async (req, res) => {
-    const projectID = req.params.id;
+router.get("/view/:projectID", isAuthenticated,isAdminOrProjectOwner, async (req, res) => {
+    const projectID = req.params.projectID;
     const query = `
     SELECT
         p.*,
@@ -357,8 +357,8 @@ router.get("/view/:id", isAuthenticated,isAdminOrProjectOwner, async (req, res) 
 
 // Delete Request (POST)
 // Soft Delete Request (POST)
-router.post("/delete/:id", isAuthenticated,isAdminOrProjectOwner, (req, res) => {
-    const projectID = req.params.id;
+router.post("/delete/:projectID", isAuthenticated,isAdminOrProjectOwner, (req, res) => {
+    const projectID = req.params.projectID;
     const query = `
         UPDATE Project
         SET
@@ -378,8 +378,8 @@ router.post("/delete/:id", isAuthenticated,isAdminOrProjectOwner, (req, res) => 
 });
 
 //undo soft delete
-router.post("/restore/:id", isAuthenticated,isAdminOrProjectOwner, (req, res) => {
-    const projectID = req.params.id;
+router.post("/restore/:projectID", isAuthenticated,isAdminOrProjectOwner, (req, res) => {
+    const projectID = req.params.projectID;
     const query = `
         UPDATE Project
         SET
@@ -400,9 +400,9 @@ router.post("/restore/:id", isAuthenticated,isAdminOrProjectOwner, (req, res) =>
 
 // Edit Project (GET)
 // Define queries at the top of your file for better maintainability
-router.get("/edit/:id", isAuthenticated,isAdminOrProjectOwner, async (req, res) => {
+router.get("/edit/:projectID", isAuthenticated,isAdminOrProjectOwner, async (req, res) => {
     try {
-        const projectID = req.params.id;
+        const projectID = req.params.projectID;
         const requestQuery = `
             SELECT
             p.*,
@@ -478,7 +478,7 @@ router.get("/edit/:id", isAuthenticated,isAdminOrProjectOwner, async (req, res) 
     }
 });
 
-router.post("/edit/:id", isAuthenticated,isAdminOrProjectOwner, async (req, res) => {
+router.post("/edit/:projectID", isAuthenticated,isAdminOrProjectOwner, async (req, res) => {
     try {
         const userID = req.session.passport.user.UserID
         if (!req.session.passport.user || !userID) {
@@ -491,7 +491,7 @@ router.post("/edit/:id", isAuthenticated,isAdminOrProjectOwner, async (req, res)
                 });
         }
 
-        const projectID = req.params.id;
+        const projectID = req.params.projectID;
         const {
             ProjectName,
             ImagingStartDate,
