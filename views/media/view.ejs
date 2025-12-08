@@ -3,7 +3,7 @@
 
 <head>
   <meta charset="UTF-8">
-  <title>📷 Media File Details - ID: <%= mediaId %>
+  <title>📷 Media File Details - ID: <%= mediaID %>
   </title>
   <link rel="stylesheet" href="/css/admin.css" />
   <style>
@@ -183,7 +183,7 @@
     : include('../partials/sidenav-user') %>
     <div class="media-container">
       <h2>
-        📸 Media File Details - ID: <%= mediaId %>
+        📸 Media File Details - ID: <%= mediaID %>
       </h2>
 
       <div class="media-details">
@@ -328,7 +328,7 @@
           <a href="/media/view-all" class="btn btn-primary">
             <i class="fas fa-arrow-left"></i> Back to view all media
           </a>
-          <a href="/media/create-or-edit-for-project/<%= mediaId%>/" class="btn btn-warning">
+          <a href="/media/create-or-edit-for-project/<%= mediaID%>/" class="btn btn-warning">
             <i class="fas fa-edit"></i> Edit Request
           </a>
         </div>

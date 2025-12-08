@@ -6,7 +6,8 @@ import * as passportStrategy from "passport-local";
 import crypto from 'crypto';
 import { userTypesEnumeration } from '../middleware/utils';
 import { FieldPacket, QueryResult } from "mysql2";
-
+import { Request, Response, NextFunction } from "express";
+import { Session } from "../@types/express-session";
 passport.use(new passportStrategy.Strategy(async function verify(username: any, password: crypto.BinaryLike, cb: (arg0: Error | null, arg1: boolean | undefined, arg2: { message: string; } | undefined) => void) {
     //Do not change the variable name from username to email, it doesn't work.
     const query = "SELECT PasswordSalt, HashedPassword, UserID,UserType,FullName,Email FROM User WHERE Email = ?";
@@ -40,7 +41,8 @@ passport.use(new passportStrategy.Strategy(async function verify(username: any, 
 }));
 
 // serialise user to be added into session data.
-passport.serializeUser((user: any, done: (arg0: null, arg1: { UserID: any; FullName: any; Email: any; UserType: any; }) => any) => {
+passport.serializeUser((user: any, done: (arg0: null,
+    arg1: { UserID: any; FullName: any; Email: any; UserType: any; }) => any) => {
     process.nextTick(function () {
         return done(null, {
             UserID: user.UserID,
@@ -90,10 +92,9 @@ router.post("/register", (req, res) => {
     });
 });
 
-
 // Login User
 router.post("/login",
-    (req, res, next) => {
+    (req: Request, res: Response, next: NextFunction) => {
         passport.authenticate('local', {
             successRedirect: "/", // I don't think this is doing anything.
             successFlash: true,
@@ -101,10 +102,11 @@ router.post("/login",
             failureFlash: true,
             failureMessage: "CUSTOM",// not working
         },
-            (err: any, user: Express.User, info: any) => {
+            (err: any, user: any, info: any) => {
                 if (err) return next(err);
                 if (!user) return res.status(401).send(info);
-                req.login(user, (err) => { // I am not suppose to use this as password authenticate already does it, but somehow this guy's code from stackoverflow works
+                req.login(user, (err) => {
+                // I am not suppose to use this as password authenticate already does it, but somehow this guy's code from stackoverflow works
                     if (err) return res.status(500).json({ error: "Login failed." });
 
                     // 🔄 Update LastLoginDate
@@ -116,8 +118,9 @@ router.post("/login",
                         } else {
                             console.log("🕓 LastLoginDate updated");
                         }
-                        req.session['imageEditingTools'] = Array<[QueryResult, FieldPacket[]]>((await db.promise().query(
-                            "SHOW COLUMNS FROM Media LIKE 'ImageEditingTool' ")))
+                        req.session.imageEditingTools = (
+                            await db.promise().query(
+                            "SHOW COLUMNS FROM Media LIKE 'ImageEditingTool' "))
                         [0][0]["Type"]
                             .replace("enum(", "")
                             .replace(")", "")
@@ -131,16 +134,20 @@ router.post("/login",
                             .replaceAll("'", "")
                             .split(",")
                         ip.splice(ip.length - 1,1, ip.at(-1).replace(")",""))
-                        req.session['imagingPlatforms'] = ip
+                        req.session.imagingPlatforms = ip
+                        console.log('imageEditingTools',req.session.imageEditingTools)
+                        console.log('imagingPlatforms',req.session.imagingPlatforms)
                         console.log('user',user.UserID)
                         req.session.save(err => {
                             if (err) {
-                                console.error("❌ Session Save Error:", err;
+                                console.error("❌ Session Save Error:", err);
                                 return res.status(500).json({ error: "Session error" });
                             }
                             return res.json({
                                 success: true,
-                                redirect: user.UserType === userTypesEnumeration().admin ? "/admin/dashboard" : "/user/dashboard"
+                                redirect: user.UserType === userTypesEnumeration().admin
+                                    ? "/admin/dashboard"
+                                    : "/user/dashboard"
                             });
                         });
                     });

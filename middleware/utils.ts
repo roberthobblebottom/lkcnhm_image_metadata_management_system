@@ -40,17 +40,7 @@ const mediaFileFormatEnumeration = () => {
     };
 }
 
-const imagingPlatformEnumeration = () => {
-    return {
-        LeicaL5: 'Leica(L5)',
-        MistutoyoL5: 'Mitutoyo(L5)',
-        OlympusL4Prep: 'Olympus(L4Prep)',
-        OlympusL5: 'Olympus(L5)',
-        PassportL5: 'Passport(L5)',
-        VDL4Prep: 'VD(L4Prep)',
-        Other: 'Other'
-    };
-}
+
 
 const userTypesEnumeration = () => {
     return {
@@ -62,5 +52,5 @@ const userTypesEnumeration = () => {
 
 export {
     formatDate, formatDisplayDate, requestStatusEnumeration, projectStatusEnumeration, projectTypeEnumeration,
-    mediaFileFormatEnumeration, imagingPlatformEnumeration, userTypesEnumeration
+    mediaFileFormatEnumeration,  userTypesEnumeration
 };

@@ -2,7 +2,7 @@ import { Interface } from "readline";
 
 const express = require("express");
 const router = express.Router();
-const db = require("./db");
+import { db } from "./db";
 const { isAuthenticated } = require("../middleware/auth");
 const {
   formatDisplayDate,
@@ -11,9 +11,9 @@ const {
 } = require("../middleware/utils");
 const multer = require("multer");
 import fs from "fs";
+import { FieldPacket, QueryResult, RowDataPacket } from "mysql2";
 const path = require("path");
 const upload = multer({ dest: "upload-bulk-metadata/" });
-
 router.get(
   "/view-all",
   isAuthenticated,
@@ -62,7 +62,7 @@ router.get(
           " ORDER BY m.CreatedDate DESC";
 
     const anyLinks = (
-      await db.promise().query(
+      await db.promise().query<RowDataPacket[]>(
         `
         SELECT * 
         FROM ProjectUserPhotographyLink pupl 
@@ -690,28 +690,30 @@ router.post(
         newImageEditingTool != "" &&
         !req.session["imageEditingTools"].includes(newImageEditingTool)
       )
+
+      req.session.imageEditingTools.push(newImageEditingTool);
+      const i:string[] = req.session.imageEditingTools
         await db
           .promise()
           .query(
-            "ALTER TABLE Media MODIFY COLUMN `ImageEditingTool` enum(?)",
-            req.session["imageEditingTools"].concat(newImageEditingTool)
+            "ALTER TABLE Media MODIFY COLUMN `ImageEditingTool` enum(?)",[i]
           );
-      req.session["imageEditingTools"].push(newImageEditingTool);
 
       if (
         newImagingPlatform != null &&
         newImagingPlatform != "" &&
         !req.session["imagingPlatforms"].includes(newImagingPlatform)
       )
+      req.session["imagingPlatforms"].push(newImagingPlatform);
+
+      const i2:string[] = req.session.imagingPlatforms
         await db
           .promise()
           .query(
-            "ALTER TABLE Media MODIFY COLUMN `ImagingPlatform` enum(?)",
-            req.session["imagingPlatforms"].concat(newImagingPlatform)
+            "ALTER TABLE Media MODIFY COLUMN `ImagingPlatform` enum(?)",[i2]
           );
-      req.session["imagingPlatforms"].push(newImagingPlatform);
 
-      const [result] = await db.promise().query(insertQuery, values);
+      const result:any = (await db.promise().query<RowDataPacket[]>(insertQuery, values))[0];
       console.log("✅ Media submitted successfully, ID:", result.insertId);
       req.session.save();
       res.json({
@@ -809,28 +811,32 @@ router.post(
     if (
       newImageEditingTool != null &&
       newImageEditingTool != "" &&
-      !req.session["imageEditingTools"].includes(newImageEditingTool)
+      !req.session.imageEditingTools.includes(newImageEditingTool)
     ) {
+          req.session.imageEditingTools.push(newImageEditingTool)
+      const i = req.session.imageEditingTools
+      console.log('i',i)
       await db
         .promise()
-        .query(
-          "ALTER TABLE Media MODIFY COLUMN `ImageEditingTool` enum(?)",
-          req.session.imageEditingTools.concat(newImageEditingTool)
+        .query<RowDataPacket[]>(
+          "ALTER TABLE Media MODIFY COLUMN `ImageEditingTool` ENUM(?)",
+          [i]
         );
-      req.session["imageEditingTools"].push(newImageEditingTool);
     }
+
     if (
       newImagingPlatform != null &&
       newImagingPlatform != "" &&
-      !req.session["imagingPlatforms"].includes(newImagingPlatform)
+      !req.session.imagingPlatforms.includes(newImagingPlatform)
     ) {
+      req.session.imagingPlatforms.push(newImagingPlatform);
+      const i = req.session.imagingPlatforms
       await db
         .promise()
-        .query(
+        .query<RowDataPacket[]>(
           "ALTER TABLE Media MODIFY COLUMN `ImagingPlatform` enum(?)",
-          req.session.imagingPlatforms.concat(newImagingPlatform)
+          [i]
         );
-      req.session["imagingPlatforms"].push(newImagingPlatform);
     }
     req.session.save();
 
@@ -893,7 +899,7 @@ router.get(
     ORDER BY m.CreatedDate DESC
         `;
 
-    db.query(query, [mediaID], (err: any, results: string | any[]) => {
+    db.query<RowDataPacket[]>(query, [mediaID], (err: any, results: string | any[]) => {
       if (err) {
         console.error("❌ Error fetching media record:", err);
         return res.status(500).render("error", {
@@ -938,11 +944,12 @@ router.post(
       "SELECT * FROM Media WHERE MediaID = ? AND IsDeleted = 0";
 
     db.promise()
-      .query(checkQuery, [mediaID])
-      .then(([results]: [any]) => {
-        if (results.length === 0) {
+      .query<RowDataPacket[]>(checkQuery, [mediaID])
+      .then((results) => {
+        if (results[0].length === 0) {
           req.flash("error", "Media not found or already deleted");
-          return res.redirect("/media/view-all");
+          res.redirect("/media/view-all");
+          return Promise.resolve(results)
         }
 
         const updateQuery = `
@@ -960,6 +967,7 @@ router.post(
         console.error("❌ Error soft deleting media:", error);
         req.flash("error", "Error archiving media");
         res.redirect("/media/view-all");
+        return Promise.resolve()
       });
   }
 );
@@ -983,11 +991,12 @@ router.post(
       "SELECT * FROM Media WHERE MediaID = ? AND IsDeleted = 1";
 
     db.promise()
-      .query(checkQuery, [mediaID])
-      .then(([results]: [any]) => {
-        if (results.length === 0) {
+      .query<RowDataPacket[]>(checkQuery, [mediaID])
+      .then((results) => {
+        if (results[0].length == 0) {
           req.flash("error", "Media not found or already restored");
-          return res.redirect("/media/view-all");
+res.redirect("/media/view-all")
+          return Promise.resolve(results);
         }
 
         const updateQuery = `
@@ -1000,11 +1009,15 @@ router.post(
 
         return db.promise().query(updateQuery, [userId, mediaID]);
       })
-      .then(() => res.redirect("/media/view-all"))
+      .then(() => {
+        res.redirect("/media/view-all")
+        return Promise.resolve();
+  })
       .catch((error: any) => {
         console.error("❌ Error soft deleting media:", error);
         req.flash("error", "Error archiving media");
         res.redirect("/media/view-all");
+        return Promise.resolve();
       });
   }
 );

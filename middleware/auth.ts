@@ -1,6 +1,7 @@
 
 const { userTypesEnumeration } = require('./utils');
-const isAuthenticated = (req, res, next) => {
+import {Request,Response,NextFunction} from "express"
+const isAuthenticated = (req: Request, res:Response, next:NextFunction) => {
     const user = req.session.passport.user
     console.log("Checking Auth:", user.Email);
     if (user) {
@@ -12,8 +13,7 @@ const isAuthenticated = (req, res, next) => {
     }
 };
 
-const isAdmin = (req, res, next) => {
-
+const isAdmin = (req: Request, res:Response, next:NextFunction) => {
     const user = req.session.passport.user
     if (!user || user.UserType !== userTypesEnumeration().admin) {
         console.log("🚫 Forbidden: User is not an admin");
@@ -23,7 +23,7 @@ const isAdmin = (req, res, next) => {
 };
 
 
-const isAdminOrProjectOwner = (req, res, next) => {
+const isAdminOrProjectOwner = (req:Request, res:Response, next:NextFunction) => {
 
     const user = req.session.passport.user
     if (!user || user.UserType === userTypesEnumeration().photographerOnly) {
