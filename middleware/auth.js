@@ -22,4 +22,14 @@ const isAdmin = (req, res, next) => {
     next();
 };
 
-module.exports = { isAuthenticated, isAdmin };
+
+const isAdminOrProjectOwner = (req, res, next) => {
+
+    const user = req.session.passport.user
+    if (!user || user.UserType === userTypesEnumeration().photographerOnly) {
+        console.log("🚫 Forbidden: User is not an admin or project owner");
+        return res.redirect("/login"); // 🔁 Send to login page if not admin
+    }
+    next();
+};
+module.exports = { isAuthenticated, isAdmin, isAdminOrProjectOwner };
