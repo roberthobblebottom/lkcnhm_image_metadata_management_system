@@ -213,7 +213,7 @@ router.post('/upload-bulk-metadata/:projectID',
             MorphoID: 0, CatalogID: 1, FileName: 2, FilePath: 3,
             FileSizeBytes: 4, FileFormat: 5, PhotographerID: 6,
             ImagingDate: 7, ImageEditingTool: 8,
-            Comments: 9, Resolution: 10,
+            Description: 9, Resolution: 10,
             ImagingPlatform: 11
         }
         const user = req.session.passport.user
@@ -373,7 +373,7 @@ router.post('/upload-bulk-metadata/:projectID',
             ProjectID,
             MorphoID, CatalogID,FileName, FilePath ,
             FileSizeBytes , FileFormat, PhotographerID ,
-            ImagingDate , ImageEditingTool , Comments, Resolution ,
+            ImagingDate , ImageEditingTool , Description, Resolution ,
             imagingPlatform,
             CreatedDate ,
             CreatedByID ,
