@@ -95,14 +95,14 @@ router.post("/create", isAuthenticated, async (req, res) => {
                 message: "there are no selected Imaging Platforms",
             });
         }
-        console.log('req.body.selectedPhotographers',  req.body.selectedPhotographers)
+        console.log('req.body.selectedPhotographers', req.body.selectedPhotographers)
         console.log(req.session.passport.user.UserID)
         if (req.body.selectedPhotographers.length == 0) {
             return res.status(400).json({
                 success: false,
                 message: "there are no selected selected photographers",
             });
-        } else if (!req.body.selectedPhotographers.includes(userID.toString())){
+        } else if (!req.body.selectedPhotographers.includes(userID.toString())) {
             return res.status(400).json({
                 success: false,
                 message: "Photographers must include him or herself.",
@@ -421,26 +421,18 @@ router.get("/edit/:id", isAuthenticated, async (req, res) => {
             allPhotographers,
         ] = await Promise.all([
             db.promise().query(requestQuery, [projectID]),
-            db
-                .promise()
-                .query(
-                    "SELECT ImagingPlatform FROM ImagingPlatformInstance WHERE ProjectID = ? ORDER BY ImagingPlatform",
-                    [projectID]
-                ),
-            db
-                .promise()
-                .query(
-                    "SELECT user.UserID ,user.FullName FROM ProjectUserPhotographyLink p JOIN User user on user.UserID = p.PhotographerID WHERE p.ProjectID = ? ",
-                    [projectID]
-                ),
-
-            db
-                .promise()
-                .query(
-                    "SELECT UserID,FullName FROM User WHERE RequestStatus = '" +
-                    requestStatusEnumeration().approved +
-                    "'"
-                ),
+            db.promise().query(
+                "SELECT ImagingPlatform FROM ImagingPlatformInstance WHERE ProjectID = ? ORDER BY ImagingPlatform",
+                [projectID]
+            ),
+            db.promise().query(
+                "SELECT user.UserID ,user.FullName FROM ProjectUserPhotographyLink p JOIN User user on user.UserID = p.PhotographerID WHERE p.ProjectID = ? ",
+                [projectID]
+            ),
+            db.promise().query(
+                "SELECT UserID,FullName FROM User WHERE RequestStatus = ?",
+                [requestStatusEnumeration().approved]
+            ),
         ]);
         if (requestResults[0].length === 0) {
             return res.status(404).render("error", { message: "Request not found" });
@@ -535,14 +527,14 @@ router.post("/edit/:id", isAuthenticated, async (req, res) => {
             return res
                 .status(400)
                 .json({ success: false, message: "no Selected Photographers" });
-        } 
+        }
         if (!newSelectedPhotographers.includes(userID.toString())) {
             return res.status(400).json({
                 success: false,
                 message: "Photographers must include him or herself.",
             });
         }
-    
+
         // Date validation
         const startDate = new Date(ImagingStartDate);
         const endDate = new Date(ImagingEndDate);
