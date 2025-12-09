@@ -210,7 +210,7 @@
       <div class="form-group">
 
         <h3>File (CSV only):</h3>
-        <input id="fileInput" type="file" name="bulk-metadata" accept=".csv" />
+        <input id="fileInput" type="file" name="bulk-metadata" accept=".csv" required />
       </div>
 
       <input type="submit" class="btn" id="submitButton" value="Upload" />
@@ -233,6 +233,7 @@
         var data = null
         try {
           const formData = new FormData(form)
+
           const response = await fetch('/media/upload-bulk-metadata/' + form.selectProjects.value, {
             method: 'POST',
             enctype: "multipart/form-data",
