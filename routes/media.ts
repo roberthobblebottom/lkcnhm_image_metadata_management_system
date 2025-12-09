@@ -12,6 +12,7 @@ const {
 const multer = require("multer");
 import fs from "fs";
 import { FieldPacket, QueryResult, RowDataPacket } from "mysql2";
+import { AsyncLocalStorage } from "async_hooks";
 const path = require("path");
 const upload = multer({ dest: "upload-bulk-metadata/" });
 router.get(
@@ -581,6 +582,11 @@ router.post(
     });
   }
 );
+router.get("/download", isAuthenticated, async (req, res) => { 
+  const filePath:string = "image metadata template for only one project.xlsx"
+    
+  res.download(filePath)
+})
 router.post(
   "/create",
   isAuthenticated,
