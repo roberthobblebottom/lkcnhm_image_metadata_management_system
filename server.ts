@@ -7,6 +7,7 @@ const authRoutes = require("./routes/auth");
 const adminRoutes = require('./routes/admin/admin');
 const mediaRoutes = require('./routes/media');
 const projectRoutes = require('./routes/project');
+const userSettingsRoutes = require('./routes/userSettings')
 const adminUserManagementRoutes = require('./routes/admin/user-management');
 const { isAuthenticated, isAdmin } = require("./middleware/auth");
 const passport = require("passport");
@@ -37,6 +38,7 @@ app.use("/auth", authRoutes);
 app.use("/admin", adminRoutes);
 app.use("/media", mediaRoutes);
 app.use("/project", projectRoutes);
+app.use("/user-settings", userSettingsRoutes);
 app.use("/admin/user-management", adminUserManagementRoutes);
 
 // ✅ Serve HTML pages
@@ -313,80 +315,6 @@ app.post("/forgot-password", (req: { body: { userId: any; Password: any; newPass
             }
 
             res.json({ success: true, message: "Password updated successfully" });
-        });
-    });
-});
-
-//change [password] route
-// app.get("/user/dashboard",isAuthenticated,(req, res) => {
-//     res.sendFile(path.resolve(__dirname, "views", "user/dashboard.html"));
-// });
-app.get('/change-password', isAuthenticated, (
-        req: {
-            session: { passport: { user: { Email: any; }; }; },
-        },
-        res: {
-            redirect: (arg0: string) => any;
-            render: (arg0: string,
-                arg1: { user: any; currentUser: any, title: string; }) => void;
-        }
- ) => {
-    if (!req.session.passport.user) {
-        return res.redirect('/login');
-    }
-
-    res.render('change-password', {
-        user: req.session.passport.user.Email,
-        currentUser: req.session.passport.user,
-        title: "Change Password"
-    }); // ✅ pass `user` to EJS
-});
-
-app.post('/change-password', isAuthenticated, (req: { session: { passport: { user: { Email: any; }; }; }; body: { old_password: any; new_password: any; }; }, res: { json: (arg0: { success: boolean; message: string; }) => any; }) => {
-    const email = req.session.passport.user.Email;
-    const { old_password, new_password } = req.body;
-
-    console.log("📩 Change Password Request for:", email);
-    console.log("🧾 Request Body:", req.body);
-
-    const checkQuery = 'SELECT Password FROM User WHERE Email = ?';
-
-    db.query(checkQuery, [email], (err: any, results: string | any[]) => {
-        if (err) {
-            console.error("❌ MySQL SELECT error:", err);
-            return res.json({ success: false, message: "❌ Database error" });
-        }
-
-        if (results.length === 0) {
-            return res.json({ success: false, message: "❌ Email not found" });
-        }
-
-        const currentPassword = results[0].Password;
-
-        if (old_password !== currentPassword) {
-            return res.json({ success: false, message: "❌ Old password is incorrect" });
-        }
-
-        if (old_password === new_password) {
-            return res.json({ success: false, message: "❌ New password must be different from old password" });
-        }
-
-        const updateQuery = 'UPDATE User SET Password = ?, UpdatedDate = NOW() WHERE Email = ?';
-
-
-        db.query(updateQuery, [new_password, email], (err: any, updateResult: { affectedRows: number; }) => {
-            if (err) {
-                console.error("❌ MySQL UPDATE error:", err);
-                return res.json({ success: false, message: "❌ Failed to update password" });
-            }
-
-            if (updateResult.affectedRows === 0) {
-                return res.json({ success: false, message: "❌ No rows were updated" });
-            }
-
-            console.log("✅ Password updated for:", email);
-            return res.json({ success: true, message: "✅ Password changed successfully!" });
-
         });
     });
 });
