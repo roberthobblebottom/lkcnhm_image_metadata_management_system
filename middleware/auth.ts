@@ -2,7 +2,13 @@
 const { userTypesEnumeration } = require('./utils');
 import {Request,Response,NextFunction} from "express"
 const isAuthenticated = (req: Request, res:Response, next:NextFunction) => {
-    const user = req.session.passport.user
+    if (req.session.passport == null) { 
+        console.log('passport is null, redirecting to home page')
+
+        return res.redirect("/login"); // 🔁 Redirect to login
+    }
+        const user = req.session.passport.user
+
     console.log("Checking Auth:", user.Email);
     if (user) {
         console.log("✅ User is authenticated.");
