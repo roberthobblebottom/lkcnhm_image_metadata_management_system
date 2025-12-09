@@ -162,7 +162,7 @@ router.get(
   isAuthenticated,
   async (
     req: {
-      params: { mediaID: any };
+      params: { mediaID: number|string };
       session: { [x: string]: any; passport: { user: any } };
     },
     res: {
@@ -270,11 +270,15 @@ router.get(
     const user = req.session.passport.user;
     const query =
       `
-    SELECT p.ProjectID, p.ProjectName
-    FROM ProjectUserPhotographyLink pupl
-    JOIN Project p ON pupl.ProjectID = p.ProjectID
-    WHERE pupl.PhotographerID = ` + user.UserID;
-    const allProjects = (await db.promise().query(query))[0];
+    SELECT  p.ProjectID, p.ProjectName
+    FROM Project p
+`
+    const q2 = user.UserType != userTypesEnumeration().admin
+      ? query + `
+        JOIN ProjectUserPhotographyLink pupl ON pupl.ProjectID = p.ProjectID
+        WHERE pupl.PhotographerID = ` + user.UserID
+      : query ;
+    const allProjects = (await db.promise().query(q2))[0];
     console.log(allProjects);
     res.render("media/upload-bulk-metadata", {
       currentUser: user,
@@ -885,7 +889,7 @@ router.get(
   "/view/:mediaID",
   isAuthenticated,
   (
-    req: { params: { mediaID: any }; session: { passport: { user: any } } },
+    req: { params: { mediaID: number }; session: { passport: { user: any } } },
     res: {
       status: (arg0: number) => {
         (): any;
@@ -900,7 +904,7 @@ router.get(
         arg1: {
           currentUser: any;
           media: any; // Since we're querying by ID, we'll only get one record
-          mediaID: any;
+          mediaID: number;
           title: string;
         }
       ) => void;
@@ -959,7 +963,7 @@ router.post(
   isAuthenticated,
   (
     req: {
-      params: { mediaID: any };
+      params: { mediaID: number };
       session: { passport: { user: { UserID: any } } };
       flash: (arg0: string, arg1: string) => void;
     },
@@ -1006,7 +1010,7 @@ router.post(
   isAuthenticated,
   (
     req: {
-      params: { mediaID: any };
+      params: { mediaID: number };
       session: { passport: { user: { UserID: any } } };
       flash: (arg0: string, arg1: string) => void;
     },
