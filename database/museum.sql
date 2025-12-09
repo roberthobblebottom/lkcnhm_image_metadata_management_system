@@ -130,6 +130,7 @@ VALUES (2,"test project 2",'BDP',NOW(),DATE_ADD(NOW(),INTERVAL 2 DAY),NOW(),NOW(
 'started','1','1','sample project summary','sample specimen details');
 -- link the project owner as a phtogragpher
 INSERT INTO ProjectUserPhotographyLink (ProjectID,PhotographerID) VALUES ("2",2); 
+INSERT INTO ProjectUserPhotographyLink (ProjectID,PhotographerID) VALUES ("2",3); 
 INSERT INTO ImagingPlatformInstance(ProjectID,ImagingPlatform) VALUES (2,'Leica(L5)');
 
 
@@ -143,7 +144,21 @@ Comments,CreatedDate,CreatedByID,UpdatedDate,UpdatedByID) VALUES (
 "Leica(L5)", "photoshop", 'comments', NOW(),1,NOW(),1);
 
 
+INSERT INTO Media (ProjectID,PhotographerID,FileName,FilePath,CatalogID,
+MorphoID,ClusterID,ImagingDate,Resolution,FileSizeBytes,FileFormat,
+Description,ImagingPlatform,ImageEditingTool,
+Comments,CreatedDate,CreatedByID,UpdatedDate,UpdatedByID) VALUES (
+2,2,"photo.png","filepath",'catelogid',"MorphoID","ClusterID",NOW(),
+"1000x1000",1000,".png","Description",
+"Leica(L5)", "photoshop", 'comments', NOW(),1,NOW(),1);
 
+INSERT INTO Media (ProjectID,PhotographerID,FileName,FilePath,CatalogID,
+MorphoID,ClusterID,ImagingDate,Resolution,FileSizeBytes,FileFormat,
+Description,ImagingPlatform,ImageEditingTool,
+Comments,CreatedDate,CreatedByID,UpdatedDate,UpdatedByID) VALUES (
+3,2,"photo.png","filepath",'catelogid',"MorphoID","ClusterID",NOW(),
+"1000x1000",1000,".png","Description",
+"Leica(L5)", "photoshop", 'comments', NOW(),1,NOW(),1);
 SELECT * FROM User;
 SELECT 1 FROM User limit 1;
 SELECT * FROM Project;

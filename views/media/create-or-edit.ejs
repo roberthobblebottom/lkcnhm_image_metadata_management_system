@@ -281,27 +281,15 @@
          : 'hidden'  %> name="MediaID" value="<%= toBeEditedMedia.MediaID %>">
 
       <div class="form-group">
-        <label>Project Name</label>
-        <select name="projectName" id="projectName" requried <%= currentUser.UserType == 'phtographerOnly' ? 'disabled' : ''%>>
-          <option value="">-- Select a project --</option>
-          <%allProjects.forEach( u=>{%>
-          <option value="<%=u.ProjectID%>" <%=u.ProjectName==(toBeEditedMedia !='create-mode' ?
-                toBeEditedMedia.ProjectName : 'test project 1' ) ? 'selected' : '' %>>
-            <%=u.ProjectName%>
-          </option>
-          <%})%>
-        </select>
-      </div>
-
-      <!-- Photographer Full Name (readonly) -->
-      <div class="form-group">
-        <label>Photographer Full Name</label>
-        <select name="photographerName" id="photographerName" requried <%= currentUser.UserType == 'photographerOnly' ? 'disabled' : ''%>>
-          <option value="">-- Select a photographer--</option>
-          <%allPhotographers.forEach( photographer=>{%>
-          <option value="<%=photographer.UserID%>" <%=photographer.FullName==(toBeEditedMedia !='create-mode' ?
-                toBeEditedPhotographer.FullName : currentUser.FullName) ? 'selected' : '' %>>
-            <%=photographer.FullName%>
+        <label>Project and Photographer Pair</label>
+        <select name="projectAndPhotographerPair" id="projectAndPhotographerPair" requried <%= currentUser.UserType == 'phtographerOnly' ? 'disabled' : ''%>>
+          <option value="">-- Select a project and photographer pair--</option>
+          <%allProjectAndPhotographerPairs.forEach( u=>{%>
+          <option value="<%=u.ProjectID%>,<%=u.UserID%>" <%=
+            u.projectName== toBeEditedMedia.ProjectName  
+            && (u.photographerName == toBeEditedMedia.photographerName) 
+          ? 'selected'  : "" %>>
+            <%=u.projectName%>-<%=u.photographerName%>
           </option>
           <%})%>
         </select>
@@ -342,7 +330,7 @@
 
       <div class="form-group">
         <label for="resolution">Resolution</label>
-        <input required  type="text" name="resolution" id="resolution" value="<%=toBeEditedMedia != 'create-mode' ? toBeEditedMedia.Resolution : '1x1' %>">
+        <input required type="text" name="resolution" id="resolution" value="<%=toBeEditedMedia != 'create-mode' ? toBeEditedMedia.Resolution : '1x1' %>">
       </div>
 
       <div class="form-group">
@@ -365,7 +353,7 @@
 
       <div class="form-group">
         <label for="description">Description of Image</label>
-        <textarea name="description" id="description" > <%=toBeEditedMedia != 'create-mode' ? toBeEditedMedia.Description : 'REMOVE THIS LATER' %></textarea>
+        <textarea name="description" id="description"> <%=toBeEditedMedia != 'create-mode' ? toBeEditedMedia.Description : 'REMOVE THIS LATER' %></textarea>
       </div>
 
       <div class="form-group">
@@ -541,8 +529,7 @@
             newImageEditingTool: (!imageEditingTools.includes(form.imageEditingTool.value)) ? form.imageEditingTool.value : null,
             comments: form.comments.value,
             MediaID: form.MediaID.value,
-            projectID: form.projectName.value,
-            photographerID: form.photographerName.value
+            projectAndPhotographerPair: form.projectAndPhotographerPair.value,
           })
           console.log("HERERERERER")
           console.log(formData)

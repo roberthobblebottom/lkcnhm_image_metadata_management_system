@@ -49,16 +49,25 @@ router.get(
         photographer.FullName As photographerName
       FROM Media m
       JOIN Project p ON m.ProjectID = p.ProjectID
-      JOIN ProjectUserPhotographyLink pupl ON pupl.ProjectID = p.ProjectID
       JOIN User photographer ON m.PhotographerID = photographer.UserID  
     `;
     const user = req.session.passport.user;
-    const query =
-      user.UserType == userTypesEnumeration().admin
-        ? baseQuery + "\nORDER BY m.CreatedDate DESC"
-        : baseQuery +
-          "\nWHERE m.IsDeleted = 0 AND (photographer.UserID =? )  ORDER BY m.CreatedDate DESC";
-
+    var query: string = "";
+    switch (user.UserType) {
+      case userTypesEnumeration().admin:
+        query = baseQuery + "\nORDER BY m.CreatedDate DESC";
+        break;
+      case userTypesEnumeration().projectOwner:
+        query =
+          baseQuery +
+          "\nWHERE m.IsDeleted = 0 AND (p.ProjectOwnerID =? )  ORDER BY m.CreatedDate DESC";
+        break;
+      case userTypesEnumeration().photographerOnly:
+        query =
+          baseQuery +
+          "\nWHERE m.IsDeleted = 0 AND (m.PhotographerID =? )  ORDER BY m.CreatedDate DESC";
+        break;
+    }
     const anyLinks = (
       await db.promise().query<RowDataPacket[]>(
         `
@@ -80,6 +89,7 @@ router.get(
           errorMessage: "Failed to load media data. Please try again later.",
         });
       }
+      console.log('results',results)
       // Successful query
       res.render("media/view-all", {
         title: "Media Management",
@@ -162,11 +172,9 @@ router.get(
           currentUser: any;
           imageEditingTools: any;
           imagingPlatforms: any;
-          allPhotographers: any;
-          allProjects: any;
+          allProjectAndPhotographerPairs: any;
           fileFormats: unknown[];
           toBeEditedMedia: any;
-          toBeEditedPhotographer: any;
           toBeEditedImagingDate: any;
           title: string;
         }
@@ -174,57 +182,69 @@ router.get(
     }
   ) => {
     const mediaID = req.params.mediaID;
-    const allPhotographersQuery = `SELECT FullName, UserID, UserType FROM User JOIN ProjectUserPhotographyLink pupl ON pupl.PhotographerID = User.UserID
-              JOIN Project ON Project.ProjectID = pupl.ProjectID
-              WHERE User.IsDeleted = 0 AND User.RequestStatus = 'approved' AND User.UserID =? `;
-    const allPhotographers = (
-      await db.promise().query(allPhotographersQuery,[req.session.passport.user.UserID])
+    const allProjectAndPhotographerPairsQuery = `    Select pupl.ProjectID, photographer.UserID, 
+          p.ProjectName as projectName, photographer.FullName as photographerName 
+        FROM ProjectUserPhotographyLink pupl 
+        JOIN Project p ON p.ProjectID = pupl.ProjectID 
+        JOIN User photographer ON photographer.UserID = pupl.PhotographerID
+        `;
+    const user = req.session.passport.user;
+    var q2: string;
+    if (user.UserType == userTypesEnumeration().projectOwner) {
+      q2 = allProjectAndPhotographerPairsQuery + "WHERE p.ProjectOwnerID = ?";
+    } else if (user.UserType == userTypesEnumeration().photographerOnly) {
+      q2 = allProjectAndPhotographerPairsQuery + "WHERE photographer.UserID = ?";
+    } else if (user.UserType == userTypesEnumeration().admin){
+      q2 = allProjectAndPhotographerPairsQuery;
+    }
+    const allProjectAndPhotographerPairs = (
+      await db.promise().query(q2, [user.UserID])
     )[0];
-    const allProjects = (
-      await db.promise().query(`SELECT * FROM Project 
-        JOIN ProjectUserPhotographyLink pupl ON pupl.ProjectID = Project.ProjectID 
-        WHERE Project.IsDeleted = 0 AND pupl.PhotographerID = ?`, [req.session.passport.user.UserID]
-      )
-    )[0];
+    console.log(
+      "allProjectAndPhotographerPairs",
+      allProjectAndPhotographerPairs
+    );
 
     //For EDIT only
     const currentMediaQuery =
       `SELECT Media.*,
-        projectOwner.FullName projectOwnerName,Project.ProjectName , projectOwner.UserID
+        projectOwner.FullName projectOwnerName,
+        Project.ProjectName ,
+        photographer.FullName as photographerName 
         FROM Media
         JOIN Project ON Media.ProjectID = Project.ProjectID
         JOIN User projectOwner ON Project.ProjectOwnerID = projectOwner.UserID
+        JOIN User photographer ON photographer.UserID = Media.PhotographerID
         WHERE Media.MediaID = ` + mediaID;
     const toBeEditedMedia =
       mediaID != "create-mode"
         ? (await db.promise().query(currentMediaQuery))[0][0]
         : "create-mode";
-
-    const toBeEditedPhotographerQuery =
-      `
-                SELECT User.FullName, User.UserID
-                FROM User
-                WHERE User.IsDeleted = 0
-                AND User.UserID = 
-                ` + toBeEditedMedia.PhotographerID;
-    const toBeEditedPhotographer =
-      mediaID != "create-mode"
-        ? (await db.promise().query(toBeEditedPhotographerQuery))[0][0]
-        : "create-mode";
+    console.log("-------");
+    console.log(toBeEditedMedia);
+    // const toBeEditedPhotographerQuery =
+    //   `
+    //             SELECT User.FullName, User.UserID
+    //             FROM User
+    //             WHERE User.IsDeleted = 0
+    //             AND User.UserID =
+    //             ` + toBeEditedMedia.PhotographerID;
+    // const toBeEditedPhotographer =
+    //   mediaID != "create-mode"
+    //     ? (await db.promise().query(toBeEditedPhotographerQuery))[0][0]
+    //     : "create-mode";
+    // console.log(toBeEditedPhotographer)
     // End of EDIT section
 
     console.log("currentMedia", toBeEditedMedia);
     console.log("toBeEditedMedia", toBeEditedMedia);
-    console.log("toBeEditedPhotographer", toBeEditedPhotographer);
     res.render("media/create-or-edit", {
       currentUser: req.session.passport.user,
       imageEditingTools: req.session["imageEditingTools"],
       imagingPlatforms: req.session["imagingPlatforms"],
-      allPhotographers,
-      allProjects,
+      allProjectAndPhotographerPairs,
       fileFormats: Object.values(mediaFileFormatEnumeration()),
       toBeEditedMedia,
-      toBeEditedPhotographer,
       toBeEditedImagingDate:
         toBeEditedMedia != "create-mode"
           ? formatDisplayDate(toBeEditedMedia.ImagingDate)
@@ -337,12 +357,12 @@ router.post(
       ImagingPlatform: 11,
     };
     const user = req.session.passport.user;
-    function isValidFileName(filename: string , fileFormat: any) {
+    function isValidFileName(filename: string, fileFormat: any) {
       if (!filename) return false;
       const lower: string = filename.toLowerCase();
       if (!lower.endsWith(fileFormat)) return false;
       if (lower.replace(fileFormat, "") == "") return false;
-      const x:string[] = Object.values(mediaFileFormatEnumeration())
+      const x: string[] = Object.values(mediaFileFormatEnumeration());
       return x.some((value: string, index: number, array: string[]) =>
         lower.endsWith(value.toString())
       );
@@ -414,8 +434,8 @@ router.post(
           //         );
           //     break;
           case newRowColumns.ImagingDate:
-                // console.log(i,element)
-                if (isNaN(new Date(element!).getTime()!)&& element != null)
+            // console.log(i,element)
+            if (isNaN(new Date(element!).getTime()!) && element != null)
               errorMessage =
                 errorMessage +
                 errorMessageBuilder("Invalid Imaging Date format.");
@@ -578,8 +598,7 @@ router.post(
         newImagingPlatform: any;
         newImageEditingTool: any;
         comments: any;
-        projectID: any;
-        photographerID: any;
+        projectAndPhotographerPair: any;
       };
       session: any;
     },
@@ -616,8 +635,7 @@ router.post(
         newImagingPlatform,
         newImageEditingTool,
         comments,
-        projectID,
-        photographerID,
+        projectAndPhotographerPair,
       } = req.body;
 
       console.log("📤 Media submission data:", req.body);
@@ -625,8 +643,8 @@ router.post(
       const updatedBy = createdBy;
       // Validation: required fields
       const missingFields = [];
-      if (!projectID) missingFields.push("ProjectID");
-      if (!photographerID) missingFields.push("PhotographerID");
+      if (!projectAndPhotographerPair)
+        missingFields.push("projectAndPhotographerPair");
       if (!fileName) missingFields.push("fileName");
       if (!filePath) missingFields.push("filePath");
       if (!catalogID) missingFields.push("catalogID");
@@ -637,7 +655,8 @@ router.post(
       // if (!imagingPlatform) missingFields.push("imagingPlatform");
       console.log("imagingPlatform", imagingPlatform);
       console.log("createdBy", createdBy);
-      console.log("photographerID",photographerID)
+      console.log("projectAndPhotographerPair", projectAndPhotographerPair);
+      const splitX = projectAndPhotographerPair.split(",");
       if (missingFields.length > 0) {
         return res.status(400).json({
           success: false,
@@ -670,8 +689,8 @@ router.post(
         `;
 
       const values = [
-        projectID,
-        photographerID,
+        splitX[0],
+        splitX[1],
         fileName,
         filePath,
         catalogID || null,
@@ -694,30 +713,31 @@ router.post(
         newImageEditingTool != "" &&
         !req.session["imageEditingTools"].includes(newImageEditingTool)
       )
-
-      req.session.imageEditingTools.push(newImageEditingTool);
-      const i:string[] = req.session.imageEditingTools
-        await db
-          .promise()
-          .query(
-            "ALTER TABLE Media MODIFY COLUMN `ImageEditingTool` enum(?)",[i]
-          );
+        req.session.imageEditingTools.push(newImageEditingTool);
+      const i: string[] = req.session.imageEditingTools;
+      await db
+        .promise()
+        .query("ALTER TABLE Media MODIFY COLUMN `ImageEditingTool` enum(?)", [
+          i,
+        ]);
 
       if (
         newImagingPlatform != null &&
         newImagingPlatform != "" &&
         !req.session["imagingPlatforms"].includes(newImagingPlatform)
       )
-      req.session["imagingPlatforms"].push(newImagingPlatform);
+        req.session["imagingPlatforms"].push(newImagingPlatform);
 
-      const i2:string[] = req.session.imagingPlatforms
-        await db
-          .promise()
-          .query(
-            "ALTER TABLE Media MODIFY COLUMN `ImagingPlatform` enum(?)",[i2]
-          );
+      const i2: string[] = req.session.imagingPlatforms;
+      await db
+        .promise()
+        .query("ALTER TABLE Media MODIFY COLUMN `ImagingPlatform` enum(?)", [
+          i2,
+        ]);
 
-      const result:any = (await db.promise().query<RowDataPacket[]>(insertQuery, values))[0];
+      const result: any = (
+        await db.promise().query<RowDataPacket[]>(insertQuery, values)
+      )[0];
       console.log("✅ Media submitted successfully, ID:", result.insertId);
       req.session.save();
       res.json({
@@ -786,6 +806,7 @@ router.post(
                 `;
     const updatedBy = req.session.passport.user.UserID;
     console.log("mediaData.imageEditingTool", mediaData.imageEditingTool);
+    const splitX = mediaData.projectAndPhotographerPair.split(",");
     const params = [
       mediaData.fileName,
       mediaData.filePath,
@@ -801,8 +822,8 @@ router.post(
       mediaData.imageEditingTool,
       mediaData.comments,
       updatedBy, // current user making the update
-      mediaData.projectID,
-      mediaData.photographerID,
+      splitX[0],
+      splitX[1],
       mediaData.MediaID,
     ];
     const newImageEditingTool = mediaData.newImageEditingTool;
@@ -817,9 +838,9 @@ router.post(
       newImageEditingTool != "" &&
       !req.session.imageEditingTools.includes(newImageEditingTool)
     ) {
-          req.session.imageEditingTools.push(newImageEditingTool)
-      const i = req.session.imageEditingTools
-      console.log('i',i)
+      req.session.imageEditingTools.push(newImageEditingTool);
+      const i = req.session.imageEditingTools;
+      console.log("i", i);
       await db
         .promise()
         .query<RowDataPacket[]>(
@@ -834,7 +855,7 @@ router.post(
       !req.session.imagingPlatforms.includes(newImagingPlatform)
     ) {
       req.session.imagingPlatforms.push(newImagingPlatform);
-      const i = req.session.imagingPlatforms
+      const i = req.session.imagingPlatforms;
       await db
         .promise()
         .query<RowDataPacket[]>(
@@ -903,28 +924,32 @@ router.get(
     ORDER BY m.CreatedDate DESC
         `;
 
-    db.query<RowDataPacket[]>(query, [mediaID], (err: any, results: string | any[]) => {
-      if (err) {
-        console.error("❌ Error fetching media record:", err);
-        return res.status(500).render("error", {
-          message: "Error loading media entry",
-          error: process.env.NODE_ENV === "development" ? err : null,
+    db.query<RowDataPacket[]>(
+      query,
+      [mediaID],
+      (err: any, results: string | any[]) => {
+        if (err) {
+          console.error("❌ Error fetching media record:", err);
+          return res.status(500).render("error", {
+            message: "Error loading media entry",
+            error: process.env.NODE_ENV === "development" ? err : null,
+          });
+        }
+
+        if (results.length === 0) {
+          return res.status(404).render("error", {
+            message: "Media record not found",
+          });
+        }
+
+        res.render("media/view", {
+          currentUser: req.session.passport.user,
+          media: results[0], // Since we're querying by ID, we'll only get one record
+          mediaID,
+          title: "View Media",
         });
       }
-
-      if (results.length === 0) {
-        return res.status(404).render("error", {
-          message: "Media record not found",
-        });
-      }
-
-      res.render("media/view", {
-        currentUser: req.session.passport.user,
-        media: results[0], // Since we're querying by ID, we'll only get one record
-        mediaID,
-        title: "View Media",
-      });
-    });
+    );
   }
 );
 
@@ -953,7 +978,7 @@ router.post(
         if (results[0].length === 0) {
           req.flash("error", "Media not found or already deleted");
           res.redirect("/media/view-all");
-          return Promise.resolve(results)
+          return Promise.resolve(results);
         }
 
         const updateQuery = `
@@ -971,7 +996,7 @@ router.post(
         console.error("❌ Error soft deleting media:", error);
         req.flash("error", "Error archiving media");
         res.redirect("/media/view-all");
-        return Promise.resolve()
+        return Promise.resolve();
       });
   }
 );
@@ -999,7 +1024,7 @@ router.post(
       .then((results) => {
         if (results[0].length == 0) {
           req.flash("error", "Media not found or already restored");
-res.redirect("/media/view-all")
+          res.redirect("/media/view-all");
           return Promise.resolve(results);
         }
 
@@ -1014,9 +1039,9 @@ res.redirect("/media/view-all")
         return db.promise().query(updateQuery, [userId, mediaID]);
       })
       .then(() => {
-        res.redirect("/media/view-all")
+        res.redirect("/media/view-all");
         return Promise.resolve();
-  })
+      })
       .catch((error: any) => {
         console.error("❌ Error soft deleting media:", error);
         req.flash("error", "Error archiving media");
