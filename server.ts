@@ -321,12 +321,25 @@ app.post("/forgot-password", (req: { body: { userId: any; Password: any; newPass
 // app.get("/user/dashboard",isAuthenticated,(req, res) => {
 //     res.sendFile(path.resolve(__dirname, "views", "user/dashboard.html"));
 // });
-app.get('/change-password', isAuthenticated, (req: { session: { passport: { user: { Email: any; }; }; }; }, res: { redirect: (arg0: string) => any; render: (arg0: string, arg1: { user: any; title: string; }) => void; }) => {
+app.get('/change-password', isAuthenticated, (
+        req: {
+            session: { passport: { user: { Email: any; }; }; },
+        },
+        res: {
+            redirect: (arg0: string) => any;
+            render: (arg0: string,
+                arg1: { user: any; currentUser: any, title: string; }) => void;
+        }
+ ) => {
     if (!req.session.passport.user) {
         return res.redirect('/login');
     }
 
-    res.render('change-password', { user: req.session.passport.user.Email, title: "Change Password" }); // ✅ pass `user` to EJS
+    res.render('change-password', {
+        user: req.session.passport.user.Email,
+        currentUser: req.session.passport.user,
+        title: "Change Password"
+    }); // ✅ pass `user` to EJS
 });
 
 app.post('/change-password', isAuthenticated, (req: { session: { passport: { user: { Email: any; }; }; }; body: { old_password: any; new_password: any; }; }, res: { json: (arg0: { success: boolean; message: string; }) => any; }) => {
