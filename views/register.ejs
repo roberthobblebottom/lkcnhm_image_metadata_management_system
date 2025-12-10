@@ -1,83 +1,266 @@
+<title>Sign Up</title>
+<link rel="stylesheet" href="/css/login.css">
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
-  <title>Sign Up</title>
-  <link rel="stylesheet" href="/css/login.css">
-  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<head>
+  <style>
+    .login-container {
+      min-height: 1500px
+    }
+
+    .form-group {
+      margin-bottom: 20px;
+    }
+
+    /* Labels */
+    label {
+      display: block;
+      font-size: 0.875rem;
+      font-weight: 600;
+      color: #475569;
+      margin-bottom: 0.5rem;
+    }
+
+    /* Input Fields */
+    input[type="text"],
+    input[type="date"],
+    input[type='number'],
+    input[type="datetime-local"],
+    select,
+    textarea {
+      width: 95%;
+      padding: 0.75rem;
+      border: 1.5px solid #e2e8f0;
+      border-radius: 8px;
+      font-size: 0.95rem;
+      color: #1e293b;
+      transition: all 0.2s ease;
+      background-color: #f8fafc;
+    }
+
+    select {
+      width: 98%;
+    }
+
+    /* Input Focus States */
+    input:focus,
+    select:focus,
+    textarea:focus {
+      outline: none;
+      border-color: #007bff;
+      box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.1);
+      background-color: #fff;
+    }
+
+    /* Readonly Inputs */
+    input[readonly] {
+      background-color: #f1f5f9;
+      border-color: #e2e8f0;
+      cursor: not-allowed;
+    }
 
 
 
-  <div class="background">
-    <div class="login-container">
+    textarea {
+      min-height: 120px;
+      resize: vertical;
+      line-height: 1.5;
+    }
+
+
+
+    .submit-btn:active {
+      transform: translateY(0);
+    }
+
+    /* Required Field Indicator */
+    [required]+label::after {
+      content: '*';
+      color: #ef4444;
+      margin-left: 4px;
+    }
+
+    .btn {
+      display: inline-block;
+      background: #007bff;
+      color: white;
+      padding: 10px 16px;
+      border: none;
+      border-radius: 6px;
+      text-decoration: none;
+      font-weight: 600;
+      float: left;
+      margin-top: 50px;
+      margin-bottom: 50px;
+    }
+
+    button[type="submit"] {
+      background-color: #007bff;
+      color: #fff;
+      border: none;
+      padding: 0.75rem 2rem;
+      /* font-size: 1rem; */
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+      font-weight: 600;
+      font-size: 1rem;
+      font-family: 'Segoe UI', sans-serif;
+    }
+
+    button[type="submit"]:hover {
+      background-color: #0056b3;
+    }
+
+    #togglePassword,
+    #toggleConfirmPassword {
+      position: absolute;
+      right: 10px;
+      top: 65%;
+      transform: translateY(-50%);
+      cursor: pointer;
+    }
+  </style>
+</head>
+
+<div class="background">
+  <div class="login-container">
+    <div class="form-group">
       <h2>Sign Up</h2>
-      <form id="registerForm">
-        <input type="email" 
-               id="email" 
-               name="email" 
-               placeholder="Email" 
-               required
-               pattern="^[a-zA-Z0-9](\.?[a-zA-Z0-9_-])*[a-zA-Z0-9]@[a-zA-Z0-9-]+\.[a-zA-Z]{2,}$" 
-               title="Enter a valid email address (e.g. test@example.com)">
+      * means mandatory
 
-        <div style="position: relative;">
-          <input type="password" 
-                 id="password" 
-                 name="password" 
-                 placeholder="Password" 
-                 required
-                 pattern="(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{8,}" 
-                 title="Password must be at least 8 characters long and include an uppercase letter, a number, and a symbol."
-                 style="padding-right: 40px;" />
-          <span id="togglePassword" 
-                style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); cursor: pointer;">
-            👁️
-          </span>
-        </div>
-
-        <div class="social-login">
-          <!-- Social icons here if needed -->
-        </div>
-
-        <button type="submit">Sign Up</button>
-      </form>
-      <p class="signup-text">
-        Already have an account? <a href="/login">Login</a>
-      </p>
     </div>
+
+    <form id="registerForm">
+      <div class="form-group">
+
+        <label>Email*</label>
+        <input type="email" id="email" name="email" required title="Enter a valid email address (e.g. test@example.com)">
+
+        <!-- pattern="^[a-zA-Z0-9](\.?[a-zA-Z0-9_-])*[a-zA-Z0-9]@[a-zA-Z0-9-]+\.[a-zA-Z]{2,}$"  -->
+      </div>
+      <div style="position: relative;" , class="form-group">
+        <label>Password*</label>
+        <input type="password" id="password" name="password" required title="Password must be at least 8 characters long and include an uppercase letter, a number, and a symbol." style="padding-right: 40px;" />
+
+        <!-- pattern="(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{8,}"  -->
+        <span id="togglePassword" class="togglePassword">
+          👁️
+        </span>
+      </div>
+      <div style="position: relative;" , class="form-group">
+
+        <label>Confirm Password*</label>
+        <input type="password" id="confirmPassword" name="confirmPassword" required title="Password must be at least 8 characters long and include an uppercase letter, a number, and a symbol." style="padding-right: 40px;" />
+
+        <!-- pattern="(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{8,}"  -->
+        <span id="toggleConfirmPassword" class="toggleConfirmPassword">
+          👁️
+        </span>
+      </div>
+
+
+
+      <div class="form-group">
+        <label for="userType">User Type*</label>
+        <select name="userType" id="userType">
+          <option value="">-- Select a User Type --</option>
+          <%userTypes.forEach( userType=>{%>
+          <option value="<%=userType%>">
+            <%=userType%>
+          </option>
+          <%})%>
+        </select>
+      </div>
+      <div class="form-group">
+        <label for="fullName">Full Name* </label>
+        <input type="text" name="fullName" id="fullname" required>
+      </div>
+
+      <div class="form-group">
+        <label for="contactNumber">Contact Number </label>
+        <input type="text" id="contactNumber" ">
+      </div>
+      <div class=" form-group">
+        <label for="organisation">Organisation </label>
+        <input type="text" id="organisation" ">
+      </div>
+      <div class=" form-group">
+        <label for="comments">Comments </label>
+        <textarea id="comments"></textarea>
+      </div>
+
+      <div class="form-group">
+        <label> Reason for Request*: </label>
+
+        <textarea required id="reasonForRequest"></textarea>
+      </div>
+
+      <button type="submit">Sign Up</button>
+    </form>
+    <p class="signup-text">
+      Already have an account? <a href="/login">Login</a>
+    </p>
   </div>
+</div>
 
-  <p id="message"></p>
+<p id="message"></p>
 
-  <script>
-    document.addEventListener("DOMContentLoaded", function () {
-      const registerForm = document.getElementById("registerForm");
-  
-      registerForm.addEventListener("submit", function (e) {
-        e.preventDefault();
-  
-        const email = document.getElementById("email").value.trim();
-        const password = document.getElementById("password").value;
-        const messageEl = document.getElementById("message");
-  
-        const emailRegex = /^[a-zA-Z0-9](\.?[a-zA-Z0-9_-])*[a-zA-Z0-9]@[a-zA-Z0-9-]+\.[a-zA-Z]{2,}$/;
-  
-        if (!emailRegex.test(email)) {
-          Swal.fire({
-            icon: 'error',
-            title: 'Invalid Email',
-            text: 'Please enter a valid email address. e.g. test@gmail.com'
-          });
-          return;
-        }
-  
-        messageEl.innerText = "⏳ Processing registration...";
-  
-        fetch("/auth/register", {
+<script>
+  document.addEventListener("DOMContentLoaded", function() {
+    const registerForm = document.getElementById("registerForm");
+
+    registerForm.addEventListener("submit", function(e) {
+      e.preventDefault();
+
+      const email = document.getElementById("email").value.trim();
+      const password = document.getElementById("password").value;
+      const messageEl = document.getElementById("message");
+
+      const emailRegex = /^[a-zA-Z0-9](\.?[a-zA-Z0-9_-])*[a-zA-Z0-9]@[a-zA-Z0-9-]+\.[a-zA-Z]{2,}$/;
+
+      if (!emailRegex.test(email)) {
+        Swal.fire({
+          icon: 'error',
+          title: 'Invalid Email',
+          text: 'Please enter a valid email address. e.g. test@gmail.com'
+        });
+        return;
+      }
+
+      if (registerForm.password.value != registerForm.confirmPassword.value) {
+        Swal.fire({
+          icon: 'error',
+          title: 'password confirmation is wrong',
+          text: 'Please enter the same password for comfirmation password input'
+        });
+        return;
+      }
+
+      messageEl.innerText = "⏳ Processing registration...";
+
+      fetch("/auth/register", {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ email, password })
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({
+            email:registerForm.email.value,
+            password: registerForm.password.value,
+            confirmPassword: registerForm.confirmPassword.value,
+            userType: registerForm.userType.value,
+            fullName: registerForm.fullName.value,
+            contactNumber: registerForm.contactNumber.value,
+            organisation: registerForm.organisation.value,
+            comments: registerForm.comments.value,
+            reasonForRequest: registerForm.reasonForRequest.value
+          })
         })
         .then(res => {
           if (!res.ok) {
-            return res.text().then(text => { throw new Error(text); });
+            return res.text().then(text => {
+              throw new Error(text);
+            });
           }
           return res.text();
         })
@@ -90,7 +273,7 @@
           }).then(() => {
             window.location.href = "/login";
           });
-  
+
           messageEl.innerText = "✅ Registered successfully!";
           console.log("Response from server:", data);
         })
@@ -103,16 +286,19 @@
           messageEl.innerText = "";
           console.error("❌ Registration failed:", err.message);
         });
-      });
-  
-      document.getElementById("togglePassword").addEventListener("click", function () {
-        const passwordInput = document.getElementById("password");
-        const type = passwordInput.getAttribute("type") === "password" ? "text" : "password";
-        passwordInput.setAttribute("type", type);
-        this.textContent = type === "password" ? "👁️" : "🙈";
-      });
     });
-  </script>
-  
 
-
+    document.getElementById("togglePassword").addEventListener("click", function() {
+      const passwordInput = document.getElementById("password");
+      const type = passwordInput.getAttribute("type") === "password" ? "text" : "password";
+      passwordInput.setAttribute("type", type);
+      this.textContent = type === "password" ? "👁️" : "🙈";
+    });
+    document.getElementById("toggleConfirmPassword").addEventListener("click", function() {
+      const passwordInput = document.getElementById("confirmPassword");
+      const type = passwordInput.getAttribute("type") === "password" ? "text" : "password";
+      passwordInput.setAttribute("type", type);
+      this.textContent = type === "password" ? "👁️" : "🙈";
+    });
+  });
+</script>

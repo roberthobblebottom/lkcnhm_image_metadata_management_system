@@ -155,7 +155,7 @@
   <div class="main_con">
     <form id="main-form">
 
-      <h2>Profile</h2>
+      <h2>View or Edit your Profile</h2>
 
       <div class="form-group">
         <label for="userID">User ID</label>
@@ -189,7 +189,7 @@
       </div>
       <div class="form-group">
         <label for="comments">Comments </label>
-        <textarea id="comments" value="<%=currentUser.Comments%>"></textarea>
+        <textarea id="comments" ><%=currentUser.Comments%></textarea>
       </div>
       <div class="form-group">
         <label>Request Status </label>
@@ -197,7 +197,7 @@
       </div>
       <div class="form-group">
         <label> Reason for Request: </label>
-        <input type="text" value="<%=currentUser.ReasonForRequest%>" readonly>
+        <textarea  readonly><%=currentUser.ReasonForRequest%></textarea>
       </div>
 
       <div class="buttons">

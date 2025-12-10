@@ -4,7 +4,10 @@ import { db } from "./db";
 import passport from "passport";
 import * as passportStrategy from "passport-local";
 import crypto from "crypto";
-import { userTypesEnumeration } from "../middleware/utils";
+import {
+  requestStatusEnumeration,
+  userTypesEnumeration,
+} from "../middleware/utils";
 import { FieldPacket, QueryResult } from "mysql2";
 import { Request, Response, NextFunction } from "express";
 import { User } from "../@types/types";
@@ -82,7 +85,43 @@ passport.deserializeUser((user: User, cb: (arg0: null, arg1: any) => any) => {
 });
 
 router.post("/register", (req, res) => {
-  const { email, password } = req.body;
+  console.log("register req.body", req.body);
+  const {
+    email,
+    password,
+    confirmPassword,
+    userType,
+    fullName,
+    contactNumber,
+    organisation,
+    comments,
+    reasonForRequest,
+  } = req.body;
+  const missingFields = [];
+  if (!email) missingFields.push("email");
+  if (!password) missingFields.push("password");
+  if (!confirmPassword) missingFields.push("confirmPassword");
+  if (!userType) missingFields.push("userType");
+  if (!fullName) missingFields.push("fullName");
+  if (!reasonForRequest) missingFields.push("reasonForRequest");
+  if (missingFields.length > 0) {
+    return res.status(400).json({
+      success: false,
+      message: "Missing required fields: " + missingFields.join(", "),
+    });
+  }
+  if (!/^[\w\-\.]+@([\w-]+\.)+[\w-]{2,}$/.test(email))
+    return res.status(400).json({
+      success: false,
+      message:
+        "invalid email, email value does not have '@' or '.' character(s).",
+    });
+  if (password != confirmPassword) {
+    return res.status(400).json({
+      success: false,
+      message: "the  passwords does not match",
+    });
+  }
   console.log(`🔹 Register Attempt: ${email}`);
 
   const checkEmailQuery = "SELECT * FROM User WHERE Email = ?";
@@ -98,21 +137,43 @@ router.post("/register", (req, res) => {
         .status(400)
         .send("User already exists. Please enter a new email.");
     }
-
-    const insertUserQuery = `
+    const newPasswordSalt = crypto.randomBytes(16).toString("hex");
+    crypto.pbkdf2(
+      password,
+      newPasswordSalt,
+      310000,
+      32,
+      "sha256",
+      async function (err, hashedPassword) {
+        const insertUserQuery = `
             INSERT INTO User 
-            (Email, Password, TempPassword, UserType, RegisteredDate, LastLoginDate, UpdatedDate, IsDelete) 
-            VALUES (?, ?, NULL, ?, NOW(), NULL, NULL, 0)`;
+            (Email, HashedPassword,PasswordSalt,  UserType, RegisteredDate,
+              UpdatedDate,FullName,ContactNumber,Organisation,Comments,ReasonForRequest,RequestStatus)
+            VALUES (?, ?,?,  ?, NOW(),NOW(),  ?, ?,?,?,?,?)`;
+        const params = [
+          email,
+          hashedPassword,
+          newPasswordSalt,
+          userType,
+          fullName,
+          contactNumber,
+          organisation,
+          comments,
+          reasonForRequest,
+          requestStatusEnumeration().approved, //TODO TEMPORARY APPROVED FOR ALL USERS FOR TESTING
+        ];
 
-    db.query(insertUserQuery, [email, password, "Non-admin"], (err: any) => {
-      if (err) {
-        console.error("❌ Error Registering User:", err);
-        return res.status(500).send("Error Registering User");
+        db.query(insertUserQuery, params, (err: any) => {
+          if (err) {
+            console.error("❌ Error Registering User:", err);
+            return res.status(500).send("Error Registering User");
+          }
+          console.log(`✅ User Registered Successfully: ${email}`);
+          // 🚀 Redirect from the backend itself
+          res.redirect("/login");
+        });
       }
-      console.log(`✅ User Registered Successfully: ${email}`);
-      // 🚀 Redirect from the backend itself
-      res.redirect("/login");
-    });
+    );
   });
 });
 

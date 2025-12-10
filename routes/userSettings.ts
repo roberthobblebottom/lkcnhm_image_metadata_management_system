@@ -47,6 +47,7 @@ router.post(
       url: any;
     },
     res: {
+      status: any;
       json: (arg0: {
         success: boolean;
         message: string;
@@ -61,7 +62,7 @@ router.post(
     const confirm_new_password = req.body.confirm_new_password;
 
     if (new_password != confirm_new_password) {
-      return res.json({
+      return res.status(400).json({
         success: false,
         message: "the new passwords does not match",
       });
