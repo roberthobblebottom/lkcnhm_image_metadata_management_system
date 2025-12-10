@@ -1,4 +1,3 @@
-import { Interface } from "readline";
 
 const express = require("express");
 const router = express.Router();
@@ -11,10 +10,10 @@ const {
 } = require("../middleware/utils");
 const multer = require("multer");
 import fs from "fs";
-import { FieldPacket, QueryResult, RowDataPacket } from "mysql2";
-import { AsyncLocalStorage } from "async_hooks";
+import { RowDataPacket } from "mysql2";
 const path = require("path");
 const upload = multer({ dest: "upload-bulk-metadata/" });
+
 router.get(
   "/view-all",
   isAuthenticated,

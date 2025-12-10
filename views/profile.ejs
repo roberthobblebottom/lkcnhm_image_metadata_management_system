@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>View User</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap');
+
+    /* Main Container */
+    .main_con {
+      display: flex;
+      min-height: 100vh;
+      background: #f8fafc;
+      padding: 2rem;
+      margin-left: 350px;
+    }
+
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: #f4f6f8;
+      padding: 2rem;
+    }
+
+    /* Form Container */
+    form {
+      min-width: 700px;
+      margin: 0 auto;
+      background: white;
+      padding: 2.5rem;
+      border-radius: 16px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+    }
+
+    /* Form Header */
+    form h2 {
+      color: #1e293b;
+      font-size: 1.875rem;
+      text-align: center;
+      margin-bottom: 2rem;
+      position: relative;
+      padding-bottom: 1rem;
+    }
+
+    form h2::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 60px;
+      height: 3px;
+      background: linear-gradient(to right, #007bff, #6366f1);
+      border-radius: 3px;
+    }
+
+    .form-group {
+      margin-bottom: 20px;
+    }
+
+    /* Labels */
+    label {
+      display: block;
+      font-size: 0.875rem;
+      font-weight: 600;
+      color: #475569;
+      margin-bottom: 0.5rem;
+    }
+
+    /* Input Fields */
+    input[type="text"],
+    textarea {
+      width: 95%;
+      padding: 0.75rem;
+      border: 1.5px solid #e2e8f0;
+      border-radius: 8px;
+      font-size: 0.95rem;
+      color: #1e293b;
+      transition: all 0.2s ease;
+      background-color: #f8fafc;
+    }
+
+
+    textarea {
+      min-height: 120px;
+      resize: vertical;
+      line-height: 1.5;
+    }
+
+    /* Input Focus States */
+    input:focus,
+    textarea:focus {
+      outline: none;
+      border-color: #007bff;
+      box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.1);
+      background-color: #fff;
+    }
+
+    /* Readonly Inputs */
+    input[readonly] {
+      background-color: #f1f5f9cb;
+      border-color: #e2e8f0;
+      cursor: not-allowed;
+    }
+
+    button[type="submit"] {
+      background-color: #007bff;
+      color: #fff;
+      border: none;
+      padding: 0.75rem 2rem;
+      /* font-size: 1rem; */
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+      font-weight: 600;
+      font-size: 1rem;
+      font-family: 'Segoe UI', sans-serif;
+    }
+
+    .submit-btn:active {
+      transform: translateY(0);
+    }
+
+    .buttons {
+      text-align: center;
+    }
+
+
+
+    /* Animation Effects */
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(10px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    form {
+      animation: fadeIn 0.5s ease-out;
+    }
+  </style>
+</head>
+
+<body>
+
+  <%- include(currentUser.UserType=='admin' 
+  ? './partials/sidenav-admin' 
+  : './partials/sidenav-user' ) %>
+  <div class="main_con">
+    <form id="main-form">
+
+      <h2>Profile</h2>
+
+      <div class="form-group">
+        <label for="userID">User ID</label>
+        <input type="text" id="userID" value="<%=currentUser.UserID%>" readonly>
+      </div>
+      <div class="form-group">
+        <label for="email">Email </label>
+        <input type="text" name="email" id="email" value="<%=currentUser.Email%>" required>
+      </div>
+
+
+      <div class="form-group">
+        <label for="userType">User Type</label>
+        <input type="text" value="<%=currentUser.UserType%>" readonly>
+      </div>
+      <div class="form-group">
+        <label for="fullName">Full Name </label>
+        <input type="text" name="fullName" id="fullname" value="<%=currentUser.FullName%>" required>
+      </div>
+      <div class="form-group">
+        <label>Registered Date </label>
+        <input type="text" value="<%=registeredDate%>" readonly>
+      </div>
+      <div class="form-group">
+        <label for="contactNumber">Contact Number </label>
+        <input type="text" id="contactNumber" value="<%=currentUser.ContactNumber%>">
+      </div>
+      <div class=" form-group">
+        <label for="organisation">Organisation </label>
+        <input type="text" id="organisation" value="<%=currentUser.Organisation%>">
+      </div>
+      <div class="form-group">
+        <label for="comments">Comments </label>
+        <textarea id="comments" value="<%=currentUser.Comments%>"></textarea>
+      </div>
+      <div class="form-group">
+        <label>Request Status </label>
+        <input type="text" value="<%=currentUser.RequestStatus%>" readonly>
+      </div>
+      <div class="form-group">
+        <label> Reason for Request: </label>
+        <input type="text" value="<%=currentUser.ReasonForRequest%>" readonly>
+      </div>
+
+      <div class="buttons">
+        <button type="submit"><i class="fas fa-paper-plane"></i> Edit Media</button>
+
+
+      </div>
+
+
+    </form>
+  </div>
+
+</body>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+  document.addEventListener("DOMContentLoaded", () => {
+    const form = document.getElementById("main-form");
+    form.addEventListener("submit",
+      async (e) => {
+        e.preventDefault();
+        const submitBtn = form.querySelector('button[type="submit"]');
+        const originalBtnText = submitBtn.innerHTML;
+        submitBtn.classList.add('loading');
+        submitBtn.innerHTML = '<i class="fas fa-spinner"></i> Submitting...';
+        submitBtn.disabled = true;
+        if (!/^[\w\-\.]+@([\w-]+\.)+[\w-]{2,}$/.test(form.email.value)) {
+
+          submitBtn.disabled = false;
+          submitBtn.innerHTML = 'Edit Profile';
+          await Swal.fire({
+            title: 'Error!',
+            text: "invalid email, email value does not have '@' or '.' character(s).",
+            icon: 'error',
+            confirmButtonText: 'OK',
+            confirmButtonColor: '#dc3545'
+          });
+          return
+        }
+        const formData = JSON.stringify({
+          userID: form.userID.value,
+          email: form.email.value,
+          fullName: form.fullName.value,
+          contactNumber: form.contactNumber.value,
+          organisation: form.organisation.value,
+          comments: form.comments.value,
+
+        })
+
+        const response = await fetch("/user-settings/profile", {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: formData
+        });
+        try {
+          if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.message || "Submission failed with status " + response.status);
+          }
+
+          const data = await response.json();
+          if (!data.success) {
+            throw new Error(data.message || "Submission failed");
+          }
+
+
+          // Show success message
+          await Swal.fire({
+            title: 'Success!',
+            text: 'project submitted successfully!',
+            icon: 'success',
+            confirmButtonText: 'OK',
+            confirmButtonColor: '#28a745',
+            timer: 1000,
+            timerProgressBar: true
+          });
+
+          console.log(data.redirectUrl)
+          // Redirect if URL is provided
+          if (data.redirectUrl) {
+            window.location.href = data.redirectUrl;
+            return; // Stop further execution
+          }
+
+          // Reset form (if no redirection)
+          form.reset();
+
+        } catch (error) {
+          await Swal.fire({
+            title: 'Error!',
+            text: error.message,
+            icon: 'error',
+            confirmButtonText: 'OK',
+            confirmButtonColor: '#dc3545'
+          });
+        } finally {
+          submitBtn.disabled = false;
+          submitBtn.value = "Edit Profile"
+        }
+      });
+  })
+</script>
