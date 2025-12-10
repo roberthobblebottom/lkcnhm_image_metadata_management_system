@@ -2,6 +2,7 @@ const express = require("express");
 const router = express.Router()
 import { FieldPacket, QueryError, QueryOptions, QueryResult, RowDataPacket } from "mysql2";
 import { db } from "./db"
+import { Session, User } from "../@types/types";
 
 const {
   isAuthenticated,
@@ -12,7 +13,6 @@ const {
   formatDisplayDate,
   projectStatusEnumeration,
   projectTypeEnumeration,
-  imagingPlatformEnumeration,
   requestStatusEnumeration,
 } = require("../middleware/utils");
 
@@ -21,16 +21,16 @@ router.get(
   isAuthenticated,
   isAdminOrProjectOwner,
   async (
-    req: { session: { passport: { user: any } } },
+    req: { session: Session },
     res: {
       render: (
         arg0: string,
         arg1: {
-          currentUser: any;
-          projectOwners: any;
-          photographers: any;
-          projectTypes: unknown[];
-          imagingPlatforms: unknown[];
+          currentUser: User;
+          projectOwners: QueryResult;
+          photographers: QueryResult;
+          projectTypes: string[];
+          imagingPlatforms: string[];
           title: string;
         }
       ) => void;
@@ -61,7 +61,7 @@ router.get(
       projectOwners: projectOwners[0],
       photographers: photographers[0],
       projectTypes: Object.values(projectTypeEnumeration()),
-      imagingPlatforms: Object.values(imagingPlatformEnumeration()),
+      imagingPlatforms: req.session.imagingPlatforms,
       title: "Project Form",
     });
   }
@@ -80,14 +80,14 @@ router.post(
         endDate: string | number | Date;
         selectedImagingPlatforms: string[];
         selectedPhotographers: string[];
-        projectName: any;
-        projectType: any;
-        projectOwner: any;
-        summary: any;
-        specimenDetails: any;
-        comments: any;
+        projectName: string;
+        projectType: string;
+        projectOwner: string;
+        summary: string;
+        specimenDetails: string;
+        comments: string;
       };
-      session: { passport: { user: { UserID: any } } };
+      session: Session;
     },
     res: {
       status: (arg0: number) => {
@@ -261,7 +261,7 @@ router.get(
   isAuthenticated,
   isAdminOrProjectOwner,
   async (
-    req: { session: { passport: { user: any } }; user: any },
+    req: { session: Session; user: any },
     res: {
       status: (arg0: number) => {
         (): any;
@@ -276,7 +276,7 @@ router.get(
         arg1: {
           projects: any;
           message?: string;
-          currentUser?: any;
+          currentUser: User;
           photographers?: {};
           title?: string;
         }
@@ -350,11 +350,12 @@ router.get(
         return res.render("project/view-all", {
           projects: [],
           message: "No projects found",
+          currentUser:user
         });
       }
       res.render("project/view-all", {
         projects: result,
-        currentUser: req.user,
+        currentUser: user,
         photographers: photographers,
         title: "Projects Dashboard", // Add title here
       });
@@ -368,7 +369,7 @@ router.get(
   isAuthenticated,
   isAdminOrProjectOwner,
   async (
-    req: { params: { projectID: any }; user: any },
+    req: { params: { projectID: number }; user: User },
     res: {
       status: (arg0: number) => {
         (): any;
@@ -380,7 +381,7 @@ router.get(
       };
       render: (
         arg0: string,
-        arg1: { request: any; currentUser: any; title: string }
+        arg1: { request: any; currentUser: User; title: string }
       ) => void;
     }
   ) => {
@@ -474,8 +475,8 @@ router.post(
   isAdminOrProjectOwner,
   (
     req: {
-      params: { projectID: any };
-      session: { passport: { user: { UserID: any } } };
+      params: { projectID: number };
+      session: Session;
     },
     res: {
       status: (arg0: number) => {
@@ -517,7 +518,7 @@ router.post(
   isAdminOrProjectOwner,
   (
     req: {
-      params: { projectID: any };
+      params: { projectID: number};
       session: { passport: { user: { UserID: any } } };
     },
     res: {
@@ -560,7 +561,7 @@ router.get(
   isAuthenticated,
   isAdminOrProjectOwner,
   async (
-    req: { params: { projectID: any }; user: any },
+    req: { params: { projectID: number }; user: User; session: Session; },
     res: {
       status: (arg0: number) => {
         (): any;
@@ -577,10 +578,10 @@ router.get(
           allPhotographers: any;
           selectedPhotographers: any[];
           statuses: unknown[];
-          projectTypes: unknown[];
-          imagingPlatforms: unknown[];
-          selectedImagingPlatforms: unknown[];
-          currentUser: any;
+          projectTypes: string[];
+          imagingPlatforms: string[]
+          selectedImagingPlatforms: string[];
+          currentUser: User;
           title: string;
         }
       ) => void;
@@ -659,7 +660,7 @@ router.get(
         selectedPhotographers: currentlySelectedPhotographers,
         statuses: Object.values(projectStatusEnumeration()),
         projectTypes: Object.values(projectTypeEnumeration()),
-        imagingPlatforms: Object.values(imagingPlatformEnumeration()),
+        imagingPlatforms: req.session.imagingPlatforms,
         selectedImagingPlatforms: imagingPlatforms,
         currentUser: req.user,
         title: "Edit Project", // Add title here
@@ -677,18 +678,18 @@ router.post(
   isAdminOrProjectOwner,
   async (
     req: {
-      session: { passport: { user: { UserID: any } } };
-      params: { projectID: any };
+      session: Session;
+      params: { projectID: number };
       body: {
-        ProjectName: any;
-        ImagingStartDate: any;
-        ImagingEndDate: any;
-        SummaryOfProject: any;
-        DetailsOfSpecimens: any;
-        LocationsOfSpecimens: any;
-        ProjectStatus: any;
-        selectedImagingPlatforms: any;
-        selectedPhotographers: any;
+        ProjectName: string;
+        ImagingStartDate: string | number | Date;
+ImagingEndDate: string | number | Date;
+        SummaryOfProject: string;
+        DetailsOfSpecimens: string;
+        LocationsOfSpecimens: string;
+        ProjectStatus: string;
+        selectedImagingPlatforms: string;
+        selectedPhotographers: string;
       };
     },
     res: {

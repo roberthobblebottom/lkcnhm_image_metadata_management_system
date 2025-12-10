@@ -15,6 +15,7 @@ const app = express();
 const PORT = process.env.PORT || 5000;
 import { RowDataPacket } from "mysql2";
 import { userTypesEnumeration } from "./middleware/utils";
+import { Passport, User } from "./@types/types";
 // ✅ Middleware
 app.use(express.static("public"));
 app.use(express.json());
@@ -121,18 +122,11 @@ app.get(
   (
     req: {
       session: {
-        passport: {
-          user: { Email: any; FullName: any; UserType: any; UserID: any };
-        };
+        passport: Passport;
       };
     },
     res: {
-      json: (arg0: {
-        Email: any;
-        FullName: any;
-        UserType: any;
-        UserID: any;
-      }) => void;
+      json: (arg0: User) => void;
       status: (arg0: number) => {
         (): any;
         new (): any;
@@ -158,7 +152,7 @@ app.get(
 app.get(
   "/session",
   (
-    req: { session: { passport: { user: any } } },
+    req: { session: { passport: Passport} },
     res: { json: (arg0: { sessionData: any }) => void }
   ) => {
     console.log("🟢 Session Check:", req.session.passport.user);

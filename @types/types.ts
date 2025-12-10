@@ -9,3 +9,9 @@ export interface Passport {
     user: User
 }
 
+export interface Session { 
+    passport: Passport;
+    imagingPlatforms: string[],
+    imageEditingTools: string[];
+}
+
