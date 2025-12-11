@@ -1,0 +1,243 @@
+<%- include('../partials/sidenav-admin') %>
+
+<head>
+  <link rel="stylesheet" href="/css/admin.css" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <link rel="stylesheet" href="https://cdn.datatables.net/2.3.5/css/dataTables.dataTables.css" />
+  <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+  <script src="https://cdn.datatables.net/2.3.5/js/dataTables.js"></script>
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      margin: 30px;
+      background: #f5f5f5;
+    }
+
+    .main_con {
+      margin-left: 300px;
+    }
+
+    .btn {
+      display: inline-block;
+      background: #007bff;
+      color: white;
+      padding: 10px 16px;
+      border: none;
+      border-radius: 6px;
+      text-decoration: none;
+      font-weight: 600;
+      float: right;
+      margin-top: 50px;
+      margin-bottom: 50px;
+      margin-left: 10px;
+    }
+
+    h2 {
+      /* text-align: center; */
+      margin: 20px 0;
+      color: #333;
+    }
+
+    table {
+
+      width: 100%;
+      border-collapse: collapse;
+      background: white;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+      border-radius: 8px;
+      overflow: hidden;
+      margin-top: 30px;
+    }
+
+    th,
+    td {
+      padding: 12px 15px;
+      border-bottom: 1px solid #eee;
+      text-align: left;
+    }
+
+    th {
+      background-color: #007bff;
+      color: white;
+      font-weight: 600;
+    }
+
+    tr:hover {
+      background-color: #f1f1f1;
+    }
+
+    .action-btns button {
+      margin-right: 6px;
+      padding: 5px 10px;
+      font-size: 14px;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+
+    .btn-view {
+      background-color: #17a2b8;
+      color: #fff;
+    }
+
+    .btn-edit {
+      background-color: #ffc107;
+      color: #000;
+    }
+
+    .btn-delete {
+      background-color: #dc3545;
+      color: #fff;
+    }
+
+    .no-data {
+      text-align: center;
+      color: gray;
+      margin-top: 20px;
+    }
+
+    .status-approved {
+      color: green;
+      font-weight: bold;
+    }
+
+    .status-rejected {
+      color: red;
+      font-weight: bold;
+    }
+
+    .btn-restore {
+      background: #54d300;
+    }
+  </style>
+</head>
+
+<main class="user-management-container">
+  <h2 class="page-title" style="text-align: center;">Login User Management</h2>
+  <div class="table-container">
+    <% if (users.length===0) { %>
+    <p class="no-data">No users found</p>
+    <% } else { %>
+    <table class="user-table" id="user-table">
+      <thead>
+        <tr>
+          <th>User ID</th>
+          <th>Email</th>
+          <th>User Type</th>
+          <th>Full Name</th>
+          <th>Organisation</th>
+          <th>Registered Date</th>
+          <th>Last Login</th>
+          <th>Request Status</th>
+          <th>Is Deleted</th>
+          <th style="text-align: center;">Action</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% users.forEach(user=> { %>
+        <tr id="row-<%= user.LoginUserID %>">
+          <td>
+            <%= user.UserID %>
+          </td>
+          <td>
+            <%= user.Email %>
+          </td>
+          <td>
+            <%= user.UserType %>
+          </td>
+
+          <td><%=user.FullName%></td>
+          <td>
+            <%= user.Organisation %>
+          </td>
+          <td>
+            <%= new Date(user.RegisteredDate).toLocaleDateString('en-IN', { day: '2-digit' ,
+                                            month: 'short' , year: 'numeric' }) %>
+          </td>
+          <td>
+            <%= user.LastLoginDate ? new
+                                            Date(user.LastLoginDate).toLocaleDateString('en-IN') : '-' %>
+          </td>
+
+          <td><span class="status <%= user.RequestStatus == 'pending' || user.RequestStatus == 'rejected' ? 'inactive' : 'active' %>">
+              <%= user.RequestStatus%>
+            </span></td>
+
+          <td class="<%= !user.IsDeleted  ? 'status-approved' :  'status-rejected'  %>">
+            <%=!user.IsDeleted? 'No' : 'Yes' %>
+          </td>
+          <td class="actions">
+            <a href="/admin/user-management/edit-users/<%= user.UserID %>" class="btn-edit">
+              <i class="fas fa-edit"></i> Edit
+            </a>
+            <%if (!user.IsDeleted ){%>
+            <form action="/admin/user-management/delete/<%= user.UserID%>" method="POST" style="display:inline;" onsubmit="return confirm('Are you sure you want to delete this media record?');">
+              <button type="submit" class="btn-delete">Delete</button>
+            </form>
+            <%} else {%>
+            <form action="/admin/user-management/restore/<%= user.UserID %>" method="POST" style="display:inline;" onsubmit="return confirm('Are you sure you want to restore this media record?');">
+              <button type="submit" class="btn-restore">restore</button>
+            </form>
+            <%}%>
+                                        
+                                    </td>
+                                </tr>
+                                <% }); %>
+      </tbody>
+    </table>
+    <% } %>
+  </div>
+</main>
+
+
+
+<script>
+  new DataTable('#user-table')
+  // function deleteUser(userID) {
+  //     if (confirm("Are you sure you want to delete this user?")) {
+  //         fetch(`/admin/user-maangement/delete-user/${userID}`, {
+  //             method: "PUT",
+  //             headers: {
+  //                 'Content-Type': 'application/json',
+  //                 'Authorization': `Bearer ${localStorage.getItem('token')}`
+  //             }
+  //         })
+  //             .then(response => {
+  //                 if (!response.ok) {
+  //                     throw new Error('Network response was not ok');
+  //                 }
+  //                 return response.json();
+  //             })
+  //             .then(data => {
+  //                 if (data.success) {
+  //                     // Fade out animation before removal
+  //                     const row = document.getElementById(`row-${userID}`);
+  //                     row.style.opacity = '0';
+  //                     setTimeout(() => row.remove(), 300);
+
+  //                     // Show success message
+  //                     showAlert('User deleted successfully', 'success');
+  //                 } else {
+  //                     showAlert(data.error || 'Error deleting user', 'error');
+  //                 }
+  //             })
+  //             .catch(error => {
+  //                 console.error("Error:", error);
+  //                 showAlert('Failed to delete user', 'error');
+  //             });
+  //     }
+  // }
+
+  function showAlert(message, type) {
+    const alertBox = document.createElement('div');
+    alertBox.className = `alert alert-${type}`;
+    alertBox.textContent = message;
+
+    document.body.appendChild(alertBox);
+
+    setTimeout(() => {
+      alertBox.classList.add('fade-out');
+      setTimeout(() => alertBox.remove(), 500);
+    }, 3000);
+  }
+</script>

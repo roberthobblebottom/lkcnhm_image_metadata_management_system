@@ -7,7 +7,7 @@ USE museum;
 CREATE TABLE User (
     UserID INT AUTO_INCREMENT PRIMARY KEY,
     Email VARCHAR(100) UNIQUE NOT NULL,
-    HashedPassword BLOB(255) NOT NULL ,
+    SaltedPassword BLOB(255) NOT NULL ,
     PasswordSalt VARCHAR(255) NOT NULL UNIQUE,
     TemporaryPassword VARCHAR(50) NULL,
     UserType ENUM('photographerOnly','projectOwner','admin') NOT NULL,
@@ -100,19 +100,19 @@ CREATE TABLE Media (
 );
 
 -- Test Data, do not use them for production
-INSERT INTO User (Email,HashedPassword,PasswordSalt,UserType,FullName,
-CreatedByID,UpdatedByID,RequestStatus) 
+INSERT INTO User (Email,SaltedPassword,PasswordSalt,UserType,FullName,
+CreatedByID,UpdatedByID,RequestStatus,Organisation) 
 VALUES ('admin@gmail.com',FROM_BASE64('W8VK+3eef900fOpSgH0HZmeD2E9wEr7hevUHM+GEQ3c='),
-'JR6lq3JUFxejg39f','admin',"jeff Jack",'1','1','approved');
-INSERT INTO User (Email,HashedPassword,PasswordSalt,UserType,FullName,
-CreatedByID,UpdatedByID,RequestStatus) 
+'JR6lq3JUFxejg39f','admin',"jeff Jack",'1','1','approved','NUS');
+INSERT INTO User (Email,SaltedPassword,PasswordSalt,UserType,FullName,
+CreatedByID,UpdatedByID,RequestStatus,Organisation) 
 VALUES ('r1@gmail.com',FROM_BASE64("hwXpWnraI+KqYkaChBAc4EjTdAEtXxKZXBn/cMss2/4="),
-'ZdYThKAg1ZD4ULyd','projectOwner',"Zesty wong",'2','2','approved');
+'ZdYThKAg1ZD4ULyd','projectOwner',"Zesty wong",'2','2','approved','NUS');
 
-INSERT INTO User (Email,HashedPassword,PasswordSalt,UserType,FullName,
-CreatedByID,UpdatedByID,RequestStatus) 
+INSERT INTO User (Email,SaltedPassword,PasswordSalt,UserType,FullName,
+CreatedByID,UpdatedByID,RequestStatus,Organisation) 
 VALUES ('p1@gmail.com',FROM_BASE64("sj1O+m695SCDA0cyNiHK/aEknLFcYPhoxP9YOZe0pvA="),
-'UkSbEVvinkts1Dbb','photographerOnly',"Ron Pass",'3','3','approved');
+'UkSbEVvinkts1Dbb','photographerOnly',"Ron Pass",'3','3','approved','NUS');
 
 
 INSERT INTO Project (ProjectOwnerID ,ProjectName ,ProjectType,ImagingStartDate ,ImagingEndDate ,

@@ -167,7 +167,7 @@
           <td> <%= record.ImagingDate?.toISOString().slice(0, 10) %></td>
           <%if (currentUser.UserType=='admin' ){%>
           <td class="<%= !record.IsDeleted  ? 'status-approved' :  'status-rejected'  %>">
-            <%=!record.IsDeleted? 'Active' : 'Deleted' %>
+            <%=!record.IsDeleted? 'No' : 'Yes' %>
           </td>
           <%}%>
           <td class="action-btns">

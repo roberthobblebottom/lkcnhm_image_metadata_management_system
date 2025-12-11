@@ -1,24 +1,20 @@
 const express = require("express");
 const router = express.Router();
-const db = require("../db"); // Database connection
+
+import { RowDataPacket } from "mysql2";
+import { db } from "../db"
 const { isAuthenticated, isAdmin } = require("../../middleware/auth"); // Middleware
 const userTypesEnumeration = require('../../middleware/utils').userTypesEnum;
 
-// ✅ Serve edit-user.html
-router.get("/edit-user", isAuthenticated, isAdmin, (req, res) => {
-    res.render("edit-user", {
-        title: "Edit User",
-        user: {}, // Default empty object (or fetch from DB if needed)
-        message: {} // Optional: for flash messages
-    });
-});
+
 
 
 
 //✅ API to Fetch All Users
-router.get("/admin-users", isAuthenticated, isAdmin, (req, res) => {
+router.get("/view-all", isAuthenticated, isAdmin, (req, res) => {
     console.log("Route /admin-users hit"); // Debug log 1
-    const query = "SELECT UserID,Password,TemporaryPassword,Email,RegisteredDate,UpdatedDate,LastLoginDate, UserType, IsDeleted FROM User";
+    const query = `SELECT UserID, Email,UserType,FullName,Organisation,
+    RegisteredDate, LastLoginDate, RequestStatus, IsDeleted  FROM User`;
 
     db.query(query, (err, result) => {
         console.log("Query executed", { err, result }); // Debug log 2
@@ -28,7 +24,7 @@ router.get("/admin-users", isAuthenticated, isAdmin, (req, res) => {
         }
 
         console.log("Rendering template"); // Debug log 3
-        res.render("admin-users", {
+        res.render("admin/view-all", {
             users: result,
             title: "User Management"
         });
@@ -55,7 +51,7 @@ router.get('/view/:user_id', isAuthenticated, (req, res) => {
         WHERE u.UserID = ? AND u.IsDeleted = 0
     `;
 
-    db.query(query, [user_id], (err, results) => {
+    db.query(query, [user_id], (err, results:any) => {
         if (err) {
             console.error('❌ Error fetching user with joins:', err);
             return res.status(500).send('Error fetching user.');
@@ -71,25 +67,14 @@ router.get('/view/:user_id', isAuthenticated, (req, res) => {
 });
 //update user details
 // Render edit user page (support both singular and plural URLs)
-router.get("/edit-users/:id", isAuthenticated, isAdmin, (req, res) => {
-    const userId = req.params.id;
+router.get("/edit/:userID", isAuthenticated, isAdmin,async (req, res) => {
+    const userId = req.params.userID;
     const query = "SELECT * FROM User WHERE UserID = ?";
 
-    db.query(query, [userId], (err, result) => {
-        if (err) {
-            console.error("❌ Database Error:", err);
-            return res.status(500).render("edit-user", {
-                title: "Error",
-                message: {
-                    type: 'error',
-                    text: 'Database error occurred'
-                },
-                user: null
-            });
-        }
-
-        if (result.length === 0) {
-            return res.render("edit-user", {
+    const result = (await db.promise().query<RowDataPacket[]>(query, [userId]         ))[0];
+    const result = (await db.promise().query<RowDataPacket[]>(query, [userId]         ))[0];
+    if (result.length === 0) {
+            return res.render("admin/edit", {
                 title: "User Not Found",
                 message: {
                     type: 'error',
@@ -110,7 +95,6 @@ router.get("/edit-users/:id", isAuthenticated, isAdmin, (req, res) => {
         if (req.session.message) {
             delete req.session.message;
         }
-    });
 });
 
 
@@ -129,7 +113,7 @@ router.post(["/update-user/:id", "/update-users/:id"], isAuthenticated, isAdmin,
         WHERE UserID = ? 
     `;
 
-    db.query(query, [TemporaryPassword, UserType, IsDeleted, userId], (err, result) => {
+    db.query(query, [TemporaryPassword, UserType, IsDeleted, userId], (err, result:any) => {
         if (err) {
             console.error("❌ Database Error:", err);
             return res.status(500).json({
@@ -157,7 +141,7 @@ router.get("/admin-users/:id", isAuthenticated, isAdmin, (req, res) => {
     const userId = req.params.id;
     const query = "SELECT UserID, Email, Password, TemporaryPassword FROM User WHERE UserID = ? AND IsDeleted = 0";
 
-    db.query(query, [userId], (err, result) => {
+    db.query(query, [userId], (err, result:any) => {
         if (err) {
             console.error("❌ Database Error:", err);
             return res.status(500).json({ error: "Database error" });
@@ -193,8 +177,8 @@ router.put("/admin-users/:id", isAuthenticated, isAdmin, (req, res) => {
 });
 
 // ✅ Delete User (Soft Delete - Update IsDeleted to 1)
-router.put("/delete-user/:id", (req, res) => {
-    const userId = req.params.id;
+router.post("/delete/:userID", isAuthenticated,isAdmin,(req, res) => {
+    const userId = req.params.userID;
     const query = "UPDATE User SET IsDeleted = 1 WHERE UserID = ?";
 
     db.query(query, [userId], (err, result) => {
@@ -203,23 +187,23 @@ router.put("/delete-user/:id", (req, res) => {
             return res.status(500).json({ success: false, error: "Database error" });
         }
         console.log(`🗑️ User ${userId} marked as deleted`);
-        res.json({ success: true });
 
-        res.redirect('/admin/UserRequest');
+        res.redirect('/admin/user-management/view-all');
     });
 });
 
 
 
-router.get("/recover/:id", isAuthenticated, isAdmin, (req, res) => {
-    const { id } = req.params;
-    db.query("UPDATE User SET IsDeleted = 0 WHERE id = ?", [id], (err, result) => {
+router.post("/restore/:userID", isAuthenticated, isAdmin, (req, res) => {
+    const userID = req.params.userID;
+    db.query("UPDATE User SET IsDeleted = 0 WHERE UserID = ?",
+        [userID], (err, result) => {
         if (err) {
             console.error(err);
             return res.status(500).json({ error: "Error recovering user" });
         }
-        console.log(`✅ User with ID ${id} recovered`);
-        res.redirect('/admin/UserRequest'); // Redirect to admin page after recovery
+        console.log(`✅ User with ID ${userID} recovered`);
+        res.redirect('/admin/user-management/view-all'); // Redirect to admin page after recovery
     });
 });
 

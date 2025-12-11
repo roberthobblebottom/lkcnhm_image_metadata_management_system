@@ -71,11 +71,11 @@ router.post(
     console.log("📩 Change Password Request for:", username);
     console.log("🧾 Request Body:", req.body);
     const query =
-      "SELECT HashedPassword,PasswordSalt FROM User WHERE Email = ?";
+      "SELECT SaltedPassword,PasswordSalt FROM User WHERE Email = ?";
     const results = (
       await db.promise().query<RowDataPacket[]>(query, [username])
     )[0][0];
-    const currentHashedPassword = results.HashedPassword;
+    const currentSaltedPassword = results.SaltedPassword;
     const currentPasswordSalt = results.PasswordSalt;
     try {
       const newPasswordSalt = crypto.randomBytes(16).toString("hex");
@@ -86,7 +86,7 @@ router.post(
         32,
         "sha256",
         async function (err, hashedPassword) {
-          if (!crypto.timingSafeEqual(hashedPassword, currentHashedPassword)) {
+          if (!crypto.timingSafeEqual(hashedPassword, currentSaltedPassword)) {
             console.log("old passwords matched");
             return res.json({
               success: false,
@@ -103,7 +103,7 @@ router.post(
             async function (err, hashedPassword) {
               console.log("inside password hashed functions");
               const updatePasswordQuery =
-                "UPDATE User SET HashedPassword = ?, PasswordSalt = ? WHERE Email = ?";
+                "UPDATE User SET SaltedPassword = ?, PasswordSalt = ? WHERE Email = ?";
               await db
                 .promise()
                 .query<RowDataPacket[]>(updatePasswordQuery, [

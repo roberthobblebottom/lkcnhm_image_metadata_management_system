@@ -24,7 +24,7 @@ passport.use(
   ) {
     //Do not change the variable name from username to email, it doesn't work.
     const query =
-      "SELECT PasswordSalt, HashedPassword, UserID,UserType,FullName,Email FROM User WHERE Email = ?";
+      "SELECT PasswordSalt, SaltedPassword, UserID,UserType,FullName,Email FROM User WHERE Email = ? AND IsDeleted = 0";
     const [result]: any = await db
       .promise()
       .query(query, [username])
@@ -52,7 +52,7 @@ passport.use(
       "sha256",
       function (err, hashedPassword) {
         if (err) return cb(err, undefined, undefined);
-        if (!crypto.timingSafeEqual(user.HashedPassword, hashedPassword)) {
+        if (!crypto.timingSafeEqual(user.SaltedPassword, hashedPassword)) {
           console.log("❌ Invalid Password");
           return cb(null, false, {
             message: "Incorrect username or password.",
@@ -147,7 +147,7 @@ router.post("/register", (req, res) => {
       async function (err, hashedPassword) {
         const insertUserQuery = `
             INSERT INTO User 
-            (Email, HashedPassword,PasswordSalt,  UserType, RegisteredDate,
+            (Email, SaltedPassword,PasswordSalt,  UserType, RegisteredDate,
               UpdatedDate,FullName,ContactNumber,Organisation,Comments,ReasonForRequest,RequestStatus)
             VALUES (?, ?,?,  ?, NOW(),NOW(),  ?, ?,?,?,?,?)`;
         const params = [
@@ -197,7 +197,7 @@ router.post("/login", (req: Request, res: Response, next: NextFunction) => {
 
         // 🔄 Update LastLoginDate
         const updateQuery =
-          "UPDATE User SET LastLoginDate = NOW() WHERE UserID = ?";
+          "UPDATE User SET LastLoginDate = NOW() WHERE UserID = ? ";
         db.query(updateQuery, [user.UserID], async (updateErr: any) => {
           if (updateErr) {
             console.error("❌ Failed to update LastLoginDate:", updateErr);
