@@ -15,7 +15,7 @@ const app = express();
 const PORT = process.env.PORT || 5000;
 import { RowDataPacket } from "mysql2";
 import { userTypesEnumeration } from "./middleware/utils";
-import { Passport, User } from "./@types/types";
+import { Passport, Session, User } from "./@types/types";
 // ✅ Middleware
 app.use(express.static("public"));
 app.use(express.json());
@@ -152,7 +152,7 @@ app.get(
 app.get(
   "/session",
   (
-    req: { session: { passport: Passport} },
+    req: { session:Session},
     res: { json: (arg0: { sessionData: any }) => void }
   ) => {
     console.log("🟢 Session Check:", req.session.passport.user);
