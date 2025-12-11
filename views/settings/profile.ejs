@@ -150,8 +150,8 @@
 <body>
 
   <%- include(currentUser.UserType=='admin' 
-  ? './partials/sidenav-admin' 
-  : './partials/sidenav-user' ) %>
+  ? '../partials/sidenav-admin' 
+  : '../partials/sidenav-user' ) %>
   <div class="main_con">
     <form id="main-form">
 
@@ -246,7 +246,7 @@
 
         })
 
-        const response = await fetch("/user-settings/profile", {
+        const response = await fetch("/settings/profile", {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json'

@@ -29,7 +29,7 @@ router.get(
       return res.redirect("/login");
     }
 
-    res.render("change-password", {
+    res.render("settings/change-password", {
       user: req.session.passport.user.Email,
       currentUser: req.session.passport.user,
       title: "Change Password",
@@ -149,7 +149,7 @@ router.get(
         .promise()
         .query<RowDataPacket[]>(query, [req.session.passport.user.UserID])
     )[0][0];
-    res.render("profile", {
+    res.render("settings/profile", {
       currentUser: result,
       registeredDate: formatDisplayDate(result.RegisteredDate),
     });
@@ -245,7 +245,7 @@ router.post(
     res.json({
       success: true,
       message: "sucessfully edited user profile",
-      redirectUrl: "/user-settings/profile",
+      redirectUrl: "/settings/profile",
     });
   }
 );

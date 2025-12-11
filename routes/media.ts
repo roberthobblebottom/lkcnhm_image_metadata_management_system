@@ -1,4 +1,3 @@
-
 const express = require("express");
 const router = express.Router();
 import { db } from "./db";
@@ -11,6 +10,7 @@ const {
 const multer = require("multer");
 import fs from "fs";
 import { RowDataPacket } from "mysql2";
+import { Session, User } from "../@types/types";
 const path = require("path");
 const upload = multer({ dest: "upload-bulk-metadata/" });
 
@@ -18,7 +18,7 @@ router.get(
   "/view-all",
   isAuthenticated,
   async (
-    req: { session: { passport: { user: any }; message: any } },
+    req: { session: Session; message: string },
     res: {
       render: (
         arg0: string,
@@ -26,8 +26,7 @@ router.get(
           title: string;
           mediaRecords: any;
           errorMessage?: string;
-          message?: any;
-          currentUser?: any;
+          currentUser?: User;
           disableCreateMedia?: boolean;
         }
       ) => void;
@@ -89,21 +88,15 @@ router.get(
           errorMessage: "Failed to load media data. Please try again later.",
         });
       }
-      console.log('results',results)
+      console.log("results", results);
       // Successful query
       res.render("media/view-all", {
         title: "Media Management",
         mediaRecords: results,
-        message: req.session.message || null,
         currentUser: user,
         disableCreateMedia:
           anyLinks.length == 0 && user.UserType != userTypesEnumeration().admin,
       });
-
-      // Clear session message if it exists
-      if (req.session.message) {
-        delete req.session.message;
-      }
     });
   }
 );
@@ -162,20 +155,20 @@ router.get(
   isAuthenticated,
   async (
     req: {
-      params: { mediaID: number|string };
-      session: { [x: string]: any; passport: { user: any } };
+      params: { mediaID: number | string };
+      session: Session;
     },
     res: {
       render: (
         arg0: string,
         arg1: {
-          currentUser: any;
-          imageEditingTools: any;
-          imagingPlatforms: any;
+          currentUser: User;
+          imageEditingTools: string[];
+          imagingPlatforms: string[];
           allProjectAndPhotographerPairs: any;
-          fileFormats: unknown[];
+          fileFormats: string[];
           toBeEditedMedia: any;
-          toBeEditedImagingDate: any;
+          toBeEditedImagingDate: string | number | Date;
           title: string;
         }
       ) => void;
@@ -193,8 +186,9 @@ router.get(
     if (user.UserType == userTypesEnumeration().projectOwner) {
       q2 = allProjectAndPhotographerPairsQuery + "WHERE p.ProjectOwnerID = ?";
     } else if (user.UserType == userTypesEnumeration().photographerOnly) {
-      q2 = allProjectAndPhotographerPairsQuery + "WHERE photographer.UserID = ?";
-    } else if (user.UserType == userTypesEnumeration().admin){
+      q2 =
+        allProjectAndPhotographerPairsQuery + "WHERE photographer.UserID = ?";
+    } else if (user.UserType == userTypesEnumeration().admin) {
       q2 = allProjectAndPhotographerPairsQuery;
     }
     const allProjectAndPhotographerPairs = (
@@ -258,26 +252,28 @@ router.get(
   "/upload-bulk-metadata",
   isAuthenticated,
   async (
-    req: { session: { passport: { user: any } } },
+    req: { session: Session },
     res: {
       render: (
         arg0: string,
-        arg1: { currentUser: any; allProjects: any; title: string }
+        arg1: { currentUser: User; allProjects: any; title: string }
       ) => void;
     }
   ) => {
     console.log("upload bulk metadata GET");
     const user = req.session.passport.user;
-    const query =
-      `
+    const query = `
     SELECT  p.ProjectID, p.ProjectName
     FROM Project p
-`
-    const q2 = user.UserType != userTypesEnumeration().admin
-      ? query + `
+`;
+    const q2 =
+      user.UserType != userTypesEnumeration().admin
+        ? query +
+          `
         JOIN ProjectUserPhotographyLink pupl ON pupl.ProjectID = p.ProjectID
-        WHERE pupl.PhotographerID = ` + user.UserID
-      : query ;
+        WHERE pupl.PhotographerID = ` +
+          user.UserID
+        : query;
     const allProjects = (await db.promise().query(q2))[0];
     console.log(allProjects);
     res.render("media/upload-bulk-metadata", {
@@ -294,14 +290,9 @@ router.post(
   isAuthenticated,
   async (
     req: {
-      params: { projectID: any };
-      file: { path: any };
-      session: {
-        [x: string]: any;
-        passport: { user: any };
-        imagingPlatforms: any[];
-        imageEditingTools: any[];
-      };
+      params: { projectID: number };
+      file: { path: string };
+      session: Session;
     },
     res: {
       json: (arg0: {
@@ -313,10 +304,7 @@ router.post(
     }
   ) => {
     const projectID = req.params.projectID;
-    if (isNaN(parseInt(projectID))) {
-      res.json({ sucess: false, message: "projectID is not an integer" });
-      return;
-    }
+
     const absolutePath = path
       .join(__dirname, req.file.path)
       .replace("/routes", "");
@@ -381,7 +369,7 @@ router.post(
         continue;
       }
       // console.log(newRowTempSplited)
-      const newRow: string[] = [projectID];
+      const newRow: string[] = [projectID.toString()];
       for (var j: number = 0; j < newRowTempSplited.length; j++) {
         const elementTemp = newRowTempSplited[j]
           .replaceAll('"', "")
@@ -532,11 +520,7 @@ router.post(
     // console.log('newTable', newTable)
     const allImageEditingTools =
       req.session["imageEditingTools"].concat(newImageEditingTools);
-    if (
-      newImageEditingTools != null &&
-      newImageEditingTools.length != 0 &&
-      !req.session["imageEditingTools"].includes(newImageEditingTools)
-    )
+    if (newImageEditingTools != null && newImageEditingTools.length != 0)
       await db
         .promise()
         .query("ALTER TABLE Media MODIFY COLUMN `ImageEditingTool` enum(?)", [
@@ -545,11 +529,7 @@ router.post(
     req.session["imageEditingTools"] = allImageEditingTools;
     const allImagingPlatforms =
       req.session["imagingPlatforms"].concat(newImagingPlatforms);
-    if (
-      newImagingPlatforms != null &&
-      newImagingPlatforms.length != 0 &&
-      !req.session["imagingPlatforms"].includes(newImagingPlatforms)
-    )
+    if (newImagingPlatforms != null && newImagingPlatforms.length != 0)
       await db
         .promise()
         .query("ALTER TABLE Media MODIFY COLUMN `ImagingPlatform` enum(?)", [
@@ -581,32 +561,37 @@ router.post(
     });
   }
 );
-router.get("/download", isAuthenticated, async (req, res) => { 
-  const filePath:string = "image metadata template for only one project.xlsx"
-    
-  res.download(filePath)
-})
+router.get(
+  "/download",
+  isAuthenticated,
+  async (req: any, res: { download: (arg0: string) => void }) => {
+    const filePath: string =
+      "image metadata template for only one project.xlsx";
+
+    res.download(filePath);
+  }
+);
 router.post(
   "/create",
   isAuthenticated,
   async (
     req: {
       body: {
-        fileName: any;
-        filePath: any;
-        catalogID: any;
-        morphoID: any;
-        clusterID: any;
-        imagingDate: any;
-        resolution: any;
-        fileSizeBytes: any;
-        fileFormat: any;
-        description: any;
-        imagingPlatform: any;
-        imageEditingTool: any;
-        newImagingPlatform: any;
-        newImageEditingTool: any;
-        comments: any;
+        fileName: string;
+        filePath: string;
+        catalogID: string;
+        morphoID: string;
+        clusterID: string;
+        imagingDate: string | number | Date;
+        resolution: string;
+        fileSizeBytes: number;
+        fileFormat: string;
+        description: string;
+        imagingPlatform: string;
+        imageEditingTool: string;
+        newImagingPlatform: string;
+        newImageEditingTool: string;
+        comments: string;
         projectAndPhotographerPair: any;
       };
       session: any;
@@ -743,7 +728,12 @@ router.post(
         .query("ALTER TABLE Media MODIFY COLUMN `ImagingPlatform` enum(?)", [
           i2,
         ]);
-
+      await db
+        .promise()
+        .query<RowDataPacket[]>(
+          "ALTER TABLE ImagingPlatformInstance MODIFY COLUMN `ImagingPlatform` enum(?)",
+          [i2]
+        );
       const result: any = (
         await db.promise().query<RowDataPacket[]>(insertQuery, values)
       )[0];
@@ -772,7 +762,7 @@ router.post(
   async (
     req: {
       body: any;
-      session: any;
+      session: Session;
     },
     res: {
       status: (arg0: number) => {
@@ -871,6 +861,12 @@ router.post(
           "ALTER TABLE Media MODIFY COLUMN `ImagingPlatform` enum(?)",
           [i]
         );
+      await db
+        .promise()
+        .query<RowDataPacket[]>(
+          "ALTER TABLE ImagingPlatformInstance MODIFY COLUMN `ImagingPlatform` enum(?)",
+          [i]
+        );
     }
     req.session.save();
 
@@ -894,7 +890,7 @@ router.get(
   "/view/:mediaID",
   isAuthenticated,
   (
-    req: { params: { mediaID: number }; session: { passport: { user: any } } },
+    req: { params: { mediaID: number }; session: Session },
     res: {
       status: (arg0: number) => {
         (): any;
@@ -907,7 +903,7 @@ router.get(
       render: (
         arg0: string,
         arg1: {
-          currentUser: any;
+          currentUser: User;
           media: any; // Since we're querying by ID, we'll only get one record
           mediaID: number;
           title: string;
@@ -969,7 +965,7 @@ router.post(
   (
     req: {
       params: { mediaID: number };
-      session: { passport: { user: { UserID: any } } };
+      session: Session;
       flash: (arg0: string, arg1: string) => void;
     },
     res: { redirect: (arg0: string) => void }
@@ -1016,7 +1012,7 @@ router.post(
   (
     req: {
       params: { mediaID: number };
-      session: { passport: { user: { UserID: any } } };
+      session: Session;
       flash: (arg0: string, arg1: string) => void;
     },
     res: { redirect: (arg0: string) => void }

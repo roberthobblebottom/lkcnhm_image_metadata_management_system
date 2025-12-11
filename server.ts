@@ -7,7 +7,7 @@ const authRoutes = require("./routes/auth");
 const adminRoutes = require("./routes/admin/admin");
 const mediaRoutes = require("./routes/media");
 const projectRoutes = require("./routes/project");
-const userSettingsRoutes = require("./routes/userSettings");
+const settingsRoutes = require("./routes/settings");
 const adminUserManagementRoutes = require("./routes/admin/user-management");
 const { isAuthenticated, isAdmin } = require("./middleware/auth");
 const passport = require("passport");
@@ -40,7 +40,7 @@ app.use("/auth", authRoutes);
 app.use("/admin", adminRoutes);
 app.use("/media", mediaRoutes);
 app.use("/project", projectRoutes);
-app.use("/user-settings", userSettingsRoutes);
+app.use("/settings", settingsRoutes);
 app.use("/admin/user-management", adminUserManagementRoutes);
 
 // ✅ Serve HTML pages

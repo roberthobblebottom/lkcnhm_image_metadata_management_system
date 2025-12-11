@@ -13,5 +13,6 @@ export interface Session {
     passport: Passport;
     imagingPlatforms: string[],
     imageEditingTools: string[];
+    save: Function;
 }
 

@@ -592,9 +592,8 @@ router.get(
       const requestQuery = `
             SELECT
             p.*,
-            projectOwner.FullName AS RequestorName,
-            projectOwner.Email AS RequestorEmail,
-            projectOwner.UserID AS RequestorID
+            projectOwner.FullName ,
+            projectOwner.Email 
             FROM Project p
             JOIN User projectOwner ON p.ProjectOwnerID = projectOwner.UserID
             WHERE p.ProjectID = ?;
@@ -616,7 +615,7 @@ router.get(
         db
           .promise()
           .query(
-            "SELECT user.UserID ,user.FullName FROM ProjectUserPhotographyLink p JOIN User user on user.UserID = p.PhotographerID WHERE p.ProjectID = ? ",
+            "SELECT user.UserID  FROM ProjectUserPhotographyLink p JOIN User user on user.UserID = p.PhotographerID WHERE p.ProjectID = ? ",
             [projectID]
           ),
         db
@@ -630,9 +629,9 @@ router.get(
           .status(404)
           .render("error", { message: "Request not found" });
       }
-      const currentlySelectedPhotographers :any[]= [];
+      const currentlySelectedPhotographers :string[]= [];
       for (var i of selectedPhotographersTemp[0]) {
-        currentlySelectedPhotographers.push(i);
+        currentlySelectedPhotographers.push(i.UserID);
       }
       console.log(
         "currentlySelectedPhotographersResults",
@@ -688,6 +687,7 @@ ImagingEndDate: string | number | Date;
         DetailsOfSpecimens: string;
         LocationsOfSpecimens: string;
         ProjectStatus: string;
+        projectOwnerID: string;
         selectedImagingPlatforms: string;
         selectedPhotographers: string;
       };
@@ -727,6 +727,7 @@ ImagingEndDate: string | number | Date;
         DetailsOfSpecimens,
         LocationsOfSpecimens,
         ProjectStatus,
+        projectOwnerID,
         selectedImagingPlatforms,
         selectedPhotographers,
       } = req.body;
@@ -755,7 +756,7 @@ ImagingEndDate: string | number | Date;
           .status(400)
           .json({ success: false, message: "no Selected Photographers" });
       }
-      if (!newSelectedPhotographers.includes(userID.toString())) {
+      if (!newSelectedPhotographers.includes(projectOwnerID.toString())) {
         return res.status(400).json({
           success: false,
           message: "Photographers must include him or herself.",

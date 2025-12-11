@@ -274,13 +274,12 @@ Retrieved 2025-11-19, License - CC BY-SA 4.0
       <div class="form-group">
         <label>Project Owner</label>
         <p class="form-control-static">
-          <%= request.RequestorName || 'Not specified' %>
+          <%= request.FullName || 'Not specified' %>
         </p>
       </div>
 
       <div class="form-group">
         <label>Project Type</label>
-        <%= request.RequestorType %>
         <select name="projectType" id="projectType" class="form-control">
           <option value="">-- Select Project Type --</option>
           <% projectTypes.forEach(projectType=> { %>
@@ -298,7 +297,11 @@ Retrieved 2025-11-19, License - CC BY-SA 4.0
           <ul class="items" id="newSelectedPhotographersList">
             <% allPhotographers.forEach(photographer=>{ %>
             <label class="dropdown-item">
-              <input class='target' type="checkbox" id="<%=photographer%>Input" <%=selectedPhotographers.some(e=>e.UserID === photographer.UserID) ? 'checked' : '' %> value=<%=photographer.UserID%> <%=photographer.UserID == currentUser.UserID ? 'disabled' : '' %>>
+              <input class='target' type="checkbox" id="<%=photographer%>Input" 
+              <%=selectedPhotographers.includes( photographer.UserID) ? 'checked' : '' %> 
+
+              value=<%=photographer.UserID%> 
+              <%=photographer.UserID == request.ProjectOwnerID ? 'disabled' : '' %>>
               <%=photographer.FullName%>
             </label>
             <%})%>
@@ -501,6 +504,7 @@ Retrieved 2025-11-19, License - CC BY-SA 4.0
           console.log(selectedPhotographers)
           // return;
           const formData = new FormData(form);
+          formData.append("projectOwnerID","<%=request.ProjectOwnerID%>")
           formData.append('selectedImagingPlatforms', selectedImagingPlatforms);
           formData.append('selectedPhotographers', selectedPhotographers);
           console.log(formData)
