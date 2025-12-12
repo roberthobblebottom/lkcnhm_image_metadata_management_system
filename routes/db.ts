@@ -1,6 +1,5 @@
 import mysql, { QueryError } from 'mysql2';
 
-// dotenv.config();
 const db = mysql.createConnection({
     host: process.env.DB_HOST, // Change to your MySQL host
     user: process.env.DB_USER,   // Change to your MySQL username

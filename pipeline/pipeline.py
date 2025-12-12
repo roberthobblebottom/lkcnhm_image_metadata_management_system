@@ -191,7 +191,7 @@ def main():
         .select(pl.exclude("ImageWidth", "ImageLength", "Make", "Model"))
     )
     print(df.head())
-    df.write_csv("output.csv")
+    df.write_csv("metadata_for_photographer_ID_"+photographerID+".csv")
 
 
 if __name__ == "__main__":

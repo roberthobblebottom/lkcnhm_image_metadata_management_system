@@ -10,4 +10,4 @@ node_modules/
 *.raw
 .~*
 *.venv*
-pipeline/output.csv
+pipeline/*.csv

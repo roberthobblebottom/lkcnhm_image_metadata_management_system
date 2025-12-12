@@ -143,7 +143,7 @@ router.post(
         comments: string;
         projectAndPhotographerPair: any;
       };
-      session: any;
+      session: Session;
     },
     res: {
       status: (arg0: number) => {

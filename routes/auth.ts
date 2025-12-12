@@ -8,13 +8,11 @@ import {
   requestStatusEnumeration,
   userTypesEnumeration,
 } from "../middleware/utils";
-import { FieldPacket, QueryResult } from "mysql2";
 import { Request, Response, NextFunction } from "express";
 import { User } from "../@types/types";
-import { Session } from "../@types/express-session";
 passport.use(
   new passportStrategy.Strategy(async function verify(
-    username: any,
+    username: string,
     password: crypto.BinaryLike,
     cb: (
       arg0: Error | null,
@@ -270,15 +268,15 @@ router.get("/logout", (req, res) => {
   }
 });
 
-// Get Logged-in User
-router.get("/user", (req, res) => {
-  if (!req.session.passport.user) {
-    console.warn("⚠️ Unauthorized User Info Request");
-    return res.status(401).json({ error: "Not logged in" });
-  }
+// // Get Logged-in User
+// router.get("/user", (req, res) => {
+//   if (!req.session.passport.user) {
+//     console.warn("⚠️ Unauthorized User Info Request");
+//     return res.status(401).json({ error: "Not logged in" });
+//   }
 
-  console.log(`🔹 User Info Requested: ${req.session.passport.user.Email}`);
-  res.json({ user: req.session.passport.user });
-});
+//   console.log(`🔹 User Info Requested: ${req.session.passport.user.Email}`);
+//   res.json({ user: req.session.passport.user });
+// });
 
 module.exports = router;
