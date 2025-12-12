@@ -96,8 +96,8 @@
 <body>
   <div class="main_con">
     <%- currentUser.UserType=='admin' 
-    ? include('../partials/sidenav-admin')
-    : include('../partials/sidenav-user') %>
+    ? include('../sidenavs/admin')
+    : include('../sidenavs/user') %>
     <center>
       <h2 style="margin-left: 35%;margin-top: 40px;">Project Management</h2>
     </center>

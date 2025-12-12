@@ -248,8 +248,8 @@
 <body>
   <div class="main_con">
     <%- currentUser.UserType=='admin' 
-    ? include('../partials/sidenav-admin')
-    : include('../partials/sidenav-user') %>
+    ? include('../sidenavs/admin')
+    : include('../sidenavs/user') %>
 
     <form id="main-form" action="media/create" method="POST">
       <div id="top-panel">

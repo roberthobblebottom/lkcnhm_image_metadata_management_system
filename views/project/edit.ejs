@@ -254,8 +254,8 @@ Retrieved 2025-11-19, License - CC BY-SA 4.0
 
 <body>
   <%- include(currentUser.UserType=='admin' 
-  ? '../partials/sidenav-admin.ejs' 
-  : '../partials/sidenav-user' ) %>
+  ? '../sidenavs/admin.ejs' 
+  : '../sidenavs/user' ) %>
   <main>
     <div class="top-group">
       <a href="/project/view-all">

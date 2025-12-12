@@ -281,7 +281,7 @@ Retrieved 2025-11-19, License - CC BY-SA 4.0
 </head>
 
 <body>
-  <%- include(currentUser.UserType==='admin' ? '../partials/sidenav-admin.ejs' : '../partials/sidenav-user' ) %>
+  <%- include(currentUser.UserType==='admin' ? '../sidenavs/admin.ejs' : '../sidenavs/user' ) %>
     <main>
       <div class="top-group">
         <a href="/project/view-all"><button class="btn btn-primary">Back to all Projects</button></a>

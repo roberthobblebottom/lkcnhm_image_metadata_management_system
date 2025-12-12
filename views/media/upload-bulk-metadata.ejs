@@ -192,8 +192,8 @@
 <body>
   <div class="main_con">
     <%- currentUser.UserType=='admin' 
-        ? include('../partials/sidenav-admin')
-        : include('../partials/sidenav-user') %>
+        ? include('../sidenavs/admin')
+        : include('../sidenavs/user') %>
     </br>
     <form id='fileUploadForm'>
       <h1>📸 Upload Metadata in Bulk</h1></br>

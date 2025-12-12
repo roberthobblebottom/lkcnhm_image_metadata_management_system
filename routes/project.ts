@@ -466,93 +466,6 @@ router.get(
   }
 );
 
-// Delete Request (POST)
-// Soft Delete Request (POST)
-router.post(
-  "/delete/:projectID",
-  isAuthenticated,
-  isAdminOrProjectOwner,
-  (
-    req: {
-      params: { projectID: number };
-      session: Session;
-    },
-    res: {
-      status: (arg0: number) => {
-        (): any;
-        new (): any;
-        send: { (arg0: string): any; new (): any };
-      };
-      redirect: (arg0: string) => void;
-    }
-  ) => {
-    const projectID = req.params.projectID;
-    const query = `
-        UPDATE Project
-        SET
-            IsDeleted = 1,
-            UpdatedByID = ?,
-            UpdatedDate = NOW()
-        WHERE ProjectID = ?
-        `;
-    db.query(
-      query,
-      [req.session.passport.user.UserID, projectID],
-      (err: any) => {
-        if (err) {
-          console.error("Error soft deleting request:", err);
-          return res.status(500).send("Error marking request as deleted.");
-        }
-
-        res.redirect("/project/view-all");
-      }
-    );
-  }
-);
-
-//undo soft delete
-router.post(
-  "/restore/:projectID",
-  isAuthenticated,
-  isAdminOrProjectOwner,
-  (
-    req: {
-      params: { projectID: number};
-      session: { passport: { user: { UserID: any } } };
-    },
-    res: {
-      status: (arg0: number) => {
-        (): any;
-        new (): any;
-        send: { (arg0: string): any; new (): any };
-      };
-      redirect: (arg0: string) => void;
-    }
-  ) => {
-    const projectID = req.params.projectID;
-    const query = `
-        UPDATE Project
-        SET
-            IsDeleted = 0,
-            UpdatedByID = ?,
-            UpdatedDate = NOW()
-        WHERE ProjectID = ?
-        `;
-    db.query(
-      query,
-      [req.session.passport.user.UserID, projectID],
-      (err: any) => {
-        if (err) {
-          console.error("Error soft deleting request:", err);
-          return res.status(500).send("Error marking request as deleted.");
-        }
-
-        res.redirect("/project/view-all");
-      }
-    );
-  }
-);
-
 // Edit Project (GET)
 // Define queries at the top of your file for better maintainability
 router.get(
@@ -915,5 +828,92 @@ ImagingEndDate: string | number | Date;
     }
   }
 );
+// Delete Request (POST)
+// Soft Delete Request (POST)
+router.post(
+  "/delete/:projectID",
+  isAuthenticated,
+  isAdminOrProjectOwner,
+  (
+    req: {
+      params: { projectID: number };
+      session: Session;
+    },
+    res: {
+      status: (arg0: number) => {
+        (): any;
+        new (): any;
+        send: { (arg0: string): any; new (): any };
+      };
+      redirect: (arg0: string) => void;
+    }
+  ) => {
+    const projectID = req.params.projectID;
+    const query = `
+        UPDATE Project
+        SET
+            IsDeleted = 1,
+            UpdatedByID = ?,
+            UpdatedDate = NOW()
+        WHERE ProjectID = ?
+        `;
+    db.query(
+      query,
+      [req.session.passport.user.UserID, projectID],
+      (err: any) => {
+        if (err) {
+          console.error("Error soft deleting request:", err);
+          return res.status(500).send("Error marking request as deleted.");
+        }
+
+        res.redirect("/project/view-all");
+      }
+    );
+  }
+);
+
+//undo soft delete
+router.post(
+  "/restore/:projectID",
+  isAuthenticated,
+  isAdminOrProjectOwner,
+  (
+    req: {
+      params: { projectID: number};
+      session: { passport: { user: { UserID: any } } };
+    },
+    res: {
+      status: (arg0: number) => {
+        (): any;
+        new (): any;
+        send: { (arg0: string): any; new (): any };
+      };
+      redirect: (arg0: string) => void;
+    }
+  ) => {
+    const projectID = req.params.projectID;
+    const query = `
+        UPDATE Project
+        SET
+            IsDeleted = 0,
+            UpdatedByID = ?,
+            UpdatedDate = NOW()
+        WHERE ProjectID = ?
+        `;
+    db.query(
+      query,
+      [req.session.passport.user.UserID, projectID],
+      (err: any) => {
+        if (err) {
+          console.error("Error soft deleting request:", err);
+          return res.status(500).send("Error marking request as deleted.");
+        }
+
+        res.redirect("/project/view-all");
+      }
+    );
+  }
+);
+
 
 module.exports = router;

@@ -124,8 +124,8 @@
 <body>
   <div class="main_con">
     <%- currentUser.UserType=='admin' 
-    ? include('../partials/sidenav-admin')
-    : include('../partials/sidenav-user') %>
+    ? include('../sidenavs/admin')
+    : include('../sidenavs/user') %>
 
     <div id="top-panel">
       <a href="/media/view-all" class="btn btn-primary">

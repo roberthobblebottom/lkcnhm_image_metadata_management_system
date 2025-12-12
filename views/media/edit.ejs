@@ -247,7 +247,7 @@
 
 <body>
   <div class="main_con">
-    <%- currentUser.UserType=='admin' ? include('../partials/sidenav-admin'): include('../partials/sidenav-user') %>
+    <%- currentUser.UserType=='admin' ? include('../sidenavs/admin'): include('../sidenavs/user') %>
     <!-- 📸 MEDIA SUBMISSION FORM (UPDATED) -->
 
     <form id="main-form" action="/media/edit" method="POST">

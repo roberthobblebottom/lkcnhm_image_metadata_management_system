@@ -116,7 +116,7 @@
 
 <body>
   <div class="main_con">
-    <%- currentUser.UserType=='admin' ? include('../partials/sidenav-admin'): include('../partials/sidenav-user') %>
+    <%- currentUser.UserType=='admin' ? include('../sidenavs/admin'): include('../sidenavs/user') %>
     <%if (currentUser.UserType=='admin' ){%>
     <h2>All Photography Metadata Records</h2>
     <%} else {%>
