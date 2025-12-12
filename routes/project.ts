@@ -1,6 +1,6 @@
 const express = require("express");
 const router = express.Router()
-import { FieldPacket, QueryError, QueryOptions, QueryResult, RowDataPacket } from "mysql2";
+import { FieldPacket, QueryError, QueryResult, RowDataPacket } from "mysql2";
 import { db } from "./db"
 import { Session, User } from "../@types/types";
 

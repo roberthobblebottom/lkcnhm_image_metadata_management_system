@@ -16,3 +16,6 @@ export interface Session {
     save: Function;
 }
 
+export interface Request { 
+    session:Session
+}

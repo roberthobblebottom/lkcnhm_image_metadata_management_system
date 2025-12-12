@@ -2,7 +2,7 @@ const express = require("express");
 const router = express.Router();
 import { RowDataPacket } from "mysql2";
 import { db } from "./db";
-import { Passport } from "../@types/types";
+import { Session, User,Request } from "../@types/types";
 
 import crypto from "crypto";
 import { formatDisplayDate } from "../middleware/utils";
@@ -13,13 +13,13 @@ router.get(
   isAuthenticated,
   (
     req: {
-      session: { passport: Passport };
+      session: Session;
     },
     res: {
       redirect: (arg0: string) => any;
       render: (
         arg0: string,
-        arg1: { user: any; currentUser: any; title: string }
+        arg1: { currentUser: User; title: string }
       ) => void;
     }
   ) => {
@@ -28,7 +28,6 @@ router.get(
     }
 
     res.render("settings/change-password", {
-      user: req.session.passport.user.Email,
       currentUser: req.session.passport.user,
       title: "Change Password",
     }); // ✅ pass `user` to EJS
@@ -40,12 +39,11 @@ router.post(
   isAuthenticated,
   async (
     req: {
-      session: { passport: Passport };
-      body: any;
-      url: any;
+      session: Session;
+      body: {email:string,oldPassword:string,newPassword:string,confirmNewPassword:string};
     },
     res: {
-      status: any;
+      status: Function;
       json: (arg0: {
         success: boolean;
         message: string;
@@ -53,11 +51,11 @@ router.post(
     }  ) => {
     // This may not be the best way to change passwords.
     const username = req.body.email;
-    const old_password = req.body.old_password;
-    const new_password = req.body.new_password;
-    const confirm_new_password = req.body.confirm_new_password;
+    const oldPassword = req.body.oldPassword;
+    const newPassword = req.body.newPassword;
+    const confirmNewPassword = req.body.confirmNewPassword;
 
-    if (new_password != confirm_new_password) {
+    if (newPassword != confirmNewPassword) {
       return res.status(400).json({
         success: false,
         message: "the new passwords does not match",
@@ -76,7 +74,7 @@ router.post(
     try {
       const newPasswordSalt = crypto.randomBytes(16).toString("hex");
       crypto.pbkdf2(
-        old_password,
+        oldPassword,
         currentPasswordSalt,
         310000,
         32,
@@ -91,7 +89,7 @@ router.post(
           }
 
           crypto.pbkdf2(
-            new_password,
+            newPassword,
             newPasswordSalt,
             310000,
             32,
@@ -129,9 +127,7 @@ router.get(
   "/profile",
   isAuthenticated,
   async (
-    req: {
-      session: { passport: Passport };
-    },
+    req:Request,
     res: {
       render: (
         arg0: string,
@@ -157,27 +153,18 @@ router.post(
   isAuthenticated,
   async (
     req: {
-      session: any;
+      session: Session;
       body: {
-        userID: any;
-        email: any;
-        fullName: any;
-        contactNumber: any;
-        organisation: any;
-        comments: any;
+        userID: number;
+        email: string;
+        fullName: string;
+        contactNumber: string;
+        organisation: string;
+        comments: string;
       };
     },
     res: {
-      
       status: {
-        (arg0: number): {
-          (): any;
-          new (): any;
-          json: {
-            (arg0: { success: boolean; message: string }): any;
-            new (): any;
-          };
-        };
         (arg0: number): {
           (): any;
           new (): any;
@@ -195,7 +182,6 @@ router.post(
       }) => void;
     }
   ) => {
-    console.log("req.body", req.body);
     const { userID, email, fullName, contactNumber, organisation, comments } =
       req.body;
 
