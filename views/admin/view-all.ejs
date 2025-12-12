@@ -167,15 +167,15 @@
             <%=!user.IsDeleted? 'No' : 'Yes' %>
           </td>
           <td class="actions">
-            <a href="/admin/user-management/edit-users/<%= user.UserID %>" class="btn-edit">
+            <a href="/admin/user-management/edit/<%= user.UserID %>" class="btn-edit">
               <i class="fas fa-edit"></i> Edit
             </a>
             <%if (!user.IsDeleted ){%>
-            <form action="/admin/user-management/delete/<%= user.UserID%>" method="POST" style="display:inline;" onsubmit="return confirm('Are you sure you want to delete this media record?');">
+            <form action="/admin/user-management/delete/<%= user.UserID%>" method="POST" style="display:inline;" onsubmit="return confirm('Are you sure you want to delete this user?');">
               <button type="submit" class="btn-delete">Delete</button>
             </form>
             <%} else {%>
-            <form action="/admin/user-management/restore/<%= user.UserID %>" method="POST" style="display:inline;" onsubmit="return confirm('Are you sure you want to restore this media record?');">
+            <form action="/admin/user-management/restore/<%= user.UserID %>" method="POST" style="display:inline;" onsubmit="return confirm('Are you sure you want to restore this user?');">
               <button type="submit" class="btn-restore">restore</button>
             </form>
             <%}%>

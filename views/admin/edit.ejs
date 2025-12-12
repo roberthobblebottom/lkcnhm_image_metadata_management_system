@@ -2,271 +2,342 @@
 <html lang="en">
 
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Edit User - <%= user ? user.LoginUserName : 'Unknown User' %>
-    </title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Edit User - <%= user ? user.LoginUserName : 'Unknown User' %>
+  </title>
 
-    <link rel="stylesheet" href="/css/admin-users.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    <%- include('../partials/sidenav-admin') %>
-        <style>
-            * {
-                box-sizing: border-box;
-                font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            }
+  <link rel="stylesheet" href="/css/admin-users.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <%- include('../partials/sidenav-admin') %>
+  <style>
+    * {
+      box-sizing: border-box;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
 
-            body {
-                margin: 0;
-                padding: 0;
-                background: white;
-                min-height: 100vh;
-                display: flex;
-                justify-content: center;
-                align-items: flex-start;
-                padding-top: 60px;
-            }
+    body {
+      margin: 0;
+      padding: 0;
+      background: white;
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      padding-top: 60px;
+    }
 
-            main {
-                width: 100%;
-                max-width: 600px;
-                padding: 20px;
-            }
+    main {
+      max-width: 600px;
+      padding: 20px;
+    }
 
-            .form-container {
-                background-color: #fff;
-                padding: 30px;
-                border-radius: 16px;
-                box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
-                width: 100%;
-            }
+    .form-container {
+      background-color: #fff;
+      padding: 30px;
+      border-radius: 16px;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+      min-width: 1000px;
+      margin-left: -100%;
+    }
 
-            .form-container h2 {
-                text-align: center;
-                margin-bottom: 25px;
-                color: #000435;
-                font-size: 24px;
-            }
+    .form-container h2 {
+      margin-bottom: 25px;
+      color: #000435;
+      font-size: 24px;
+    }
 
-            .form-group {
-                margin-bottom: 20px;
-            }
+    .form-group {
+      margin-bottom: 20px;
+    }
 
-            label {
-                display: block;
-                font-weight: 600;
-                margin-bottom: 8px;
-                color: #333;
-            }
+    label {
+      display: block;
+      font-weight: 600;
+      margin-bottom: 8px;
+      color: #333;
+    }
 
-            input,
-            select {
-                width: 100%;
-                padding: 12px 15px;
-                border: 1.5px solid #ccc;
-                border-radius: 8px;
-                font-size: 15px;
-                transition: border-color 0.3s ease;
-            }
+    input,
+    select {
+      width: 100%;
+      padding: 12px 15px;
+      border: 1.5px solid #ccc;
+      border-radius: 8px;
+      font-size: 15px;
+      transition: border-color 0.3s ease;
+    }
 
-            input:focus,
-            select:focus {
-                border-color: #00c6ff;
-                outline: none;
-            }
+    input:focus,
+    select:focus {
+      border-color: #00c6ff;
+      outline: none;
+    }
 
-            input[disabled] {
-                background-color: #f0f0f0;
-                color: #999;
-            }
+    input[disabled] {
+      background-color: #f0f0f0;
+      color: #999;
+    }
 
-            button {
-                width: 100%;
-                background-color: #000435;
-                color: white;
-                padding: 14px;
-                font-size: 16px;
-                font-weight: bold;
-                border: none;
-                border-radius: 8px;
-                cursor: pointer;
-                transition: background-color 0.3s ease;
-            }
+    textarea {
+      min-height: 120px;
+      width: 100%;
+      resize: vertical;
+      line-height: 1.5;
+    }
 
-            button:hover {
-                background-color: #0072ff;
-            }
+    button {
+      width: 100%;
+      background-color: #000435;
+      color: white;
+      padding: 14px;
+      font-size: 16px;
+      font-weight: bold;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
 
-            @media screen and (max-width: 768px) {
-                body {
-                    align-items: flex-start;
-                    padding: 40px 10px;
-                }
+    button:hover {
+      background-color: #0072ff;
+    }
 
-                .form-container {
-                    padding: 20px;
-                }
+    @media screen and (max-width: 768px) {
+      body {
+        align-items: flex-start;
+        padding: 40px 10px;
+      }
 
-                .form-container h2 {
-                    font-size: 20px;
-                }
+      .form-container {
+        padding: 20px;
+      }
 
-                button {
-                    padding: 12px;
-                    font-size: 15px;
-                }
-            }
-        </style>
+      .form-container h2 {
+        font-size: 20px;
+      }
+
+      button {
+        padding: 12px;
+        font-size: 15px;
+      }
+    }
+  </style>
 
 </head>
 
 <body>
-    <main>
-        <div class="form-container">
-            <h2>Edit Login Details</h2>
+  <main>
+    <div class="form-container">
+      <h2>Edit Login Details</h2>
 
-            <form id="editUserForm">
-                <input type="hidden" name="LoginUserID" value="<%= user.LoginUserID %>">
+      <form id="editUserForm">
 
-                
-<div class="form-group">
-        <label for="userID">User ID</label>
-        <input type="text" id="userID" value="<%=currentUser.UserID%>" readonly>
-      </div>
-      <div class="form-group">
-        <label for="email">Email </label>
-        <input type="text" name="email" id="email" value="<%=currentUser.Email%>" required>
-      </div>
-                <div class="form-group">
-                    <label for="Password">Password:</label>
-                    <input type="password" id="Password" name="Password" value="" >
-                </div>
 
-   
-
-<div class="form-group">
-        <label for="userType">User Type</label>
-        <input type="text" value="<%=currentUser.UserType%>" readonly>
-      </div>
-      <div class="form-group">
-        <label for="fullName">Full Name </label>
-        <input type="text" name="fullName" id="fullname" value="<%=currentUser.FullName%>" required>
-      </div>
-      <div class="form-group">
-        <label>Registered Date </label>
-        <input type="text" value="<%=registeredDate%>" readonly>
-      </div>
-      <div class="form-group">
-        <label for="contactNumber">Contact Number </label>
-        <input type="text" id="contactNumber" value="<%=currentUser.ContactNumber%>">
-      </div>
-      <div class=" form-group">
-        <label for="organisation">Organisation </label>
-        <input type="text" id="organisation" value="<%=currentUser.Organisation%>">
-      </div>
-      <div class="form-group">
-        <label for="comments">Comments </label>
-        <textarea id="comments" ><%=currentUser.Comments%></textarea>
-      </div>
-      <div class="form-group">
-        <label>Request Status </label>
-        <input type="text" value="<%=currentUser.RequestStatus%>" readonly>
-      </div>
-      <div class="form-group">
-        <label> Reason for Request: </label>
-        <textarea  readonly><%=currentUser.ReasonForRequest%></textarea>
-      </div>
-                <!--          
-                 <div class="form-group">
-                    <label for="IsDelete">Status:</label>
-                    <select id="IsDelete" name="IsDelete">
-                        <option value="0" <%= user.IsDelete == 0 ? 'selected' : '' %>>Active</option>
-                        <option value="1" <%= user.IsDelete == 1 ? 'selected' : '' %>>Deleted</option>
-                    </select>
-                </div> -->
-
-                <button type="submit">Update User</button>
-            </form>
+        <div class="form-group">
+          <label for="userID">User ID</label>
+          <input type="text" id="userID" value="<%=user.UserID%>" readonly>
         </div>
-    </main>
+        <div class="form-group">
+          <label for="email">Email </label>
+          <input type="text" name="email" id="email" value="<%=user.Email%>" required>
+        </div>
+        <div class="form-group">
+          <label for="Password">For changing Password (previous password not shown):</label>
+          <input type="password" id="password" name="password" value="">
+        </div>
+        <div class="form-group">
+          <label for="confirmPassword">To confirm changed Password:</label>
+          <input type="password" id="confirmPassword" name="confirmPassword" value="">
+        </div>
 
-    <script>
-        document.getElementById('editUserForm').addEventListener('submit', async function (e) {
-            e.preventDefault();
 
-            // Validate form
-            const tempPassword = document.getElementById('TempPassword').value;
-            const passwordRegex = /^(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{8,}$/;
+        <div class="form-group">
+          <label for="userType">User Type <%=userTypes%></label>
+          <select name="userType" id="userType" requried>
+            <option value="">-- Select a User Type--</option>
+            <%userTypes.forEach( u=>{%>
+            <option value="<%=u%>" <%=
+            u== user.UserType  
+          ? 'selected'  : "" %>>
+              <%=u%>
+            </option>
+            <%})%>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="fullName">Full Name </label>
+          <input type="text" name="fullName" id="fullname" value="<%=user.FullName%>" required>
+        </div>
+        <div class="form-group">
+          <label>Registered Date </label>
+          <input type="text" value="<%=registeredDate%>" readonly>
+        </div>
+        <div class="form-group">
+          <label for="contactNumber">Contact Number </label>
+          <input type="text" id="contactNumber" value="<%=user.ContactNumber%>">
+        </div>
+        <div class=" form-group">
+          <label for="organisation">Organisation </label>
+          <input type="text" id="organisation" value="<%=user.Organisation%>">
+        </div>
+        <div class="form-group">
+          <label for="comments">Comments </label>
+          <textarea id="comments"><%=user.Comments%></textarea>
+        </div>
+        <div class="form-group">
+          <label>Request Status </label>
+          <select name="requestStatus" id="requestStatus" requried>
+            <option value="">-- Select a Request Status--</option>
+            <%requestStatuses.forEach( u=>{%>
+            <option value="<%=u%>" <%=
+            u== user.RequestStatus  
+          ? 'selected'  : "" %>>
+              <%=u%>
+            </option>
+            <%})%>
+          </select>
+        </div>
 
-            if (!passwordRegex.test(tempPassword)) {
-                Swal.fire({
-                    title: 'Invalid Password',
-                    text: 'Password must contain at least 8 characters with one uppercase, one number, and one special character',
-                    icon: 'error',
-                    confirmButtonColor: '#00bbff'
-                });
-                return;
+        <div class="form-group">
+          <label>Is Deleted? </label>
+          <%=!user.IsDeleted? 'No' : 'Yes' %>
+
+        </div>
+        <div class="form-group">
+          <label> Reason for Request: </label>
+          <textarea id="reasonForRequest"><%=user.ReasonForRequest%></textarea>
+        </div>
+
+
+        <button type="submit">Update User</button>
+      </form>
+    </div>
+  </main>
+
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+
+      const form = document.getElementById("editUserForm");
+      form.addEventListener('submit', async function(e) {
+        e.preventDefault();
+
+        // Validate form
+        //   const passwordRegex = /^(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{8,}$/;
+        const submitBtn = form.querySelector('button[type="submit"]');
+        const originalBtnText = submitBtn.innerHTML;
+        submitBtn.classList.add('loading');
+        submitBtn.innerHTML = '<i class="fas fa-spinner"></i> Submitting...';
+        submitBtn.disabled = true;
+        if (!/^[\w\-\.]+@([\w-]+\.)+[\w-]{2,}$/.test(form.email.value)) {
+
+          submitBtn.disabled = false;
+          submitBtn.innerHTML = 'Edit Profile';
+          await Swal.fire({
+            title: 'Error!',
+            text: "invalid email, email value does not have '@' or '.' character(s).",
+            icon: 'error',
+            confirmButtonText: 'OK',
+            confirmButtonColor: '#dc3545'
+          });
+          return
+        }
+
+        //   if (!passwordRegex.test(password)) {
+        //     Swal.fire({
+        //       title: 'Invalid Password',
+        //       text: 'Password must contain at least 8 characters with one uppercase, one number, and one special character',
+        //       icon: 'error',
+        //       confirmButtonColor: '#00bbff'
+        //     });
+        //     return;
+        //   }
+
+        if (form.password.value != form.confirmPassword.value) {
+          Swal.fire({
+            icon: 'error',
+            title: 'Error!',
+            text: "wrong confimation of password doesn't match first instance of  password."
+          });
+          console.log("mismatched passwords")
+          return
+        }
+        // Prepare form data
+        // const formData = new URLSearchParams(new FormData(form));
+        //   const data = Object.fromEntries(formData.entries());
+        const params = JSON.stringify({
+          userID: form.userID.value,
+          email: form.email.value,
+          password: form.password.value,
+          confirmPassword: form.confirmPassword.value,
+          userType: form.userType.value,
+          fullName: form.fullName.value,
+          contactNumber: form.contactNumber.value,
+          organisation: form.organisation.value,
+          comments: form.comments.value,
+          requestStatus: form.requestStatus.value,
+          reasonForRequest: form.reasonForRequest.value,
+        })
+        try {
+          // Show loading indicator
+          Swal.fire({
+            title: 'Updating User',
+            html: 'Please wait...',
+            allowOutsideClick: false,
+            didOpen: () => {
+              Swal.showLoading();
             }
+          });
 
-            // Prepare form data
-            const formData = new FormData(this);
-            const data = Object.fromEntries(formData.entries());
+          // Send AJAX request
+          console.log(params)
+          const response = await fetch('/admin/user-management/edit/<%= user.UserID %>', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            body: params
+          });
 
-            try {
-                // Show loading indicator
-                Swal.fire({
-                    title: 'Updating User',
-                    html: 'Please wait...',
-                    allowOutsideClick: false,
-                    didOpen: () => {
-                        Swal.showLoading();
-                    }
-                });
+          const result = await response.json();
 
-                // Send AJAX request
-                const response = await fetch('/update-users/<%= user.LoginUserID %>', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify(data)
-                });
+          // Close loading indicator
+          Swal.close();
 
-                const result = await response.json();
-
-                // Close loading indicator
-                Swal.close();
-
-                if (result.success) {
-                    // Show success alert
-                    Swal.fire({
-                        title: 'Success!',
-                        text: result.message,
-                        icon: 'success',
-                        confirmButtonColor: '#00bbff'
-                    });
-                } else {
-                    // Show error alert
-                    Swal.fire({
-                        title: 'Error!',
-                        text: result.message,
-                        icon: 'error',
-                        confirmButtonColor: '#00bbff'
-                    });
-                }
-            } catch (error) {
-                Swal.close();
-                Swal.fire({
-                    title: 'Error!',
-                    text: 'An unexpected error occurred',
-                    icon: 'error',
-                    confirmButtonColor: '#00bbff'
-                });
-                console.error('Error:', error);
-            }
-        });
-    </script>
+          if (result.success) {
+            // Show success alert
+            Swal.fire({
+              title: 'Success!',
+              text: "updating of user is successful",
+              icon: 'success',
+              showConfirmButton: true,
+              timer: 1000
+            }).then(() => {
+              window.location.href = "/admin/user-management/view-all"; // Redirect to the desired page after success
+            });
+          } else {
+            // Show error alert
+            Swal.fire({
+              title: 'Error!',
+              text: result.message,
+              icon: 'error',
+              confirmButtonColor: '#00bbff'
+            });
+          }
+        } catch (error) {
+          Swal.close();
+          Swal.fire({
+            title: 'Error!',
+            text: 'An unexpected error occurred',
+            icon: 'error',
+            confirmButtonColor: '#00bbff'
+          });
+          console.error('Error:', error);
+        }
+      });
+    });
+  </script>
 </body>
 
 </html>

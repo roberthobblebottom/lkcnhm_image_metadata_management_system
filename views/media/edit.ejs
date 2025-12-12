@@ -149,7 +149,6 @@
       border-radius: 6px;
       text-decoration: none;
       font-weight: 600;
-      float: left;
       margin-top: 50px;
       margin-bottom: 50px;
     }
@@ -251,21 +250,18 @@
     <%- currentUser.UserType=='admin' ? include('../partials/sidenav-admin'): include('../partials/sidenav-user') %>
     <!-- 📸 MEDIA SUBMISSION FORM (UPDATED) -->
 
-    <form id="main-form" action="/<%=toBeEditedMedia == 'create-mode' ? 'media/create' : 'media/edit' %>" method="POST">
+    <form id="main-form" action="/media/edit" method="POST">
       <div id="top-panel">
         <a href="/media/view-all" class="btn btn-primary">
           <i class="fas fa-arrow-left"></i> Back to all media
         </a>
         <h2>
-          <%= toBeEditedMedia !='create-mode' 
-          ? "Then, edit image metadata entry " :"Then, enter new image metadata entry" %>
+          Then, edit image metadata entry
         </h2>
       </div>
 
       <!-- Hidden IDs -->
-      <input readonly type=<%=toBeEditedMedia != 'create-mode'
-         ? 'text'
-         : 'hidden'  %> name="MediaID" value="<%= toBeEditedMedia.MediaID %>">
+      <input readonly type='text' name="MediaID" value="<%= toBeEditedMedia.MediaID %>">
 
       <div class="form-group">
         <label>Project and Photographer Pair</label>
@@ -285,29 +281,29 @@
       <!-- The rest of the form stays the same... -->
       <div class="form-group">
         <label for="mediaFileName">Media File Full Name</label>
-        <input type="text" name="mediaFileName" id="mediaFileName" value="<%=toBeEditedMedia != 'create-mode' ? toBeEditedMedia.FileName : 'REMOVE THIS LATER' %>" required>
+        <input type="text" name="mediaFileName" id="mediaFileName" value="<%=toBeEditedMedia.FileName%>" required>
       </div>
 
       <div class="form-group">
         <label for="filePath">File Path</label>
-        <input type="text" name="filePath" id="filePath" value="<%=toBeEditedMedia != 'create-mode' ? toBeEditedMedia.FilePath : 'REMOVE THIS LATER' %>" required>
+        <input type="text" name="filePath" id="filePath" value="<%=toBeEditedMedia.FilePath %>" required>
       </div>
 
       <div class="form-group">
         <label for="catalogID">Catalog ID (default id ZRCBDP0012345 is for testing purposes, remove
           later)</label>
-        <input type="text" name="catalogID" id="catalogID" value="<%=toBeEditedMedia != 'create-mode' ? toBeEditedMedia.CatalogID : 'ZRCBDP0012345' %>" required>
+        <input type="text" name="catalogID" id="catalogID" value="<%=toBeEditedMedia.CatalogID %>" required>
       </div>
 
       <div class="form-group">
         <label for="morphoID">Morpho ID</label>
-        <input type="text" name="morphoID" id="morphoID" value="<%=toBeEditedMedia != 'create-mode' ? toBeEditedMedia.MorphoID : 'REMOVE THIS LATER' %>" required>
+        <input type="text" name="morphoID" id="morphoID" value="<%= toBeEditedMedia.MorphoID  %>" required>
       </div>
 
       <div class="form-group">
         <label for="clusterID">Cluster ID (default id 3PZRCBDP1234567 is for testing purposes, remove
           later)</label>
-        <input type="text" name="clusterID" id="clusterID" value="<%=toBeEditedMedia != 'create-mode' ? toBeEditedMedia.ClusterID: '3PZRCBDP1234567' %>">
+        <input type="text" name="clusterID" id="clusterID" value="<%=toBeEditedMedia.ClusterID %>">
       </div>
 
       <div class="form-group">
@@ -317,12 +313,12 @@
 
       <div class="form-group">
         <label for="resolution">Resolution</label>
-        <input required type="text" name="resolution" id="resolution" value="<%=toBeEditedMedia != 'create-mode' ? toBeEditedMedia.Resolution : '1x1' %>">
+        <input required type="text" name="resolution" id="resolution" value="<%=toBeEditedMedia.Resolution%>">
       </div>
 
       <div class="form-group">
         <label for="fileSize">File Size in Bytes</label>
-        <input required type="number" name="fileSizeBytes" id="fileSizeBytes" value="<%=toBeEditedMedia != 'create-mode' ? toBeEditedMedia.FileSizeBytes : '999999' %>">
+        <input required type="number" name="fileSizeBytes" id="fileSizeBytes" value="<%=toBeEditedMedia.FileSizeBytes%>">
       </div>
 
       <div class="form-group">
@@ -330,8 +326,7 @@
         <select name="fileFormat" id="fileFormat" onchange="fileFormatOnChange()" requried>
           <option value="">-- Select a media file format --</option>
           <%fileFormats.forEach( fileFormat=>{%>
-          <option value="<%=fileFormat%>" <%=fileFormat==(toBeEditedMedia !='create-mode' ? toBeEditedMedia.FileFormat : '.tiff'
-                ) ? 'selected' : '' %>>
+          <option value="<%=fileFormat%>" <%=fileFormat==toBeEditedMedia.FileFormat ? 'selected' : '' %>>
             <%=fileFormat%>
           </option>
           <%})%>
@@ -340,7 +335,7 @@
 
       <div class="form-group">
         <label for="description">Description of Image</label>
-        <textarea name="description" id="description"> <%=toBeEditedMedia != 'create-mode' ? toBeEditedMedia.Description : 'REMOVE THIS LATER' %></textarea>
+        <textarea name="description" id="description"> toBeEditedMedia.Description %></textarea>
       </div>
 
       <div class="form-group">
@@ -348,8 +343,7 @@
         <select name="imagingPlatform" id="imagingPlatform">
           <option value="">-- Select a imaging platform --</option>
           <%imagingPlatforms.forEach( imagingPlatform=>{%>
-          <option value="<%=imagingPlatform%>" <%=imagingPlatform==(toBeEditedMedia !='create-mode' ?
-                toBeEditedMedia.ImagingPlatform : 'Leica(L5)' ) ? 'selected' : '' %>>
+          <option value="<%=imagingPlatform%>" <%=imagingPlatform==toBeEditedMedia.ImagingPlatform  ? 'selected' : '' %>>
             <%=imagingPlatform%>
           </option>
           <%})%>
@@ -363,8 +357,7 @@
         <select name="imageEditingTool" id="imageEditingTool">
           <option value="">-- Select a image editing tool --</option>
           <%imageEditingTools.forEach( imageEditingTool=>{%>
-          <option value="<%=imageEditingTool%>" <%=imageEditingTool==(toBeEditedMedia !='create-mode' ?
-                toBeEditedMedia.ImageEditingTool : 'photoshop' ) ? 'selected' : '' %>>
+          <option value="<%=imageEditingTool%>" <%=imageEditingTool == toBeEditedMedia.ImageEditingTool ? 'selected' : '' %>>
             <%=imageEditingTool%>
           </option>
           <%})%>
@@ -374,7 +367,7 @@
 
       <div class="form-group">
         <label for="comments">Comments</label>
-        <textarea name="comments" id="comments"><%=toBeEditedMedia != 'create-mode' ? toBeEditedMedia.Comments : 'REMOVE THIS LATER' %></textarea>
+        <textarea name="comments" id="comments"><%=toBeEditedMedia.Comments  %></textarea>
       </div>
 
 
@@ -390,7 +383,6 @@
 
   </div>
   <script>
-    // import { fileFormatEnumeration } from "../../middleware/utils";
     function fileFormatOnChange() {
       const fileNameInput = document.getElementById("mediaFileName");
       const fileFormat = document.getElementById("fileFormat");
@@ -526,7 +518,7 @@
           submitBtn.classList.add('loading');
           submitBtn.innerHTML = '<i class="fas fa-spinner"></i> Submitting...';
           submitBtn.disabled = true;
-          const response = await fetch("/<%=toBeEditedMedia == 'create-mode' ? 'media/create' : 'media/edit' %>", {
+          const response = await fetch("/<%='media/edit' %>", {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json'
@@ -548,7 +540,7 @@
             // Show success message
             await Swal.fire({
               title: 'Success!',
-              text: 'project submitted successfully!',
+              text: 'project edited successfully!',
               icon: 'success',
               confirmButtonText: 'OK',
               confirmButtonColor: '#28a745',

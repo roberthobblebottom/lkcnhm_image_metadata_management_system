@@ -1,0 +1,574 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <title>📸 Media Submission Form</title>
+  <link rel="stylesheet" href="/css/admin.css" />
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: #f4f6f8;
+      padding: 2rem;
+    }
+
+    /* Main Container */
+    .main_con {
+      display: flex;
+      min-height: 100vh;
+      background: #f8fafc;
+      padding: 2rem;
+      margin-left: 350px;
+    }
+
+    /* Form Container */
+    form {
+      max-width: 1000px;
+      margin: 0 auto;
+      background: white;
+      padding: 2.5rem;
+      border-radius: 16px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+    }
+
+    /* Form Header */
+    form h2 {
+      color: #1e293b;
+      font-size: 1.875rem;
+      text-align: center;
+      margin-bottom: 2rem;
+      position: relative;
+      padding-bottom: 1rem;
+    }
+
+    form h2::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 60px;
+      height: 3px;
+      background: linear-gradient(to right, #007bff, #6366f1);
+      border-radius: 3px;
+    }
+
+  
+
+
+    .form-group {
+      margin-bottom: 20px;
+    }
+
+    /* Labels */
+    label {
+      display: block;
+      font-size: 0.875rem;
+      font-weight: 600;
+      color: #475569;
+      margin-bottom: 0.5rem;
+    }
+
+    /* Input Fields */
+    input[type="text"],
+    input[type="date"],
+    input[type='number'],
+    input[type="datetime-local"],
+    select,
+    textarea {
+      width: 95%;
+      padding: 0.75rem;
+      border: 1.5px solid #e2e8f0;
+      border-radius: 8px;
+      font-size: 0.95rem;
+      color: #1e293b;
+      transition: all 0.2s ease;
+      background-color: #f8fafc;
+    }
+
+    select {
+      width: 98%;
+    }
+
+    /* Input Focus States */
+    input:focus,
+    select:focus,
+    textarea:focus {
+      outline: none;
+      border-color: #007bff;
+      box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.1);
+      background-color: #fff;
+    }
+
+    /* Readonly Inputs */
+    input[readonly] {
+      background-color: #f1f5f9;
+      border-color: #e2e8f0;
+      cursor: not-allowed;
+    }
+
+
+
+    textarea {
+      min-height: 120px;
+      resize: vertical;
+      line-height: 1.5;
+    }
+
+
+
+    .submit-btn:active {
+      transform: translateY(0);
+    }
+
+    /* Note Section */
+    .note {
+      text-align: center;
+      color: #64748b;
+      background: #f8fafc;
+      padding: 1rem;
+      border-radius: 8px;
+      border: 1px dashed #cbd5e1;
+      margin: 2rem 0;
+      font-size: 0.875rem;
+    }
+
+    /* Required Field Indicator */
+    [required]+label::after {
+      content: '*';
+      color: #ef4444;
+      margin-left: 4px;
+    }
+
+    .btn {
+      display: inline-block;
+      background: #007bff;
+      color: white;
+      padding: 10px 16px;
+      border: none;
+      border-radius: 6px;
+      text-decoration: none;
+      font-weight: 600;
+      margin-top: 50px;
+      margin-bottom: 50px;
+    }
+
+    /* Responsive Adjustments */
+    @media (max-width: 768px) {
+      form {
+        padding: 1.5rem;
+      }
+
+      
+
+      form h2 {
+        font-size: 1.5rem;
+      }
+    }
+
+    /* Animation Effects */
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(10px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    form {
+      animation: fadeIn 0.5s ease-out;
+    }
+
+    /* Hidden Fields */
+    input[type="hidden"] {
+      display: none;
+    }
+
+
+    /* input:invalid, select:invalid, textarea:invalid {
+  border-color: red;
+} */
+    .btn-primary {
+      background-color: #007bff;
+      border: none;
+      height: 4%;
+      margin-left: 10%;
+      color: #fff;
+    }
+
+    .btn-primary:hover {
+      background-color: #0056b3;
+    }
+
+    .btn-warning {
+      background-color: #07daff;
+      border: none;
+      color: #212529;
+    }
+
+    .btn-warning:hover {
+      background-color: #e0a800;
+    }
+
+    button[type="submit"] {
+      background-color: #007bff;
+      color: #fff;
+      border: none;
+      padding: 0.75rem 2rem;
+      /* font-size: 1rem; */
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+      font-weight: 600;
+      font-size: 1rem;
+      font-family: 'Segoe UI', sans-serif;
+    }
+
+    button[type="submit"]:hover {
+      background-color: #0056b3;
+    }
+
+    #top-panel {
+      display: flex;
+      justify-content: center;
+    }
+
+    .buttons {
+      text-align: center;
+    }
+  </style>
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+</head>
+
+<body>
+  <div class="main_con">
+    <%- currentUser.UserType=='admin' 
+    ? include('../partials/sidenav-admin')
+    : include('../partials/sidenav-user') %>
+
+    <form id="main-form" action="media/create" method="POST">
+      <div id="top-panel">
+        <a href="/media/view-all" class="btn btn-primary">
+          <i class="fas fa-arrow-left"></i> Back to all media
+        </a>
+        <h2>
+          "Then, enter new image metadata entry" 
+        </h2>
+      </div>
+
+      <!-- Hidden IDs -->
+
+      <div class="form-group">
+        <label>Project and Photographer Pair</label>
+        <select name="projectAndPhotographerPair" id="projectAndPhotographerPair" requried
+         <%= currentUser.UserType == 'phtographerOnly' ? 'disabled' : ''%>>
+          <option value="">-- Select a project and photographer pair--</option>
+          <%allProjectAndPhotographerPairs.forEach( u=>{%>
+          <option value="<%=u.ProjectID%>,<%=u.UserID%>" >
+            <%=u.projectName%>-<%=u.photographerName%>
+          </option>
+          <%})%>
+        </select>
+      </div>
+
+      <!-- The rest of the form stays the same... -->
+      <div class="form-group">
+        <label for="mediaFileName">Media File Full Name</label>
+        <input type="text" name="mediaFileName" id="mediaFileName" value="REMOVE THIS LATER" required>
+      </div>
+
+      <div class="form-group">
+        <label for="filePath">File Path</label>
+        <input type="text" name="filePath" id="filePath" value="REMOVE THIS LATER" required>
+      </div>
+
+      <div class="form-group">
+        <label for="catalogID">Catalog ID (default id ZRCBDP0012345 is for testing purposes, remove
+          later)</label>
+        <input type="text" name="catalogID" id="catalogID" value="ZRCBDP0012345" required>
+      </div>
+
+      <div class="form-group">
+        <label for="morphoID">Morpho ID</label>
+        <input type="text" name="morphoID" id="morphoID" value="REMOVE THIS LATER" required>
+      </div>
+
+      <div class="form-group">
+        <label for="clusterID">Cluster ID (default id 3PZRCBDP1234567 is for testing purposes, remove
+          later)</label>
+        <input type="text" name="clusterID" id="clusterID" value="3PZRCBDP1234567">
+      </div>
+
+      <div class="form-group">
+        <label for="imagingDate">Date of Imaging</label>
+        <input type="date" name="imagingDate" id="imagingDate" >
+      </div>
+
+      <div class="form-group">
+        <label for="resolution">Resolution</label>
+        <input required type="text" name="resolution" id="resolution" value="1x1">
+      </div>
+
+      <div class="form-group">
+        <label for="fileSize">File Size in Bytes</label>
+        <input required type="number" name="fileSizeBytes" id="fileSizeBytes" value="999999">
+      </div>
+
+      <div class="form-group">
+        <label for="fileFormat">Media File Format</label>
+        <select name="fileFormat" id="fileFormat" onchange="fileFormatOnChange()" requried>
+          <option value="">-- Select a media file format --</option>
+          <%fileFormats.forEach( fileFormat=>{%>
+          <option value="<%=fileFormat%>" <%=fileFormat=='.tiff'? 'selected' : '' %>>
+            <%=fileFormat%>
+          </option>
+          <%})%>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label for="description">Description of Image</label>
+        <textarea name="description" id="description"> REMOVE THIS LATER </textarea>
+      </div>
+
+      <div class="form-group">
+        <label for="imagingPlatform">imaging Platform</label>
+        <select name="imagingPlatform" id="imagingPlatform">
+          <option value="">-- Select a imaging platform --</option>
+          <%imagingPlatforms.forEach( imagingPlatform=>{%>
+          <option value="<%=imagingPlatform%>" <%=imagingPlatform== 'Leica(L5)' ? 'selected' : '' %>>
+            <%=imagingPlatform%>
+          </option>
+          <%})%>
+          <option value="" onclick="enterNewImagingPlatform()"> Enter new Imaging Platform </option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label for="imageEditingTool">Image Editing Tool</label>
+        <select name="imageEditingTool" id="imageEditingTool">
+          <option value="">-- Select a image editing tool --</option>
+          <%imageEditingTools.forEach( imageEditingTool=>{%>
+          <option value="<%=imageEditingTool%>" <%=imageEditingTool== 'photoshop'  ? 'selected' : '' %>>
+            <%=imageEditingTool%>
+          </option>
+          <%})%>
+          <option value="" onclick="enterNewImagingEditingTool()"> Enter new Imaging Editing Tool </option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label for="comments">Comments</label>
+        <textarea name="comments" id="comments">REMOVE THIS LATER</textarea>
+      </div>
+
+
+      <p class="note">
+        💡 Note: If there is more than one image for a specimen, please use the pipeline script to capture the metadata
+        details.
+      </p>
+
+      <div class="buttons">
+        <button type="submit"><i class="fas fa-paper-plane"></i> Submit Media</button>
+      </div>
+    </form>
+
+  </div>
+  <script>
+    function fileFormatOnChange() {
+      const fileNameInput = document.getElementById("mediaFileName");
+      const fileFormat = document.getElementById("fileFormat");
+      const temp = fileNameInput.value.split(".")[0]
+      fileNameInput.value = temp + fileFormat.value
+    };
+
+    function enterNewImagingEditingTool() {
+      console.log('enterNewImagingEditingTool')
+      Swal.fire({
+        title: "Add new Imaging Editing Tool",
+        text: "Add new Imaging Editing Tool",
+        input: 'text',
+        showCancelButton: true,
+        inputPlaceholder: "Enter it here."
+      }).then((result) => {
+        if (result.value) {
+          const select = document.getElementById("imageEditingTool")
+          var option = document.createElement('option')
+          option.text = option.value = result.value
+          select.add(option, 1)
+          select.value = option.text
+        }
+      });
+    }
+
+    function enterNewImagingPlatform() {
+      console.log('enterNewImagingPlatform')
+      Swal.fire({
+        title: "Add new Imaging Platform",
+        text: "Add new Imaging Platform",
+        input: 'text',
+        showCancelButton: true,
+        inputPlaceholder: "Enter it here."
+      }).then((result) => {
+        if (result.value) {
+          const select = document.getElementById("imagingPlatform")
+          var option = document.createElement('option')
+          option.text = option.value = result.value
+          select.add(option, 1)
+          select.value = option.text
+        }
+      });
+    }
+    document.addEventListener("DOMContentLoaded", () => {
+      const form = document.getElementById("main-form");
+      const fileNameInput = document.getElementById("mediaFileName");
+      const fileFormat = document.getElementById("fileFormat");
+      const validExtensions = "<%=fileFormats%>".split(",");
+      const now = new Date()
+      now.setDate(new Date().getDate())
+      document.getElementById('imagingDate').value = now.toISOString().slice(0, 16).split('T')[0]
+      fileFormatOnChange()
+      // Check for a valid file extension
+      function isValidFileName(filename) {
+        if (!filename) return false;
+        const lower = filename.toLowerCase();
+        if (!lower.endsWith(fileFormat.value)) return false
+        if (lower.replace(fileFormat.value, "") == "") return false
+        return validExtensions.some(ext => lower.endsWith(ext));
+      }
+
+      form.addEventListener("submit", async (e) => {
+
+        e.preventDefault();
+        const fileName = fileNameInput.value.trim();
+        let errorMessages = [];
+        if (!isValidFileName(fileName)) {
+          errorMessages.push("📁 The media file name must include a valid extension like `.jpg`, `.png`, `.tiff`, etc. AND must the the same as media File Format from selection drop down box.\n\n");
+          fileNameInput.style.borderColor = "red";
+        } else {
+          fileNameInput.style.borderColor = "";
+        }
+        const catalogIDRegex = /^[A-Z]{6}\d{7}$/;
+        if (!catalogIDRegex.test(document.getElementById('catalogID').value)) {
+          errorMessages.push("catalogID is not in the correct format. Example of a correct format: ZRCBDP0012345. 6 capital letters and then 7 numbers. \n\n");
+          fileNameInput.style.borderColor = "red";
+        } else {
+          fileNameInput.style.borderColor = "";
+        }
+
+        const clusterIDRegex = /^[\d][A-Z]{7}\d{7}$/
+        const clusterID = document.getElementById('clusterID').value
+        if (!clusterIDRegex.test(clusterID) && clusterID != "") {
+          errorMessages.push("clusterID is not in the correct format. Example of a correct format:3PZRCBDP1234567,  1 number, 7 capital letters and then 7 numbers. \n\n ");
+          fileNameInput.style.borderColor = "red";
+        } else {
+          fileNameInput.style.borderColor = "";
+        }
+        const resolutionRegex = /^\d{1,5}x\d{1,5}$/;
+        if (!resolutionRegex.test(document.getElementById('resolution').value.toLowerCase())) {
+          errorMessages.push("resolution is not in the correct format. example format: 1440x720 \n\n");
+          fileNameInput.style.borderColor = "red";
+        } else {
+          fileNameInput.style.borderColor = "";
+        }
+        if (errorMessages.length > 0) {
+          e.preventDefault(); // prevent form submission
+          Swal.fire({
+            icon: 'error',
+            title: 'Validation Issue',
+            html: errorMessages.join("<br>"),
+            confirmButtonColor: '#007bff'
+          });
+        } else {
+          imagingPlatforms = "<%=imagingPlatforms%>"
+          imageEditingTools = "<%=imageEditingTools%>"
+          const formData = JSON.stringify({
+            fileName: form.mediaFileName.value,
+            filePath: form.filePath.value,
+            catalogID: form.catalogID.value,
+            morphoID: form.morphoID.value,
+            clusterID: form.clusterID.value,
+            imagingDate: form.imagingDate.value,
+            resolution: form.resolution.value == "" ? null : form.resolution.value,
+            fileSizeBytes: form.fileSizeBytes.value,
+            fileFormat: form.fileFormat.value,
+            description: form.description.value,
+            imagingPlatform: form.imagingPlatform.value == "" ? null : form.imagingPlatform.value,
+            imageEditingTool: form.imageEditingTool.value == "" ? null : form.imageEditingTool.value,
+            newImagingPlatform: (!imagingPlatforms.includes(form.imagingPlatform.value)) ? form.imagingPlatform.value : null,
+            newImageEditingTool: (!imageEditingTools.includes(form.imageEditingTool.value)) ? form.imageEditingTool.value : null,
+            comments: form.comments.value,
+            projectAndPhotographerPair: form.projectAndPhotographerPair.value,
+          })
+          console.log(formData)
+
+          const submitBtn = form.querySelector('button[type="submit"]');
+          const originalBtnText = submitBtn.innerHTML;
+          submitBtn.classList.add('loading');
+          submitBtn.innerHTML = '<i class="fas fa-spinner"></i> Submitting...';
+          submitBtn.disabled = true;
+          const response = await fetch("/media/create", {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            body: formData
+          });
+          try {
+            if (!response.ok) {
+              const errorData = await response.json();
+              throw new Error(errorData.message || "Submission failed with status " + response.status);
+            }
+
+            const data = await response.json();
+            if (!data.success) {
+              throw new Error(data.message || "Submission failed");
+            }
+
+
+            // Show success message
+            await Swal.fire({
+              title: 'Success!',
+              text: 'project created successfully!',
+              icon: 'success',
+              confirmButtonText: 'OK',
+              confirmButtonColor: '#28a745',
+              timer: 1000,
+              timerProgressBar: true
+            });
+
+            // Redirect if URL is provided
+            if (data.redirectUrl) {
+              window.location.href = data.redirectUrl;
+              return; // Stop further execution
+            }
+
+            // Reset form (if no redirection)
+            form.reset();
+
+          } catch (error) {
+            await Swal.fire({
+              title: 'Error!',
+              text: error.message,
+              icon: 'error',
+              confirmButtonText: 'OK',
+              confirmButtonColor: '#dc3545'
+            });
+          } finally {
+            submitBtn.disabled = false;
+            submitBtn.value = "Upload"
+          }
+        }
+      });
+    });
+  </script>
+
+
+</body>
+
+</html>

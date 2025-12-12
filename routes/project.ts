@@ -105,7 +105,6 @@ router.post(
       }) => void;
     }
   ) => {
-    console.log("in /create-project");
     try {
       const requiredFields = [
         "projectOwner",

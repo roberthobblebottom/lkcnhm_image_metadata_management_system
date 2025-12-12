@@ -2,13 +2,11 @@ const express = require("express");
 const router = express.Router();
 import { RowDataPacket } from "mysql2";
 import { db } from "./db";
-import { Passport, User } from "../@types/types";
-import passport from "passport";
+import { Passport } from "../@types/types";
 
 import crypto from "crypto";
-import { Router } from "express";
 import { formatDisplayDate } from "../middleware/utils";
-const { isAuthenticated, isAdmin } = require("../middleware/auth");
+const { isAuthenticated } = require("../middleware/auth");
 
 router.get(
   "/change-password",
@@ -52,9 +50,7 @@ router.post(
         success: boolean;
         message: string;
       }) => void | PromiseLike<void>;
-    },
-    next: any
-  ) => {
+    }  ) => {
     // This may not be the best way to change passwords.
     const username = req.body.email;
     const old_password = req.body.old_password;
