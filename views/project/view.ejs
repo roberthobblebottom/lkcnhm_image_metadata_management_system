@@ -341,17 +341,17 @@
             <div class="container request-container">
                 <div class="request-header">
                     <h1 class="h3 mb-0">
-                        Name: <%= request.ProjectName %>
+                        Name: <%= project.ProjectName %>
                     </h1>
-                    <p class="text-muted mb-0">Created on <%= request.CreatedDate %> by <%= request.CreatorName
+                    <p class="text-muted mb-0">Created on <%= project.CreatedDate %> by <%= project.CreatorName
                                 || 'System' %>
                     </p>
-                    <% if (request.UpdatedDate) { %>
-                        <p class="text-muted">Last updated on <%= request.UpdatedDate %> by <%= request.UpdaterName
+                    <% if (project.UpdatedDate) { %>
+                        <p class="text-muted">Last updated on <%= project.UpdatedDate %> by <%= project.UpdaterName
                                     || 'System' %>
                         </p>
                         <% } %>
-                            <% if(request.isDeleted){%>
+                            <% if(project.isDeleted){%>
                                 <span class="status-badge bg-danger">
                                     Deleted
                                 </span>
@@ -363,19 +363,19 @@
                         <div class="detail-row">
                             <div class="detail-label">Project Owner</div>
                             <div class="detail-value">
-                                <%= request.projectOwnerName %>
+                                <%= project.projectOwnerName %>
                             </div>
                         </div>
                         <div class="detail-row">
                             <div class="detail-label">Project Type</div>
                             <div class="detail-value">
-                                <%= request.ProjectType %>
+                                <%= project.ProjectType %>
                             </div>
                         </div>
                         <div class="detail-row">
                             <div class="detail-label">Photographer</div>
                             <div class="detail-value">
-                                <%= request.photographers || 'Not Specified' %>
+                                <%= project.photographers || 'Not Specified' %>
                             </div>
                         </div>
 
@@ -383,7 +383,7 @@
                             <div class="detail-label">Status</div>
                             <div class="detail-value">
                                 <span>
-                                    <%= request.statusName %>
+                                    <%= project.statusName %>
                                 </span>
                             </div>
                         </div>
@@ -394,7 +394,7 @@
                         <div class="detail-row">
                             <div class="detail-label">Imaging Period</div>
                             <div class="detail-value">
-                                <%= request.ImagingStartDate %> to <%= request.ImagingEndDate %>
+                                <%= project.ImagingStartDate %> to <%= project.ImagingEndDate %>
                             </div>
                         </div>
 
@@ -403,7 +403,7 @@
                         <div class="detail-row">
                             <div class="detail-label">Imaging Platform</div>
                             <div class="detail-value">
-                                <%= request.imagingPlatforms || 'Not specified' %>
+                                <%= project.imagingPlatforms || 'Not specified' %>
                             </div>
                         </div>
 
@@ -414,22 +414,22 @@
                 <div class="detail-row">
                     <div class="detail-label">Project Summary</div>
                     <div class="detail-value text-area-value">
-                        <%= request.SummaryOfProject %>
+                        <%= project.SummaryOfProject %>
                     </div>
                 </div>
 
                 <div class="detail-row">
                     <div class="detail-label">Specimens Details</div>
                     <div class="detail-value text-area-value">
-                        <%= request.DetailsOfSpecimens %>
+                        <%= project.DetailsOfSpecimens %>
                     </div>
                 </div>
 
-                <% if (request.Comments) { %>
+                <% if (project.Comments) { %>
                     <div class="detail-row">
                         <div class="detail-label">Additional Comments</div>
                         <div class="detail-value text-area-value">
-                            <%= request.Comments %>
+                            <%= project.Comments %>
                         </div>
                     </div>
                     <% } %>
@@ -437,7 +437,7 @@
                             <a href="/project/view-all" class="btn btn-primary">
                                 <i class="fas fa-arrow-left"></i> Back to Projects
                             </a>
-                            <a href="/project/edit/<%= request.ProjectID %>" class="btn btn-warning">
+                            <a href="/project/edit/<%= project.ProjectID %>" class="btn btn-warning">
                                 <i class="fas fa-edit"></i> Edit Request
                             </a>
                         </div>

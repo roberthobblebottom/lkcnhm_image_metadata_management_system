@@ -2,7 +2,7 @@ const express = require("express");
 const router = express.Router()
 import { FieldPacket, QueryError, QueryResult, RowDataPacket } from "mysql2";
 import { db } from "./db"
-import { Session, User } from "../@types/types";
+import { Request, Session, User } from "../@types/types";
 
 const {
   isAuthenticated,
@@ -21,7 +21,7 @@ router.get(
   isAuthenticated,
   isAdminOrProjectOwner,
   async (
-    req: { session: Session },
+    req: Request,
     res: {
       render: (
         arg0: string,
@@ -260,7 +260,7 @@ router.get(
   isAuthenticated,
   isAdminOrProjectOwner,
   async (
-    req: { session: Session; user: any },
+    req: Request,
     res: {
       status: (arg0: number) => {
         (): any;
@@ -362,7 +362,6 @@ router.get(
   }
 );
 
-// View Request (GET)
 router.get(
   "/view/:projectID",
   isAuthenticated,
@@ -380,7 +379,7 @@ router.get(
       };
       render: (
         arg0: string,
-        arg1: { request: any; currentUser: User; title: string }
+        arg1: { project: any; currentUser: User; title: string }
       ) => void;
     }
   ) => {
@@ -438,7 +437,7 @@ router.get(
         });
       }
       // Format dates for display
-      const request = {
+      const project = {
         ...results[0],
         CreatedDate: formatDate(results[0].CreatedDate),
         ImagingStartDate: formatDate(results[0].ImagingStartDate),
@@ -458,7 +457,7 @@ router.get(
       };
 
       res.render("project/view", {
-        request: request,
+        project: project,
         currentUser: req.user,
         title: "View Project", // Add title here
       });
@@ -486,7 +485,7 @@ router.get(
       render: (
         arg0: string,
         arg1: {
-          request: any;
+          project: any;
           allPhotographers: any;
           selectedPhotographers: any[];
           statuses: unknown[];
@@ -556,7 +555,7 @@ router.get(
       }
 
       // Format dates for display
-      const request = {
+      const project = {
         ...requestResults[0][0],
         CreatedDate: formatDisplayDate(requestResults[0][0].CreatedDate),
         ImagingStartDate: formatDisplayDate(
@@ -566,7 +565,7 @@ router.get(
       };
 
       res.render(`project/edit`, {
-        request: request,
+        project: project,
         allPhotographers: allPhotographers[0],
         selectedPhotographers: currentlySelectedPhotographers,
         statuses: Object.values(projectStatusEnumeration()),
@@ -880,7 +879,7 @@ router.post(
   (
     req: {
       params: { projectID: number};
-      session: { passport: { user: { UserID: any } } };
+      session: Session;
     },
     res: {
       status: (arg0: number) => {

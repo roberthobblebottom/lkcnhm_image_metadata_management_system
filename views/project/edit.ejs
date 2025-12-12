@@ -265,16 +265,16 @@ Retrieved 2025-11-19, License - CC BY-SA 4.0
       </a>
       <h2>Edit Project</h2>
     </div>
-    <form id='editForm' action="/project/edit/<%= request.ProjectID %>" method="POST">
+    <form id='editForm' action="/project/edit/<%= project.ProjectID %>" method="POST">
       <div class="form-group">
         <label>Project Name</label>
-        <input type="text" id="ProjectName" name="ProjectName" value="<%= request.ProjectName %>" class="form-control" required>
+        <input type="text" id="ProjectName" name="ProjectName" value="<%= project.ProjectName %>" class="form-control" required>
       </div>
 
       <div class="form-group">
         <label>Project Owner</label>
         <p class="form-control-static">
-          <%= request.FullName || 'Not specified' %>
+          <%= project.FullName || 'Not specified' %>
         </p>
       </div>
 
@@ -283,7 +283,7 @@ Retrieved 2025-11-19, License - CC BY-SA 4.0
         <select name="projectType" id="projectType" class="form-control">
           <option value="">-- Select Project Type --</option>
           <% projectTypes.forEach(projectType=> { %>
-          <option value="<%= projectType %>" <%=request.ProjectType==projectType ? 'selected' : ''%>>
+          <option value="<%= projectType %>" <%=project.ProjectType==projectType ? 'selected' : ''%>>
             <%= projectType %>
           </option>
           <% }) %>
@@ -301,7 +301,7 @@ Retrieved 2025-11-19, License - CC BY-SA 4.0
               <%=selectedPhotographers.includes( photographer.UserID) ? 'checked' : '' %> 
 
               value=<%=photographer.UserID%> 
-              <%=photographer.UserID == request.ProjectOwnerID ? 'disabled' : '' %>>
+              <%=photographer.UserID == project.ProjectOwnerID ? 'disabled' : '' %>>
               <%=photographer.FullName%>
             </label>
             <%})%>
@@ -311,25 +311,25 @@ Retrieved 2025-11-19, License - CC BY-SA 4.0
 
       <div class="form-group">
         <label for="ImagingStartDate">Imaging Start Date:</label>
-        <input type="date" id="ImagingStartDate" name="ImagingStartDate" value="<%= request.ImagingStartDate %>" class="form-control" required>
+        <input type="date" id="ImagingStartDate" name="ImagingStartDate" value="<%= project.ImagingStartDate %>" class="form-control" required>
       </div>
 
       <div class="form-group">
         <label for="ImagingEndDate">Imaging End Date:</label>
-        <input type="date" id="ImagingEndDate" name="ImagingEndDate" value="<%= request.ImagingEndDate %>" class="form-control" required>
+        <input type="date" id="ImagingEndDate" name="ImagingEndDate" value="<%= project.ImagingEndDate %>" class="form-control" required>
       </div>
 
       <div class="form-group">
         <label for="SummaryOfProject">Summary of Project:</label>
         <textarea id="SummaryOfProject" name="SummaryOfProject" class="form-control" required>
-            <%= request.SummaryOfProject %>
+            <%= project.SummaryOfProject %>
         </textarea>
       </div>
 
       <div class="form-group">
         <label for="DetailsOfSpecimens">Details Of Specimens:</label>
         <textarea id="DetailsOfSpecimens" name="DetailsOfSpecimens" class="form-control" required>
-            <%= request.DetailsOfSpecimens %>
+            <%= project.DetailsOfSpecimens %>
         </textarea>
       </div>
       <div class="form-group">
@@ -356,7 +356,7 @@ Retrieved 2025-11-19, License - CC BY-SA 4.0
         <select name="ProjectStatus" id="ProjectStatus" class="form-control" required>
           <option value="">-- Select Type --</option>
           <% statuses.forEach(status=> { %>
-          <option value="<%= status %>" <%=request.ProjectStatus==status ? ' selected' : '' %>>
+          <option value="<%= status %>" <%=project.ProjectStatus==status ? ' selected' : '' %>>
             <%= status%>
           </option>
           <% }) %>
@@ -400,7 +400,7 @@ Retrieved 2025-11-19, License - CC BY-SA 4.0
     document.addEventListener('DOMContentLoaded', function() {
       const form = document.getElementById('editForm')
 
-      const requestDate = new Date('<%= request.DateofRequest %>');
+      const requestDate = new Date('<%= project.DateofRequest %>');
       const startDateInput = document.getElementById('ImagingStartDate');
       const endDateInput = document.getElementById('ImagingEndDate');
       const currentUser = '<%= currentUser%>'
@@ -409,8 +409,8 @@ Retrieved 2025-11-19, License - CC BY-SA 4.0
         const reasonField = document.getElementById('ReasonForRequest');
       }
       // Set minimum dates
-      startDateInput.min = '<%= request.DateofRequest %>';
-      endDateInput.min = '<%= request.ImagingStartDate %>';
+      startDateInput.min = '<%= project.DateofRequest %>';
+      endDateInput.min = '<%= project.ImagingStartDate %>';
 
       // Real-time validation
       startDateInput.addEventListener('change', function() {
@@ -423,7 +423,7 @@ Retrieved 2025-11-19, License - CC BY-SA 4.0
             title: 'Invalid Date',
             text: 'Start date must be on or after request date'
           });
-          this.value = '<%= request.ImagingStartDate %>';
+          this.value = '<%= project.ImagingStartDate %>';
         }
       });
 
@@ -437,7 +437,7 @@ Retrieved 2025-11-19, License - CC BY-SA 4.0
             title: 'Invalid Date',
             text: 'End date must be on or after start date'
           });
-          this.value = '<%= request.ImagingEndDate %>';
+          this.value = '<%= project.ImagingEndDate %>';
         }
       });
       // Form submission handler
@@ -465,7 +465,7 @@ Retrieved 2025-11-19, License - CC BY-SA 4.0
         }
         if (currentUser.UserType === 'admin') {
           // Validate reason if status changed
-          if (statusSelect.value !== '<%= request.RequestStatusID %>' && !reasonField.value.trim()) {
+          if (statusSelect.value !== '<%= project.RequestStatusID %>' && !reasonField.value.trim()) {
             Swal.fire({
               icon: 'error',
               title: 'Missing Reason',
@@ -504,7 +504,7 @@ Retrieved 2025-11-19, License - CC BY-SA 4.0
           console.log(selectedPhotographers)
           // return;
           const formData = new FormData(form);
-          formData.append("projectOwnerID","<%=request.ProjectOwnerID%>")
+          formData.append("projectOwnerID","<%=project.ProjectOwnerID%>")
           formData.append('selectedImagingPlatforms', selectedImagingPlatforms);
           formData.append('selectedPhotographers', selectedPhotographers);
           console.log(formData)
