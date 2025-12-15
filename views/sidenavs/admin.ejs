@@ -6,6 +6,15 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="stylesheet" href="/css/admin-users.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+  <style>
+    .loginDetails{
+margin-left: 15px;
+margin-bottom: 10px;
+    }
+    ul{
+      font-size:17px;
+    }
+    </style>
 </head>
 
 <body>
@@ -15,13 +24,12 @@
     </div>
     <ul class="nav-links">
       <li>
-        <div id="fullName"></div>
-        <div id="email"></div>
-        <div id="userType"></div>
-        <div id="userID"></div>
-
-      <li><a href="/settings/profile"><i class="fas fa-key"></i><span>Profile</span></a></li>
+        <div id="fullName" class="loginDetails" ></div>
+        <div id="email" class="loginDetails"></div>
+        <div id="userType" class="loginDetails"></div>
+        <div id="userID" class="loginDetails"></div>
       </li>
+      <li><a href="/settings/profile"><i class="fas fa-key"></i><span>Profile</span></a></li>
       <li class="active"><a href="/admin/dashboard"><i class="fas fa-chart-line"></i><span>Dashboard</span></a>
       </li>
       <li><a href="/admin/user-management/view-all"><i class="fas fa-users"></i><span>Login Details Management</span></a></li>

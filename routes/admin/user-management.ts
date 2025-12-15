@@ -9,7 +9,133 @@ import {
   userTypesEnumeration,
 } from "../../middleware/utils";
 const { isAuthenticated, isAdmin } = require("../../middleware/auth"); // Middleware
+router.get("/create", isAuthenticated, isAdmin, async (req, res) => {
+  res.render("admin/create", {
+    userTypes: Object.values(userTypesEnumeration()),
+    requestStatuses: Object.values(requestStatusEnumeration()),
+    currentUser: req.session.passport.user,
+  });
 
+  if (req.session.message) {
+    delete req.session.message;
+  }
+});
+
+router.post("/create", isAuthenticated, isAdmin, async (req, res) => {
+  const adminID = req.session.passport.user.UserID;
+  const {
+    userID,
+    email,
+    password,
+    confirmPassword,
+    userType,
+    fullName,
+    contactNumber,
+    organisation,
+    comments,
+    requestStatus,
+    reasonForRequest,
+  } = req.body;
+  console.log(req.body);
+  //Validation
+  const missingFields = [];
+  if (!email) missingFields.push("email");
+  if (!password) missingFields.push("password");
+  if (!confirmPassword) missingFields.push("confirmPassword");
+  if (!fullName) missingFields.push("fullName");
+  if (missingFields.length > 0) {
+    return res.status(400).json({
+      success: false,
+      message: "Missing required fields: " + missingFields.join(", "),
+    });
+  }
+  if (!/^[\w\-\.]+@([\w-]+\.)+[\w-]{2,}$/.test(email))
+    return res.status(400).json({
+      success: false,
+      message:
+        "invalid email, email value does not have '@' or '.' character(s).",
+    });
+  if (password != confirmPassword && password.trim() != "") {
+    return res.status(400).json({
+      success: false,
+      message: "the new passwords does not match",
+    });
+  }
+  const result = (
+    await db
+      .promise()
+      .query<RowDataPacket[]>("SELECT 1 FROM User WHERE Email = ? LIMIT 1", [
+        email,
+      ])
+  )[0];
+  if (result[0]) {
+    return res.status(400).json({
+      success: false,
+      message: "Email already exist",
+    });
+  }
+  const query = `
+        INSERT INTO User
+        (Email,
+        SaltedPassword  ,
+        PasswordSalt  ,
+        UserType,
+        FullName,
+        ContactNumber,
+        Organisation  ,
+        Comments,
+        RequestStatus,
+        ReasonForRequest,
+        UpdatedByID  ,
+        CreatedByID  ,
+        UpdatedDate 
+        )
+        VALUES(?,?,?,?,?,?,?,?,?,?,?,?,NOW() )
+    `;
+
+  const newPasswordSalt = crypto.randomBytes(16).toString("hex");
+  try {
+    crypto.pbkdf2(
+      password,
+      newPasswordSalt,
+      310000,
+      32,
+      "sha256",
+      async function (err, hashedPassword) {
+        if (err)
+          return res.json({
+            success: false,
+            message: `❌ Password change salting Failed: ${err} `,
+          });
+        const params = [
+          email,
+          hashedPassword,
+          newPasswordSalt,
+          userType,
+          fullName,
+          contactNumber,
+          organisation,
+          comments,
+          requestStatus,
+          reasonForRequest,
+          adminID,
+          adminID,
+        ];
+        await db.promise().query<RowDataPacket[]>(query, params);
+        return res.json({
+          success: true,
+          message: "User created successfully!",
+        });
+      }
+    );
+  } catch (error) {
+    console.error("password change error:", error);
+    return res.json({
+      success: false,
+      message: `❌ Password change Failed: ${error} `,
+    });
+  }
+});
 //✅ API to Fetch All Users
 router.get("/view-all", isAuthenticated, isAdmin, (req, res) => {
   console.log("Route /admin-users hit"); // Debug log 1
@@ -32,28 +158,19 @@ router.get("/view-all", isAuthenticated, isAdmin, (req, res) => {
 });
 
 //refactored from server.js, not tested and may not be needed
-router.get("/view/:user_id", isAuthenticated, (req, res) => {
-  const { user_id } = req.params;
-  const isAdminRequestor =
-    req.session.passport.user?.UserType === userTypesEnumeration().admin;
-  const isAdmin =
-    req.session.passport.user.UserType === userTypesEnumeration().admin;
+router.get("/view/:userID", isAuthenticated, isAdmin, (req, res) => {
+  const userID = req.params.userID;
 
   const query = `
-        SELECT 
-            u.*, 
-            creator.Email AS CreatedByName,
-            updater.Email AS UpdatedByName,
-            ut.UserTypeName,
-            u.RequestStatus
-        FROM User u
-        LEFT JOIN User creator ON u.CreatedByID = creator.UserID
-        LEFT JOIN User updater ON u.updated_by = updater.UserID
-        LEFT JOIN UserType ut ON u.UserTypeID = ut.UserTypeID
-        WHERE u.UserID = ? AND u.IsDeleted = 0
+    SELECT UserID,Email,UserType,FullName,
+    RegisteredDate,ContactNumber,
+    Organisation,Comments,RequestStatus,
+    IsDeleted,ReasonForRequest
+    FROM User
+    WHERE UserID = ?;
     `;
 
-  db.query(query, [user_id], (err, results: any) => {
+  db.query(query, [userID], (err, results: any) => {
     if (err) {
       console.error("❌ Error fetching user with joins:", err);
       return res.status(500).send("Error fetching user.");
@@ -64,11 +181,11 @@ router.get("/view/:user_id", isAuthenticated, (req, res) => {
     }
 
     console.log("📄 User Data Fetched:", results[0]);
-    res.render("view", {
+    res.render("admin/view", {
       user: results[0],
-      isAdminRequestor,
-      isAdmin,
       title: "Imaging User Details",
+
+      registeredDate: formatDisplayDate(results[0].RegisteredDate),
     });
   });
 });
@@ -110,53 +227,63 @@ router.get("/edit/:userID", isAuthenticated, isAdmin, async (req, res) => {
   }
 });
 
-// Handle form submission (support both singular and plural URLs)
-// TODO more User Attributes need to be updated here.
-router.post(
-  ["/edit/:userID", "/update-users/:id"],
-  isAuthenticated,
-  isAdmin,
-  async (req, res) => {
-    const adminID = req.params.userID;
+router.post(["/edit/:userID"], isAuthenticated, isAdmin, async (req, res) => {
+  const adminID = req.params.userID;
 
-    const {
-      userID,
-      email,
-      password,
-      confirmPassword,
-      userType,
-      fullName,
-      contactNumber,
-      organisation,
-      comments,
-      requestStatus,
-      reasonForRequest,
-    } = req.body;
-    console.log(req.body);
-    //Validation
-    const missingFields = [];
-    if (!userID) missingFields.push("userID");
-    if (!email) missingFields.push("email");
-    if (!fullName) missingFields.push("fullName");
-    if (missingFields.length > 0) {
+  const {
+    userID,
+    email,
+    password,
+    confirmPassword,
+    userType,
+    fullName,
+    contactNumber,
+    organisation,
+    comments,
+    requestStatus,
+    reasonForRequest,
+    originalEmail,
+  } = req.body;
+  console.log(req.body);
+  //Validation
+  const missingFields = [];
+  if (!userID) missingFields.push("userID");
+  if (!email) missingFields.push("email");
+  if (!fullName) missingFields.push("fullName");
+  if (missingFields.length > 0) {
+    return res.status(400).json({
+      success: false,
+      message: "Missing required fields: " + missingFields.join(", "),
+    });
+  }
+  if (!/^[\w\-\.]+@([\w-]+\.)+[\w-]{2,}$/.test(email))
+    return res.status(400).json({
+      success: false,
+      message:
+        "invalid email, email value does not have '@' or '.' character(s).",
+    });
+  if (password != confirmPassword && password.trim() != "") {
+    return res.status(400).json({
+      success: false,
+      message: "the new passwords does not match",
+    });
+  }
+  if (email != originalEmail) {
+    const result = await db
+      .promise()
+      .query("SELECT 1 FROM User WHERE Email = ? AND Email != ? LIMIT 1;", [
+        email,
+        originalEmail,
+      ]);
+    if (result[0]) {
       return res.status(400).json({
         success: false,
-        message: "Missing required fields: " + missingFields.join(", "),
+        message: "Email already exist",
       });
     }
-    if (!/^[\w\-\.]+@([\w-]+\.)+[\w-]{2,}$/.test(email))
-      return res.status(400).json({
-        success: false,
-        message:
-          "invalid email, email value does not have '@' or '.' character(s).",
-      });
-    if (password != confirmPassword && password.trim() != "") {
-      return res.status(400).json({
-        success: false,
-        message: "the new passwords does not match",
-      });
-    }
-    const query = `
+  }
+
+  const query = `
         UPDATE User 
     SET
         Email=?,
@@ -171,113 +298,67 @@ router.post(
         UpdatedByID = ?
     `;
 
-    const newPasswordSalt = crypto.randomBytes(16).toString("hex");
-    try {
-      crypto.pbkdf2(
-        password,
-        newPasswordSalt,
-        310000,
-        32,
-        "sha256",
-        async function (err, hashedPassword) {
-          if (err)
-            return res.json({
-              success: false,
-              message: `❌ Password change salting Failed: ${err} `,
-            });
-          const q2 =
-            password.trim() != ""
-              ? query + ",SaltedPassword = ?, PasswordSalt = ? WHERE UserID = ?"
-              : query + "WHERE UserID = ?";
-          const params =
-            password.trim() != ""
-              ? [
-                  email,
-                  userType,
-                  fullName,
-                  contactNumber,
-                  organisation,
-                  comments,
-                  requestStatus,
-                  reasonForRequest,
-                  adminID,
-                  hashedPassword,
-                  newPasswordSalt,
-                  userID,
-                ]
-              : [
-                  email,
-                  userType,
-                  fullName,
-                  contactNumber,
-                  organisation,
-                  comments,
-                  requestStatus,
-                  reasonForRequest,
-                  adminID,
-                  userID,
-                ];
-
-          await db.promise().query<RowDataPacket[]>(q2, params);
+  const newPasswordSalt = crypto.randomBytes(16).toString("hex");
+  try {
+    crypto.pbkdf2(
+      password,
+      newPasswordSalt,
+      310000,
+      32,
+      "sha256",
+      async function (err, hashedPassword) {
+        if (err)
           return res.json({
-            success: true,
-            message: "User updated successfully!",
+            success: false,
+            message: `❌ Password change salting Failed: ${err} `,
           });
-        }
-      );
-    } catch (error) {
-      console.error("password change error:", error);
-      return res.json({
-        success: false,
-        message: `❌ Password change Failed: ${error} `,
-      });
-    }
-  }
-);
+        const q2 =
+          password.trim() != ""
+            ? query + ",SaltedPassword = ?, PasswordSalt = ? WHERE UserID = ?"
+            : query + "WHERE UserID = ?";
+        const params =
+          password.trim() != ""
+            ? [
+                email,
+                userType,
+                fullName,
+                contactNumber,
+                organisation,
+                comments,
+                requestStatus,
+                reasonForRequest,
+                adminID,
+                hashedPassword,
+                newPasswordSalt,
+                userID,
+              ]
+            : [
+                email,
+                userType,
+                fullName,
+                contactNumber,
+                organisation,
+                comments,
+                requestStatus,
+                reasonForRequest,
+                adminID,
+                userID,
+              ];
 
-// ✅ API to Fetch a Single User by ID
-router.get("/admin-users/:id", isAuthenticated, isAdmin, (req, res) => {
-  const userId = req.params.id;
-  const query =
-    "SELECT UserID, Email, Password, TemporaryPassword FROM User WHERE UserID = ? AND IsDeleted = 0";
-
-  db.query(query, [userId], (err, result: any) => {
-    if (err) {
-      console.error("❌ Database Error:", err);
-      return res.status(500).json({ error: "Database error" });
-    }
-
-    if (result.length === 0) {
-      return res.status(404).json({ error: "User not found" });
-    }
-
-    res.json({ success: true, user: result[0] });
-  });
-});
-
-// ✅ API to Edit User Details
-router.put("/admin-users/:id", isAuthenticated, isAdmin, (req, res) => {
-  const userId = req.params.id;
-  const { Email, Password, TemporaryPassword } = req.body;
-
-  const query = `
-        UPDATE User 
-        SET Email = ?, Password = ?, TemporaryPassword = ?, UpdatedDate = NOW() 
-        WHERE UserID = ? AND IsDeleted = 0
-    `;
-
-  db.query(
-    query,
-    [Email, Password, TemporaryPassword, userId],
-    (err, result) => {
-      if (err) {
-        console.error("❌ Database Error:", err);
-        return res.status(500).json({ error: "Database error" });
+        await db.promise().query<RowDataPacket[]>(q2, params);
+        return res.json({
+          success: true,
+          message: "User updated successfully!",
+        });
       }
-
-      res.json({ success: true, message: "User updated successfully" });
-    }
-  );
+    );
+  } catch (error) {
+    console.error("password change error:", error);
+    return res.json({
+      success: false,
+      message: `❌ Password change Failed: ${error} `,
+    });
+  }
 });
 
 // ✅ Delete User (Soft Delete - Update IsDeleted to 1)

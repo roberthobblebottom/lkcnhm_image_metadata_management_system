@@ -161,6 +161,7 @@ router.post(
         contactNumber: string;
         organisation: string;
         comments: string;
+        originalEmail: string;
       };
     },
     res: {
@@ -182,9 +183,8 @@ router.post(
       }) => void;
     }
   ) => {
-    const { userID, email, fullName, contactNumber, organisation, comments } =
+    const { userID, email, fullName, contactNumber, organisation, comments,originalEmail } =
       req.body;
-
     const missingFields = [];
     if (!userID) missingFields.push("userID");
     if (!email) missingFields.push("email");
@@ -201,6 +201,20 @@ router.post(
         message:
           "invalid email, email value does not have '@' or '.' character(s).",
       });
+    if (email != originalEmail) {
+    const result = await db
+      .promise()
+      .query("SELECT 1 FROM User WHERE Email = ? AND Email != ? LIMIT 1;", [
+        email,
+        originalEmail,
+      ]);
+    if (result[0]) {
+      return res.status(400).json({
+        success: false,
+        message: "Email already exist",
+      });
+    }
+  }
     const query = `
    UPDATE User SET
       Email =?,

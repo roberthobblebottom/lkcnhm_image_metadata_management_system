@@ -236,6 +236,7 @@
           });
           return
         }
+
         const formData = JSON.stringify({
           userID: form.userID.value,
           email: form.email.value,
@@ -243,7 +244,7 @@
           contactNumber: form.contactNumber.value,
           organisation: form.organisation.value,
           comments: form.comments.value,
-
+originalEmail: "<%=currentUser.Email%>"
         })
 
         const response = await fetch("/settings/profile", {
@@ -297,6 +298,7 @@
         } finally {
           submitBtn.disabled = false;
           submitBtn.value = "Edit Profile"
+        submitBtn.innerHTML = 'Edit Profile';
         }
       });
   })

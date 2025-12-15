@@ -130,10 +130,10 @@ router.post("/register", (req, res) => {
     }
 
     if (result.length > 0) {
-      console.warn("⚠️ User already exists:", email);
+      console.warn("⚠️ Email already exists:", email);
       return res
         .status(400)
-        .send("User already exists. Please enter a new email.");
+        .send("Email already exists. Please enter a new email.");
     }
     const newPasswordSalt = crypto.randomBytes(16).toString("hex");
     crypto.pbkdf2(

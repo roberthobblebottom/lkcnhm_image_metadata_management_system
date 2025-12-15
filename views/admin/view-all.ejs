@@ -17,7 +17,12 @@
     .main_con {
       margin-left: 300px;
     }
-
+    .top-row{
+      width: 150%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
     .btn {
       display: inline-block;
       background: #007bff;
@@ -27,15 +32,13 @@
       border-radius: 6px;
       text-decoration: none;
       font-weight: 600;
-      float: right;
-      margin-top: 50px;
       margin-bottom: 50px;
-      margin-left: 10px;
+      align-self: flex-start;
     }
 
     h2 {
-      /* text-align: center; */
-      margin: 20px 0;
+      text-align: center;
+      flex-grow: 1;
       color: #333;
     }
 
@@ -113,8 +116,15 @@
 </head>
 
 <main class="user-management-container">
-  <h2 class="page-title" style="text-align: center;">Login User Management</h2>
+
+
   <div class="table-container">
+<div class="top-row">
+  <h2 class="page-title" style="text-align: center;">Login User Management</h2>
+
+<a href="/admin/user-management/create/" class="btn">Add User</a>
+
+</div>
     <% if (users.length===0) { %>
     <p class="no-data">No users found</p>
     <% } else { %>
@@ -167,6 +177,9 @@
             <%=!user.IsDeleted? 'No' : 'Yes' %>
           </td>
           <td class="actions">
+<a href="/admin/user-management/view/<%= user.UserID %>" class="btn-view">
+              <i class="fas fa-view"></i> View
+            </a>
             <a href="/admin/user-management/edit/<%= user.UserID %>" class="btn-edit">
               <i class="fas fa-edit"></i> Edit
             </a>

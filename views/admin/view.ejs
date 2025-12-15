@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Edit User - <%= user ? user.LoginUserName : 'Unknown User' %>
+  </title>
+
+  <link rel="stylesheet" href="/css/admin-users.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <%- include('../sidenavs/admin') %>
+  <style>
+    * {
+      box-sizing: border-box;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    body {
+      margin: 0;
+      padding: 0;
+      background: white;
+      min-height: 100vh;
+      justify-content: center;
+      padding-top: 60px;
+    }
+
+    main {
+      max-width: 500px;
+      padding: 20px;
+    }
+
+    .form-container {
+      padding: 30px;
+      border-radius: 16px;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+      margin-left: -100%;
+align-content: center;
+      /* width: 900px; */
+      /* min-height: 100vh; */
+      /* text-align: center; */
+      /* margin-left: 350px; */
+      background-color: #f5f7fa;
+    }
+
+    .form-container h2 {
+      margin-bottom: 25px;
+      color: #000435;
+      font-size: 24px;
+    }
+
+    .form-group {
+      margin-bottom: 20px;
+
+    }
+
+    label {
+      display: block;
+      font-weight: 600;
+      margin-bottom: 8px;
+      color: #333;
+    }
+
+
+    button {
+      width: 100%;
+      background-color: #000435;
+      color: white;
+      padding: 14px;
+      font-size: 16px;
+      font-weight: bold;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+
+    button:hover {
+      background-color: #0072ff;
+    }
+.btn {
+      display: inline-block;
+      background: #007bff;
+      color: white;
+      padding: 10px 16px;
+      border: none;
+      border-radius: 6px;
+      text-decoration: none;
+      font-weight: 600;
+      margin-top: 50px;
+      /* margin-bottom: 50px; */
+    }
+.btn-primary {
+      background-color: #007bff;
+      border: none;
+      color: #fff;
+    }
+
+    .btn-primary:hover {
+      background-color: #0056b3;
+    }
+    @media screen and (max-width: 768px) {
+      body {
+        align-items: flex-start;
+        padding: 40px 10px;
+      }
+
+      .form-container {
+        padding: 20px;
+      }
+
+      .form-container h2 {
+        font-size: 20px;
+      }
+
+      button {
+        padding: 12px;
+        font-size: 15px;
+      }
+    }
+  </style>
+
+</head>
+
+<body>
+  <main>
+    <div class="form-container">
+      <h2>Edit Login Details</h2>
+      <div class="form-group">
+        <label for="userID">User ID</label>
+        <%=user.UserID%>
+      </div>
+      <div class="form-group">
+        <label for="email">Email </label>
+        <%=user.Email%>
+      </div>
+      <div class="form-group">
+        <label for="userType">User Type </label>
+        <%= user.UserType %>
+      </div>
+      <div class="form-group">
+        <label for="fullName">Full Name </label>
+        <%=user.FullName%>
+      </div>
+      <div class="form-group">
+        <label>Registered Date </label>
+        <%=registeredDate%>
+      </div>
+      <div class="form-group">
+        <label for="contactNumber">Contact Number </label>
+        <%=user.ContactNumber%>
+      </div>
+      <div class=" form-group">
+        <label for="organisation">Organisation </label>
+        <%=user.Organisation%>
+      </div>
+      <div class="form-group">
+        <label for="comments">Comments </label>
+        <%=user.Comments%>
+      </div>
+      <div class="form-group">
+        <label>Request Status </label>
+        <%=    user.RequestStatus%>
+      </div>
+
+      <div class="form-group">
+        <label>Is Deleted? </label>
+        <%=!user.IsDeleted? 'No' : 'Yes' %>
+
+      </div>
+      <div class="form-group">
+        <label> Reason for Request: </label>
+        <%=user.ReasonForRequest%>
+      </div>
+      <div class="mt-4 d-flex justify-content-between">
+        <a href="/admin/user-management/view-all" class="btn btn-primary">
+          <i class="fas fa-arrow-left"></i> Back to view all media
+        </a>
+        <a href="/admin/user-management/edit/<%= user.UserID%>/" class="btn btn-warning">
+          <i class="fas fa-edit"></i> Edit Request
+        </a>
+      </div>
+
+    </div>
+  </main>
+
+  <script>
+
+  </script>
+</body>
+
+</html>
