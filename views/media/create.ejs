@@ -67,6 +67,7 @@
       font-weight: 600;
       color: #475569;
       margin-bottom: 0.5rem;
+      float: left;
     }
 
     /* Input Fields */
@@ -196,7 +197,7 @@
       background-color: #007bff;
       border: none;
       height: 4%;
-      margin-left: 10%;
+      margin-right: 10%;
       color: #fff;
     }
 
@@ -232,11 +233,15 @@
       background-color: #0056b3;
     }
 
-    #top-panel {
+    #horizontal-panel {
       display: flex;
       justify-content: center;
     }
-
+.addButton{
+      float: right;
+      margin-right: 2%;
+      margin-bottom: 5px;
+    }
     .buttons {
       text-align: center;
     }
@@ -264,12 +269,12 @@
     : include('../sidenavs/user') %>
 
     <form id="main-form">
-      <div id="top-panel">
+      <div id="horizontal-panel">
         <a href="/media/view-all" class="btn btn-primary">
           <i class="fas fa-arrow-left"></i> Back to all media
         </a>
         <h2>
-          "Then, enter new image metadata entry"
+          "Enter new image metadata entry"
         </h2>
       </div>
 
@@ -348,8 +353,10 @@
       </div>
 
       <div class="form-group">
-        <label for="imagingPlatform">imaging Platform</label>
-        <button id="addImagingPlatform">Add</button>
+        <div class="horizontal-panel">
+          <label for="imagingPlatform">imaging Platform</label>
+          <button class="addButton" id="addImagingPlatform">Add</button>
+        </div>
         <select name="imagingPlatform" id="imagingPlatform">
           <option value="">-- Select a imaging platform --</option>
           <%imagingPlatforms.forEach( imagingPlatform=>{%>
@@ -361,9 +368,10 @@
       </div>
 
       <div class="form-group">
-        <label for="imageEditingTool">Image Editing Tool</label>
-
-        <button id="addImageEditingTool" >Add</button>
+        <div class="horizontal-panel">
+          <label for="imageEditingTool">Image Editing Tool</label>
+          <button class='addButton' id="addImageEditingTool">Add</button>
+        </div>
         <select name="imageEditingTool" id="imageEditingTool">
           <option value="">-- Select a image editing tool --</option>
           <%imageEditingTools.forEach( imageEditingTool=>{%>
@@ -403,28 +411,28 @@
 
 
 
-document.getElementById('addImagingPlatform').addEventListener(
-  'click',
-    function enterNewImagingPlatform(e) {
-      console.log('enterNewImagingPlatform')
-      e.preventDefault()
-      Swal.fire({
-        title: "Add new Imaging Platform",
-        text: "Add new Imaging Platform",
-        input: 'text',
-        showCancelButton: true,
-        inputPlaceholder: "Enter it here."
-      }).then((result) => {
-        if (result.value) {
-          const select = document.getElementById("imagingPlatform")
-          var option = document.createElement('option')
-          option.text = option.value = result.value
-          select.add(option, 1)
-          select.value = option.text
-        }
-      });
-    }    
-)
+    document.getElementById('addImagingPlatform').addEventListener(
+      'click',
+      function enterNewImagingPlatform(e) {
+        console.log('enterNewImagingPlatform')
+        e.preventDefault()
+        Swal.fire({
+          title: "Add new Imaging Platform",
+          text: "Add new Imaging Platform",
+          input: 'text',
+          showCancelButton: true,
+          inputPlaceholder: "Enter it here."
+        }).then((result) => {
+          if (result.value) {
+            const select = document.getElementById("imagingPlatform")
+            var option = document.createElement('option')
+            option.text = option.value = result.value
+            select.add(option, 1)
+            select.value = option.text
+          }
+        });
+      }
+    )
     document.getElementById('addImageEditingTool').addEventListener('click',
       async function enterNewImageEditingTool(e) {
         console.log('enterNewImageEditingTool')

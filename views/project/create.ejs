@@ -9,12 +9,9 @@
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
   <link rel="stylesheet" href="/css/admin-users.css">
-<link
-  rel="stylesheet"
-  href="https://cdn.jsdelivr.net/npm/choices.js@11.1.0/public/assets/styles/choices.min.css"
-/>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/choices.js@11.1.0/public/assets/styles/choices.min.css" />
   <!-- Include Choices JavaScript -->
-<script src="https://cdn.jsdelivr.net/npm/choices.js/public/assets/scripts/choices.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/choices.js/public/assets/scripts/choices.min.js"></script>
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -53,14 +50,14 @@
       box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
     }
 
-    .top-group {
-      max-width: 700px;
-      margin: auto;
-      padding: 2rem;
-    }
+
 
     .form-group {
       margin-bottom: 1.5rem;
+      display: grid;
+      
+      /* vertical-align: middle; */
+      align-items: center;
     }
 
     label {
@@ -69,7 +66,10 @@
       margin-bottom: 0.5rem;
       color: #34495e;
     }
+    .label2 {
 
+      float:left;
+    }
     input[type="text"],
     input[type="date"],
     .anchor,
@@ -82,6 +82,10 @@
       font-size: 1rem;
       background-color: #fefefe;
       transition: border-color 0.2s;
+    }
+
+    select {
+      float: bottom;
     }
 
     input:focus,
@@ -132,12 +136,16 @@
     .btn-primary {
       background-color: #007bff;
       color: white;
-      margin-right: 100%;
+      margin-left: 10%;
       width: 100px;
     }
 
 
+    #horizontal-panel {
+      display: flex;
+      align-items: center;
 
+    }
 
     /* Responsive Enhancements */
     @media (max-width: 600px) {
@@ -155,12 +163,23 @@
       width: 100%;
     }
 
-    /*
-Source - https://stackoverflow.com/a
-Posted by Arun Aravind, modified by community. See post 'Timeline' for change history
-Retrieved 2025-11-19, License - CC BY-SA 4.0
-*/
+    .addButton {
+      float: right;
+      margin-right: 2%;
+      margin-bottom: 5px;
+    }
 
+    /* Note Section */
+    .note {
+      text-align: center;
+      color: #64748b;
+      background: #f8fafc;
+      padding: 1rem;
+      border-radius: 8px;
+      border: 1px dashed #cbd5e1;
+      margin: 2rem 0;
+      font-size: 0.875rem;
+    }
 
   </style>
 </head>
@@ -168,7 +187,7 @@ Retrieved 2025-11-19, License - CC BY-SA 4.0
 <body>
   <%- include(currentUser.UserType==='admin' ? '../sidenavs/admin.ejs' : '../sidenavs/user' ) %>
   <main>
-    <div class="top-group">
+    <div class="horizontal-panel">
       <a href="/project/view-all"><button class="btn btn-primary">Back to all Projects</button></a>
       <h2>Create a New Project </h2>
     </div>
@@ -193,12 +212,15 @@ Retrieved 2025-11-19, License - CC BY-SA 4.0
       </div>
 
       <div class="form-group">
-        <label>Project Type*</label>
-        <button id="addProjectTypeButton">Add</button>
+        <div class="horizontal-panel">
+          <label class="label2">Project Type*</label>
+          <button class="addButton" id="addProjectTypeButton">Add</button>
+        </div>
+
         <select name="projectType" id="projectType" class="form-control" required>
           <option value="">-- Select Project Type --</option>
           <% projectTypes.forEach(projectType=> { %>
-        <option value="<%= projectType %>" <%=projectType=='BDP' ? "selected":""%>>
+          <option value="<%= projectType %>" <%=projectType=='BDP' ? "selected":""%>>
             <%= projectType %>
           </option>
           <% }) %>
@@ -250,10 +272,11 @@ Retrieved 2025-11-19, License - CC BY-SA 4.0
 
 
       <div class="form-group">
-        <label for="platform">Imaging Platform</label>
-        
-<button id="addImagingPlatformButton">Add</button>
-<select multiple id="newSelectedImagingPlatforms">
+        <div class="horizontal-panel">
+          <label class="label2" for="platform">Imaging Platform</label>
+          <button class='addButton' id="addImagingPlatformButton">Add</button>
+        </div>
+        <select multiple id="newSelectedImagingPlatforms">
           <option value="">Select Imaging Platforms</span>
             <% imagingPlatforms.forEach(i=>{ %>
           <option value="<%=i%>" <%=i=='(Leica(L5))' ? "selected":""%>>
@@ -264,64 +287,72 @@ Retrieved 2025-11-19, License - CC BY-SA 4.0
       </div>
 
       <div class="form-group">
-        <label for="comments">Comments</label>
+        <label  for="comments">Comments</label>
         <textarea id="comments" name="comments"></textarea>
       </div>
 
       <div class="buttons">
         <button type="submit" class="new"><i class="fas fa-paper-plane"></i> Submit</button>
       </div>
-<p class="note">
+      <p class="note">
         💡 New project types and/or imaging platform will only be in the system if said changes are submitted
       </p>
     </form>
   </main>
   <script>
-    
     const element = document.getElementById('newSelectedPhotographers');
-    const newSelectedPhotographers =  new Choices(element,{allowHTML:true, removeItemButton: true});
-    const newSelectedImagingPlatforms = new Choices(document.getElementById('newSelectedImagingPlatforms'),
-  {allowHTML:true, removeItemButton: true});
+    const newSelectedPhotographers = new Choices(element, {
+      allowHTML: true,
+      removeItemButton: true
+    });
+    const newSelectedImagingPlatforms = new Choices(document.getElementById('newSelectedImagingPlatforms'), {
+      allowHTML: true,
+      removeItemButton: true
+    });
     // Initialize form with current datetime
     document.addEventListener('DOMContentLoaded', function() {
-document.getElementById('addProjectTypeButton').addEventListener('click',async function(e){
+
+    // document.querySelector("[class='choices__inner']").style.float = "1000px"
+      document.getElementById('addProjectTypeButton').addEventListener('click', async function(e) {
         e.preventDefault()
-          Swal.fire({
-        title: "Add new Project Type",
-        text: "Add new Project Type",
-        input: 'text',
-        showCancelButton: true,
-        inputPlaceholder: "Enter it here."
-      }).then((result) => {
-        if (result.value && result.value != "") {
-                    const select = document.getElementById("projectType")
-          var option = document.createElement('option')
-          option.text = option.value = result.value
-          select.add(option, 1)
-          select.value = option.text
-        }
-      });
+        Swal.fire({
+          title: "Add new Project Type",
+          text: "Add new Project Type",
+          input: 'text',
+          showCancelButton: true,
+          inputPlaceholder: "Enter it here."
+        }).then((result) => {
+          if (result.value && result.value != "") {
+            const select = document.getElementById("projectType")
+            var option = document.createElement('option')
+            option.text = option.value = result.value
+            select.add(option, 1)
+            select.value = option.text
+          }
+        });
       })
-      document.getElementById('addImagingPlatformButton').addEventListener('click',async function(e){
+      document.getElementById('addImagingPlatformButton').addEventListener('click', async function(e) {
         console.log("add Imaging Platform button")
         e.preventDefault()
-          Swal.fire({
-        title: "Add new Imaging Platform",
-        text: "Add new Imaging Platform",
-        input: 'text',
-        showCancelButton: true,
-        inputPlaceholder: "Enter it here."
-      }).then((result) => {
-        if (result.value && result.value != "") {
-          newSelectedImagingPlatforms.setChoices([{
-            value: result.value, label: result.value, selected: true
-          }])
-        }
-      });
+        Swal.fire({
+          title: "Add new Imaging Platform",
+          text: "Add new Imaging Platform",
+          input: 'text',
+          showCancelButton: true,
+          inputPlaceholder: "Enter it here."
+        }).then((result) => {
+          if (result.value && result.value != "") {
+            newSelectedImagingPlatforms.setChoices([{
+              value: result.value,
+              label: result.value,
+              selected: true
+            }])
+          }
+        });
       })
       const aDate = new Date()
       document.getElementById('startDate').value = aDate.toISOString().slice(0, 16).split('T')[0]
-      aDate.setDate(aDate.getDate()+4)
+      aDate.setDate(aDate.getDate() + 4)
       document.getElementById('endDate').value = aDate.toISOString().slice(0, 16).split('T')[0]
 
       // Set min attributes for date fields
@@ -338,9 +369,9 @@ document.getElementById('addProjectTypeButton').addEventListener('click',async f
       const startDate = document.getElementById('startDate').value;
 
       // Set minimum end date to be after start date (if start date is selected)
-      if (startDate) 
+      if (startDate)
         document.getElementById('endDate').min = startDate;
-      
+
     }
 
 
@@ -460,8 +491,8 @@ document.getElementById('addProjectTypeButton').addEventListener('click',async f
           summary: form.summary.value,
           specimenDetails: form.specimenDetails.value,
           comments: form.comments.value || null,
-          selectedImagingPlatforms:newSelectedImagingPlatforms.getValue(true),
-          selectedPhotographers:  newSelectedPhotographers.getValue(true),
+          selectedImagingPlatforms: newSelectedImagingPlatforms.getValue(true),
+          selectedPhotographers: newSelectedPhotographers.getValue(true),
         };
 
 

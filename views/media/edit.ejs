@@ -53,7 +53,7 @@
       border-radius: 3px;
     }
 
-  
+
 
 
     .form-group {
@@ -67,6 +67,7 @@
       font-weight: 600;
       color: #475569;
       margin-bottom: 0.5rem;
+      float:left;
     }
 
     /* Input Fields */
@@ -159,7 +160,7 @@
         padding: 1.5rem;
       }
 
-      
+
 
       form h2 {
         font-size: 1.5rem;
@@ -183,20 +184,12 @@
       animation: fadeIn 0.5s ease-out;
     }
 
-    /* Hidden Fields */
-    input[type="hidden"] {
-      display: none;
-    }
 
-
-    /* input:invalid, select:invalid, textarea:invalid {
-  border-color: red;
-} */
     .btn-primary {
       background-color: #007bff;
       border: none;
       height: 4%;
-      margin-left: 10%;
+      margin-right: 10%;
       color: #fff;
     }
 
@@ -232,13 +225,19 @@
       background-color: #0056b3;
     }
 
-    #top-panel {
+    #horizontal-panel {
       display: flex;
-      justify-content: center;
+    align-items: center;
+
     }
 
     .buttons {
       text-align: center;
+    }
+    .addButton{
+      float: right;
+      margin-right: 2%;
+      margin-bottom: 5px;
     }
   </style>
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
@@ -250,18 +249,20 @@
     <%- currentUser.UserType=='admin' ? include('../sidenavs/admin'): include('../sidenavs/user') %>
     <!-- 📸 MEDIA SUBMISSION FORM (UPDATED) -->
 
-    <form id="main-form" >
-      <div id="top-panel">
+    <form id="main-form">
+      <div id="horizontal-panel">
         <a href="/media/view-all" class="btn btn-primary">
           <i class="fas fa-arrow-left"></i> Back to all media
         </a>
         <h2>
-          Then, edit image metadata entry
+          Edit image metadata entry
         </h2>
       </div>
+      <div class='form-group'>
 
-      <!-- Hidden IDs -->
-      <input readonly type='text' name="MediaID" value="<%= toBeEditedMedia.MediaID %>">
+        <label>Media ID</label>
+        <input readonly type='text' name="MediaID" value="<%= toBeEditedMedia.MediaID %>">
+      </div>
 
       <div class="form-group">
         <label>Project and Photographer Pair</label>
@@ -335,13 +336,16 @@
 
       <div class="form-group">
         <label for="description">Description of Image</label>
-        <textarea name="description" id="description"> toBeEditedMedia.Description %></textarea>
+        <textarea name="description" id="description"> <%=toBeEditedMedia.Description%></textarea>
       </div>
 
       <div class="form-group">
-        <label for="imagingPlatform">imaging Platform</label>
+        <div class="horizontal-panel">
+          <label for="imagingPlatform">imaging Platform</label>
 
-        <button id="addImagingPlatform">Add</button>
+
+          <button class="addButton" id="addImagingPlatform">Add</button>
+        </div>
         <select name="imagingPlatform" id="imagingPlatform">
           <option value="">-- Select a imaging platform --</option>
           <%imagingPlatforms.forEach( imagingPlatform=>{%>
@@ -354,9 +358,12 @@
       </div>
 
       <div class="form-group">
-        <label for="imageEditingTool">Image Editing Tool</label>
+        
+        <div class="horizontal-panel">
+        <label  for="imageEditingTool">Image Editing Tool</label>
 
-        <button id="addImageEditingTool" >Add</button>
+        <button class="addButton" id="addImageEditingTool">Add</button>
+        </div>
         <select name="imageEditingTool" id="imageEditingTool">
           <option value="">-- Select a image editing tool --</option>
           <%imageEditingTools.forEach( imageEditingTool=>{%>
@@ -391,46 +398,46 @@
       const temp = fileNameInput.value.split(".")[0]
       fileNameInput.value = temp + fileFormat.value
     };
-document.getElementById('addImageEditingTool').addEventListener("click",
-    function enterNewImageEditingTool(e) {
-      e.preventDefault()
-      Swal.fire({
-        title: "Add new Image Editing Tool",
-        text: "Add new Image Editing Tool",
-        input: 'text',
-        showCancelButton: true,
-        inputPlaceholder: "Enter it here."
-      }).then((result) => {
-        if (result.value) {
-          const select = document.getElementById("imageEditingTool")
-          var option = document.createElement('option')
-          option.text = option.value = result.value
-          select.add(option, 1)
-          select.value = option.text
-        }
+    document.getElementById('addImageEditingTool').addEventListener("click",
+      function enterNewImageEditingTool(e) {
+        e.preventDefault()
+        Swal.fire({
+          title: "Add new Image Editing Tool",
+          text: "Add new Image Editing Tool",
+          input: 'text',
+          showCancelButton: true,
+          inputPlaceholder: "Enter it here."
+        }).then((result) => {
+          if (result.value) {
+            const select = document.getElementById("imageEditingTool")
+            var option = document.createElement('option')
+            option.text = option.value = result.value
+            select.add(option, 1)
+            select.value = option.text
+          }
+        });
       });
-    });
 
-document.getElementById('addImagingPlatform').addEventListener("click",
-    function enterNewImagingPlatform(e) {
-      e.preventDefault()
-      console.log('enterNewImagingPlatform')
-      Swal.fire({
-        title: "Add new Imaging Platform",
-        text: "Add new Imaging Platform",
-        input: 'text',
-        showCancelButton: true,
-        inputPlaceholder: "Enter it here."
-      }).then((result) => {
-        if (result.value) {
-          const select = document.getElementById("imagingPlatform")
-          var option = document.createElement('option')
-          option.text = option.value = result.value
-          select.add(option, 1)
-          select.value = option.text
-        }
+    document.getElementById('addImagingPlatform').addEventListener("click",
+      function enterNewImagingPlatform(e) {
+        e.preventDefault()
+        console.log('enterNewImagingPlatform')
+        Swal.fire({
+          title: "Add new Imaging Platform",
+          text: "Add new Imaging Platform",
+          input: 'text',
+          showCancelButton: true,
+          inputPlaceholder: "Enter it here."
+        }).then((result) => {
+          if (result.value) {
+            const select = document.getElementById("imagingPlatform")
+            var option = document.createElement('option')
+            option.text = option.value = result.value
+            select.add(option, 1)
+            select.value = option.text
+          }
+        });
       });
-    });
     document.addEventListener("DOMContentLoaded", () => {
       const form = document.getElementById("main-form");
       const fileNameInput = document.getElementById("mediaFileName");
