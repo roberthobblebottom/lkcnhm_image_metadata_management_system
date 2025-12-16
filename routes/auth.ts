@@ -223,7 +223,20 @@ router.post("/login", (req: Request, res: Response, next: NextFunction) => {
             .split(",");
           ip.splice(ip.length - 1, 1, ip.at(-1).replace(")", ""));
           req.session.imagingPlatforms = ip;
-          req.session.save((err) => {
+          
+const projectTypes = (
+            await db
+              .promise()
+              .query("SHOW COLUMNS FROM Project LIKE 'ProjectType' ")
+          )[0][0]["Type"]
+            .replaceAll("enum(", "")
+            .replaceAll("'", "")
+            .split(",");
+          projectTypes.splice(projectTypes.length - 1, 1, projectTypes.at(-1).replace(")", ""));
+          req.session.projectTypes = projectTypes;
+
+
+          req.session.save((err: any) => {
             if (err) {
               console.error("❌ Session Save Error:", err);
               return res.status(500).json({ error: "Session error" });

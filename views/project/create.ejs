@@ -194,6 +194,7 @@ Retrieved 2025-11-19, License - CC BY-SA 4.0
 
       <div class="form-group">
         <label>Project Type*</label>
+        <button id="addProjectTypeButton">Add</button>
         <select name="projectType" id="projectType" class="form-control" required>
           <option value="">-- Select Project Type --</option>
           <% projectTypes.forEach(projectType=> { %>
@@ -206,7 +207,6 @@ Retrieved 2025-11-19, License - CC BY-SA 4.0
       </div>
       <div class="form-group">
         <label for="photographer">Photographer(s)*</label>
-
         <select multiple id="newSelectedPhotographers">
           <option value="">Select Photographers</span>
             <% photographers.forEach(photographer=>{ %>
@@ -252,6 +252,7 @@ Retrieved 2025-11-19, License - CC BY-SA 4.0
       <div class="form-group">
         <label for="platform">Imaging Platform</label>
         
+<button id="addImagingPlatformButton">Add</button>
 <select multiple id="newSelectedImagingPlatforms">
           <option value="">Select Imaging Platforms</span>
             <% imagingPlatforms.forEach(i=>{ %>
@@ -280,19 +281,52 @@ Retrieved 2025-11-19, License - CC BY-SA 4.0
   {allowHTML:true, removeItemButton: true});
     // Initialize form with current datetime
     document.addEventListener('DOMContentLoaded', function() {
-      // document.getElementById('startDate').value = ((new Date()).getDate() + 1).toISOString().slice(0, 16).split('T')[0];
-      
-      const now = new Date()
+document.getElementById('addProjectTypeButton').addEventListener('click',async function(e){
+        e.preventDefault()
+          Swal.fire({
+        title: "Add new Project Type",
+        text: "Add new Project Type",
+        input: 'text',
+        showCancelButton: true,
+        inputPlaceholder: "Enter it here."
+      }).then((result) => {
+        if (result.value && result.value != "") {
+                    const select = document.getElementById("projectType")
+          var option = document.createElement('option')
+          option.text = option.value = result.value
+          select.add(option, 1)
+          select.value = option.text
+        }
+      });
+      })
+      document.getElementById('addImagingPlatformButton').addEventListener('click',async function(e){
+        console.log("add Imaging Platform button")
+        e.preventDefault()
+          Swal.fire({
+        title: "Add new Imaging Platform",
+        text: "Add new Imaging Platform",
+        input: 'text',
+        showCancelButton: true,
+        inputPlaceholder: "Enter it here."
+      }).then((result) => {
+        if (result.value && result.value != "") {
+          newSelectedImagingPlatforms.setChoices([{
+            value: result.value, label: result.value, selected: true
+          }])
+        }
+      });
+      })
+      const aDate = new Date()
+      document.getElementById('startDate').value = aDate.toISOString().slice(0, 16).split('T')[0]
+      aDate.setDate(aDate.getDate()+4)
+      document.getElementById('endDate').value = aDate.toISOString().slice(0, 16).split('T')[0]
 
-      document.getElementById('startDate').value = now.toISOString().slice(0, 16).split('T')[0]
-      now.setDate(now.getDate()+4)
-      document.getElementById('endDate').value = now.toISOString().slice(0, 16).split('T')[0]
       // Set min attributes for date fields
       updateDateConstraints();
-
-
       // Setup form validation
       setupFormValidation();
+
+
     });
 
     // Update date constraints when dates change
@@ -301,11 +335,9 @@ Retrieved 2025-11-19, License - CC BY-SA 4.0
       const startDate = document.getElementById('startDate').value;
 
       // Set minimum end date to be after start date (if start date is selected)
-      if (startDate) {
+      if (startDate) 
         document.getElementById('endDate').min = startDate;
-      } else {
-        // document.getElementById('endDate').min = requestDate;
-      }
+      
     }
 
 
@@ -414,6 +446,7 @@ Retrieved 2025-11-19, License - CC BY-SA 4.0
 
 
 
+        console.log(form.projectType.value)
         // Create a plain object from form data
         const formData = {
           projectName: form.projectName.value,
@@ -424,8 +457,8 @@ Retrieved 2025-11-19, License - CC BY-SA 4.0
           summary: form.summary.value,
           specimenDetails: form.specimenDetails.value,
           comments: form.comments.value || null,
-          selectedImagingPlatforms: newSelectedPhotographers.getValue(true),
-          selectedPhotographers: newSelectedPhotographers.getValue(true)
+          selectedImagingPlatforms:newSelectedImagingPlatforms.getValue(true),
+          selectedPhotographers:  newSelectedPhotographers.getValue(true),
         };
 
 

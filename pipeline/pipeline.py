@@ -39,7 +39,7 @@ def recursion(
             "tif",
             "svg",
         ]:
-            print("not an valid image extension")
+            print("not an valid image extension", file_or_folder_path)
             continue
         if "LABEL" in file_or_folder_path:
             print("label or thumb file, skipping")
@@ -54,8 +54,8 @@ def recursion(
         new_row["FileName"] = file_or_folder_path.split("/")[-1]
         new_row["FileFormat"] = "." + file_or_folder_path.split(".")[-1]
         fileNameArray = new_row["FileName"].split(
-            " "
-        )  # MAY BE CHANGE TO ANOTHER SEPERATOR
+            "_"
+        )  
         new_row["CatalogID"] = fileNameArray[1]
         if not re.search("^[A-Z]{6}\\d{7,8}$", new_row["CatalogID"]):
             raise Exception(
@@ -70,8 +70,10 @@ def recursion(
                 + new_row["FileName"]
                 + " may not not in the correct format of a taxon name."
             )
-        part_with_fileFormat = fileNameArray[-1].split(".")
-        new_row["Description"] = part_with_fileFormat[0]
+        # part_with_fileFormat = fileNameArray[-1].split(".")
+        new_row["Description"] = fileNameArray[-2]+"   "+fileNameArray[-1].split('.')[0] \
+                                if fileNameArray[-2].lower() != "none" \
+                                else fileNameArray[-1].split('.')[0]
 
         new_row["FileSizeBytes"] = getsize(file_or_folder_path)
 
@@ -191,7 +193,7 @@ def main():
         .select(pl.exclude("ImageWidth", "ImageLength", "Make", "Model"))
     )
     print(df.head())
-    df.write_csv("metadata_for_photographer_ID_"+photographerID+".csv")
+    df.write_csv("metadata_for_photographer_ID_"+str(photographerID)+".csv")
 
 
 if __name__ == "__main__":

@@ -6,12 +6,9 @@
   <link rel="stylesheet" href="/css/admin-users.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
-<link
-  rel="stylesheet"
-  href="https://cdn.jsdelivr.net/npm/choices.js@11.1.0/public/assets/styles/choices.min.css"
-/>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/choices.js@11.1.0/public/assets/styles/choices.min.css" />
   <!-- Include Choices JavaScript -->
-<script src="https://cdn.jsdelivr.net/npm/choices.js/public/assets/scripts/choices.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/choices.js/public/assets/scripts/choices.min.js"></script>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Edit Project</title>
@@ -183,7 +180,7 @@
     }
 
 
-    
+
 
     .buttons {
       text-align: center;
@@ -219,6 +216,8 @@
 
       <div class="form-group">
         <label>Project Type</label>
+
+        <button id="addProjectTypeButton">Add</button>
         <select name="projectType" id="projectType" class="form-control">
           <option value="">-- Select Project Type --</option>
           <% projectTypes.forEach(projectType=> { %>
@@ -231,14 +230,11 @@
 
       <div>
         <label for="PhotographerID">Photographer(s):</label>
-        
-<select multiple id="newSelectedPhotographers">
-          <option value="">Select Photographers</span>
-            <% allPhotographers.forEach(photographer=>{ %>
-          <option  value="<%=photographer.UserID%>" id ="<%=photographer.UserID%>ID" 
-            <%=photographer.UserID == project.ProjectOwnerID ? "disabled": ""%>
-            <%=selectedPhotographers.includes(photographer.UserID) ? "selected":""%>
-            >
+
+        <select multiple id="newSelectedPhotographers">
+          <option value="">---Select Photographers---</option>
+          <% allPhotographers.forEach(photographer=>{ %>
+          <option value="<%=photographer.UserID%>" id="<%=photographer.UserID%>ID" <%=photographer.UserID == project.ProjectOwnerID ? "disabled": ""%> <%=selectedPhotographers.includes(photographer.UserID) ? "selected":""%>>
             <%=photographer.FullName%>
           </option>
           <%})%>
@@ -271,9 +267,10 @@
       <div class="form-group">
         <label for="imagingPlatform">Imaging Platform:</label>
 
-<select multiple id="newSelectedImagingPlatforms">
-          <option value="">Select Imaging Platforms</span>
-            <% imagingPlatforms.forEach(i=>{ %>
+        <button id="addImagingPlatformButton">Add</button>
+        <select multiple id="newSelectedImagingPlatforms">
+          <option value="">Select Imaging Platforms</option>
+          <% imagingPlatforms.forEach(i=>{ %>
           <option value="<%=i%>" <%=selectedImagingPlatforms.includes(i) ? "selected":""%>>
             <%=i%>
           </option>
@@ -304,23 +301,64 @@
 
   </main>
   <script>
-
     const newSelectedPhotographersElement = document.getElementById('newSelectedPhotographers');
-    const newSelectedPhotographers =  new Choices(newSelectedPhotographersElement, {allowHTML:true, removeItemButton: true});
-    const newSelectedImagingPlatforms = new Choices(document.getElementById("newSelectedImagingPlatforms"), {allowHTML:true, removeItemButton: true});
-   
-    
-// newSelectedPhotographers.addEventListener("unhighlightItem", function(e){
-//   console.log("IN HERE")
-  
-// if (e.value == "<%=project.ProjectOwnerID%>"){
-// newSelectedPhotographers.setChoices = {value:e.value,label:e.label,selcted:true}
-// }})
-    document.addEventListener('DOMContentLoaded', function() {
+    const newSelectedPhotographers = new Choices(newSelectedPhotographersElement, {
+      allowHTML: true,
+      removeItemButton: true
+    });
+    const newSelectedImagingPlatforms = new Choices(document.getElementById("newSelectedImagingPlatforms"), {
+      allowHTML: true,
+      removeItemButton: true
+    });
 
-    const x = document.querySelector("[data-value='<%=project.ProjectOwnerID%>']")
-x.removeChild(x.childNodes[1])
-    console.log(x)
+
+    document.addEventListener('DOMContentLoaded', function() {
+      document.getElementById('addProjectTypeButton').addEventListener('click', async function(e) {
+        e.preventDefault()
+        Swal.fire({
+          title: "Add new Project Type",
+          text: "Add new Project Type",
+          input: 'text',
+          showCancelButton: true,
+          inputPlaceholder: "Enter it here."
+        }).then((result) => {
+          if (result.value && result.value != "") {
+            const select = document.getElementById("projectType")
+            var option = document.createElement('option')
+            option.text = option.value = result.value
+            select.add(option, 1)
+            select.value = option.text
+          }
+        });
+      })
+      document.getElementById('addImagingPlatformButton').addEventListener('click', async function(e) {
+        console.log("add Imaging Platform button")
+        e.preventDefault()
+        Swal.fire({
+          title: "Add new Imaging Platform",
+          text: "Add new Imaging Platform",
+          input: 'text',
+          showCancelButton: true,
+          inputPlaceholder: "Enter it here."
+        }).then((result) => {
+          if (result.value && result.value != "") {
+            console.log('adding', result.value)
+            newSelectedImagingPlatforms.setChoices([{
+              value: result.value,
+              label: result.value,
+              selected: true
+            }])
+          }
+        });
+      })
+
+
+      // Removes the remove item button of the selected element that is also the project owner's id
+      const x = document.querySelector("[data-value='<%=project.ProjectOwnerID%>']")
+      x.removeChild(x.childNodes[1])
+      x.style.padding = "12px"
+      x.style.backgroundColor = "gray"
+      console.log(x)
       const form = document.getElementById('editForm')
       // console.log(newSelectedPhotographersElement.childNodes)
       const requestDate = new Date('<%= project.DateofRequest %>');
@@ -408,14 +446,13 @@ x.removeChild(x.childNodes[1])
         }
         // Submit form via AJAX
         try {
-          
-          // return;
+
           const formData = new FormData(form);
-          formData.append("projectOwnerID","<%=project.ProjectOwnerID%>")
+          formData.append("projectOwnerID", "<%=project.ProjectOwnerID%>")
           formData.append('selectedImagingPlatforms', newSelectedImagingPlatforms.getValue(true));
+
           formData.append('selectedPhotographers', newSelectedPhotographers.getValue(true));
           console.log(formData)
-          // return;
           const response = await fetch(form.action, {
             method: 'POST',
             headers: {
