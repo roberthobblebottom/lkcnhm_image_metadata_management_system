@@ -53,7 +53,7 @@
       border-radius: 3px;
     }
 
-  
+
 
 
     .form-group {
@@ -159,7 +159,7 @@
         padding: 1.5rem;
       }
 
-      
+
 
       form h2 {
         font-size: 1.5rem;
@@ -240,6 +240,18 @@
     .buttons {
       text-align: center;
     }
+
+    /* Note Section */
+    .note {
+      text-align: center;
+      color: #64748b;
+      background: #f8fafc;
+      padding: 1rem;
+      border-radius: 8px;
+      border: 1px dashed #cbd5e1;
+      margin: 2rem 0;
+      font-size: 0.875rem;
+    }
   </style>
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
@@ -251,13 +263,13 @@
     ? include('../sidenavs/admin')
     : include('../sidenavs/user') %>
 
-    <form id="main-form" action="media/create" method="POST">
+    <form id="main-form">
       <div id="top-panel">
         <a href="/media/view-all" class="btn btn-primary">
           <i class="fas fa-arrow-left"></i> Back to all media
         </a>
         <h2>
-          "Then, enter new image metadata entry" 
+          "Then, enter new image metadata entry"
         </h2>
       </div>
 
@@ -265,11 +277,10 @@
 
       <div class="form-group">
         <label>Project and Photographer Pair</label>
-        <select name="projectAndPhotographerPair" id="projectAndPhotographerPair" requried
-         <%= currentUser.UserType == 'phtographerOnly' ? 'disabled' : ''%>>
+        <select name="projectAndPhotographerPair" id="projectAndPhotographerPair" requried <%= currentUser.UserType == 'phtographerOnly' ? 'disabled' : ''%>>
           <option value="">-- Select a project and photographer pair--</option>
           <%allProjectAndPhotographerPairs.forEach( u=>{%>
-          <option value="<%=u.ProjectID%>,<%=u.UserID%>" >
+          <option value="<%=u.ProjectID%>,<%=u.UserID%>">
             <%=u.projectName%>-<%=u.photographerName%>
           </option>
           <%})%>
@@ -306,7 +317,7 @@
 
       <div class="form-group">
         <label for="imagingDate">Date of Imaging</label>
-        <input type="date" name="imagingDate" id="imagingDate" >
+        <input type="date" name="imagingDate" id="imagingDate">
       </div>
 
       <div class="form-group">
@@ -338,6 +349,7 @@
 
       <div class="form-group">
         <label for="imagingPlatform">imaging Platform</label>
+        <button id="addImagingPlatform">Add</button>
         <select name="imagingPlatform" id="imagingPlatform">
           <option value="">-- Select a imaging platform --</option>
           <%imagingPlatforms.forEach( imagingPlatform=>{%>
@@ -345,12 +357,13 @@
             <%=imagingPlatform%>
           </option>
           <%})%>
-          <option value="" onclick="enterNewImagingPlatform()"> Enter new Imaging Platform </option>
         </select>
       </div>
 
       <div class="form-group">
         <label for="imageEditingTool">Image Editing Tool</label>
+
+        <button id="addImageEditingTool" >Add</button>
         <select name="imageEditingTool" id="imageEditingTool">
           <option value="">-- Select a image editing tool --</option>
           <%imageEditingTools.forEach( imageEditingTool=>{%>
@@ -358,7 +371,6 @@
             <%=imageEditingTool%>
           </option>
           <%})%>
-          <option value="" onclick="enterNewImagingEditingTool()"> Enter new Imaging Editing Tool </option>
         </select>
       </div>
 
@@ -371,6 +383,8 @@
       <p class="note">
         💡 Note: If there is more than one image for a specimen, please use the pipeline script to capture the metadata
         details.
+
+        New project types and/or imaging platform will only be in the system if said changes are submitted
       </p>
 
       <div class="buttons">
@@ -387,27 +401,13 @@
       fileNameInput.value = temp + fileFormat.value
     };
 
-    function enterNewImagingEditingTool() {
-      console.log('enterNewImagingEditingTool')
-      Swal.fire({
-        title: "Add new Imaging Editing Tool",
-        text: "Add new Imaging Editing Tool",
-        input: 'text',
-        showCancelButton: true,
-        inputPlaceholder: "Enter it here."
-      }).then((result) => {
-        if (result.value) {
-          const select = document.getElementById("imageEditingTool")
-          var option = document.createElement('option')
-          option.text = option.value = result.value
-          select.add(option, 1)
-          select.value = option.text
-        }
-      });
-    }
 
-    function enterNewImagingPlatform() {
+
+document.getElementById('addImagingPlatform').addEventListener(
+  'click',
+    function enterNewImagingPlatform(e) {
       console.log('enterNewImagingPlatform')
+      e.preventDefault()
       Swal.fire({
         title: "Add new Imaging Platform",
         text: "Add new Imaging Platform",
@@ -423,7 +423,30 @@
           select.value = option.text
         }
       });
-    }
+    }    
+)
+    document.getElementById('addImageEditingTool').addEventListener('click',
+      async function enterNewImageEditingTool(e) {
+        console.log('enterNewImageEditingTool')
+        e.preventDefault()
+        await Swal.fire({
+          title: "Add new Imaging Editing Tool",
+          text: "Add new Imaging Editing Tool",
+          input: 'text',
+          showCancelButton: true,
+          inputPlaceholder: "Enter it here."
+        }).then((result) => {
+          console.log("HERE")
+          if (result.value) {
+            const select = document.getElementById("imageEditingTool")
+            var option = document.createElement('option')
+            option.text = option.value = result.value
+            select.add(option, 1)
+            select.value = option.text
+          }
+        });
+      }
+    )
     document.addEventListener("DOMContentLoaded", () => {
       const form = document.getElementById("main-form");
       const fileNameInput = document.getElementById("mediaFileName");

@@ -230,9 +230,9 @@ router.post(
             UpdatedByID
         ) VALUES(?,  ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW(), ?, NOW(),?)
         `;
-
+      const projectID = splitX[0];
       const values = [
-        splitX[0],
+        projectID,
         splitX[1],
         fileName,
         filePath,
@@ -268,21 +268,27 @@ router.post(
         newImagingPlatform != null &&
         newImagingPlatform != "" &&
         !req.session["imagingPlatforms"].includes(newImagingPlatform)
-      )
+      ) {
         req.session["imagingPlatforms"].push(newImagingPlatform);
-
-      const i2: string[] = req.session.imagingPlatforms;
-      await db
-        .promise()
-        .query("ALTER TABLE Media MODIFY COLUMN `ImagingPlatform` enum(?)", [
-          i2,
-        ]);
-      await db
-        .promise()
-        .query<RowDataPacket[]>(
-          "ALTER TABLE ImagingPlatformInstance MODIFY COLUMN `ImagingPlatform` enum(?)",
-          [i2]
-        );
+        const i2: string[] = req.session.imagingPlatforms;
+        await db
+          .promise()
+          .query("ALTER TABLE Media MODIFY COLUMN `ImagingPlatform` enum(?)", [
+            i2,
+          ]);
+        await db
+          .promise()
+          .query<RowDataPacket[]>(
+            "ALTER TABLE ImagingPlatformInstance MODIFY COLUMN `ImagingPlatform` enum(?)",
+            [i2]
+          );
+        await db
+          .promise()
+          .query<RowDataPacket[]>(
+            "INSERT IGNORE INTO ImagingPlatformInstance (ProjectID, ImagingPlatform) VALUES (?,?) ",
+            [projectID, newImagingPlatform]
+          );
+      }
       const result: any = (
         await db.promise().query<RowDataPacket[]>(insertQuery, values)
       )[0];
@@ -522,7 +528,7 @@ router.get(
         JOIN User projectOwner ON Project.ProjectOwnerID = projectOwner.UserID
         JOIN User photographer ON photographer.UserID = Media.PhotographerID
         WHERE Media.MediaID = ` + mediaID;
-    const toBeEditedMedia = (await db.promise().query(currentMediaQuery))[0][0]
+    const toBeEditedMedia = (await db.promise().query(currentMediaQuery))[0][0];
     console.log("-------");
     console.log(toBeEditedMedia);
     console.log("currentMedia", toBeEditedMedia);
@@ -591,6 +597,7 @@ router.post(
     const updatedBy = req.session.passport.user.UserID;
     console.log("mediaData.imageEditingTool", mediaData.imageEditingTool);
     const splitX = mediaData.projectAndPhotographerPair.split(",");
+    const projectID = splitX[0];
     const params = [
       mediaData.fileName,
       mediaData.filePath,
@@ -606,7 +613,7 @@ router.post(
       mediaData.imageEditingTool,
       mediaData.comments,
       updatedBy, // current user making the update
-      splitX[0],
+      projectID,
       splitX[1],
       mediaData.MediaID,
     ];
@@ -652,6 +659,12 @@ router.post(
           "ALTER TABLE ImagingPlatformInstance MODIFY COLUMN `ImagingPlatform` enum(?)",
           [i]
         );
+      await db
+        .promise()
+        .query<RowDataPacket[]>(
+          "INSERT IGNORE INTO ImagingPlatformInstance (ProjectID, ImagingPlatform) VALUES (?,?) ",
+          [projectID, newImagingPlatform]
+        );
     }
     req.session.save();
 
@@ -670,7 +683,6 @@ router.post(
     });
   }
 );
-
 
 // Soft delete media by setting IsDelete = 1 and redirect
 router.post(
@@ -769,9 +781,6 @@ router.post(
       });
   }
 );
-
-
-
 
 router.get(
   "/upload-bulk-metadata",
