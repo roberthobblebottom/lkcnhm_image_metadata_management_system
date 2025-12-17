@@ -83,9 +83,6 @@ router.post(
   (req, res) => {}
 );
 
-
-
-
 router.post(
   "/delete-enumeration-value",
   isAuthenticated,
@@ -95,10 +92,12 @@ router.post(
     const value = req.body.value;
     switch (feature) {
       case "projectType":
-        req.session.projectTypes.pop(value);
+        const projectTypes = req.session.projectTypes;
+        projectTypes.includes(value) &&
+          projectTypes.splice(projectTypes.indexOf(value), 1);
         await db
           .promise()
-          .query("UPDATE Project SET ProjectType ='' WHERE ProjectType = ?", [
+          .query("UPDATE Project SET ProjectType =NULL WHERE ProjectType = ?", [
             value,
           ]);
         await db
@@ -108,13 +107,16 @@ router.post(
           ]);
         break;
       case "imagingPlatform":
-        req.session.imagingPlatforms.pop(value);
+        const imagingPlatforms = req.session.imagingPlatforms;
+        imagingPlatforms.includes(value) &&
+          imagingPlatforms.splice(imagingPlatforms.indexOf(value), 1);
         await db
           .promise()
           .query(
-            "UPDATE  ImagingPlatformInstance  SET ImagingPlatform='' WHERE ImagingPlatform = ?",
+            "DELETE FROM ImagingPlatformInstance  WHERE ImagingPlatform = ?",
             [value]
           );
+        console.log(req.session.imagingPlatforms);
         await db
           .promise()
           .query(
@@ -125,7 +127,7 @@ router.post(
         await db
           .promise()
           .query(
-            "UPDATE Media SET ImagingPlatform='' WHERE ImagingPlatform = ?",
+            "UPDATE Media SET ImagingPlatform= NULL WHERE ImagingPlatform = ?",
             [value]
           );
 
@@ -137,11 +139,13 @@ router.post(
           );
         break;
       case "imageEditingTool":
-        req.session.imageEditingTools.pop(value);
+        const imageEditingTools = req.session.imageEditingTools;
+        imageEditingTools.includes(value) &&
+          imageEditingTools.splice(imageEditingTools.indexOf(value), 1);
         await db
           .promise()
           .query(
-            "UPDATE Media SET ImageEditingTool='' WHERE ImageEditingTool = ?",
+            "UPDATE Media SET ImageEditingTool=NULL WHERE ImageEditingTool = ?",
             [value]
           );
 
