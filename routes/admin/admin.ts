@@ -34,7 +34,6 @@ router.post(
   isAuthenticated,
   isAdmin,
   async (req, res) => {
-    console.log(req.body);
     const feature = req.body.feature;
     const value = req.body.value;
     switch (feature) {
@@ -83,10 +82,82 @@ router.post(
   isAdmin,
   (req, res) => {}
 );
+
+
+
+
 router.post(
-  "/deleted-enumeration-value",
+  "/delete-enumeration-value",
   isAuthenticated,
   isAdmin,
-  (req, res) => {}
+  async (req, res) => {
+    const feature = req.body.feature;
+    const value = req.body.value;
+    switch (feature) {
+      case "projectType":
+        req.session.projectTypes.pop(value);
+        await db
+          .promise()
+          .query("UPDATE Project SET ProjectType ='' WHERE ProjectType = ?", [
+            value,
+          ]);
+        await db
+          .promise()
+          .query("ALTER TABLE Project CHANGE ProjectType ProjectType ENUM(?)", [
+            req.session.projectTypes,
+          ]);
+        break;
+      case "imagingPlatform":
+        req.session.imagingPlatforms.pop(value);
+        await db
+          .promise()
+          .query(
+            "UPDATE  ImagingPlatformInstance  SET ImagingPlatform='' WHERE ImagingPlatform = ?",
+            [value]
+          );
+        await db
+          .promise()
+          .query(
+            "ALTER TABLE ImagingPlatformInstance CHANGE ImagingPlatform ImagingPlatform enum(?)",
+            [req.session.imagingPlatforms]
+          );
+
+        await db
+          .promise()
+          .query(
+            "UPDATE Media SET ImagingPlatform='' WHERE ImagingPlatform = ?",
+            [value]
+          );
+
+        await db
+          .promise()
+          .query(
+            "ALTER TABLE Media CHANGE  ImagingPlatform ImagingPlatform enum(?)",
+            [req.session.imagingPlatforms]
+          );
+        break;
+      case "imageEditingTool":
+        req.session.imageEditingTools.pop(value);
+        await db
+          .promise()
+          .query(
+            "UPDATE Media SET ImageEditingTool='' WHERE ImageEditingTool = ?",
+            [value]
+          );
+
+        await db
+          .promise()
+          .query(
+            "ALTER TABLE Media CHANGE COLUMN ImageEditingTool ImageEditingTool enum(?)",
+            [req.session.imageEditingTools]
+          );
+        break;
+    }
+    return res.json({
+      success: true,
+      message: "deleted table enum value for " + feature,
+      redirectUrl: "/admin/other-admin-settings",
+    });
+  }
 );
 module.exports = router;
