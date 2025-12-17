@@ -18,24 +18,35 @@
     }
 
     .main_con {
-      margin-left: 350px;
+      margin-left: 300px;
     }
 
     .btn {
-      display: inline-block;
-      background: #007bff;
+
+    background: #007bff;
       color: white;
       padding: 10px 16px;
       border: none;
       border-radius: 6px;
       text-decoration: none;
       font-weight: 600;
-      margin-top: 50px;
+      margin-bottom: 10px;
+      margin-left: 10px;
     }
-
+ .addProject {
+  float:right;
+    background: #007bff;
+      color: white;
+      padding: 10px 16px;
+      border: none;
+      border-radius: 6px;
+      text-decoration: none;
+      font-weight: 600;
+      margin-bottom: 10px;
+      margin-left: 10px;
+ }
     h2 {
       text-align: center;
-      margin: 20px 0;
       color: #333;
     }
 
@@ -90,6 +101,14 @@
       color: gray;
       margin-top: 20px;
     }
+
+    #horizontal-panel {
+      display: flex;
+  justify-content: space-between; /* Place between title and button */
+    align-items: center; /* Align items vertically */
+    width: 100%;
+    }
+    
   </style>
 </head>
 
@@ -98,11 +117,9 @@
     <%- currentUser.UserType=='admin' 
     ? include('../sidenavs/admin')
     : include('../sidenavs/user') %>
-    <center>
-      <h2 style="margin-left: 35%;margin-top: 40px;">Project Management</h2>
-    </center>
-    <div style="text-align: right; ">
-      <a href="/project/create"><button class="btn">Add Project</button></a>
+    <div class="horizontal-panel">
+      <h2>Project Management</h2>
+      <a href="/project/create" class="addProject" >Add Project</a>
     </div>
     <% if (projects.length===0) { %>
     <p class="no-data">No projects found.</p>

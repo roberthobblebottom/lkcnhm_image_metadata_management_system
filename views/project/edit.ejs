@@ -27,7 +27,7 @@
       margin-top: -50px;
     }
 
-    form {
+    main {
       max-width: 750px;
       margin: auto;
       background: #fff;
@@ -36,10 +36,10 @@
       box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
     }
 
-    .top-group {
-      max-width: 700px;
-      margin: auto;
-      padding: 2rem;
+    #horizontal-panel {
+      display: flex;
+      align-items: center;
+
     }
 
     .form-group {
@@ -114,17 +114,6 @@
       background-color: #0056b3;
     }
 
-    /* .btn-secondary {
-            background-color: #452dff;
-            color: white;
-            margin-top: 0px;
-            margin-bottom: 10px;
-
-        }
-
-        .btn-secondary:hover {
-            background-color: #431eff;
-        } */
 
     a button {
       display: block;
@@ -147,20 +136,6 @@
     .btn-primary:hover {
       background-color: #0056b3;
     }
-
-    #imagingPlatformCheckboxes {
-      display: none;
-      border: 1px #dadada solid;
-    }
-
-    #imagingPlatformCheckboxes label {
-      display: block;
-    }
-
-    #imagingPlatformCheckboxes label:hover {
-      background-color: #1e90ff;
-    }
-
 
 
     .selectBox {
@@ -186,6 +161,12 @@
       text-align: center;
     }
 
+    .addButton {
+      float: right;
+      margin-right: 2%;
+      margin-bottom: 5px;
+    }
+
     /* Note Section */
     .note {
       text-align: center;
@@ -205,7 +186,7 @@
   ? '../sidenavs/admin.ejs' 
   : '../sidenavs/user' ) %>
   <main>
-    <div class="top-group">
+<div class="horizontal-panel">
       <a href="/project/view-all">
         <button class="btn btn-primary">
           Back to All Projects
@@ -214,6 +195,7 @@
       <h2>Edit Project</h2>
     </div>
     <form id='editForm' action="/project/edit/<%= project.ProjectID %>" method="POST">
+    
       <div class="form-group">
         <label>Project Name</label>
         <input type="text" id="ProjectName" name="ProjectName" value="<%= project.ProjectName %>" class="form-control" required>
@@ -227,9 +209,11 @@
       </div>
 
       <div class="form-group">
-        <label>Project Type</label>
+        <div class="horizontal-panel">
+          <label>Project Type</label>
+          <button class='addButton' id="addProjectTypeButton">Add</button>
+        </div>
 
-        <button id="addProjectTypeButton">Add</button>
         <select name="projectType" id="projectType" class="form-control">
           <option value="">-- Select Project Type --</option>
           <% projectTypes.forEach(projectType=> { %>
@@ -277,9 +261,13 @@
         </textarea>
       </div>
       <div class="form-group">
-        <label for="imagingPlatform">Imaging Platform:</label>
 
-        <button id="addImagingPlatformButton">Add</button>
+        <div class="horizontal-panel">
+          <label for="imagingPlatform">Imaging Platform:</label>
+
+          <button class='addButton' id="addImagingPlatformButton">Add</button>
+
+        </div>
         <select multiple id="newSelectedImagingPlatforms">
           <option value="">Select Imaging Platforms</option>
           <% imagingPlatforms.forEach(i=>{ %>

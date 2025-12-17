@@ -37,10 +37,11 @@
       margin-bottom: 2rem;
       color: #2c3e50;
       margin-top: -60px;
+      padding-bottom: 90px;
     }
 
     /* Form Styles */
-    form#projectForm {
+    main {
       max-width: 700px;
       margin: auto;
       padding: 2rem;
@@ -187,11 +188,12 @@
 <body>
   <%- include(currentUser.UserType==='admin' ? '../sidenavs/admin.ejs' : '../sidenavs/user' ) %>
   <main>
-    <div class="horizontal-panel">
+  <div class="horizontal-panel">
       <a href="/project/view-all"><button class="btn btn-primary">Back to all Projects</button></a>
       <h2>Create a New Project </h2>
-    </div>
+    </div> 
     <form id="projectForm" action="/project/create" method="POST">
+ 
       <div class="form-group">
 
         <label for="projectName">Project Name*</label>

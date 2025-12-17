@@ -22,7 +22,7 @@
     }
 
     .btn {
-      display: inline-block;
+      /* display: inline-block; */
       background: #007bff;
       color: white;
       padding: 10px 16px;
@@ -30,14 +30,13 @@
       border-radius: 6px;
       text-decoration: none;
       font-weight: 600;
-           margin-top: 50px;
-      margin-bottom: 50px;
+      margin-bottom: 10px;
       margin-left: 10px;
+      float: right;
     }
 
     h2 {
       text-align: center;
-      margin: 20px 0;
       color: #333;
     }
 
@@ -111,81 +110,86 @@
     .btn-restore {
       background: #54d300;
     }
+
+    #horizontal-panel {
+      display: flex;
+      align-items: center;
+
+    }
   </style>
 </head>
 
 <body>
   <div class="main_con">
     <%- currentUser.UserType=='admin' ? include('../sidenavs/admin'): include('../sidenavs/user') %>
-    <%if (currentUser.UserType=='admin' ){%>
-    <h2>All Photography Metadata Records</h2>
-    <%} else {%>
-    <h2>Your Photography Metadata Records</h2>
-    <%}%>
+    <div class="horizontal-panel">
+      <h2><%= currentUser.UserType=='admin'? "All": "Your"%> Photography Metadata Records</h2>
+      <% if (disableCreateMedia){ %>
+      You do not have any projects you can add media to.
+      <% }else{ %>
+      <a href="/media/create/" class="btn">Add Media(s)</a>
+      <a href="/media/upload-bulk-metadata/" class="btn"> Upload Bulk MetaData</a>
+      <%}%>
 
-    <% if (disableCreateMedia){ %>
-    You do not have any projects you can add media to.
-    <% }else{ %>
-    <a href="/media/create/" class="btn">Add Media(s)</a>
-    <a href="/media/upload-bulk-metadata/" class="btn"> Upload Bulk MetaData</a>
-    <%}%>
+    </div>
+
     
             
     <% if (medias.length===0) { %>
-    <p class="no-data">No media records found.</p>
-    <% } else { %>
-    <table id="dataTable">
-      <thead>
-        <tr>
-          <th>Media ID</th>
-          <th>Project ID</th>
-          <th>Project Name</th>
-          <%if (currentUser.UserType=='admin' ){%>
-          <th>Photographer</th>
-          <%}%>
+      <p class="no-data">No media records found.</p>
+      <% } else { %>
+      <table id="dataTable">
+        <thead>
+          <tr>
+            <th>Media ID</th>
+            <th>Project ID</th>
+            <th>Project Name</th>
+            <%if (currentUser.UserType=='admin' ){%>
+            <th>Photographer</th>
+            <%}%>
           <th>File Name</th>
           <th>Catalog ID</th>
           <th>Imaging Date</th>
           <%if (currentUser.UserType=='admin' ){%>
-          <th>Is Deleted?</th>
-          <%}%>
+            <th>Is Deleted?</th>
+            <%}%>
           <th>Actions</th>
         </tr>
       </thead>
     <tbody>
       <% medias.forEach(media=> { %>
-        <tr>
-          <td> <%= media.MediaID %></td>
-          <td> <%= media.ProjectID %></td>
-          <td> <%= media.ProjectName %></td>
-          <%if (currentUser.UserType=='admin' ){%>
-          <td> <%= media.photographerName%></td>
-          <%}%>
+          <tr>
+            <td> <%= media.MediaID %></td>
+            <td> <%= media.ProjectID %></td>
+            <td> <%= media.ProjectName %></td>
+            <%if (currentUser.UserType=='admin' ){%>
+            <td> <%= media.photographerName%></td>
+            <%}%>
             <td><%= media.FileName %></td>
-          <td> <%= media.CatalogID  %></td>
-          <td> <%= media.ImagingDate?.toISOString().slice(0, 10) %></td>
-          <td class="<%= !media.IsDeleted  ? 'status-approved' :  'status-rejected'  %>">
-            <%=!media.IsDeleted? 'No' : 'Yes' %>
-          </td>
-          <td class="action-btns">
-            <a href="/media/view/<%= media.MediaID %>"><button class="btn-view">View</button></a>
-          <a href="/media/edit/<%=media.MediaID%>"><button class="btn-edit">Edit</button></a>
+            <td> <%= media.CatalogID  %></td>
+            <td> <%= media.ImagingDate?.toISOString().slice(0, 10) %></td>
+            <td class="<%= !media.IsDeleted  ? 'status-approved' :  'status-rejected'  %>">
+              <%=!media.IsDeleted? 'No' : 'Yes' %>
+            </td>
+            <td class="action-btns">
+              <a href="/media/view/<%= media.MediaID %>"><button class="btn-view">View</button></a>
+              <a href="/media/edit/<%=media.MediaID%>"><button class="btn-edit">Edit</button></a>
 
-          <%if (!media.IsDeleted ){%>
-          <form action="/media/delete/<%= media.MediaID %>" method="POST" style="display:inline;" onsubmit="return confirm('Are you sure you want to delete this media ?');">
-            <button type="submit" class="btn-delete">Delete</button>
-          </form>
-          <%} else {%>
-          <form action="/media/restore/<%= media.MediaID %>" method="POST" style="display:inline;" onsubmit="return confirm('Are you sure you want to restore this media ?');">
-            <button type="submit" class="btn-restore">restore</button>
-          </form>
-          <%}%>
+              <%if (!media.IsDeleted ){%>
+              <form action="/media/delete/<%= media.MediaID %>" method="POST" style="display:inline;" onsubmit="return confirm('Are you sure you want to delete this media ?');">
+                <button type="submit" class="btn-delete">Delete</button>
+              </form>
+              <%} else {%>
+              <form action="/media/restore/<%= media.MediaID %>" method="POST" style="display:inline;" onsubmit="return confirm('Are you sure you want to restore this media ?');">
+                <button type="submit" class="btn-restore">restore</button>
+              </form>
+              <%}%>
           </td>
         </tr>
       <%})%>
-          </tbody>
-    </table>
-    <%}%>
+              </tbody>
+      </table>
+      <%}%>
   </div>
 </body>
 
