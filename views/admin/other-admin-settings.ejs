@@ -136,7 +136,7 @@
             <td><%=element%></td>
             <td>
               <div class="horizontal-panel">
-                <button class="btn-edit">Edit</button>
+                <button onclick="editValue('projectType','<%=element%>')" class="btn-edit">Edit</button>
                 <button onclick="deleteValue('projectType','<%=element%>')" class="btn-delete">Delete</button>
               </div>
             </td>
@@ -168,8 +168,7 @@
             <td><%=element%></td>
             <td>
               <div class="horizontal-panel">
-
-                <button class="btn-edit">Edit</button>
+                <button onclick="editValue('imagingPlatform','<%=element%>')" class="btn-edit">Edit</button>
                 <button onclick="deleteValue('imagingPlatform','<%=element%>')"" class="btn-delete">Delete</button>
               </div>
             </td>
@@ -199,8 +198,7 @@
             <td><%=element%></td>
             <td>
               <div class="horizontal-panel">
-
-                <button class="btn-edit">Edit</button>
+                <button onclick="editValue('imageEditingTool','<%=element%>')" class="btn-edit">Edit</button>
                 <button onclick="deleteValue('imageEditingTool','<%=element%>')" class="btn-delete">Delete</button>
 
               </div>
@@ -290,7 +288,70 @@
   }
 
   function editValue(feature, value) {
+Swal.fire({
+      title: "Editing Value, "+value+" of the feature "+feature,
+      text: "Editing Value, "+value+" of the feature "+feature,
+      input: 'text',
+      showCancelButton: true,
+      inputPlaceholder: "Enter it here."
+    }).then((result) => {
+      if (result.value) {
+        sendEditValue(feature, value,result.value)
+      }
+    });
+  }
+  async function sendEditValue(feature,oldValue,newValue){
+    const response = await fetch("/admin/edit-enumeration-value", {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        feature: feature,
+        oldValue,
+        newValue
+      })
+    });
+    try {
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || "Submission failed with status " + response.status);
+      }
 
+      const data = await response.json();
+      if (!data.success) {
+        throw new Error(data.message || "Submission failed");
+      }
+
+
+      // Show success message
+      await Swal.fire({
+        title: 'Success!',
+        text: 'enum value edited successfully!',
+        icon: 'success',
+        confirmButtonText: 'OK',
+        confirmButtonColor: '#28a745',
+        timer: 1000,
+        timerProgressBar: true
+      });
+
+      console.log(data.redirectUrl)
+      // Redirect if URL is provided
+      if (data.redirectUrl) {
+        window.location.href = data.redirectUrl;
+        return; // Stop further execution
+      }
+
+
+    } catch (error) {
+      await Swal.fire({
+        title: 'Error!',
+        text: error.message,
+        icon: 'error',
+        confirmButtonText: 'OK',
+        confirmButtonColor: '#dc3545'
+      });
+    }
   }
 async function deleteValue(feature,value){
 
@@ -302,7 +363,6 @@ Swal.fire({
         sendDeleteValue(feature, value)
     });
 }
-
  async  function sendDeleteValue(feature, value) {
 console.log(feature,value)
     const response = await fetch("/admin/delete-enumeration-value", {
@@ -330,7 +390,7 @@ console.log(feature,value)
       // Show success message
       await Swal.fire({
         title: 'Success!',
-        text: 'enum value deletled successfully!',
+        text: 'enum value deleted successfully!',
         icon: 'success',
         confirmButtonText: 'OK',
         confirmButtonColor: '#28a745',
@@ -356,8 +416,5 @@ console.log(feature,value)
       });
     }
   }
-  document.addEventListener("DOMContentLoaded", () => {
-    const form = document.getElementById("main-form");
-  
-  })
+
 </script>

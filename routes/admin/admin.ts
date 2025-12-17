@@ -80,7 +80,67 @@ router.post(
   "/edit-enumeration-value",
   isAuthenticated,
   isAdmin,
-  (req, res) => {}
+  async (req, res) => {
+    const feature = req.body.feature;
+    const oldValue = req.body.oldValue;
+    const newValue = req.body.newValue;
+    switch (feature) {
+      case "projectType":
+        console.log(feature,oldValue,newValue)
+        const projectTypes = req.session.projectTypes;
+        projectTypes.includes(oldValue) &&
+          projectTypes.splice(projectTypes.indexOf(oldValue), 1);
+        projectTypes.push(newValue);
+        req.session.save()
+ await db
+          .promise()
+          .query("UPDATE Project SET ProjectType =NULL WHERE ProjectType = ?", [
+            oldValue,
+          ]);
+        await db
+          .promise()
+          .query("ALTER TABLE Project CHANGE ProjectType ProjectType ENUM(?)", [
+            projectTypes,
+          ]);
+        await db
+          .promise()
+          .query("UPDATE Project SET ProjectType = ? WHERE ProjectType IS NULL", [
+            newValue,
+          ]);
+        
+        break;
+      case "imagingPlatform":
+        const imagingPlatforms = req.session.imagingPlatforms;
+        break;
+      case "imageEditingTool":
+        const imageEditingTools = req.session.imageEditingTools;
+        imageEditingTools.includes(oldValue) &&
+          imageEditingTools.splice(imageEditingTools.indexOf(oldValue), 1);
+        imageEditingTools.push(newValue);
+        req.session.save()
+ await db
+          .promise()
+          .query("UPDATE Media SET ImageEditingTool =NULL WHERE ImageEditingTool = ?", [
+            oldValue,
+          ]);
+        await db
+          .promise()
+          .query("ALTER TABLE Media CHANGE ImageEditingTool ImageEditingTool ENUM(?)", [
+            imageEditingTools,
+          ]);
+        await db
+          .promise()
+          .query("UPDATE Media SET ImageEditingTool  = ? WHERE ImageEditingTool IS NULL", [
+            newValue,
+          ]);
+        break;
+    }
+return res.json({
+      success: true,
+      message: "edited table enum value for " + feature,
+      redirectUrl: "/admin/other-admin-settings",
+    });
+  }
 );
 
 router.post(
