@@ -98,16 +98,13 @@ router.get(
     } else if (user.UserType == userTypesEnumeration().photographerOnly) {
       q2 =
         allProjectAndPhotographerPairsQuery + "WHERE photographer.UserID = ?";
-    } else if (user.UserType == userTypesEnumeration().admin) {
+    } else {
       q2 = allProjectAndPhotographerPairsQuery;
     }
     const allProjectAndPhotographerPairs = (
       await db.promise().query(q2, [user.UserID])
     )[0];
-    console.log(
-      "allProjectAndPhotographerPairs",
-      allProjectAndPhotographerPairs
-    );
+ 
 
     res.render("media/create", {
       currentUser: req.session.passport.user,
@@ -196,9 +193,7 @@ router.post(
       // if (!imagingDate) missingFields.push("imagingDate");
       if (!description) missingFields.push("description");
       // if (!imagingPlatform) missingFields.push("imagingPlatform");
-      console.log("imagingPlatform", imagingPlatform);
-      console.log("createdBy", createdBy);
-      console.log("projectAndPhotographerPair", projectAndPhotographerPair);
+
       const splitX = projectAndPhotographerPair.split(",");
       if (missingFields.length > 0) {
         return res.status(400).json({
@@ -506,7 +501,7 @@ router.get(
     } else if (user.UserType == userTypesEnumeration().photographerOnly) {
       q2 =
         allProjectAndPhotographerPairsQuery + "WHERE photographer.UserID = ?";
-    } else if (user.UserType == userTypesEnumeration().admin) {
+    } else  {
       q2 = allProjectAndPhotographerPairsQuery;
     }
     const allProjectAndPhotographerPairs = (
@@ -528,7 +523,8 @@ router.get(
         JOIN User projectOwner ON Project.ProjectOwnerID = projectOwner.UserID
         JOIN User photographer ON photographer.UserID = Media.PhotographerID
         WHERE Media.MediaID = ` + mediaID;
-    const toBeEditedMedia = (await db.promise().query(currentMediaQuery))[0][0];
+    const x:any[] = (await db.promise().query(currentMediaQuery))
+    const toBeEditedMedia = x[0][0];
     console.log("-------");
     console.log(toBeEditedMedia);
     console.log("currentMedia", toBeEditedMedia);
@@ -619,8 +615,7 @@ router.post(
     ];
     const newImageEditingTool = mediaData.newImageEditingTool;
     const newImagingPlatform = mediaData.newImagingPlatform;
-    console.log("mediaData", mediaData);
-    console.log("params", params);
+
 
     console.log("newImageEditingTool", newImageEditingTool);
     console.log("newImagingPlatform", newImagingPlatform);
@@ -998,7 +993,7 @@ router.post(
 
             // } else
             if (
-              !req.session.imagingPlatforms.includes(element) &&
+              !req.session.imagingPlatforms.includes(element!) &&
               !newImagingPlatforms.includes(element!) &&
               element != null &&
               element != ""
@@ -1013,7 +1008,7 @@ router.post(
             //         + Object.values(imageEditingToolEnumeration()).toString())
             // } else
             if (
-              !req.session.imageEditingTools.includes(element) &&
+              !req.session.imageEditingTools.includes(element!) &&
               !newImageEditingTools.includes(element!) &&
               element != null &&
               element != ""

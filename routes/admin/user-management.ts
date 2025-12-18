@@ -240,7 +240,7 @@ router.get(
       };
       render: (
         arg0: string,
-        arg1: { user: any; title: string; registeredDate: string }
+        arg1: { user: any; title: string; registeredDate: string|null }
       ) => void;
     }
   ) => {
@@ -292,10 +292,10 @@ router.get(
         arg1: {
           title: string;
           message: any;
-          user: RowDataPacket;
+          user: RowDataPacket | null;
           userTypes?: string[];
           requestStatuses?: string[];
-          registeredDate?: string;
+          registeredDate?: string|null;
         }
       ) => void;
     }
@@ -330,9 +330,7 @@ router.get(
       message: message,
     });
 
-    if (req.session.message) {
-      delete req.session.message;
-    }
+  
   }
 );
 

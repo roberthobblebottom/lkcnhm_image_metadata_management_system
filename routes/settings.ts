@@ -131,7 +131,7 @@ router.get(
     res: {
       render: (
         arg0: string,
-        arg1: { currentUser: RowDataPacket; registeredDate: string }
+        arg1: { currentUser: RowDataPacket; registeredDate: string|null }
       ) => void;
     }
   ) => {

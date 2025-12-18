@@ -34,6 +34,7 @@
       font-family: 'Segoe UI', sans-serif;
       background: #f4f6f8;
       padding: 2rem;
+      font-size: medium;
     }
 
 
@@ -61,22 +62,35 @@
 
     h3 {
       text-align: center;
+      float: left;
     }
 
     .form-group {
       margin-bottom: 20px;
+
     }
 
-    /* Labels */
     label {
-      display: block;
-      font-size: 0.875rem;
-      font-weight: 600;
-      color: #475569;
-      margin-bottom: 0.5rem;
+      font-size: medium;
     }
 
+    .btn {
+      font-size: medium;
+    }
 
+    .btn-primary {
+      width: 100%;
+      height: 1.5%;
+      background-color: #007bff;
+      color: #fff;
+      font-size: medium;
+    }
+
+    .btn-create {
+      float: right;
+      margin-top: 4%;
+      height: 20%;
+    }
 
 
     .btn-edit {
@@ -90,8 +104,16 @@
     }
 
     .horizontal-panel {
+      width: 100%;
       display: flex;
-      justify-content: between;
+      justify-content: space-between;
+      margin-bottom: 5%;
+    }
+
+    .horizontal-panel2 {
+      width: 100%;
+      display: flex;
+      justify-content: space-evenly;
     }
 
     /* Animation Effects */
@@ -110,34 +132,50 @@
     form {
       animation: fadeIn 0.5s ease-out;
     }
+
+    /* Note Section */
+    .note {
+      text-align: center;
+      color: #64748b;
+      background: #f8fafc;
+      padding: 1rem;
+      border-radius: 8px;
+      border: 1px dashed #cbd5e1;
+      margin: 2rem 0;
+      font-size: 0.875rem;
+    }
   </style>
 </head>
 
 <body>
-
   <%- include( '../sidenavs/admin' ) %>
   <div class="main_con">
     <h2>Edit Enumeration Values used by the System</h2>
+    <p class="note">
+      The Delete and Edit of any of these attributes will affect existing table data's respective values.
+    </p>
     <div class="form-group">
       <div class="horizontal-panel">
         <h3>Project Types</h3>
-        <button onclick="addValue('projectType')" class="btn-create">Create</button>
+        <button onclick="addValue('projectType')" class="btn btn-create">Create</button>
       </div>
       <table id="projectTypesTable">
         <thead>
           <tr>
-            <th>Value</th>
-            <th>Action</th>
+            <th><label>Value</label></th>
+            <th><label>Action</label></th>
           </tr>
         </thead>
         <tbody>
           <% projectTypes.forEach(element => {%>
           <tr>
-            <td><%=element%></td>
+            <td><label><%=element%></label></td>
             <td>
-              <div class="horizontal-panel">
-                <button onclick="editValue('projectType','<%=element%>')" class="btn-edit">Edit</button>
-                <button onclick="deleteValue('projectType','<%=element%>')" class="btn-delete">Delete</button>
+              <div class="horizontal-panel2">
+                <button onclick="editValue('projectType','<%=element%>')" class="btn btn-edit">
+                  Edit</button>
+                <button onclick="deleteValue('projectType','<%=element%>')" class="btn btn-delete">
+                  Delete</button>
               </div>
             </td>
 
@@ -148,31 +186,30 @@
 
     </div>
     <div class="form-group">
-
       <div class="horizontal-panel">
         <h3>Imaging Platforms </h3>
-
-        <button class="btn-create" onclick="addValue('imagingPlatform')">Create</button>
+        <button class="btn btn-create" onclick="addValue('imagingPlatform')">Create</button>
       </div>
       <table id="imagingPlatformsTable">
         <thead>
           <tr>
-            <th>Value</th>
-            <th>Action</th>
+
+            <th><label>Value</label></th>
+            <th><label>Action</label></th>
           </tr>
         </thead>
         <tbody>
           <% imagingPlatforms.forEach(element => {%>
-
           <tr>
-            <td><%=element%></td>
+            <td><label><%=element%></label></td>
             <td>
-              <div class="horizontal-panel">
-                <button onclick="editValue('imagingPlatform','<%=element%>')" class="btn-edit">Edit</button>
-                <button onclick="deleteValue('imagingPlatform','<%=element%>')"" class="btn-delete">Delete</button>
+              <div class="horizontal-panel2">
+                <button onclick="editValue('imagingPlatform','<%=element%>')" class="btn btn-edit">
+                  Edit</button>
+                <button onclick="deleteValue('imagingPlatform','<%=element%>')"" class=" btn btn-delete">
+                  Delete</button>
               </div>
             </td>
-
           </tr>
           <% })%>
         </tbody>
@@ -183,24 +220,26 @@
       <div class="horizontal-panel">
         <h3>Image Editing Tools </h3>
 
-        <button class="btn-create" onclick="addValue('imageEditingTool')">Create</button>
+        <button class="btn btn-create" onclick="addValue('imageEditingTool')">Create</button>
       </div>
       <table id="imageEditingToolsTable">
         <thead>
           <tr>
-            <th>Value</th>
-            <th>Action</th>
+
+            <th><label>Value</label></th>
+            <th><label>Action</label></th>
           </tr>
         </thead>
         <tbody>
           <% imageEditingTools.forEach(element => {%>
           <tr>
-            <td><%=element%></td>
+            <td><label><%=element%></label></td>
             <td>
-              <div class="horizontal-panel">
-                <button onclick="editValue('imageEditingTool','<%=element%>')" class="btn-edit">Edit</button>
-                <button onclick="deleteValue('imageEditingTool','<%=element%>')" class="btn-delete">Delete</button>
-
+              <div class="horizontal-panel2">
+                <button onclick="editValue('imageEditingTool','<%=element%>')" class="btn btn-edit">
+                  Edit</button>
+                <button onclick="deleteValue('imageEditingTool','<%=element%>')" class="btn btn-delete">
+                  Delete</button>
               </div>
             </td>
           </tr>
@@ -208,6 +247,10 @@
         </tbody>
       </table>
     </div>
+    <h2>Download System's Data</h2>
+    <a href="/admin/download-system-data" class="btn btn-primary">
+      <i class="fas fa-arrow-down"></i> Download
+    </a>
   </div>
 
 
@@ -221,8 +264,8 @@
 
   async function addValue(feature) {
     Swal.fire({
-      title: "Add new "+feature,
-      text: "Add new "+feature,
+      title: "Add new " + feature,
+      text: "Add new " + feature,
       input: 'text',
       showCancelButton: true,
       inputPlaceholder: "Enter it here."
@@ -234,7 +277,7 @@
 
   }
   async function sendAddValue(feature, value) {
-    console.log(feature,value)
+    console.log(feature, value)
     const response = await fetch("/admin/add-enumeration-value", {
       method: 'POST',
       headers: {
@@ -288,19 +331,19 @@
   }
 
   function editValue(feature, value) {
-Swal.fire({
-      title: "Editing Value, "+value+" of the feature "+feature,
-      text: "Editing Value, "+value+" of the feature "+feature,
+    Swal.fire({
+      title: "Editing Value, " + value + " of the feature " + feature,
+      text: "Editing Value, " + value + " of the feature " + feature,
       input: 'text',
       showCancelButton: true,
       inputPlaceholder: "Enter it here."
     }).then((result) => {
       if (result.value) {
-        sendEditValue(feature, value,result.value)
+        sendEditValue(feature, value, result.value)
       }
     });
   }
-  async function sendEditValue(feature,oldValue,newValue){
+  async function sendEditValue(feature, oldValue, newValue) {
     const response = await fetch("/admin/edit-enumeration-value", {
       method: 'POST',
       headers: {
@@ -353,18 +396,18 @@ Swal.fire({
       });
     }
   }
-async function deleteValue(feature,value){
+  async function deleteValue(feature, value) {
 
-Swal.fire({
-      title: "Are you sure you want to delete this value "+value+" from "+feature,
-      text: "Are you sure you want to delete this value "+value+" from "+feature,
+    Swal.fire({
+      title: "Are you sure you want to delete this value " + value + " from " + feature,
+      text: "Are you sure you want to delete this value " + value + " from " + feature,
       showCancelButton: true,
     }).then((result) => {
-        sendDeleteValue(feature, value)
+      sendDeleteValue(feature, value)
     });
-}
- async  function sendDeleteValue(feature, value) {
-console.log(feature,value)
+  }
+  async function sendDeleteValue(feature, value) {
+    console.log(feature, value)
     const response = await fetch("/admin/delete-enumeration-value", {
       method: 'POST',
       headers: {
@@ -416,5 +459,4 @@ console.log(feature,value)
       });
     }
   }
-
 </script>

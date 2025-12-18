@@ -9,7 +9,7 @@ import {
   userTypesEnumeration,
 } from "../middleware/utils";
 import { Request, Response, NextFunction } from "express";
-import { User } from "../@types/types";
+import { Passport, User } from "../@types/types";
 passport.use(
   new passportStrategy.Strategy(async function verify(
     username: string,
@@ -64,16 +64,18 @@ passport.use(
 );
 
 // serialise user to be added into session data.
-passport.serializeUser((user: User, done: (arg0: null, user: User) => any) => {
-  process.nextTick(function () {
-    return done(null, {
-      UserID: user.UserID,
-      FullName: user.FullName,
-      Email: user.Email,
-      UserType: user.UserType,
+passport.serializeUser(
+  (user: any, done: (arg0: any, user: User| null) => any) => {
+    process.nextTick(function () {
+      return done(null, {
+        UserID: user.UserID,
+        FullName: user.FullName,
+        Email: user.Email,
+        UserType: user.UserType,
+      });
     });
-  });
-});
+  }
+);
 
 // retrieving session data
 passport.deserializeUser((user: User, cb: (arg0: null, arg1: any) => any) => {
@@ -82,101 +84,106 @@ passport.deserializeUser((user: User, cb: (arg0: null, arg1: any) => any) => {
   });
 });
 
-router.post("/register", (req, res) => {
-  console.log("register req.body", req.body);
-  const {
-    email,
-    password,
-    confirmPassword,
-    userType,
-    fullName,
-    contactNumber,
-    organisation,
-    comments,
-    reasonForRequest,
-  } = req.body;
-  const missingFields = [];
-  if (!email) missingFields.push("email");
-  if (!password) missingFields.push("password");
-  if (!confirmPassword) missingFields.push("confirmPassword");
-  if (!userType) missingFields.push("userType");
-  if (!fullName) missingFields.push("fullName");
-  if (!reasonForRequest) missingFields.push("reasonForRequest");
-  if (missingFields.length > 0) {
-    return res.status(400).json({
-      success: false,
-      message: "Missing required fields: " + missingFields.join(", "),
-    });
-  }
-  if (!/^[\w\-\.]+@([\w-]+\.)+[\w-]{2,}$/.test(email))
-    return res.status(400).json({
-      success: false,
-      message:
-        "invalid email, email value does not have '@' or '.' character(s).",
-    });
-  if (password != confirmPassword) {
-    return res.status(400).json({
-      success: false,
-      message: "the  passwords does not match",
-    });
-  }
-  console.log(`🔹 Register Attempt: ${email}`);
-
-  const checkEmailQuery = "SELECT * FROM User WHERE Email = ?";
-  db.query(checkEmailQuery, [email], (err: any, result: any, field: any) => {
-    if (err) {
-      console.error("❌ Database Error:", err);
-      return res.status(500).send("Database Error");
-    }
-
-    if (result.length > 0) {
-      console.warn("⚠️ Email already exists:", email);
-      return res
-        .status(400)
-        .send("Email already exists. Please enter a new email.");
-    }
-    const newPasswordSalt = crypto.randomBytes(16).toString("hex");
-    crypto.pbkdf2(
+router.post(
+  "/register",
+  (
+    req:any,res:any 
+  ) => {
+    console.log("register req.body", req.body);
+    const {
+      email,
       password,
-      newPasswordSalt,
-      310000,
-      32,
-      "sha256",
-      async function (err, hashedPassword) {
-        const insertUserQuery = `
+      confirmPassword,
+      userType,
+      fullName,
+      contactNumber,
+      organisation,
+      comments,
+      reasonForRequest,
+    } = req.body;
+    const missingFields = [];
+    if (!email) missingFields.push("email");
+    if (!password) missingFields.push("password");
+    if (!confirmPassword) missingFields.push("confirmPassword");
+    if (!userType) missingFields.push("userType");
+    if (!fullName) missingFields.push("fullName");
+    if (!reasonForRequest) missingFields.push("reasonForRequest");
+    if (missingFields.length > 0) {
+      return res.status(400).json({
+        success: false,
+        message: "Missing required fields: " + missingFields.join(", "),
+      });
+    }
+    if (!/^[\w\-\.]+@([\w-]+\.)+[\w-]{2,}$/.test(email))
+      return res.status(400).json({
+        success: false,
+        message:
+          "invalid email, email value does not have '@' or '.' character(s).",
+      });
+    if (password != confirmPassword) {
+      return res.status(400).json({
+        success: false,
+        message: "the  passwords does not match",
+      });
+    }
+    console.log(`🔹 Register Attempt: ${email}`);
+
+    const checkEmailQuery = "SELECT * FROM User WHERE Email = ?";
+    db.query(checkEmailQuery, [email], (err: any, result: any, field: any) => {
+      if (err) {
+        console.error("❌ Database Error:", err);
+        return res.status(500).send("Database Error");
+      }
+
+      if (result.length > 0) {
+        console.warn("⚠️ Email already exists:", email);
+        return res
+          .status(400)
+          .send("Email already exists. Please enter a new email.");
+      }
+      const newPasswordSalt = crypto.randomBytes(16).toString("hex");
+      crypto.pbkdf2(
+        password,
+        newPasswordSalt,
+        310000,
+        32,
+        "sha256",
+        async function (err, hashedPassword) {
+          const insertUserQuery = `
             INSERT INTO User 
             (Email, SaltedPassword,PasswordSalt,  UserType, RegisteredDate,
               UpdatedDate,FullName,ContactNumber,Organisation,Comments,ReasonForRequest,RequestStatus)
             VALUES (?, ?,?,  ?, NOW(),NOW(),  ?, ?,?,?,?,?)`;
-        const params = [
-          email,
-          hashedPassword,
-          newPasswordSalt,
-          userType,
-          fullName,
-          contactNumber,
-          organisation,
-          comments,
-          reasonForRequest,
-          requestStatusEnumeration().approved, //TODO TEMPORARY APPROVED FOR ALL USERS FOR TESTING
-        ];
+          const params = [
+            email,
+            hashedPassword,
+            newPasswordSalt,
+            userType,
+            fullName,
+            contactNumber,
+            organisation,
+            comments,
+            reasonForRequest,
+            requestStatusEnumeration().approved, //TODO TEMPORARY APPROVED FOR ALL USERS FOR TESTING
+          ];
 
-        db.query(insertUserQuery, params, (err: any) => {
-          if (err) {
-            console.error("❌ Error Registering User:", err);
-            return res.status(500).send("Error Registering User");
-          }
-          console.log(`✅ User Registered Successfully: ${email}`);
-          // 🚀 Redirect from the backend itself
-          res.redirect("/login");
-        });
-      }
-    );
-  });
-});
+          db.query(insertUserQuery, params, (err: any) => {
+            if (err) {
+              console.error("❌ Error Registering User:", err);
+              return res.status(500).send("Error Registering User");
+            }
+            console.log(`✅ User Registered Successfully: ${email}`);
+            // 🚀 Redirect from the backend itself
+            res.redirect("/login");
+          });
+        }
+      );
+    });
+  }
+);
 
 // Login User
-router.post("/login", (req: Request, res: Response, next: NextFunction) => {
+router.post("/login", (req: any, res: Response, next: NextFunction) => {
   passport.authenticate(
     "local",
     {
@@ -189,7 +196,7 @@ router.post("/login", (req: Request, res: Response, next: NextFunction) => {
     (err: any, user: User, info: any) => {
       if (err) return next(err);
       if (!user) return res.status(401).send(info);
-      req.login(user, (err) => {
+      req.login(user, (err: any) => {
         // I am not suppose to use this as password authenticate already does it, but somehow this guy's code from stackoverflow works
         if (err) return res.status(500).json({ error: "Login failed." });
 
@@ -203,38 +210,38 @@ router.post("/login", (req: Request, res: Response, next: NextFunction) => {
           } else {
             console.log("🕓 LastLoginDate updated");
           }
-          req.session.imageEditingTools = (
-            await db
-              .promise()
-              .query("SHOW COLUMNS FROM Media LIKE 'ImageEditingTool' ")
-          )[0][0]["Type"]
+
+          const x1: any[] = await db
+            .promise()
+            .query("SHOW COLUMNS FROM Media LIKE 'ImageEditingTool' ");
+          req.session.imageEditingTools = x1[0][0]["Type"]
             .replace("enum(", "")
             .replace(")", "")
             .replaceAll("'", "")
             .split(",");
 
-          const ip = (
-            await db
-              .promise()
-              .query("SHOW COLUMNS FROM Media LIKE 'ImagingPlatform' ")
-          )[0][0]["Type"]
+          const x2: any[] = await db
+            .promise()
+            .query("SHOW COLUMNS FROM Media LIKE 'ImagingPlatform' ");
+          const ip = x2[0][0]["Type"]
             .replaceAll("enum(", "")
             .replaceAll("'", "")
             .split(",");
           ip.splice(ip.length - 1, 1, ip.at(-1).replace(")", ""));
           req.session.imagingPlatforms = ip;
-          
-const projectTypes = (
-            await db
-              .promise()
-              .query("SHOW COLUMNS FROM Project LIKE 'ProjectType' ")
-          )[0][0]["Type"]
+          const x3: any[] = await db
+            .promise()
+            .query("SHOW COLUMNS FROM Project LIKE 'ProjectType' ");
+          const projectTypes = x3[0][0]["Type"]
             .replaceAll("enum(", "")
             .replaceAll("'", "")
             .split(",");
-          projectTypes.splice(projectTypes.length - 1, 1, projectTypes.at(-1).replace(")", ""));
+          projectTypes.splice(
+            projectTypes.length - 1,
+            1,
+            projectTypes.at(-1).replace(")", "")
+          );
           req.session.projectTypes = projectTypes;
-
 
           req.session.save((err: any) => {
             if (err) {
@@ -256,30 +263,36 @@ const projectTypes = (
 });
 
 // Logout User
-router.get("/logout", (req, res) => {
-  try {
-    if (!req.session.passport.user || !req.session.passport.user.UserID) {
-      console.warn("⚠️ Logout Attempt Without Login");
-      return res.redirect("/");
-    }
-    console.log(`🔹 Logout Attempt: ${req.session.passport.user.Email}`);
-
-    req.session.destroy((err) => {
-      if (err) {
-        console.error("❌ Logout Error:", err);
-
+router.get(
+  "/logout",
+  (
+    req: any,
+    res: { redirect: (arg0: string) => any }
+  ) => {
+    try {
+      if (!req.session.passport.user || !req.session.passport.user.UserID) {
+        console.warn("⚠️ Logout Attempt Without Login");
         return res.redirect("/");
-        // return res.status(500).json({ error: "Logout failed" });
       }
-      console.log("✅ User Logged Out");
+      console.log(`🔹 Logout Attempt: ${req.session.passport.user.Email}`);
+
+      req.session.destroy((err: any) => {
+        if (err) {
+          console.error("❌ Logout Error:", err);
+
+          return res.redirect("/");
+          // return res.status(500).json({ error: "Logout failed" });
+        }
+        console.log("✅ User Logged Out");
+        return res.redirect("/");
+      });
+    } catch (error) {
+      console.error("❌ Logout Try-Catch Error:", error);
       return res.redirect("/");
-    });
-  } catch (error) {
-    console.error("❌ Logout Try-Catch Error:", error);
-    return res.redirect("/");
-    // res.status(500).json({ error: "Something went wrong during logout" });
+      // res.status(500).json({ error: "Something went wrong during logout" });
+    }
   }
-});
+);
 
 // // Get Logged-in User
 // router.get("/user", (req, res) => {

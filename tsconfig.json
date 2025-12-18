@@ -1,12 +1,12 @@
 {
   "compilerOptions": {
-    "target": "es2024",
+    "target": "es2021",
     "module": "commonjs",
     "rootDir": "./",
     "outDir": "./build",
     "esModuleInterop": true,
     "strict": false,
-  
+"types":["node"],  
     "typeRoots": ["./node_modules/@types", "./@types"]
   } 
 }

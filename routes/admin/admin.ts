@@ -1,39 +1,83 @@
 const express = require("express");
 const router = express.Router();
 const path = require("path");
+import { User, Request, Session } from "../../@types/types";
 import { db } from "../db"; // Database connection
 const { isAuthenticated, isAdmin } = require("../../middleware/auth"); // Middleware
 const userTypesEnumeration = require("../../middleware/utils").userTypesEnum;
+
 // 📌 Serve Admin Users Page (HTML)
-router.get("/admin-users", isAuthenticated, isAdmin, (req, res) => {
-  res.sendFile(path.join(__dirname, "../views/admin-users.html"));
-});
+router.get(
+  "/admin-users",
+  isAuthenticated,
+  isAdmin,
+  (req: any, res: { sendFile: (arg0: any) => void }) => {
+    res.sendFile(path.join(__dirname, "../views/admin-users.html"));
+  }
+);
 
 // 🔒 Admin Routes (Protected)
-router.get("/dashboard", isAuthenticated, isAdmin, (req, res) => {
-  console.log(
-    "🟢 Accessing Admin Dashboard - Session Data:",
-    req.session.passport.user
-  );
-  res.render("admin/dashboard", {
-    user: req.session.passport.user,
-    title: "Admin Dashboard",
-  });
-});
+router.get(
+  "/dashboard",
+  isAuthenticated,
+  isAdmin,
+  (
+    req: Request,
+    res: { render: (arg0: string, arg1: { user: User; title: string }) => void }
+  ) => {
+    console.log(
+      "🟢 Accessing Admin Dashboard - Session Data:",
+      req.session.passport.user
+    );
+    res.render("admin/dashboard", {
+      user: req.session.passport.user,
+      title: "Admin Dashboard",
+    });
+  }
+);
 
-router.get("/other-admin-settings", isAuthenticated, isAdmin, (req, res) => {
-  res.render("admin/other-admin-settings", {
-    projectTypes: req.session.projectTypes,
-    imagingPlatforms: req.session.imagingPlatforms,
-    imageEditingTools: req.session.imageEditingTools,
-  });
-});
+router.get(
+  "/other-admin-settings",
+  isAuthenticated,
+  isAdmin,
+  (
+    req: Request,
+    res: {
+      render: (
+        arg0: string,
+        arg1: {
+          projectTypes: string[];
+          imagingPlatforms: string[];
+          imageEditingTools: string[];
+        }
+      ) => void;
+    }
+  ) => {
+    res.render("admin/other-admin-settings", {
+      projectTypes: req.session.projectTypes,
+      imagingPlatforms: req.session.imagingPlatforms,
+      imageEditingTools: req.session.imageEditingTools,
+    });
+  }
+);
 
 router.post(
   "/add-enumeration-value",
   isAuthenticated,
   isAdmin,
-  async (req, res) => {
+  async (
+    req: {
+      body: { feature: string; value: string };
+      session: Session;
+    },
+    res: {
+      json: (arg0: {
+        success: boolean;
+        message: string;
+        redirectUrl: string;
+      }) => any;
+    }
+  ) => {
     const feature = req.body.feature;
     const value = req.body.value;
     switch (feature) {
@@ -80,7 +124,24 @@ router.post(
   "/edit-enumeration-value",
   isAuthenticated,
   isAdmin,
-  async (req, res) => {
+  async (
+    req: {
+      body: { feature: any; oldValue: any; newValue: any };
+      session: {
+        projectTypes: string[];
+        save: () => void;
+        imagingPlatforms: string[];
+        imageEditingTools: string[];
+      };
+    },
+    res: {
+      json: (arg0: {
+        success: boolean;
+        message: string;
+        redirectUrl: string;
+      }) => any;
+    }
+  ) => {
     const feature = req.body.feature;
     const oldValue = req.body.oldValue;
     const newValue = req.body.newValue;
@@ -116,6 +177,14 @@ router.post(
           imagingPlatforms.splice(imagingPlatforms.indexOf(oldValue), 1);
         imagingPlatforms.push(newValue);
         req.session.save();
+        const x: any[] = await db
+          .promise()
+          .query(
+            "SELECT ImagingPlatformInstanceID FROM ImagingPlatformInstance WHERE ImagingPlatform = ?",
+            [oldValue]
+          );
+        const imagingPlatformInstanceIDs: string[]=Object.values(x[0][0])
+        console.log(imagingPlatformInstanceIDs)
         await db
           .promise()
           .query(
@@ -131,10 +200,18 @@ router.post(
         await db
           .promise()
           .query(
-            "UPDATE ImagingPlatformInstance SET ImagingPlatform = ? WHERE ImagingPlatform IS NULL",
-            [newValue]
-          );
+            "UPDATE ImagingPlatformInstance SET ImagingPlatform = ? WHERE ImagingPlatformInstanceID in (?)",
+            [newValue,imagingPlatformInstanceIDs]
+        );
+        
 
+     const x3: any[] = await db
+          .promise()
+          .query(
+            "SELECT MediaID FROM Media WHERE ImagingPlatform = ?",
+            [oldValue]
+          );
+        const mediaIDs: string[]=Object.values(x3[0][0])
         await db
           .promise()
           .query(
@@ -150,8 +227,8 @@ router.post(
         await db
           .promise()
           .query(
-            "UPDATE Media SET ImagingPlatform = ? WHERE ImagingPlatform IS NULL",
-            [newValue]
+            "UPDATE Media SET ImagingPlatform = ? WHERE MediaID in (?)",
+            [newValue,mediaIDs]
           );
         break;
       case "imageEditingTool":
@@ -187,12 +264,27 @@ router.post(
     });
   }
 );
-
 router.post(
   "/delete-enumeration-value",
   isAuthenticated,
   isAdmin,
-  async (req, res) => {
+  async (
+    req: {
+      body: { feature: string; value: string };
+      session: {
+        projectTypes: string[];
+        imagingPlatforms: string[];
+        imageEditingTools: string[];
+      };
+    },
+    res: {
+      json: (arg0: {
+        success: boolean;
+        message: string;
+        redirectUrl: string;
+      }) => any;
+    }
+  ) => {
     const feature = req.body.feature;
     const value = req.body.value;
     switch (feature) {
@@ -267,6 +359,23 @@ router.post(
       message: "deleted table enum value for " + feature,
       redirectUrl: "/admin/other-admin-settings",
     });
+  }
+);
+
+router.get(
+  "/download-system-data",
+  isAuthenticated,
+  isAdmin,
+  async (req: any, res: any) => {
+    console.log("download system data");
+    await db.promise().query(`
+  SELECT * FROM Media
+  INTO OUTFILE './downloaded-system-file.csv'
+  FIELDS ENCLOSED BY '"' 
+TERMINATED BY ',' 
+ESCAPED BY '"' 
+LINES TERMINATED BY '\r\n'
+  `);
   }
 );
 module.exports = router;
