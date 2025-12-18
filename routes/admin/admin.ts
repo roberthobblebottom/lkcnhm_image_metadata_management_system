@@ -1,11 +1,13 @@
 const express = require("express");
 const router = express.Router();
 const path = require("path");
+
+import { QueryResult } from "mysql2";
 import { User, Request, Session } from "../../@types/types";
 import { db } from "../db"; // Database connection
 const { isAuthenticated, isAdmin } = require("../../middleware/auth"); // Middleware
-const userTypesEnumeration = require("../../middleware/utils").userTypesEnum;
-
+const fastcsv = require("fast-csv");
+const fs = require("fs");
 // 📌 Serve Admin Users Page (HTML)
 router.get(
   "/admin-users",
@@ -366,16 +368,23 @@ router.get(
   "/download-system-data",
   isAuthenticated,
   isAdmin,
-  async (req: any, res: any) => {
+  async (req: any,res: { download: (filePath: string) => void; }) => {
     console.log("download system data");
-    await db.promise().query(`
-  SELECT * FROM Media
-  INTO OUTFILE './downloaded-system-file.csv'
-  FIELDS ENCLOSED BY '"' 
-TERMINATED BY ',' 
-ESCAPED BY '"' 
-LINES TERMINATED BY '\r\n'
-  `);
+    const x:any =(await db.promise().query(`
+  SELECT * FROM Media;
+  `))[0];
+    const data: Array<any> = Array.from(x)
+
+     const jsonData = JSON.parse(JSON.stringify(data));
+    console.log("jsonData", jsonData);
+    const filePath = "data.csv"
+
+    fs.rm(filePath)
+    const ws = fs.createWriteStream(filePath);
+    fastcsv.write(jsonData, { headers: true }).on('finish', function () { 
+
+    }).pipe(ws)
+res.download(filePath)
   }
 );
 module.exports = router;

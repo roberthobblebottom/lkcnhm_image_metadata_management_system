@@ -10,5 +10,5 @@ node_modules/
 *.raw
 .~*
 *.venv*
-pipeline/*.csv
+*.csv
 pipeline/dist/*

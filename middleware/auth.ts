@@ -1,6 +1,6 @@
 const { userTypesEnumeration } = require("./utils");
 import { Request, Response, NextFunction } from "express";
-const isAuthenticated = (req: Request, res: Response, next: NextFunction) => {
+export const isAuthenticated = (req: Request, res: Response, next: NextFunction) => {
   if (req.session.passport == null) {
     console.log("passport is null, redirecting to home page");
     return res.redirect("/login"); // 🔁 Redirect to login
@@ -16,7 +16,7 @@ const isAuthenticated = (req: Request, res: Response, next: NextFunction) => {
   }
 };
 
-const isAdmin = (req: Request, res: Response, next: NextFunction) => {
+export const isAdmin = (req: Request, res: Response, next: NextFunction) => {
 if (req.session.passport == null) {
     console.log("passport is null, redirecting to home page");
     return res.redirect("/login"); // 🔁 Redirect to login
