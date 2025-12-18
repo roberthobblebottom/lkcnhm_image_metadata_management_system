@@ -86,13 +86,13 @@ router.post(
     const newValue = req.body.newValue;
     switch (feature) {
       case "projectType":
-        console.log(feature,oldValue,newValue)
+        console.log(feature, oldValue, newValue);
         const projectTypes = req.session.projectTypes;
         projectTypes.includes(oldValue) &&
           projectTypes.splice(projectTypes.indexOf(oldValue), 1);
         projectTypes.push(newValue);
-        req.session.save()
- await db
+        req.session.save();
+        await db
           .promise()
           .query("UPDATE Project SET ProjectType =NULL WHERE ProjectType = ?", [
             oldValue,
@@ -104,38 +104,83 @@ router.post(
           ]);
         await db
           .promise()
-          .query("UPDATE Project SET ProjectType = ? WHERE ProjectType IS NULL", [
-            newValue,
-          ]);
-        
+          .query(
+            "UPDATE Project SET ProjectType = ? WHERE ProjectType IS NULL",
+            [newValue]
+          );
+
         break;
       case "imagingPlatform":
         const imagingPlatforms = req.session.imagingPlatforms;
+        imagingPlatforms.includes(oldValue) &&
+          imagingPlatforms.splice(imagingPlatforms.indexOf(oldValue), 1);
+        imagingPlatforms.push(newValue);
+        req.session.save();
+        await db
+          .promise()
+          .query(
+            "UPDATE ImagingPlatformInstance SET ImagingPlatform =NULL WHERE ImagingPlatform = ?",
+            [oldValue]
+          );
+        await db
+          .promise()
+          .query(
+            "ALTER TABLE ImagingPlatformInstance CHANGE ImagingPlatform ImagingPlatform ENUM(?)",
+            [imagingPlatforms]
+          );
+        await db
+          .promise()
+          .query(
+            "UPDATE ImagingPlatformInstance SET ImagingPlatform = ? WHERE ImagingPlatform IS NULL",
+            [newValue]
+          );
+
+        await db
+          .promise()
+          .query(
+            "UPDATE Media SET ImagingPlatform =NULL WHERE ImagingPlatform = ?",
+            [oldValue]
+          );
+        await db
+          .promise()
+          .query(
+            "ALTER TABLE Media CHANGE ImagingPlatform ImagingPlatform ENUM(?)",
+            [imagingPlatforms]
+          );
+        await db
+          .promise()
+          .query(
+            "UPDATE Media SET ImagingPlatform = ? WHERE ImagingPlatform IS NULL",
+            [newValue]
+          );
         break;
       case "imageEditingTool":
         const imageEditingTools = req.session.imageEditingTools;
         imageEditingTools.includes(oldValue) &&
           imageEditingTools.splice(imageEditingTools.indexOf(oldValue), 1);
         imageEditingTools.push(newValue);
-        req.session.save()
- await db
-          .promise()
-          .query("UPDATE Media SET ImageEditingTool =NULL WHERE ImageEditingTool = ?", [
-            oldValue,
-          ]);
+        req.session.save();
         await db
           .promise()
-          .query("ALTER TABLE Media CHANGE ImageEditingTool ImageEditingTool ENUM(?)", [
-            imageEditingTools,
-          ]);
+          .query(
+            "UPDATE Media SET ImageEditingTool =NULL WHERE ImageEditingTool = ?",
+            [oldValue]
+          );
         await db
           .promise()
-          .query("UPDATE Media SET ImageEditingTool  = ? WHERE ImageEditingTool IS NULL", [
-            newValue,
-          ]);
+          .query(
+            "ALTER TABLE Media CHANGE ImageEditingTool ImageEditingTool ENUM(?)",
+            [imageEditingTools]
+          );
+        await db
+          .promise()
+          .query(
+            "UPDATE Media SET ImageEditingTool  = ? WHERE ImageEditingTool IS NULL",
+            [newValue]
+          );
         break;
     }
-return res.json({
+    return res.json({
       success: true,
       message: "edited table enum value for " + feature,
       redirectUrl: "/admin/other-admin-settings",
