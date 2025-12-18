@@ -8,8 +8,9 @@ import {
   requestStatusEnumeration,
   userTypesEnumeration,
 } from "../middleware/utils";
-import { Request, Response, NextFunction } from "express";
-import { Passport, User } from "../@types/types";
+import { Response, NextFunction } from "express";
+
+import {Request, Passport, User } from "../@types/types";
 passport.use(
   new passportStrategy.Strategy(async function verify(
     username: string,

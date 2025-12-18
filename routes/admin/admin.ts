@@ -185,8 +185,8 @@ router.post(
             "SELECT ImagingPlatformInstanceID FROM ImagingPlatformInstance WHERE ImagingPlatform = ?",
             [oldValue]
           );
-        const imagingPlatformInstanceIDs: string[]=Object.values(x[0][0])
-        console.log(imagingPlatformInstanceIDs)
+        const imagingPlatformInstanceIDs: string[] = Object.values(x[0][0]);
+        console.log(imagingPlatformInstanceIDs);
         await db
           .promise()
           .query(
@@ -203,17 +203,15 @@ router.post(
           .promise()
           .query(
             "UPDATE ImagingPlatformInstance SET ImagingPlatform = ? WHERE ImagingPlatformInstanceID in (?)",
-            [newValue,imagingPlatformInstanceIDs]
-        );
-        
-
-     const x3: any[] = await db
-          .promise()
-          .query(
-            "SELECT MediaID FROM Media WHERE ImagingPlatform = ?",
-            [oldValue]
+            [newValue, imagingPlatformInstanceIDs]
           );
-        const mediaIDs: string[]=Object.values(x3[0][0])
+
+        const x3: any[] = await db
+          .promise()
+          .query("SELECT MediaID FROM Media WHERE ImagingPlatform = ?", [
+            oldValue,
+          ]);
+        const mediaIDs: string[] = Object.values(x3[0][0]);
         await db
           .promise()
           .query(
@@ -228,10 +226,10 @@ router.post(
           );
         await db
           .promise()
-          .query(
-            "UPDATE Media SET ImagingPlatform = ? WHERE MediaID in (?)",
-            [newValue,mediaIDs]
-          );
+          .query("UPDATE Media SET ImagingPlatform = ? WHERE MediaID in (?)", [
+            newValue,
+            mediaIDs,
+          ]);
         break;
       case "imageEditingTool":
         const imageEditingTools = req.session.imageEditingTools;
@@ -368,23 +366,30 @@ router.get(
   "/download-system-data",
   isAuthenticated,
   isAdmin,
-  async (req: any,res: { download: (filePath: string) => void; }) => {
+  async (req: any, res: { download: (filePath: string) => void }) => {
     console.log("download system data");
-    const x:any =(await db.promise().query(`
+    const x: any = (
+      await db.promise().query(`
   SELECT * FROM Media;
-  `))[0];
-    const data: Array<any> = Array.from(x)
+  `)
+    )[0];
+    const data: Array<any> = Array.from(x);
 
-     const jsonData = JSON.parse(JSON.stringify(data));
-    console.log("jsonData", jsonData);
-    const filePath = "data.csv"
-
-    fs.rm(filePath)
+    const jsonData = JSON.parse(JSON.stringify(data));
+    
+    const filePath = path.join(__dirname,"data.csv").replace("/routes/admin","");
+    // TODO: These lines are not working, try to fix them
+    // if (fs.existsSync(filePath))
+    //   fs.rm(filePath, { force: true }, () => { });
     const ws = fs.createWriteStream(filePath);
-    fastcsv.write(jsonData, { headers: true }).on('finish', function () { 
+    fastcsv
+      .write(jsonData, { headers: true })
+      .on("finish", function () {})
+      .pipe(ws);
+   
+    res.download(filePath);
+    console.log("3");
 
-    }).pipe(ws)
-res.download(filePath)
   }
 );
 module.exports = router;
