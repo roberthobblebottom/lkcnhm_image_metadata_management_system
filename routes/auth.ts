@@ -32,7 +32,6 @@ passport.use(
         return cb(null, false, { message: "Database error" });
       });
 
-    console.log("🔎 Query Result:", result);
 
     if (result.length === 0) {
       console.log("🚫 User Not Found");
@@ -41,7 +40,6 @@ passport.use(
 
     const user = result[0];
     console.log("🆔 Found User:", user.Email);
-    console.log(user.UserID);
 
     crypto.pbkdf2(
       password,

@@ -248,9 +248,13 @@
       </table>
     </div>
     <h2>Download System's Data</h2>
-    <a href="/admin/download-system-data" class="btn btn-primary">
+    <!-- <a href="/admin/download-system-data" class="btn btn-primary">
       <i class="fas fa-arrow-down"></i> Download
-    </a>
+    </a> -->
+    <button onclick="downloadSystemData()" class="btn btn-primary">
+
+      <i class="fas fa-arrow-down"></i> Download
+    </button>
   </div>
 
 
@@ -407,6 +411,7 @@
     });
   }
   async function sendDeleteValue(feature, value) {
+
     console.log(feature, value)
     const response = await fetch("/admin/delete-enumeration-value", {
       method: 'POST',
@@ -456,6 +461,31 @@
         icon: 'error',
         confirmButtonText: 'OK',
         confirmButtonColor: '#dc3545'
+      });
+    }
+  }
+  async function downloadSystemData() {
+    try {
+      const response = await fetch('/admin/download-system-data', )
+
+     
+      const result = await response.json();
+
+
+      var bytes = new Uint8Array(result.buffer.data); // pass your byte response to this constructor
+      var blob = new Blob([bytes], {
+        type: "application/zip"
+      }); // change resultByte to bytes
+      var link = document.createElement('a');
+      link.href = window.URL.createObjectURL(blob);
+      link.download = "data.zip";
+      link.click();
+    } catch (error) {
+      Swal.fire({
+        title: 'Error!',
+        text: 'An unexpected error occurred',
+        icon: 'error',
+        confirmButtonColor: '#00bbff'
       });
     }
   }
