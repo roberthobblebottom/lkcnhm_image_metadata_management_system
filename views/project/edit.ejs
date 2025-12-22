@@ -3,199 +3,30 @@
 
 <head>
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-  <link rel="stylesheet" href="/css/admin-users.css">
+  <link rel="stylesheet" href="/css/form.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/choices.js@11.1.0/public/assets/styles/choices.min.css" />
-  <!-- Include Choices JavaScript -->
   <script src="https://cdn.jsdelivr.net/npm/choices.js/public/assets/scripts/choices.min.js"></script>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Edit Project</title>
-  <style>
-    body {
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      background: #f4f7f9;
-      margin: 0;
-      padding: 20px;
-    }
-
-    h2 {
-      text-align: center;
-      color: #333;
-      margin-bottom: 30px;
-      margin-top: -50px;
-    }
-
-    main {
-      max-width: 750px;
-      margin: auto;
-      background: #fff;
-      padding: 30px;
-      border-radius: 12px;
-      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
-    }
-
-    #horizontal-panel {
-      display: flex;
-      align-items: center;
-
-    }
-
-    .form-group {
-      margin-bottom: 20px;
-    }
-
-    label {
-      display: block;
-      margin-bottom: 8px;
-      font-weight: 600;
-      color: #444;
-    }
-
-    input[type="text"],
-    input[type="date"],
-    select,
-    .anchor,
-    textarea {
-      width: 95%;
-      padding: 12px 15px;
-      border: 1px solid #ccc;
-      background: #fff;
-      border-radius: 8px;
-      font-size: 15px;
-      transition: border-color 0.3s ease;
-    }
-
-    select {
-      width: 100%;
-    }
-
-    input:focus,
-    select:focus,
-    textarea:focus {
-      border-color: #007bff;
-      outline: none;
-    }
-
-    textarea {
-      resize: vertical;
-      min-height: 100px;
-    }
-
-    .form-control-plaintext {
-      background-color: #f8f9fa;
-      border: none;
-      padding: 10px 15px;
-      font-size: 16px;
-      color: #555;
-    }
-
-    button i {
-      margin-right: 8px;
-    }
-
-    .btn {
-      padding: 10px 18px;
-      font-size: 16px;
-      font-weight: 500;
-      border-radius: 8px;
-      cursor: pointer;
-      border: none;
-      transition: background 0.3s ease;
-    }
-
-    .btn-primary {
-      background-color: #007bff;
-      color: white;
-    }
-
-    .btn-primary:hover {
-      background-color: #0056b3;
-    }
-
-
-    a button {
-      display: block;
-      margin: 0 auto;
-    }
-
-    button[type="submit"] {
-      background-color: #007bff;
-      color: #fff;
-      border: none;
-      padding: 0.75rem 2rem;
-      font-size: 1rem;
-      border-radius: 8px;
-      cursor: pointer;
-      transition: background-color 0.3s ease;
-    }
-
-    button[type="submit"]:hover,
-    .btn-secondary:hover,
-    .btn-primary:hover {
-      background-color: #0056b3;
-    }
-
-
-    .selectBox {
-      position: relative;
-    }
-
-    .selectBox select {
-      width: 100%;
-    }
-
-    .overSelect {
-      position: absolute;
-      left: 0;
-      right: 0;
-      top: 0;
-      bottom: 0;
-    }
-
-
-
-
-    .buttons {
-      text-align: center;
-    }
-
-    .addButton {
-      float: right;
-      margin-right: 2%;
-      margin-bottom: 5px;
-    }
-
-    /* Note Section */
-    .note {
-      text-align: center;
-      color: #64748b;
-      background: #f8fafc;
-      padding: 1rem;
-      border-radius: 8px;
-      border: 1px dashed #cbd5e1;
-      margin: 2rem 0;
-      font-size: 0.875rem;
-    }
-  </style>
 </head>
 
 <body>
+  <div class="main-con">
   <%- include(currentUser.UserType=='admin' 
   ? '../sidenavs/admin.ejs' 
   : '../sidenavs/user' ) %>
-  <main>
-<div class="horizontal-panel">
-      <a href="/project/view-all">
-        <button class="btn btn-primary">
+
+    <form id='main-form' >
+    <div class="horizontal-panel">
+      <a href="/project/view-all" class="btn btn-primary">
+        <i class="fas fa-arrow-left"></i>
           Back to All Projects
-        </button>
       </a>
       <h2>Edit Project</h2>
     </div>
-    <form id='editForm' action="/project/edit/<%= project.ProjectID %>" method="POST">
-    
       <div class="form-group">
         <label>Project Name</label>
         <input type="text" id="ProjectName" name="ProjectName" value="<%= project.ProjectName %>" class="form-control" required>
@@ -209,9 +40,9 @@
       </div>
 
       <div class="form-group">
-        <div class="horizontal-panel">
+        <div class="horizontal-panel2">
           <label>Project Type</label>
-          <button class='addButton' id="addProjectTypeButton">Add</button>
+          <button class='btn addButton' id="addProjectTypeButton">Add</button>
         </div>
 
         <select name="projectType" id="projectType" class="form-control">
@@ -224,9 +55,8 @@
         </select>
       </div>
 
-      <div>
-        <label for="PhotographerID">Photographer(s):</label>
-
+      <div class="form-group">
+        <label for="newSelectedImagingPlatforms">Photographer(s):</label>
         <select multiple id="newSelectedPhotographers">
           <option value="">---Select Photographers---</option>
           <% allPhotographers.forEach(photographer=>{ %>
@@ -262,11 +92,9 @@
       </div>
       <div class="form-group">
 
-        <div class="horizontal-panel">
+        <div class="horizontal-panel2">
           <label for="imagingPlatform">Imaging Platform:</label>
-
-          <button class='addButton' id="addImagingPlatformButton">Add</button>
-
+          <button class='btn addButton' id="addImagingPlatformButton">Add</button>
         </div>
         <select multiple id="newSelectedImagingPlatforms">
           <option value="">Select Imaging Platforms</option>
@@ -302,7 +130,10 @@
 
     <br>
 
-  </main>
+
+</div>
+</body>
+
   <script>
     const newSelectedPhotographersElement = document.getElementById('newSelectedPhotographers');
     const newSelectedPhotographers = new Choices(newSelectedPhotographersElement, {
@@ -362,7 +193,7 @@
       x.style.padding = "12px"
       x.style.backgroundColor = "gray"
       console.log(x)
-      const form = document.getElementById('editForm')
+      const form = document.getElementById('main-form')
       // console.log(newSelectedPhotographersElement.childNodes)
       const requestDate = new Date('<%= project.DateofRequest %>');
       const startDateInput = document.getElementById('ImagingStartDate');
@@ -408,6 +239,7 @@
       form.addEventListener('submit', async function(e) {
         e.preventDefault();
         // Validate dates
+        console.log("here")
         const startDate = new Date(startDateInput.value);
         const endDate = new Date(endDateInput.value);
         if (startDate < requestDate) {
@@ -492,8 +324,4 @@
       });
     });
   </script>
-
-
-</body>
-
 </html>

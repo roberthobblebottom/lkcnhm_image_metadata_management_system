@@ -4,248 +4,97 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Create User
-  </title>
-
-  <link rel="stylesheet" href="/css/admin-users.css">
+  <title>Create User </title>
+  <link rel="stylesheet" href="/css/form.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
   <%- include('../sidenavs/admin') %>
   <style>
-    * {
-      box-sizing: border-box;
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    }
-
-    body {
-      margin: 0;
-      padding: 0;
-      background: white;
-      min-height: 100vh;
-      display: flex;
-      justify-content: center;
-      align-items: flex-start;
-      padding-top: 60px;
-    }
-
-    .top-row {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-
-    h2 {
-      text-align: center;
-      flex-grow: 1;
-      color: #333;
-    }
-
-    main {
-      max-width: 600px;
-      padding: 20px;
-    }
-
-    .form-container {
-      background-color: #fff;
-      padding: 30px;
-      border-radius: 16px;
-      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
-      min-width: 1000px;
-      margin-left: -100%;
-    }
-
-    .form-container h2 {
-      margin-bottom: 25px;
-      color: #000435;
-      font-size: 24px;
-    }
-
-    .form-group {
-      margin-bottom: 20px;
-    }
-
-    label {
-      display: block;
-      font-weight: 600;
-      margin-bottom: 8px;
-      color: #333;
-    }
-
-    input,
-    select {
-      width: 100%;
-      padding: 12px 15px;
-      border: 1.5px solid #ccc;
-      border-radius: 8px;
-      font-size: 15px;
-      transition: border-color 0.3s ease;
-    }
-
-    input:focus,
-    select:focus {
-      border-color: #00c6ff;
-      outline: none;
-    }
-
-    input[disabled] {
-      background-color: #f0f0f0;
-      color: #999;
-    }
-
-    textarea {
-      min-height: 120px;
-      width: 100%;
-      resize: vertical;
-      line-height: 1.5;
-    }
-
-    button {
-      width: 100%;
-      background-color: #000435;
-      color: white;
-      padding: 14px;
-      font-size: 16px;
-      font-weight: bold;
-      border: none;
-      border-radius: 8px;
-      cursor: pointer;
-      transition: background-color 0.3s ease;
-    }
-
-    button:hover {
-      background-color: #0072ff;
-    }
-
-    .btn {
-      display: inline-block;
-      background: #007bff;
-      color: white;
-      padding: 10px 16px;
-      border: none;
-      border-radius: 6px;
-      text-decoration: none;
-      font-weight: 600;
-      margin-top: 50px;
-      /* margin-bottom: 50px; */
-      align-self: flex-start;
-    }
-
-    .btn-primary {
-      background-color: #007bff;
-      border: none;
-      color: #fff;
-    }
-
-    .btn-primary:hover {
-      background-color: #0056b3;
-    }
-
-    @media screen and (max-width: 768px) {
-      body {
-        align-items: flex-start;
-        padding: 40px 10px;
-      }
-
-      .form-container {
-        padding: 20px;
-      }
-
-      .form-container h2 {
-        font-size: 20px;
-      }
-
-      button {
-        padding: 12px;
-        font-size: 15px;
-      }
-
+   form {
+      width: 200%;
     }
   </style>
-
 </head>
 
 <body>
-  <main>
-    <div class="form-container">
-      <div class="top-panel">
+  <div class="main-con">
+    <form id="form">
+      <div class="horizontal-panel">
         <a href="/admin/user-management/view-all" class="btn btn-primary">
           <i class="fas fa-arrow-left"></i> Back to all Users
         </a>
         <h2>Create User</h2>
       </div>
-      <form id="editUserForm">
+
+      <div class="form-group">
+        <label for="email">Email* </label>
+        <input type="text" name="email" id="email" value="" required>
+      </div>
+      <div class="form-group">
+        <label for="Password">Password* :</label>
+        <input type="password" id="password" name="password" value="" required>
+      </div>
+      <div class="form-group">
+        <label for="confirmPassword">Confirm Password*:</label>
+        <input type="password" id="confirmPassword" name="confirmPassword" value="" required>
+      </div>
 
 
-        <div class="form-group">
-          <label for="email">Email* </label>
-          <input type="text" name="email" id="email" value="" required>
-        </div>
-        <div class="form-group">
-          <label for="Password">Password* :</label>
-          <input type="password" id="password" name="password" value="" required>
-        </div>
-        <div class="form-group">
-          <label for="confirmPassword">Confirm Password*:</label>
-          <input type="password" id="confirmPassword" name="confirmPassword" value="" required>
-        </div>
+      <div class="form-group">
+        <label for="userType">User Type* </label>
+        <select name="userType" id="userType" requried>
+          <option value="">-- Select a User Type--</option>
+          <%userTypes.forEach( u=>{%>
+          <option value="<%=u%>">
+            <%=u%>
+          </option>
+          <%})%>
+        </select>
+      </div>
+      <div class="form-group">
+        <label for="fullName">Full Name* </label>
+        <input type="text" name="fullName" id="fullname" value="" required>
+      </div>
+
+      <div class="form-group">
+        <label for="contactNumber">Contact Number </label>
+        <input type="text" id="contactNumber" value="">
+      </div>
+      <div class=" form-group">
+        <label for="organisation">Organisation </label>
+        <input type="text" id="organisation" value="">
+      </div>
+      <div class="form-group">
+        <label for="comments">Comments </label>
+        <textarea id="comments"></textarea>
+      </div>
+      <div class="form-group">
+        <label>Request Status* </label>
+        <select name="requestStatus" id="requestStatus" requried>
+          <option value="">-- Select a Request Status--</option>
+          <%requestStatuses.forEach( u=>{%>
+          <option value="<%=u%>">
+            <%=u%>
+          </option>
+          <%})%>
+        </select>
+      </div>
 
 
-        <div class="form-group">
-          <label for="userType">User Type* </label>
-          <select name="userType" id="userType" requried>
-            <option value="">-- Select a User Type--</option>
-            <%userTypes.forEach( u=>{%>
-            <option value="<%=u%>">
-              <%=u%>
-            </option>
-            <%})%>
-          </select>
-        </div>
-        <div class="form-group">
-          <label for="fullName">Full Name* </label>
-          <input type="text" name="fullName" id="fullname" value="" required>
-        </div>
-
-        <div class="form-group">
-          <label for="contactNumber">Contact Number </label>
-          <input type="text" id="contactNumber" value="">
-        </div>
-        <div class=" form-group">
-          <label for="organisation">Organisation </label>
-          <input type="text" id="organisation" value="">
-        </div>
-        <div class="form-group">
-          <label for="comments">Comments </label>
-          <textarea id="comments"></textarea>
-        </div>
-        <div class="form-group">
-          <label>Request Status* </label>
-          <select name="requestStatus" id="requestStatus" requried>
-            <option value="">-- Select a Request Status--</option>
-            <%requestStatuses.forEach( u=>{%>
-            <option value="<%=u%>">
-              <%=u%>
-            </option>
-            <%})%>
-          </select>
-        </div>
+      <div class="form-group">
+        <label> Reason for Request: </label>
+        <textarea id="reasonForRequest"></textarea>
+      </div>
 
 
-        <div class="form-group">
-          <label> Reason for Request: </label>
-          <textarea id="reasonForRequest"></textarea>
-        </div>
-
-
-        <button type="submit">Update User</button>
-      </form>
-    </div>
-  </main>
+      <button type="submit">Create User</button>
+    </form>
+  </div>
 
   <script>
     document.addEventListener("DOMContentLoaded", () => {
 
-      const form = document.getElementById("editUserForm");
+      const form = document.getElementById("form");
       form.addEventListener('submit', async function(e) {
         e.preventDefault();
 
@@ -360,11 +209,11 @@
           });
           console.error('Error:', error);
         } finally {
-            submitBtn.disabled = false;
-            submitBtn.value = "Upload"
+          submitBtn.disabled = false;
+          submitBtn.value = "Upload"
 
-        submitBtn.innerHTML = 'Edit Profile';
-          }
+          submitBtn.innerHTML = 'Edit Profile';
+        }
       });
     });
   </script>

@@ -5,195 +5,24 @@
   <meta charset="UTF-8">
   <title>Project Management</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-  <!-- Add this in your <head> section -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-  <link rel="stylesheet" href="/css/admin-users.css">
+  <link rel="stylesheet" href="/css/form.css">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/choices.js@11.1.0/public/assets/styles/choices.min.css" />
-  <!-- Include Choices JavaScript -->
   <script src="https://cdn.jsdelivr.net/npm/choices.js/public/assets/scripts/choices.min.js"></script>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      margin: 40px;
-      background: #f9f9f9;
-    }
-
-    /* Reset some basic elements */
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-    }
-
-    body {
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      background-color: #f4f6f8;
-      padding: 2rem;
-    }
-
-    h2 {
-      text-align: center;
-      margin-bottom: 2rem;
-      color: #2c3e50;
-      margin-top: -60px;
-      padding-bottom: 90px;
-    }
-
-    /* Form Styles */
-    main {
-      max-width: 700px;
-      margin: auto;
-      padding: 2rem;
-      background-color: #ffffff;
-
-      border-radius: 12px;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-    }
-
-
-
-    .form-group {
-      margin-bottom: 1.5rem;
-      display: grid;
-      
-      /* vertical-align: middle; */
-      align-items: center;
-    }
-
-    label {
-      display: block;
-      font-weight: 600;
-      margin-bottom: 0.5rem;
-      color: #34495e;
-    }
-    .label2 {
-
-      float:left;
-    }
-    input[type="text"],
-    input[type="date"],
-    .anchor,
-    select,
-    textarea {
-      width: 100%;
-      padding: 0.75rem;
-      border: 1px solid #ccc;
-      border-radius: 8px;
-      font-size: 1rem;
-      background-color: #fefefe;
-      transition: border-color 0.2s;
-    }
-
-    select {
-      float: bottom;
-    }
-
-    input:focus,
-    textarea:focus,
-    select:focus {
-      border-color: #007bff;
-      outline: none;
-    }
-
-    textarea {
-      resize: vertical;
-      min-height: 100px;
-    }
-
-    .error-message {
-      font-size: 0.9rem;
-      color: #e74c3c;
-      display: none;
-      margin-top: 0.3rem;
-    }
-
-    /* Button Styles */
-    .buttons {
-      text-align: center;
-    }
-
-    button[type="submit"] {
-      background-color: #007bff;
-      color: #fff;
-      border: none;
-      padding: 0.75rem 2rem;
-      font-size: 1rem;
-      border-radius: 8px;
-      cursor: pointer;
-      transition: background-color 0.3s ease;
-    }
-
-    button[type="submit"]:hover,
-    .btn-secondary:hover,
-    .btn-primary:hover {
-      background-color: #0056b3;
-    }
-
-    button i {
-      margin-right: 8px;
-    }
-
-    .btn-primary {
-      background-color: #007bff;
-      color: white;
-      margin-left: 10%;
-      width: 100px;
-    }
-
-
-    #horizontal-panel {
-      display: flex;
-      align-items: center;
-
-    }
-
-    /* Responsive Enhancements */
-    @media (max-width: 600px) {
-      form#projectForm {
-        padding: 1.5rem;
-      }
-
-      h2 {
-        font-size: 1.5rem;
-      }
-
-    }
-
-    #list2 {
-      width: 100%;
-    }
-
-    .addButton {
-      float: right;
-      margin-right: 2%;
-      margin-bottom: 5px;
-    }
-
-    /* Note Section */
-    .note {
-      text-align: center;
-      color: #64748b;
-      background: #f8fafc;
-      padding: 1rem;
-      border-radius: 8px;
-      border: 1px dashed #cbd5e1;
-      margin: 2rem 0;
-      font-size: 0.875rem;
-    }
-
-  </style>
 </head>
 
 <body>
-  <%- include(currentUser.UserType==='admin' ? '../sidenavs/admin.ejs' : '../sidenavs/user' ) %>
-  <main>
-  <div class="horizontal-panel">
-      <a href="/project/view-all"><button class="btn btn-primary">Back to all Projects</button></a>
-      <h2>Create a New Project </h2>
-    </div> 
-    <form id="projectForm" action="/project/create" method="POST">
- 
+  <div class="main-con">
+    <%- include(currentUser.UserType==='admin' ? '../sidenavs/admin.ejs' : '../sidenavs/user' ) %>
+
+    <form id="main-form">
+      <div class="horizontal-panel">
+        <a href="/project/view-all" class="btn btn-primary">
+          <i class="fas fa-arrow-left"></i> Back to all media
+        </a>
+        <h2>Create a New Project </h2>
+      </div>
       <div class="form-group">
 
         <label for="projectName">Project Name*</label>
@@ -214,9 +43,9 @@
       </div>
 
       <div class="form-group">
-        <div class="horizontal-panel">
+        <div class="horizontal-panel2">
           <label class="label2">Project Type*</label>
-          <button class="addButton" id="addProjectTypeButton">Add</button>
+          <button class="btn addButton" id="addProjectTypeButton">Add</button>
         </div>
 
         <select name="projectType" id="projectType" class="form-control" required>
@@ -230,7 +59,7 @@
 
       </div>
       <div class="form-group">
-        <label for="photographer">Photographer(s)*</label>
+        <label for="newSelectedPhotographers">Photographer(s)*</label>
         <select multiple id="newSelectedPhotographers">
           <option value="">Select Photographers</span>
             <% photographers.forEach(photographer=>{ %>
@@ -238,12 +67,7 @@
             <%=photographer.FullName%>
           </option>
           <%})%>
-        </select>
-
-
-
-
-        <div id="photographer-error" class="error-message">Please select a photographer</div>
+        </select>        <div id="photographer-error" class="error-message">Please select a photographer</div>
       </div>
 
 
@@ -274,9 +98,9 @@
 
 
       <div class="form-group">
-        <div class="horizontal-panel">
+        <div class="horizontal-panel2">
           <label class="label2" for="platform">Imaging Platform</label>
-          <button class='addButton' id="addImagingPlatformButton">Add</button>
+          <button class='btn addButton' id="addImagingPlatformButton">Add</button>
         </div>
         <select multiple id="newSelectedImagingPlatforms">
           <option value="">Select Imaging Platforms</span>
@@ -289,7 +113,7 @@
       </div>
 
       <div class="form-group">
-        <label  for="comments">Comments</label>
+        <label for="comments">Comments</label>
         <textarea id="comments" name="comments"></textarea>
       </div>
 
@@ -300,262 +124,262 @@
         💡 New project types and/or imaging platform will only be in the system if said changes are submitted
       </p>
     </form>
-  </main>
-  <script>
-    const element = document.getElementById('newSelectedPhotographers');
-    const newSelectedPhotographers = new Choices(element, {
-      allowHTML: true,
-      removeItemButton: true
-    });
-    const newSelectedImagingPlatforms = new Choices(document.getElementById('newSelectedImagingPlatforms'), {
-      allowHTML: true,
-      removeItemButton: true
-    });
-    // Initialize form with current datetime
-    document.addEventListener('DOMContentLoaded', function() {
+  </div>
+</body>
+
+<script>
+  const element = document.getElementById('newSelectedPhotographers');
+  const newSelectedPhotographers = new Choices(element, {
+    allowHTML: true,
+    removeItemButton: true
+  });
+  const newSelectedImagingPlatforms = new Choices(document.getElementById('newSelectedImagingPlatforms'), {
+    allowHTML: true,
+    removeItemButton: true
+  });
+  // Initialize form with current datetime
+  document.addEventListener('DOMContentLoaded', function() {
 
     // document.querySelector("[class='choices__inner']").style.float = "1000px"
-      document.getElementById('addProjectTypeButton').addEventListener('click', async function(e) {
-        e.preventDefault()
-        Swal.fire({
-          title: "Add new Project Type",
-          text: "Add new Project Type",
-          input: 'text',
-          showCancelButton: true,
-          inputPlaceholder: "Enter it here."
-        }).then((result) => {
-          if (result.value && result.value != "") {
-            const select = document.getElementById("projectType")
-            var option = document.createElement('option')
-            option.text = option.value = result.value
-            select.add(option, 1)
-            select.value = option.text
-          }
-        });
-      })
-      document.getElementById('addImagingPlatformButton').addEventListener('click', async function(e) {
-        console.log("add Imaging Platform button")
-        e.preventDefault()
-        Swal.fire({
-          title: "Add new Imaging Platform",
-          text: "Add new Imaging Platform",
-          input: 'text',
-          showCancelButton: true,
-          inputPlaceholder: "Enter it here."
-        }).then((result) => {
-          if (result.value && result.value != "") {
-            newSelectedImagingPlatforms.setChoices([{
-              value: result.value,
-              label: result.value,
-              selected: true
-            }])
-          }
-        });
-      })
-      const aDate = new Date()
-      document.getElementById('startDate').value = aDate.toISOString().slice(0, 16).split('T')[0]
-      aDate.setDate(aDate.getDate() + 4)
-      document.getElementById('endDate').value = aDate.toISOString().slice(0, 16).split('T')[0]
+    document.getElementById('addProjectTypeButton').addEventListener('click', async function(e) {
+      e.preventDefault()
+      Swal.fire({
+        title: "Add new Project Type",
+        text: "Add new Project Type",
+        input: 'text',
+        showCancelButton: true,
+        inputPlaceholder: "Enter it here."
+      }).then((result) => {
+        if (result.value && result.value != "") {
+          const select = document.getElementById("projectType")
+          var option = document.createElement('option')
+          option.text = option.value = result.value
+          select.add(option, 1)
+          select.value = option.text
+        }
+      });
+    })
+    document.getElementById('addImagingPlatformButton').addEventListener('click', async function(e) {
+      console.log("add Imaging Platform button")
+      e.preventDefault()
+      Swal.fire({
+        title: "Add new Imaging Platform",
+        text: "Add new Imaging Platform",
+        input: 'text',
+        showCancelButton: true,
+        inputPlaceholder: "Enter it here."
+      }).then((result) => {
+        if (result.value && result.value != "") {
+          newSelectedImagingPlatforms.setChoices([{
+            value: result.value,
+            label: result.value,
+            selected: true
+          }])
+        }
+      });
+    })
+    const aDate = new Date()
+    document.getElementById('startDate').value = aDate.toISOString().slice(0, 16).split('T')[0]
+    aDate.setDate(aDate.getDate() + 4)
+    document.getElementById('endDate').value = aDate.toISOString().slice(0, 16).split('T')[0]
 
-      // Set min attributes for date fields
+    // Set min attributes for date fields
+    updateDateConstraints();
+    // Setup form validation
+    setupFormValidation();
+
+
+  });
+
+  // Update date constraints when dates change
+  function updateDateConstraints() {
+    // const requestDate = document.getElementById('requestDate').value;
+    const startDate = document.getElementById('startDate').value;
+
+    // Set minimum end date to be after start date (if start date is selected)
+    if (startDate)
+      document.getElementById('endDate').min = startDate;
+
+  }
+
+
+  // Function to setup form validation
+  function setupFormValidation() {
+    const form = document.getElementById('main-form');
+
+
+
+    document.getElementById('startDate').addEventListener('change', function() {
       updateDateConstraints();
-      // Setup form validation
-      setupFormValidation();
-
-
+      validateDates();
     });
 
-    // Update date constraints when dates change
-    function updateDateConstraints() {
-      // const requestDate = document.getElementById('requestDate').value;
-      const startDate = document.getElementById('startDate').value;
+    document.getElementById('endDate').addEventListener('change', validateDates);
+    // Validate on submit
+    form.addEventListener('submit', async function(e) {
+      e.preventDefault();
+      console.log("add event listner for submit")
 
-      // Set minimum end date to be after start date (if start date is selected)
-      if (startDate)
-        document.getElementById('endDate').min = startDate;
-
-    }
-
-
-    // Function to setup form validation
-    function setupFormValidation() {
-      const form = document.getElementById('projectForm');
-
-
-
-      document.getElementById('startDate').addEventListener('change', function() {
-        updateDateConstraints();
-        validateDates();
+      // Reset error messages
+      document.querySelectorAll('.error-message').forEach(el => {
+        el.style.display = 'none';
       });
 
-      document.getElementById('endDate').addEventListener('change', validateDates);
-      // Validate on submit
-      form.addEventListener('submit', async function(e) {
-        e.preventDefault();
-        console.log("add event listner for submit")
+      // Validate required fields
+      let isValid = true;
 
-        // Reset error messages
-        document.querySelectorAll('.error-message').forEach(el => {
-          el.style.display = 'none';
+      // Check dropdowns
+      if (!form.projectOwner.value) {
+        document.getElementById('projectOwner-error').style.display = 'block';
+        isValid = false;
+      }
+
+
+
+      // Check text areas
+      if (!form.summary.value.trim()) {
+        document.getElementById('summary-error').style.display = 'block';
+        isValid = false;
+      }
+
+      if (!form.specimenDetails.value.trim()) {
+        document.getElementById('specimenDetails-error').style.display = 'block';
+        isValid = false;
+      }
+
+
+
+      // Validate dates
+      validateDates();
+      if (!form.checkValidity()) {
+        isValid = false;
+        form.querySelector(':invalid').scrollIntoView({
+          behavior: 'smooth',
+          block: 'center'
         });
+      }
 
-        // Validate required fields
-        let isValid = true;
+      if (!isValid) {
+        return;
+      }
 
-        // Check dropdowns
-        if (!form.projectOwner.value) {
-          document.getElementById('projectOwner-error').style.display = 'block';
-          isValid = false;
-        }
+      // Submit form if valid
+      await submitForm(form);
+    });
+  }
+
+  // Date validation function
+  function validateDates() {
+    const startDate = new Date(document.getElementById('startDate').value);
+    const endDate = new Date(document.getElementById('endDate').value);
+
+    const startDateError = document.getElementById('startDate-error');
+    const endDateError = document.getElementById('endDate-error');
+
+    // Reset displays
+    startDateError.style.display = 'none';
+    endDateError.style.display = 'none';
+    document.getElementById('startDate').setCustomValidity('');
+    document.getElementById('endDate').setCustomValidity('');
 
 
 
-        // Check text areas
-        if (!form.summary.value.trim()) {
-          document.getElementById('summary-error').style.display = 'block';
-          isValid = false;
-        }
+    // Validate end date
+    if (document.getElementById('endDate').value && endDate < startDate) {
+      endDateError.style.display = 'block';
+      document.getElementById('endDate').setCustomValidity('End date must be after start date');
+    }
+  }
 
-        if (!form.specimenDetails.value.trim()) {
-          document.getElementById('specimenDetails-error').style.display = 'block';
-          isValid = false;
-        }
+  // Function to handle form submission
+  async function submitForm(form) {
+    console.log('in submitForm')
+    const submitBtn = form.querySelector('button[type="submit"]');
+    console.log(newSelectedPhotographers.getValue(true))
+    console.log(newSelectedImagingPlatforms.getValue(true))
+    const originalBtnText = submitBtn.innerHTML;
+
+    try {
+      // Show loading state
+      submitBtn.classList.add('loading');
+      submitBtn.innerHTML = '<i class="fas fa-spinner"></i> Submitting...';
+      submitBtn.disabled = true;
 
 
 
-        // Validate dates
-        validateDates();
-        if (!form.checkValidity()) {
-          isValid = false;
-          form.querySelector(':invalid').scrollIntoView({
-            behavior: 'smooth',
-            block: 'center'
-          });
-        }
 
-        if (!isValid) {
-          return;
-        }
+      console.log(form.projectType.value)
+      // Create a plain object from form data
+      const formData = {
+        projectName: form.projectName.value,
+        projectOwner: form.projectOwner.value,
+        projectType: form.projectType.value,
+        startDate: form.startDate.value,
+        endDate: form.endDate.value,
+        summary: form.summary.value,
+        specimenDetails: form.specimenDetails.value,
+        comments: form.comments.value || null,
+        selectedImagingPlatforms: newSelectedImagingPlatforms.getValue(true),
+        selectedPhotographers: newSelectedPhotographers.getValue(true),
+      };
 
-        // Submit form if valid
-        await submitForm(form);
+
+      const response = await fetch('/project/create', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(formData)
       });
-    }
-
-    // Date validation function
-    function validateDates() {
-      const startDate = new Date(document.getElementById('startDate').value);
-      const endDate = new Date(document.getElementById('endDate').value);
-
-      const startDateError = document.getElementById('startDate-error');
-      const endDateError = document.getElementById('endDate-error');
-
-      // Reset displays
-      startDateError.style.display = 'none';
-      endDateError.style.display = 'none';
-      document.getElementById('startDate').setCustomValidity('');
-      document.getElementById('endDate').setCustomValidity('');
-
-
-
-      // Validate end date
-      if (document.getElementById('endDate').value && endDate < startDate) {
-        endDateError.style.display = 'block';
-        document.getElementById('endDate').setCustomValidity('End date must be after start date');
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || "Submission failed with status " + response.status);
       }
-    }
 
-    // Function to handle form submission
-    async function submitForm(form) {
-      console.log('in submitForm')
-      const submitBtn = form.querySelector('button[type="submit"]');
-      console.log(newSelectedPhotographers.getValue(true))
-      console.log(newSelectedImagingPlatforms.getValue(true))
-      const originalBtnText = submitBtn.innerHTML;
-
-      try {
-        // Show loading state
-        submitBtn.classList.add('loading');
-        submitBtn.innerHTML = '<i class="fas fa-spinner"></i> Submitting...';
-        submitBtn.disabled = true;
-
-
-
-
-        console.log(form.projectType.value)
-        // Create a plain object from form data
-        const formData = {
-          projectName: form.projectName.value,
-          projectOwner: form.projectOwner.value,
-          projectType: form.projectType.value,
-          startDate: form.startDate.value,
-          endDate: form.endDate.value,
-          summary: form.summary.value,
-          specimenDetails: form.specimenDetails.value,
-          comments: form.comments.value || null,
-          selectedImagingPlatforms: newSelectedImagingPlatforms.getValue(true),
-          selectedPhotographers: newSelectedPhotographers.getValue(true),
-        };
-
-
-        const response = await fetch('/project/create', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify(formData)
-        });
-        if (!response.ok) {
-          const errorData = await response.json();
-          throw new Error(errorData.message || "Submission failed with status " + response.status);
-        }
-
-        const data = await response.json();
-        if (!data.success) {
-          throw new Error(data.message || "Submission failed");
-        }
-
-        // Show success message
-        await Swal.fire({
-          title: 'Success!',
-          text: 'project submitted successfully!',
-          icon: 'success',
-          confirmButtonText: 'OK',
-          confirmButtonColor: '#28a745',
-          timer: 1000,
-          timerProgressBar: true
-        });
-
-        // Redirect if URL is provided
-        if (data.redirectUrl) {
-          window.location.href = data.redirectUrl;
-          return; // Stop further execution
-        }
-
-        // Reset form (if no redirection)
-        form.reset();
-
-
-
-
-      } catch (error) {
-        console.error("Submission error:", error);
-        await Swal.fire({
-          title: 'Error!',
-          text: error.message,
-          icon: 'error',
-          confirmButtonText: 'OK',
-          confirmButtonColor: '#dc3545'
-        });
-      } finally {
-        // Reset button state
-        submitBtn.classList.remove('loading');
-        submitBtn.innerHTML = originalBtnText;
-        submitBtn.disabled = false;
+      const data = await response.json();
+      if (!data.success) {
+        throw new Error(data.message || "Submission failed");
       }
-    }
-  </script>
 
-</body>
+      // Show success message
+      await Swal.fire({
+        title: 'Success!',
+        text: 'project submitted successfully!',
+        icon: 'success',
+        confirmButtonText: 'OK',
+        confirmButtonColor: '#28a745',
+        timer: 1000,
+        timerProgressBar: true
+      });
+
+      // Redirect if URL is provided
+      if (data.redirectUrl) {
+        window.location.href = data.redirectUrl;
+        return; // Stop further execution
+      }
+
+      // Reset form (if no redirection)
+      form.reset();
+
+
+
+
+    } catch (error) {
+      console.error("Submission error:", error);
+      await Swal.fire({
+        title: 'Error!',
+        text: error.message,
+        icon: 'error',
+        confirmButtonText: 'OK',
+        confirmButtonColor: '#dc3545'
+      });
+    } finally {
+      // Reset button state
+      submitBtn.classList.remove('loading');
+      submitBtn.innerHTML = originalBtnText;
+      submitBtn.disabled = false;
+    }
+  }
+</script>
 
 </html>

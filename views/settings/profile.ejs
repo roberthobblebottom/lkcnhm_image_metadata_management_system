@@ -4,145 +4,13 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="/css/form.css">
   <title>View User</title>
   <style>
-    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap');
+    
 
-    /* Main Container */
-    .main_con {
-      display: flex;
-      min-height: 100vh;
-      background: #f8fafc;
-      padding: 2rem;
-      margin-left: 350px;
-    }
-
-    body {
-      font-family: 'Segoe UI', sans-serif;
-      background: #f4f6f8;
-      padding: 2rem;
-    }
-
-    /* Form Container */
-    form {
-      min-width: 700px;
-      margin: 0 auto;
-      background: white;
-      padding: 2.5rem;
-      border-radius: 16px;
-      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
-    }
-
-    /* Form Header */
-    form h2 {
-      color: #1e293b;
-      font-size: 1.875rem;
-      text-align: center;
-      margin-bottom: 2rem;
-      position: relative;
-      padding-bottom: 1rem;
-    }
-
-    form h2::after {
-      content: '';
-      position: absolute;
-      bottom: 0;
-      left: 50%;
-      transform: translateX(-50%);
-      width: 60px;
-      height: 3px;
-      background: linear-gradient(to right, #007bff, #6366f1);
-      border-radius: 3px;
-    }
-
-    .form-group {
-      margin-bottom: 20px;
-    }
-
-    /* Labels */
-    label {
-      display: block;
-      font-size: 0.875rem;
-      font-weight: 600;
-      color: #475569;
-      margin-bottom: 0.5rem;
-    }
-
-    /* Input Fields */
-    input[type="text"],
-    textarea {
-      width: 95%;
-      padding: 0.75rem;
-      border: 1.5px solid #e2e8f0;
-      border-radius: 8px;
-      font-size: 0.95rem;
-      color: #1e293b;
-      transition: all 0.2s ease;
-      background-color: #f8fafc;
-    }
-
-
-    textarea {
-      min-height: 120px;
-      resize: vertical;
-      line-height: 1.5;
-    }
-
-    /* Input Focus States */
-    input:focus,
-    textarea:focus {
-      outline: none;
-      border-color: #007bff;
-      box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.1);
-      background-color: #fff;
-    }
-
-    /* Readonly Inputs */
-    input[readonly], textarea[readonly] {
-      background-color: #f1f5f985;
-      border-color: #e2e8f0;
-      cursor: not-allowed;
-    }
-
-    button[type="submit"] {
-      background-color: #007bff;
-      color: #fff;
-      border: none;
-      padding: 0.75rem 2rem;
-      /* font-size: 1rem; */
-      border-radius: 8px;
-      cursor: pointer;
-      transition: background-color 0.3s ease;
-      font-weight: 600;
-      font-size: 1rem;
-      font-family: 'Segoe UI', sans-serif;
-    }
-
-    .submit-btn:active {
-      transform: translateY(0);
-    }
-
-    .buttons {
-      text-align: center;
-    }
-
-
-
-    /* Animation Effects */
-    @keyframes fadeIn {
-      from {
-        opacity: 0;
-        transform: translateY(10px);
-      }
-
-      to {
-        opacity: 1;
-        transform: translateY(0);
-      }
-    }
-
-    form {
-      animation: fadeIn 0.5s ease-out;
+    #main-form {
+      width :200%;
     }
   </style>
 </head>
@@ -152,10 +20,12 @@
   <%- include(currentUser.UserType=='admin' 
   ? '../sidenavs/admin' 
   : '../sidenavs/user' ) %>
-  <div class="main_con">
+  <div class="main-con">
     <form id="main-form">
+      <div class="form-group">
+        <h2>View or Edit your Profile</h2>
+      </div>
 
-      <h2>View or Edit your Profile</h2>
 
       <div class="form-group">
         <label for="userID">User ID</label>
@@ -165,8 +35,6 @@
         <label for="email">Email </label>
         <input type="text" name="email" id="email" value="<%=currentUser.Email%>" required>
       </div>
-
-
       <div class="form-group">
         <label for="userType">User Type</label>
         <input type="text" value="<%=currentUser.UserType%>" readonly>
@@ -189,7 +57,7 @@
       </div>
       <div class="form-group">
         <label for="comments">Comments </label>
-        <textarea id="comments" ><%=currentUser.Comments%></textarea>
+        <textarea id="comments"><%=currentUser.Comments%></textarea>
       </div>
       <div class="form-group">
         <label>Request Status </label>
@@ -197,7 +65,7 @@
       </div>
       <div class="form-group">
         <label> Reason for Request: </label>
-        <textarea  readonly><%=currentUser.ReasonForRequest%></textarea>
+        <textarea readonly><%=currentUser.ReasonForRequest%></textarea>
       </div>
 
       <div class="buttons">
@@ -244,7 +112,7 @@
           contactNumber: form.contactNumber.value,
           organisation: form.organisation.value,
           comments: form.comments.value,
-originalEmail: "<%=currentUser.Email%>"
+          originalEmail: "<%=currentUser.Email%>"
         })
 
         const response = await fetch("/settings/profile", {
@@ -298,7 +166,7 @@ originalEmail: "<%=currentUser.Email%>"
         } finally {
           submitBtn.disabled = false;
           submitBtn.value = "Edit Profile"
-        submitBtn.innerHTML = 'Edit Profile';
+          submitBtn.innerHTML = 'Edit Profile';
         }
       });
   })
