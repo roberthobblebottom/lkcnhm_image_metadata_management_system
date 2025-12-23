@@ -28,7 +28,7 @@
     background: white;
     border-radius: 30px;
     padding: 50px 60px;
-    width: 700px;
+    width: 600px;
     height: 500px;
     box-shadow: 0 15px 40px rgba(0, 0, 0, 0.1);
     text-align: center;
@@ -43,13 +43,12 @@
 
   .password-field{
     font-size: 30px;
-    min-width: 600px;
+    min-width: 400px;
     min-height: 80px;
   }
 .password-field {
     position: relative;
     width: 100%;
-    max-width: 400px;
     margin: 20px auto;
   }
 

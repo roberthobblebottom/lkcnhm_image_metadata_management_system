@@ -10,16 +10,17 @@
   <link rel="stylesheet" href="https://cdn.datatables.net/2.3.5/css/dataTables.dataTables.css" />
   <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
   <script src="https://cdn.datatables.net/2.3.5/js/dataTables.js"></script>
- <style>
-  .horizontal-panel2{
-    display:flex;
-    justify-content: space-between;
-    
-  }
-form{
-    margin-bottom: -5px;
-  }
- </style> 
+  <style>
+    .horizontal-panel2 {
+      display: flex;
+      justify-content: space-between;
+      width: 250px;
+    }
+
+    form {
+      margin-bottom: -5px;
+    }
+  </style>
 </head>
 
 <body>
@@ -44,16 +45,16 @@ form{
             <th>Media ID</th>
             <th>Project ID</th>
             <th>Project Name</th>
-            <%if (currentUser.UserType=='admin' ){%>
             <th>Photographer</th>
-            <%}%>
           <th>File Name</th>
+          <th>File Path</th>
           <th>Catalog ID</th>
+          <th>Resolution</th>
           <th>Imaging Date</th>
           <%if (currentUser.UserType=='admin' ){%>
             <th>Is Deleted?</th>
             <%}%>
-          <th>Actions</th>
+          <th >Actions</th>
         </tr>
       </thead>
     <tbody>
@@ -62,11 +63,11 @@ form{
             <td> <%= media.MediaID %></td>
             <td> <%= media.ProjectID %></td>
             <td> <%= media.ProjectName %></td>
-            <%if (currentUser.UserType=='admin' ){%>
             <td> <%= media.photographerName%></td>
-            <%}%>
             <td><%= media.FileName %></td>
+            <td><%= media.FilePath %></td>
             <td> <%= media.CatalogID  %></td>
+            <td><%= media.Resolution%></td>
             <td> <%= media.ImagingDate?.toISOString().slice(0, 10) %></td>
 
             <%if (currentUser.UserType=='admin' ){%>
@@ -76,22 +77,22 @@ form{
             <%}%>
             <td class="horizontal-panel2">
               <a href="/media/view/<%= media.MediaID %>"class="btn-view">View</a>
-              <a href="/media/edit/<%=media.MediaID%>" class="<%=media.IsDeleted?'disabled':'btn-edit'%>">
-                Edit</a>
+            <a href="/media/edit/<%=media.MediaID%>" class="<%=media.IsDeleted?'disabled':'btn-edit'%>">
+              Edit</a>
 
-              <%if (!media.IsDeleted ){%>
-              <form action="/media/delete/<%= media.MediaID %>" method="POST"  onsubmit="return confirm('Are you sure you want to delete this media ?');">
-                <button type="submit" class="btn-delete">Delete</button>
-              </form>
-              <%} else {%>
-              <form action="/media/restore/<%= media.MediaID %>" method="POST" onsubmit="return confirm('Are you sure you want to restore this media ?');">
-                <button type="submit" class="btn-restore">restore</button>
-              </form>
-              <%}%>
+            <%if (!media.IsDeleted ){%>
+            <form action="/media/delete/<%= media.MediaID %>" method="POST" onsubmit="return confirm('Are you sure you want to delete this media ?');">
+              <button type="submit" class="btn-delete">Delete</button>
+            </form>
+            <%} else {%>
+            <form action="/media/restore/<%= media.MediaID %>" method="POST" onsubmit="return confirm('Are you sure you want to restore this media ?');">
+              <button type="submit" class="btn-restore">restore</button>
+            </form>
+            <%}%>
           </td>
         </tr>
       <%})%>
-              </tbody>
+            </tbody>
       </table>
       <%}%>
   </div>

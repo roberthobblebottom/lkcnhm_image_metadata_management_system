@@ -9,7 +9,7 @@ body {
 
 .main-con {
   margin-top: 100px;
-  margin-left: 300px;
+  margin-left: 350px;
 
 }
 
@@ -28,7 +28,7 @@ h2 {
 
 /* Table Styles */
 table {
-  width: 80%;
+  width: 100%;
   /* Slightly narrower */
   border-collapse: collapse;
   background: white;

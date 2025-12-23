@@ -334,6 +334,7 @@ router.get(
         m.FileFormat,
         m.CreatedDate,
         m.IsDeleted,
+        m.Resolution,
         p.ProjectID,
         p.ProjectName,
         photographer.FullName As photographerName

@@ -6,7 +6,7 @@
     left: 0;
     top: 0;
     height: 100%;
-    width: 220px;
+    width: 300px;
     background-color: #0f0015;
     display: flex;
     flex-direction: column;
@@ -16,7 +16,12 @@
     color: white;
 
   }
-  
+      .loginDetails{
+margin-left: 15px;
+margin-bottom: 10px;
+    }
+    
+    img {width: 280px; height: auto; margin-left:10px;}
   .logo-text {
     text-align: center;
     font-size: 28px;
