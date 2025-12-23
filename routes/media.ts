@@ -431,7 +431,7 @@ router.get(
     LEFT JOIN User u2 ON m.UpdatedByID = u2.UserID
     JOIN User photographer ON m.PhotographerID = photographer.UserID  
     JOIN Project project ON m.ProjectID = project.ProjectID
-    WHERE m.MediaID = ? AND m.IsDeleted = 0
+    WHERE m.MediaID = ? 
     ORDER BY m.CreatedDate DESC
         `;
 

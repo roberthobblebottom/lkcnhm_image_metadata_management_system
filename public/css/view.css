@@ -30,15 +30,19 @@
 
   .request-header p {
       margin-top: 4px;
+      font-size: large;
       color: #666;
   }
-
+a.disabled {
+  color:#ccc;
+  pointer-events: none;
+}
   .status-badge {
       font-size: 1rem;
       padding: 6px 12px;
       border-radius: 20px;
       float: right;
-      margin-top: -35px;
+      margin-top: -60px;
   }
 
   .detail-row {

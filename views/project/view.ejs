@@ -28,7 +28,7 @@
                                     || 'System' %>
         </p>
         <% } %>
-        <% if(project.isDeleted){%>
+        <% if(project.IsDeleted){%>
         <span class="status-badge bg-danger">
           Deleted
         </span>
@@ -109,7 +109,7 @@
       <a href="/project/view-all" class="btn btn-primary">
         <i class="fas fa-arrow-left"></i> Back to Projects
       </a>
-      <a href="/project/edit/<%= project.ProjectID %>" class="btn btn-warning">
+      <a href="/project/edit/<%= project.ProjectID %>" class="<%=project.IsDeleted?'disabled':'btn btn-warning'%>">
         <i class="fas fa-edit"></i> Edit Request
       </a>
     </div>

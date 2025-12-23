@@ -32,7 +32,7 @@
         </p>
         <p class="text-muted">Last updated on <%=  media.UpdatedDate?.toISOString().slice(0, 10)%> by <%= media.UpdatedByName %>
         </p>
-        <% if(media.isDeleted){%>
+        <% if(media.IsDeleted){%>
         <span class="status-badge bg-danger">
           Deleted
         </span>
@@ -164,7 +164,7 @@
     <a href="/media/view-all" class="btn btn-primary">
       <i class="fas fa-arrow-left"></i> Back to view all media
     </a>
-    <a href="/media/edit/<%= mediaID%>/" class="btn btn-warning">
+    <a href="/media/edit/<%= mediaID%>/" class="<%=media.IsDeleted?'disabled':'btn btn-warning'%>">
       <i class="fas fa-edit"></i> Edit Request
     </a>
   </div>

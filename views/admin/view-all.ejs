@@ -57,8 +57,7 @@
                                             month: 'short' , year: 'numeric' }) %>
         </td>
         <td>
-          <%= user.LastLoginDate ? new
-                                            Date(user.LastLoginDate).toLocaleDateString('en-IN') : '-' %>
+          <%= user.LastLoginDate ? new Date(user.LastLoginDate).toLocaleDateString('en-IN') : '-' %>
         </td>
 
         <td><span class="status <%= user.RequestStatus == 'pending' || user.RequestStatus == 'rejected' ? 'inactive' : 'active' %>">
@@ -72,7 +71,7 @@
           <a href="/admin/user-management/view/<%= user.UserID %>" class="btn-view">
             <i class="fas fa-view"></i> View
           </a>
-          <a href="/admin/user-management/edit/<%= user.UserID %>" class="btn-edit">
+          <a href="/admin/user-management/edit/<%= user.UserID %>" class="<%=user.IsDeleted?'disabled':'btn-edit'%>">
             <i class="fas fa-edit"></i> Edit
           </a>
           <%if (!user.IsDeleted ){%>

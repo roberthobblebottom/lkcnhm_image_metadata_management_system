@@ -10,7 +10,16 @@
   <link rel="stylesheet" href="https://cdn.datatables.net/2.3.5/css/dataTables.dataTables.css" />
   <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
   <script src="https://cdn.datatables.net/2.3.5/js/dataTables.js"></script>
-  
+ <style>
+  .horizontal-panel2{
+    display:flex;
+    justify-content: space-between;
+    
+  }
+form{
+    margin-bottom: -5px;
+  }
+ </style> 
 </head>
 
 <body>
@@ -65,16 +74,17 @@
               <%=!media.IsDeleted? 'No' : 'Yes' %>
             </td>
             <%}%>
-            <td class="horizontal-panel">
-              <a href="/media/view/<%= media.MediaID %>"><button class="btn-view">View</button></a>
-              <a href="/media/edit/<%=media.MediaID%>"><button class="btn-edit">Edit</button></a>
+            <td class="horizontal-panel2">
+              <a href="/media/view/<%= media.MediaID %>"class="btn-view">View</a>
+              <a href="/media/edit/<%=media.MediaID%>" class="<%=media.IsDeleted?'disabled':'btn-edit'%>">
+                Edit</a>
 
               <%if (!media.IsDeleted ){%>
-              <form action="/media/delete/<%= media.MediaID %>" method="POST" style="display:inline;" onsubmit="return confirm('Are you sure you want to delete this media ?');">
+              <form action="/media/delete/<%= media.MediaID %>" method="POST"  onsubmit="return confirm('Are you sure you want to delete this media ?');">
                 <button type="submit" class="btn-delete">Delete</button>
               </form>
               <%} else {%>
-              <form action="/media/restore/<%= media.MediaID %>" method="POST" style="display:inline;" onsubmit="return confirm('Are you sure you want to restore this media ?');">
+              <form action="/media/restore/<%= media.MediaID %>" method="POST" onsubmit="return confirm('Are you sure you want to restore this media ?');">
                 <button type="submit" class="btn-restore">restore</button>
               </form>
               <%}%>
