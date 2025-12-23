@@ -9,6 +9,7 @@
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
   <link rel="stylesheet" href="/css/form.css">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/choices.js@11.1.0/public/assets/styles/choices.min.css" />
+   <!-- <link ref="stylesheet" href="/css/choiceJS.css"> -->
   <script src="https://cdn.jsdelivr.net/npm/choices.js/public/assets/scripts/choices.min.js"></script>
 </head>
 
@@ -45,7 +46,7 @@
       <div class="form-group">
         <div class="horizontal-panel2">
           <label class="label2">Project Type*</label>
-          <button class="btn addButton" id="addProjectTypeButton">Add</button>
+          <button class="addButton" id="addProjectTypeButton">Add</button>
         </div>
 
         <select name="projectType" id="projectType" class="form-control" required>
@@ -100,7 +101,7 @@
       <div class="form-group">
         <div class="horizontal-panel2">
           <label class="label2" for="platform">Imaging Platform</label>
-          <button class='btn addButton' id="addImagingPlatformButton">Add</button>
+          <button class='addButton' id="addImagingPlatformButton">Add</button>
         </div>
         <select multiple id="newSelectedImagingPlatforms">
           <option value="">Select Imaging Platforms</span>
@@ -139,7 +140,6 @@
   });
   // Initialize form with current datetime
   document.addEventListener('DOMContentLoaded', function() {
-
     // document.querySelector("[class='choices__inner']").style.float = "1000px"
     document.getElementById('addProjectTypeButton').addEventListener('click', async function(e) {
       e.preventDefault()
@@ -193,9 +193,7 @@
 
   // Update date constraints when dates change
   function updateDateConstraints() {
-    // const requestDate = document.getElementById('requestDate').value;
     const startDate = document.getElementById('startDate').value;
-
     // Set minimum end date to be after start date (if start date is selected)
     if (startDate)
       document.getElementById('endDate').min = startDate;
@@ -206,8 +204,6 @@
   // Function to setup form validation
   function setupFormValidation() {
     const form = document.getElementById('main-form');
-
-
 
     document.getElementById('startDate').addEventListener('change', function() {
       updateDateConstraints();

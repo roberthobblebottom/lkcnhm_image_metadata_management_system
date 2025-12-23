@@ -15,7 +15,7 @@
     /* Labels */
     label {
       display: block;
-      font-size: 0.875rem;
+      font-size: large;
       font-weight: 600;
       color: #475569;
       margin-bottom: 0.5rem;
@@ -26,13 +26,15 @@
     input[type="date"],
     input[type='number'],
     input[type="datetime-local"],
+    input[type='email'],
+    input[type='password'],
     select,
     textarea {
       width: 95%;
       padding: 0.75rem;
       border: 1.5px solid #e2e8f0;
       border-radius: 8px;
-      font-size: 0.95rem;
+      font-size: large;
       color: #1e293b;
       transition: all 0.2s ease;
       background-color: #f8fafc;
@@ -126,7 +128,7 @@
 <div class="background">
   <div class="login-container">
     <div class="form-group">
-      <h2>Sign Up</h2>
+      <h1>Sign Up</h1>
       * means mandatory
 
     </div>
@@ -139,7 +141,7 @@
 
         <!-- pattern="^[a-zA-Z0-9](\.?[a-zA-Z0-9_-])*[a-zA-Z0-9]@[a-zA-Z0-9-]+\.[a-zA-Z]{2,}$"  -->
       </div>
-      <div style="position: relative;" , class="form-group">
+      <div   class="form-group">
         <label>Password*</label>
         <input type="password" id="password" name="password" required title="Password must be at least 8 characters long and include an uppercase letter, a number, and a symbol." style="padding-right: 40px;" />
 
@@ -148,7 +150,7 @@
           👁️
         </span>
       </div>
-      <div style="position: relative;" , class="form-group">
+      <div  class="form-group">
 
         <label>Confirm Password*</label>
         <input type="password" id="confirmPassword" name="confirmPassword" required title="Password must be at least 8 characters long and include an uppercase letter, a number, and a symbol." style="padding-right: 40px;" />

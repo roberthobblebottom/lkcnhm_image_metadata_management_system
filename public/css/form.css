@@ -8,7 +8,7 @@
    /* Main Container */
    .main-con {
        display: flex;
-       min-height: 100vh;
+       min-height: 50vh;
        padding: 2rem;
        margin-left: 100px;
    }
@@ -21,6 +21,25 @@
        padding: 2.5rem;
        border-radius: 16px;
        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+   }
+
+   .form-group {
+       margin-bottom: 20px;
+       margin-bottom: 1.5rem;
+       display: grid;
+       /* vertical-align: middle; */
+       align-items: center;
+   }
+
+   .horizontal-panel {
+       display: flex;
+       justify-content: center;
+   }
+
+   .horizontal-panel2 {
+       display: flex;
+       justify-content: space-between;
+
    }
 
    /* Form Header */
@@ -47,30 +66,32 @@
        border-radius: 3px;
    }
 
-   .form-group {
-       margin-bottom: 20px;
-       margin-bottom: 1.5rem;
-       display: grid;
-       /* vertical-align: middle; */
-       align-items: center;
-   }
- .horizontal-panel {
-       display: flex;
-       justify-content: center;
-   }
-   
- .horizontal-panel2 {
-    display: flex;
-    justify-content: space-between;
- }
+
    /* Labels */
    label {
        display: block;
-       font-size: medium;
+       font-size: large;
        font-weight: 600;
        color: #475569;
        margin-bottom: 0.5rem;
        float: left;
+   }
+   .label2{
+   display: block;
+       font-size: medium;
+       font-size: large;
+       font-weight: 600;
+       color: #475569;
+       float: left;
+   }
+
+ 
+
+   /* Required Field Indicator */
+   [required]+label::after {
+       content: '*';
+       color: #ef4444;
+       margin-left: 4px;
    }
 
    /* Input Fields */
@@ -81,17 +102,20 @@
    input[type="datetime-local"],
    select,
    textarea {
-       font-size: medium;
+       font-size: 20px;
        width: 95%;
        padding: 0.75rem;
        border: 1.5px solid #e2e8f0;
        border-radius: 8px;
-       font-size: 0.95rem;
        color: #1e293b;
        transition: all 0.2s ease;
        background-color: #f8fafc;
    }
 
+   /* Hidden Fields */
+   input[type="hidden"] {
+       display: none;
+   }
    select {
        width: 98%;
    }
@@ -114,95 +138,12 @@
    }
 
 
-
-
-   /* Required Field Indicator */
-   [required]+label::after {
-       content: '*';
-       color: #ef4444;
-       margin-left: 4px;
-   }
-
-
    textarea {
+       font-size: 20px;
        min-height: 120px;
        resize: vertical;
        line-height: 1.5;
    }
-
-
-
-   .submit-btn:active {
-       transform: translateY(0);
-   }
-
-   /* Note Section */
-   .note {
-       text-align: center;
-       color: #64748b;
-       background: #f8fafc;
-       padding: 1rem;
-       border-radius: 8px;
-       border: 1px dashed #cbd5e1;
-       margin: 2rem 0;
-       font-size: 0.875rem;
-   }
-
-   /* Required Field Indicator */
-   [required]+label::after {
-       content: '*';
-       color: #ef4444;
-       margin-left: 4px;
-   }
-
-   .btn {
-       display: inline-block;
-       background: #007bff;
-       color: white;
-       padding: 10px 16px;
-       border: none;
-       border-radius: 6px;
-       text-decoration: none;
-       font-weight: 600;
-       margin-top: 50px;
-       margin-bottom: 50px;
-   }
-
-   /* Responsive Adjustments */
-   @media (max-width: 768px) {
-       form {
-           padding: 1.5rem;
-       }
-
-
-
-       form h2 {
-           font-size: 1.5rem;
-       }
-   }
-
-   /* Animation Effects */
-   @keyframes fadeIn {
-       from {
-           opacity: 0;
-           transform: translateY(10px);
-       }
-
-       to {
-           opacity: 1;
-           transform: translateY(0);
-       }
-   }
-
-   form {
-       animation: fadeIn 0.5s ease-out;
-   }
-
-   /* Hidden Fields */
-   input[type="hidden"] {
-       display: none;
-   }
-
 
 
    .btn-primary {
@@ -232,12 +173,10 @@
        color: #fff;
        border: none;
        padding: 0.75rem 2rem;
-       /* font-size: 1rem; */
        border-radius: 8px;
        cursor: pointer;
        transition: background-color 0.3s ease;
        font-weight: 600;
-       font-size: 1rem;
        font-family: 'Segoe UI', sans-serif;
    }
 
@@ -245,19 +184,70 @@
        background-color: #0056b3;
    }
 
-
    .addButton {
-       float: right;
+       display: inline-block;
+       background: #007bff;
+       color: white;
+       padding: 10px 16px;
+       border: none;
+       border-radius: 6px;
+       text-decoration: none;
+       font-weight: 600;
        margin-right: 2%;
-       margin-top: 1%;
-       margin-bottom: 5px;
+       margin-bottom: 0.9rem;
+   }
+
+   /* Required Field Indicator */
+   [required]+label::after {
+       content: '*';
+       color: #ef4444;
+       margin-left: 4px;
+   }
+
+   .btn {
+       display: inline-block;
+       background: #007bff;
+       color: white;
+       padding: 10px 16px;
+       border: none;
+       border-radius: 6px;
+       text-decoration: none;
+       font-weight: 600;
+       margin-top: 50px;
+       margin-bottom: 50px;
+   }
+
+   /* Responsive Adjustments */
+   @media (max-width: 768px) {
+       form {
+           padding: 1.5rem;
+       }
+       form h2 {
+           font-size: 1.5rem;
+       }
+   }
+
+   /* Animation Effects */
+   @keyframes fadeIn {
+       from {
+           opacity: 0;
+           transform: translateY(10px);
+       }
+
+       to {
+           opacity: 1;
+           transform: translateY(0);
+       }
+   }
+
+   form {
+       animation: fadeIn 0.5s ease-out;
    }
 
    .buttons {
        text-align: center;
    }
 
-   /* Note Section */
    .note {
        text-align: center;
        color: #64748b;
@@ -266,7 +256,7 @@
        border-radius: 8px;
        border: 1px dashed #cbd5e1;
        margin: 2rem 0;
-       font-size: 0.875rem;
+       font-size: medium;
    }
 
    .error-message {

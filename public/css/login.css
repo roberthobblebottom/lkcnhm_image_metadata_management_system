@@ -27,31 +27,64 @@
   .login-container {
     background: white;
     border-radius: 30px;
-    padding: 40px 60px;
-    width: 500px;
+    padding: 50px 60px;
+    width: 700px;
     height: 500px;
     box-shadow: 0 15px 40px rgba(0, 0, 0, 0.1);
     text-align: center;
   }
   
-  .login-container h2 {
-    font-size: 24px;
+  /* .login-container h2 {
+    font-size: large;
     font-weight: 700;
     margin-bottom: 30px;
-  }
+  } */
   
-  form input {
+
+  .password-field{
+    font-size: 30px;
+    min-width: 600px;
+    min-height: 80px;
+  }
+.password-field {
+    position: relative;
     width: 100%;
-    padding: 14px 16px;
-    margin: 12px 0;
-    border-radius: 12px;
-    border: 1px solid #ccc;
-    font-size: 16px;
+    max-width: 400px;
+    margin: 20px auto;
   }
-  
+
+  .password-field input {
+    width: 100%;
+    padding: 12px 40px 12px 12px;
+    font-size: large;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    outline: none;
+    transition: border-color 0.3s;
+  }
+
+  .password-field input:focus {
+    border-color: #007bff;
+  }
+
+  .toggle-eye {
+    position: absolute;
+    top: 35%;
+    right: 12px;
+    transform: translateY(-50%);
+    cursor: pointer;
+    font-size: 18px;
+    color: #555;
+    user-select: none;
+    transition: color 0.2s;
+  }
+
+  .toggle-eye:hover {
+    color: #000;
+  }
   .forgot-password {
     text-align: right;
-    font-size: 14px;
+    font-size: medium;
     margin-bottom: 15px;
   }
   
@@ -59,14 +92,7 @@
     color: #6a6a6a;
     text-decoration: none;
   }
-  .social-login{
-    margin-top: 100px;
-  }
-  .social-login p {
-    margin: 20px 0 10px;
-    font-size: 14px;
-    color: #444;
-  }
+ 
   
   .icons {
     display: flex;
@@ -92,7 +118,7 @@
     border-radius: 999px;
     background-color: #377dff;
     color: white;
-    font-size: 16px;
+    font-size: large;
     font-weight: 600;
     cursor: pointer;
     margin-top: 20px;
@@ -105,7 +131,7 @@
   
   .signup-text {
     margin-top: 20px;
-    font-size: 14px;
+    font-size: medium;
     color: #666;
   }
   

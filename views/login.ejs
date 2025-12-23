@@ -1,10 +1,19 @@
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link rel="stylesheet" href="/css/login.css">
 
+<style>
+  
+</style>
+</head>
 <div class="background">
   <div class="login-container">
     <h2>Sign In</h2>
     <form id="login-form">
+      <div class="password-field">
       <input type="email" id="email" placeholder="Enter your email" required>
+      <div>
       <div class="password-field">
         <input type="password" id="password" placeholder="Enter your password" required>
         <span id="togglePassword" class="toggle-eye">👁️</span>
@@ -74,42 +83,3 @@
 
   });
 </script>
-
-<style>
-  .password-field {
-    position: relative;
-    width: 100%;
-    max-width: 400px;
-    margin: 20px auto;
-  }
-
-  .password-field input {
-    width: 100%;
-    padding: 12px 40px 12px 12px;
-    font-size: 16px;
-    border: 1px solid #ccc;
-    border-radius: 6px;
-    outline: none;
-    transition: border-color 0.3s;
-  }
-
-  .password-field input:focus {
-    border-color: #007bff;
-  }
-
-  .toggle-eye {
-    position: absolute;
-    top: 50%;
-    right: 12px;
-    transform: translateY(-50%);
-    cursor: pointer;
-    font-size: 18px;
-    color: #555;
-    user-select: none;
-    transition: color 0.2s;
-  }
-
-  .toggle-eye:hover {
-    color: #000;
-  }
-</style>

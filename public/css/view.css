@@ -1,0 +1,205 @@
+  body {
+      background-color: #f8f9fa;
+  }
+
+  .request-container {
+      background-color: #fff;
+      border-radius: 12px;
+      padding: 30px;
+      margin-top: -100px;
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
+      height: 1000px;
+      width: 1300px;
+      max-width: 2000px;
+      margin: 40px auto;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+
+  }
+
+  .request-header {
+      margin-bottom: 30px;
+      border-bottom: 2px solid #f1f1f1;
+      padding-bottom: 15px;
+  }
+
+  .request-header h1 {
+      font-size: 1.75rem;
+      font-weight: 600;
+      color: #333;
+  }
+
+  .request-header p {
+      margin-top: 4px;
+      color: #666;
+  }
+
+  .status-badge {
+      font-size: 1rem;
+      padding: 6px 12px;
+      border-radius: 20px;
+      float: right;
+      margin-top: -35px;
+  }
+
+  .detail-row {
+      display: flex;
+      margin-bottom: 32px;
+      flex-wrap: wrap;
+  }
+
+  .detail-label {
+      flex: 0 0 180px;
+      font-weight: 600;
+      color: #444;
+      font-size: large;
+  }
+
+  .detail-value {
+      flex: 1;
+      color: #333;
+
+      font-size: large;
+  }
+
+  .text-area-value {
+      background: #f9f9f9;
+      border-radius: 8px;
+      border: 1px solid #eee;
+      font-size: medium;
+      min-height: 120px;
+      line-height: 1.5;
+  }
+
+  .badge {
+      padding: 6px 10px;
+      font-size: 0.85rem;
+      font-weight: 500;
+      border-radius: 12px;
+  }
+
+  .bg-success {
+      background-color: #28a745 !important;
+      color: #fff;
+  }
+
+  .bg-danger {
+      background-color: #dc3545 !important;
+      color: #fff;
+  }
+
+  .bg-warning {
+      background-color: #ffc107 !important;
+      color: #212529;
+  }
+
+  .mt-4 {
+      margin-top: 2rem !important;
+  }
+
+  .btn {
+      border-radius: 8px;
+      padding: 10px 20px;
+      font-size: large;
+      font-weight: 500;
+      transition: all 0.3s ease-in-out;
+  }
+
+  .btn-primary {
+      background-color: #007bff;
+      border: none;
+      color: #fff;
+  }
+
+  .btn-primary:hover {
+      background-color: #0056b3;
+  }
+
+  .btn-warning {
+      background-color: #07daff;
+      border: none;
+      color: #212529;
+  }
+
+  .btn-warning:hover {
+      background-color: #e0a800;
+  }
+
+  body {
+      font-family: 'Inter', sans-serif;
+      margin: 0;
+      background: #f8f9fc;
+      color: #333;
+      display: flex;
+  }
+
+  main {
+      margin-left: 200px;
+      /* enough space for sidebar */
+      padding: 40px;
+      width: 100%;
+      box-sizing: border-box;
+  }
+
+
+  /* Heading */
+  h2 {
+      font-size: 24px;
+      color: #212529;
+      font-weight: 600;
+      margin-bottom: 20px;
+  }
+
+
+
+  /* Buttons */
+  button,
+  a {
+      font-size: medium;
+      display: inline-block;
+      padding: 8px 12px;
+      border: none;
+      cursor: pointer;
+      text-align: center;
+      border-radius: 4px;
+      transition: 0.3s;
+      text-decoration: none;
+      font-weight: 500;
+  }
+
+  /* Edit Button */
+  a.edit-btn {
+      background: #28a745;
+      color: white;
+  }
+
+  a.edit-btn:hover {
+      background: #218838;
+  }
+
+  /* Delete Button */
+  button.delete-btn {
+      background: #dc3545;
+      color: white;
+  }
+
+  button.delete-btn:hover {
+      background: #c82333;
+  }
+
+  /* Responsive Design */
+  @media (max-width: 768px) {
+      table {
+          font-size: 12px;
+      }
+
+      th,
+      td {
+          padding: 10px;
+      }
+
+      button,
+      a {
+          padding: 6px 10px;
+          font-size: 12px;
+      }
+  }
