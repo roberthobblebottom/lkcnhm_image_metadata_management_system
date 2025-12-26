@@ -109,7 +109,7 @@
     <div class="detail-row">
       <div class="detail-label">Imaging Date:</div>
       <div class="detail-value">
-        <%= media.ImagingDate?.toISOString().slice(-1, 10) %>
+        <%= media.ImagingDate?.toISOString().split('T')[0]%>
       </div>
     </div>
 

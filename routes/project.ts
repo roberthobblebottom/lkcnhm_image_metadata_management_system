@@ -592,13 +592,13 @@ router.get(
               : "Not Specified",
         };
 
-        const newlyCreatedPhotographers = req.session.newlyCreatedPhotographers;
+        const newlyCreatedPhotographers = req.session.newlyCreatedPhotographers ;
         req.session.newlyCreatedPhotographers = [];
         req.session.save();
         res.render("project/view", {
           project: project,
           currentUser: req.session.passport.user,
-          newlyCreatedPhotographers: newlyCreatedPhotographers,
+          newlyCreatedPhotographers: newlyCreatedPhotographers ? newlyCreatedPhotographers : []  ,
           title: "View Project", // Add title here
         });
       }
@@ -635,6 +635,8 @@ router.get(
           selectedImagingPlatforms: string[];
           currentUser: User;
           title: string;
+
+          newlyCreatedPhotographers: string[];
         }
       ) => void;
     }
@@ -711,6 +713,8 @@ router.get(
         selectedImagingPlatforms: imagingPlatforms,
         currentUser: req.user,
         title: "Edit Project", // Add title here
+        
+        newlyCreatedPhotographers:[]
       });
     } catch (err) {
       console.error("Error:", err);
