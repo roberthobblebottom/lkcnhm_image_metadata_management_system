@@ -202,6 +202,13 @@ router.post(
         const newPasswordSalt = crypto.randomBytes(16).toString();
         // const newPassword = crypto.randomBytes(8).toString() // TODO: switch to this in production
         const newPassword = "1"; // For testing only
+        const saltedPassword = crypto.pbkdf2Sync(
+          newPassword,
+          newPasswordSalt,
+          310000,
+          32,
+          "sha256"
+        );
         var insertedId = "";
         const insertUserQuery = `
             INSERT INTO User 
@@ -210,7 +217,7 @@ router.post(
             VALUES (?, ?,?,  ?, NOW(),NOW(),  ?, ?,?,?,?,?)`;
         const params = [
           email,
-          Buffer.from("DUMMY_PASSWORD_CHANGE_THIS_IMMEDIATELY").toString("hex"),
+          saltedPassword,
           newPasswordSalt,
           userTypesEnumeration().photographerOnly,
           fullName,
@@ -246,19 +253,6 @@ router.post(
               : err;
           res.status(400).json({ success: false, message: msg });
         }
-        crypto.pbkdf2(
-          newPassword,
-          newPasswordSalt,
-          310000,
-          32,
-          "sha256",
-          async function (err, hashedPassword) {
-            db.promise().query(
-              "UPDATE User SET SaltedPassword = ? WHERE UserID = ?",
-              [hashedPassword, insertedId]
-            );
-          }
-        );
       }
       req.session["newlyCreatedPhotographers"] = newlyCreatedPhotographers;
       req.session.save();
@@ -834,9 +828,9 @@ router.post(
           message: "End date must be after start date",
         });
       }
-      console.log(toBeCreatedPhotographers)
+      console.log(toBeCreatedPhotographers);
       for (const x of toBeCreatedPhotographers) {
-        console.log('x',x)
+        console.log("x", x);
         if (!emailRegex.test(x[1])) {
           return res.status(400).json({
             success: false,
@@ -862,6 +856,14 @@ router.post(
         // const newPassword = crypto.randomBytes(8).toString() // TODO: switch to this in production
         const newPassword = "1"; // For testing only
         var insertedId = "";
+
+        const saltedPassword = crypto.pbkdf2Sync(
+          newPassword,
+          newPasswordSalt,
+          310000,
+          32,
+          "sha256"
+        );
         const insertUserQuery = `
             INSERT INTO User 
             (Email, SaltedPassword,PasswordSalt,  UserType, RegisteredDate,
@@ -869,7 +871,7 @@ router.post(
             VALUES (?, ?,?,  ?, NOW(),NOW(),  ?, ?,?,?,?,?)`;
         const params = [
           email,
-          Buffer.from("DUMMY_PASSWORD_CHANGE_THIS_IMMEDIATELY").toString("hex"),
+          saltedPassword,
           newPasswordSalt,
           userTypesEnumeration().photographerOnly,
           fullName,
@@ -905,19 +907,6 @@ router.post(
               : err;
           res.status(400).json({ success: false, message: msg });
         }
-        crypto.pbkdf2(
-          newPassword,
-          newPasswordSalt,
-          310000,
-          32,
-          "sha256",
-          async function (err, hashedPassword) {
-            db.promise().query(
-              "UPDATE User SET SaltedPassword = ? WHERE UserID = ?",
-              [hashedPassword, insertedId]
-            );
-          }
-        );
       }
       req.session["newlyCreatedPhotographers"] = newlyCreatedPhotographers;
       req.session.save();
