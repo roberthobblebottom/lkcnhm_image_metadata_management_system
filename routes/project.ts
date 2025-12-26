@@ -253,16 +253,15 @@ router.post(
           32,
           "sha256",
           async function (err, hashedPassword) {
-            db.promise().query("UPDATE User SET SaltedPassword = ? WHERE UserID = ?", [
-
-              hashedPassword,
-              insertedId,
-            ]);
+            db.promise().query(
+              "UPDATE User SET SaltedPassword = ? WHERE UserID = ?",
+              [hashedPassword, insertedId]
+            );
           }
         );
       }
-      req.session['newlyCreatedPhotographers'] = newlyCreatedPhotographers
-      req.session.save()
+      req.session["newlyCreatedPhotographers"] = newlyCreatedPhotographers;
+      req.session.save();
       //alter table for Imaging Platform enums if any new values
       const selectedImagingPlatforms = req.body.selectedImagingPlatforms;
       var hasNewImagingPlatform = false;
@@ -326,24 +325,26 @@ router.post(
             ProjectStatus
         ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, NOW(), ?, NOW(), ?, 0, ?)
         `;
-      const result = (await db
-        .promise()
-        .query(insertQuery, [
-          req.body.projectName,
-          req.body.projectType,
-          req.body.projectOwner,
-          req.body.startDate,
-          req.body.endDate,
-          req.body.summary,
-          req.body.specimenDetails,
-          req.body.comments || null,
-          userID,
-          userID,
-          projectStatusEnumeration().in_progress,
-        ]))[0];
+      const result = (
+        await db
+          .promise()
+          .query(insertQuery, [
+            req.body.projectName,
+            req.body.projectType,
+            req.body.projectOwner,
+            req.body.startDate,
+            req.body.endDate,
+            req.body.summary,
+            req.body.specimenDetails,
+            req.body.comments || null,
+            userID,
+            userID,
+            projectStatusEnumeration().in_progress,
+          ])
+      )[0];
 
-      const insertedProjectID = Object.values(result)[2].toString()
-    
+      const insertedProjectID = Object.values(result)[2].toString();
+
       const photographersTuple: string[][] = [];
       for (var x of selectedPhotographers) {
         photographersTuple.push([x, insertedProjectID]);
@@ -500,7 +501,7 @@ router.get(
   isAuthenticated,
   isAdminOrProjectOwner,
   async (
-    req: { params: { projectID: number }; session:Session },
+    req: { params: { projectID: number }; session: Session },
     res: {
       status: (arg0: number) => {
         (): any;
@@ -512,7 +513,12 @@ router.get(
       };
       render: (
         arg0: string,
-        arg1: { project: any; currentUser: User; title: string,newlyCreatedPhotographers:any }
+        arg1: {
+          project: any;
+          currentUser: User;
+          title: string;
+          newlyCreatedPhotographers: any;
+        }
       ) => void;
     }
   ) => {
@@ -593,8 +599,8 @@ router.get(
         };
 
         const newlyCreatedPhotographers = req.session.newlyCreatedPhotographers;
-        req.session.newlyCreatedPhotographers = []
-        req.session.save()
+        req.session.newlyCreatedPhotographers = [];
+        req.session.save();
         res.render("project/view", {
           project: project,
           currentUser: req.session.passport.user,
@@ -729,16 +735,16 @@ router.post(
       params: { projectID: number };
       body: {
         projectType: string;
-        ProjectName: string;
-        ImagingStartDate: string | number | Date;
-        ImagingEndDate: string | number | Date;
-        SummaryOfProject: string;
-        DetailsOfSpecimens: string;
-        LocationsOfSpecimens: string;
-        ProjectStatus: string;
+        projectName: string;
+        imagingStartDate: string | number | Date;
+        imagingEndDate: string | number | Date;
+        summaryOfProject: string;
+        detailsOfSpecimens: string;
+        projectStatus: string;
         projectOwnerID: string;
-        selectedImagingPlatforms: string;
-        selectedPhotographers: string;
+        selectedImagingPlatforms: string[];
+        selectedPhotographers: string[];
+        toBeCreatedPhotographers: string[];
       };
     },
     res: {
@@ -769,44 +775,40 @@ router.post(
 
       const projectID: number = req.params.projectID;
       const {
-        ProjectName,
-        ImagingStartDate,
-        ImagingEndDate,
-        SummaryOfProject,
-        DetailsOfSpecimens,
-        LocationsOfSpecimens,
-        ProjectStatus,
+        projectName,
+        imagingStartDate,
+        imagingEndDate,
+        summaryOfProject,
+        detailsOfSpecimens,
+        projectStatus,
         projectOwnerID,
         selectedImagingPlatforms,
         selectedPhotographers,
+        toBeCreatedPhotographers,
       } = req.body;
 
-      let newSelectedImagingPlatforms: string[] =
-        selectedImagingPlatforms.split(",");
-      let newSelectedPhotographers: string[] = selectedPhotographers.split(",");
-
       // === 1. VALIDATION ===
-      if (!ImagingStartDate || !ImagingEndDate || !ProjectStatus) {
+      if (!imagingStartDate || !imagingEndDate || !projectStatus) {
         return res
           .status(400)
           .json({ success: false, message: "Missing required fields" });
       }
 
       if (
-        newSelectedImagingPlatforms.length == 0 ||
-        (newSelectedImagingPlatforms.length == 1 &&
-          newSelectedImagingPlatforms[0] == "")
+        selectedImagingPlatforms.length == 0 ||
+        (selectedImagingPlatforms.length == 1 &&
+          selectedImagingPlatforms[0] == "")
       ) {
         return res
           .status(400)
           .json({ success: false, message: "No Selected Imaging Platforms" });
       }
-      if (newSelectedPhotographers.length == 0) {
+      if (selectedPhotographers.length == 0) {
         return res
           .status(400)
           .json({ success: false, message: "no Selected Photographers" });
       }
-      if (!newSelectedPhotographers.includes(projectOwnerID.toString())) {
+      if (!selectedPhotographers.includes(projectOwnerID.toString())) {
         return res.status(400).json({
           success: false,
           message: "Photographers must include him or herself.",
@@ -814,8 +816,8 @@ router.post(
       }
 
       // Date validation
-      const startDate = new Date(ImagingStartDate);
-      const endDate = new Date(ImagingEndDate);
+      const startDate = new Date(imagingStartDate);
+      const endDate = new Date(imagingEndDate);
       if (isNaN(startDate.getTime())) {
         return res
           .status(400)
@@ -832,10 +834,96 @@ router.post(
           message: "End date must be after start date",
         });
       }
-
+      console.log(toBeCreatedPhotographers)
+      for (const x of toBeCreatedPhotographers) {
+        console.log('x',x)
+        if (!emailRegex.test(x[1])) {
+          return res.status(400).json({
+            success: false,
+            message:
+              "there is at least a photographer with email of the wrong format",
+          });
+        }
+        //validating to be created photographer full name
+        if (x[0] == "" || !x[0]) {
+          return res.status(400).json({
+            success: false,
+            message: "there is at least a photographer with missing full name ",
+          });
+        }
+      }
+      //creation of new photographers
+      const newlyCreatedPhotographers: { email: string; password: string }[] =
+        [];
+      for (const x of toBeCreatedPhotographers) {
+        const fullName = x[0];
+        const email = x[1];
+        const newPasswordSalt = crypto.randomBytes(16).toString();
+        // const newPassword = crypto.randomBytes(8).toString() // TODO: switch to this in production
+        const newPassword = "1"; // For testing only
+        var insertedId = "";
+        const insertUserQuery = `
+            INSERT INTO User 
+            (Email, SaltedPassword,PasswordSalt,  UserType, RegisteredDate,
+              UpdatedDate,FullName,ContactNumber,Organisation,Comments,ReasonForRequest,RequestStatus)
+            VALUES (?, ?,?,  ?, NOW(),NOW(),  ?, ?,?,?,?,?)`;
+        const params = [
+          email,
+          Buffer.from("DUMMY_PASSWORD_CHANGE_THIS_IMMEDIATELY").toString("hex"),
+          newPasswordSalt,
+          userTypesEnumeration().photographerOnly,
+          fullName,
+          "",
+          "",
+          "",
+          "project owner or admin " +
+            req.session.passport.user.FullName +
+            ", " +
+            req.session.passport.user.Email +
+            "created this account during the creation of the project",
+          requestStatusEnumeration().approved,
+        ];
+        try {
+          const result = (await db.promise().query(insertUserQuery, params))[0];
+          const o: any = result;
+          insertedId = Object.values(o)[2].toString(); //the weird way of getting insertedId
+          newlyCreatedPhotographers.push({
+            email: email,
+            password: newPassword,
+          });
+          for (let x = 0; x < selectedPhotographers.length; x++) {
+            if (emailRegex.test(selectedPhotographers[x])) {
+              selectedPhotographers[x] = insertedId;
+              break;
+            }
+          }
+        } catch (err: any) {
+          const msg =
+            err.toString().toLowerCase().includes("duplicate") &&
+            err.toString().toLowerCase().includes("email")
+              ? "email already existed in the database."
+              : err;
+          res.status(400).json({ success: false, message: msg });
+        }
+        crypto.pbkdf2(
+          newPassword,
+          newPasswordSalt,
+          310000,
+          32,
+          "sha256",
+          async function (err, hashedPassword) {
+            db.promise().query(
+              "UPDATE User SET SaltedPassword = ? WHERE UserID = ?",
+              [hashedPassword, insertedId]
+            );
+          }
+        );
+      }
+      req.session["newlyCreatedPhotographers"] = newlyCreatedPhotographers;
+      req.session.save();
       // imaging Platforms operations for updating enum if any
       var hasNewImagingPlatform = false;
-      for (const i of selectedImagingPlatforms.split(",")) {
+      for (const i of selectedImagingPlatforms) {
         if (
           i != null &&
           i != "" &&
@@ -889,7 +977,7 @@ router.post(
       }
 
       //Getting differences
-      const temp2 = newSelectedImagingPlatforms.filter(
+      const temp2 = selectedImagingPlatforms.filter(
         (e: any) => !currentSelectedImagingPlatforms.includes(e)
       );
       const imagingPlatformsToBeAdded: string[][] = [];
@@ -898,7 +986,7 @@ router.post(
       }
       const imagingPlatformsToBeRemoved: any =
         currentSelectedImagingPlatforms.filter(
-          (e: any) => !newSelectedImagingPlatforms.includes(e)
+          (e: any) => !selectedImagingPlatforms.includes(e)
         );
 
       //the update
@@ -931,7 +1019,7 @@ router.post(
         currentSelectedPhotographers.push(x.PhotographerID.toString());
 
       //Getting differences
-      const temp4 = newSelectedPhotographers.filter(
+      const temp4 = selectedPhotographers.filter(
         (e: any) => !currentSelectedPhotographers.includes(e)
       );
       const photographersToBeAdded: string[][] = [];
@@ -939,7 +1027,7 @@ router.post(
 
       const photographersToBeRemoved: string[] =
         currentSelectedPhotographers.filter(
-          (e: any) => !newSelectedPhotographers.includes(e)
+          (e: any) => !selectedPhotographers.includes(e)
         );
       //the update
       if (photographersToBeRemoved.length != 0) {
@@ -969,7 +1057,6 @@ router.post(
         ImagingEndDate = ?,
         SummaryofProject = ?,
         DetailsOfSpecimens = ?,
-        LocationsOfSpecimens = ?,
         ProjectStatus = ?,
         UpdatedByID = ?,
         UpdatedDate = NOW(),
@@ -979,13 +1066,12 @@ router.post(
       await db
         .promise()
         .query(updateQuery, [
-          ProjectName,
+          projectName,
           startDate,
           endDate,
-          SummaryOfProject || null,
-          DetailsOfSpecimens || null,
-          LocationsOfSpecimens || null,
-          ProjectStatus,
+          summaryOfProject || null,
+          detailsOfSpecimens || null,
+          projectStatus,
           req.session.passport.user.UserID,
           projectType,
           projectID,

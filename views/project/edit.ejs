@@ -15,26 +15,26 @@
 
 <body>
   <div class="main-con">
-  <%- include(currentUser.UserType=='admin' 
+    <%- include(currentUser.UserType=='admin' 
   ? '../sidenavs/admin.ejs' 
   : '../sidenavs/user' ) %>
 
-    <form id='main-form' >
-    <div class="horizontal-panel">
-      <a href="/project/view-all" class="btn btn-primary">
-        <i class="fas fa-arrow-left"></i>
+    <form id='main-form'>
+      <div class="horizontal-panel">
+        <a href="/project/view-all" class="btn btn-primary">
+          <i class="fas fa-arrow-left"></i>
           Back to All Projects
-      </a>
-      <h2>Edit Project</h2>
-    </div>
+        </a>
+        <h2>Edit Project</h2>
+      </div>
       <div class="form-group">
         <label>Project Name</label>
-        <input type="text" id="ProjectName" name="ProjectName" value="<%= project.ProjectName %>" class="form-control" required>
+        <input type="text" id="projectName" name="projectName" value="<%= project.ProjectName %>" class="form-control" required>
       </div>
 
       <div class="form-group">
         <label>Project Owner</label>
-        <p class="form-control-static">
+        <p class="form-control-static" >
           <%= project.FullName || 'Not specified' %>
         </p>
       </div>
@@ -56,7 +56,10 @@
       </div>
 
       <div class="form-group">
-        <label for="newSelectedImagingPlatforms">Photographer(s):</label>
+        <div class="horizontal-panel2">
+          <label for="newSelectedImagingPlatforms">Photographer(s):</label>
+          <button class="addButton" id="addPhotographerButton">Add Photographer</button>
+        </div>
         <select multiple id="newSelectedPhotographers">
           <option value="">---Select Photographers---</option>
           <% allPhotographers.forEach(photographer=>{ %>
@@ -69,31 +72,31 @@
 
       <div class="form-group">
         <label for="ImagingStartDate">Imaging Start Date:</label>
-        <input type="date" id="ImagingStartDate" name="ImagingStartDate" value="<%= project.ImagingStartDate %>" class="form-control" required>
+        <input type="date" id="imagingStartDate" name="imagingStartDate" value="<%= project.ImagingStartDate %>" class="form-control" required>
       </div>
 
       <div class="form-group">
         <label for="ImagingEndDate">Imaging End Date:</label>
-        <input type="date" id="ImagingEndDate" name="ImagingEndDate" value="<%= project.ImagingEndDate %>" class="form-control" required>
+        <input type="date" id="imagingEndDate" name="imagingEndDate" value="<%= project.ImagingEndDate %>" class="form-control" required>
       </div>
 
       <div class="form-group">
         <label for="SummaryOfProject">Summary of Project:</label>
-        <textarea id="SummaryOfProject" name="SummaryOfProject" class="form-control" required>
+        <textarea id="summaryOfProject" name="summaryOfProject" class="form-control" required>
             <%= project.SummaryOfProject %>
         </textarea>
       </div>
 
       <div class="form-group">
         <label for="DetailsOfSpecimens">Details Of Specimens:</label>
-        <textarea id="DetailsOfSpecimens" name="DetailsOfSpecimens" class="form-control" required>
+        <textarea id="detailsOfSpecimens" name="detailsOfSpecimens" class="form-control" required>
             <%= project.DetailsOfSpecimens %>
         </textarea>
       </div>
       <div class="form-group">
 
         <div class="horizontal-panel2">
-          <label  id="label2" for="imagingPlatform">Imaging Platform:</label>
+          <label id="label2" for="imagingPlatform">Imaging Platform:</label>
           <button class='addButton' id="addImagingPlatformButton">Add Imaging Platform</button>
         </div>
         <select multiple id="newSelectedImagingPlatforms">
@@ -108,7 +111,7 @@
 
       <div class=" form-group">
         <label for="ProjectStatus">Status:</label>
-        <select name="ProjectStatus" id="ProjectStatus" class="form-control" required>
+        <select name="projectStatus" id="projectStatus" class="form-control" required>
           <option value="">-- Select Type --</option>
           <% statuses.forEach(status=> { %>
           <option value="<%= status %>" <%=project.ProjectStatus==status ? ' selected' : '' %>>
@@ -131,197 +134,264 @@
     <br>
 
 
-</div>
+  </div>
 </body>
 
-  <script>
-    const newSelectedPhotographersElement = document.getElementById('newSelectedPhotographers');
-    const newSelectedPhotographers = new Choices(newSelectedPhotographersElement, {
-      allowHTML: true,
-      removeItemButton: true
-    });
-    const newSelectedImagingPlatforms = new Choices(document.getElementById("newSelectedImagingPlatforms"), {
-      allowHTML: true,
-      removeItemButton: true
-    });
+<script>
+  const newSelectedPhotographersElement = document.getElementById('newSelectedPhotographers');
+  const newSelectedPhotographers = new Choices(newSelectedPhotographersElement, {
+    allowHTML: true,
+    removeItemButton: true
+  });
+  const newSelectedImagingPlatforms = new Choices(document.getElementById("newSelectedImagingPlatforms"), {
+    allowHTML: true,
+    removeItemButton: true
+  });
 
 
-    document.addEventListener('DOMContentLoaded', function() {
-      document.getElementById('addProjectTypeButton').addEventListener('click', async function(e) {
-        e.preventDefault()
-        Swal.fire({
-          title: "Add new Project Type",
-          text: "Add new Project Type",
-          input: 'text',
-          showCancelButton: true,
-          inputPlaceholder: "Enter it here."
-        }).then((result) => {
-          if (result.value && result.value != "") {
-            const select = document.getElementById("projectType")
-            var option = document.createElement('option')
-            option.text = option.value = result.value
-            select.add(option, 1)
-            select.value = option.text
+  const toBeCreatedPhotographers = []
+  document.addEventListener('DOMContentLoaded', function() {
+    document.getElementById('addProjectTypeButton').addEventListener('click', async function(e) {
+      e.preventDefault()
+      Swal.fire({
+        title: "Add new Project Type",
+        text: "Add new Project Type",
+        input: 'text',
+        showCancelButton: true,
+        inputPlaceholder: "Enter it here."
+      }).then((result) => {
+        if (result.value && result.value != "") {
+          const select = document.getElementById("projectType")
+          var option = document.createElement('option')
+          option.text = option.value = result.value
+          select.add(option, 1)
+          select.value = option.text
+        }
+      });
+    })
+    document.getElementById('addImagingPlatformButton').addEventListener('click', async function(e) {
+      console.log("add Imaging Platform button")
+      e.preventDefault()
+      Swal.fire({
+        title: "Add new Imaging Platform",
+        text: "Add new Imaging Platform",
+        input: 'text',
+        showCancelButton: true,
+        inputPlaceholder: "Enter it here."
+      }).then((result) => {
+        if (result.value && result.value != "") {
+          console.log('adding', result.value)
+          newSelectedImagingPlatforms.setChoices([{
+            value: result.value,
+            label: result.value,
+            selected: true
+          }])
+        }
+      });
+    })
+    document.getElementById('addPhotographerButton').addEventListener('click', async function(e) {
+      e.preventDefault()
+      Swal.fire({
+        title: "Add new Photographer",
+        text: "Add new Photographer",
+        width: '700px',
+        html: `
+        <input 
+          id="newPhotographerEmail" 
+          placeholder="Enter Email"
+          style="width:95%;height:40%;font-size:30px;margin-bottom:5px" 
+          required>
+        <br>
+        <input 
+          id="newPhotographerFullName" 
+          placeholder="Enter Full Name" 
+          style="width:95%;height:40%;font-size:30px;" 
+          required">`,
+
+
+        showCancelButton: true,
+      }).then((result) => {
+        const email = document.getElementById('newPhotographerEmail').value
+
+        const emailRegex = /^[a-zA-Z0-9](\.?[a-zA-Z0-9_-])*[a-zA-Z0-9]@[a-zA-Z0-9-]+\.[a-zA-Z]{2,}$/
+
+        const fullName = document.getElementById('newPhotographerFullName').value
+        if (email && fullName) {
+          if (!emailRegex.test(email)) {
+            alert("you entered an email with an invalid format")
+            return
           }
-        });
-      })
-      document.getElementById('addImagingPlatformButton').addEventListener('click', async function(e) {
-        console.log("add Imaging Platform button")
-        e.preventDefault()
-        Swal.fire({
-          title: "Add new Imaging Platform",
-          text: "Add new Imaging Platform",
-          input: 'text',
-          showCancelButton: true,
-          inputPlaceholder: "Enter it here."
-        }).then((result) => {
-          if (result.value && result.value != "") {
-            console.log('adding', result.value)
-            newSelectedImagingPlatforms.setChoices([{
-              value: result.value,
-              label: result.value,
-              selected: true
-            }])
-          }
-        });
-      })
-
-
-      // Removes the remove item button of the selected element that is also the project owner's id
-      const x = document.querySelector("[data-value='<%=project.ProjectOwnerID%>']")
-      x.removeChild(x.childNodes[1])
-      x.style.padding = "12px"
-      x.style.backgroundColor = "gray"
-      console.log(x)
-      const form = document.getElementById('main-form')
-      // console.log(newSelectedPhotographersElement.childNodes)
-      const requestDate = new Date('<%= project.DateofRequest %>');
-      const startDateInput = document.getElementById('ImagingStartDate');
-      const endDateInput = document.getElementById('ImagingEndDate');
-      const currentUser = '<%= currentUser%>'
-      if (currentUser.UserType === 'admin') {
-        const statusSelect = document.getElementById('ProjectStatus');
-        const reasonField = document.getElementById('ReasonForRequest');
+          newSelectedPhotographers.setChoices([{
+            value: email,
+            label: fullName,
+            selected: true
+          }])
+          toBeCreatedPhotographers.push([fullName, email])
+          // console.log('toBeCreatedPhotographers', toBeCreatedPhotographers)
+        }
+      });
+    })
+    newSelectedPhotographers.passedElement.element.addEventListener('removeItem', function(e) {
+      toBeRemoved = [e.detail.label, e.detail.value]
+      for (x = 0; x < toBeCreatedPhotographers.length; x++) {
+        const o = toBeCreatedPhotographers[x]
+        if (o[0] == toBeRemoved[0] && o[1] == toBeRemoved[1]) {
+          toBeCreatedPhotographers.splice(x, 1)
+        }
       }
-      // Set minimum dates
-      startDateInput.min = '<%= project.DateofRequest %>';
-      endDateInput.min = '<%= project.ImagingStartDate %>';
+    }, false)
 
-      // Real-time validation
-      startDateInput.addEventListener('change', function() {
-        const startDate = new Date(this.value);
-        endDateInput.min = this.value;
+    // Removes the remove item button of the selected element that is also the project owner's id
+    const x = document.querySelector("[data-value='<%=project.ProjectOwnerID%>']")
+    x.removeChild(x.childNodes[1])
+    x.style.padding = "12px"
+    x.style.backgroundColor = "gray"
+    console.log(x)
+    const form = document.getElementById('main-form')
+    // console.log(newSelectedPhotographersElement.childNodes)
+    const requestDate = new Date('<%= project.DateofRequest %>');
+    const startDateInput = document.getElementById('imagingStartDate');
+    const endDateInput = document.getElementById('imagingEndDate');
+    const currentUser = '<%= currentUser%>'
+    if (currentUser.UserType === 'admin') {
+      const statusSelect = document.getElementById('projectStatus');
+      const reasonField = document.getElementById('reasonForRequest');
+    }
+    // Set minimum dates
+    startDateInput.min = '<%= project.DateofRequest %>';
+    endDateInput.min = '<%= project.ImagingStartDate %>';
 
-        if (startDate < requestDate) {
+    // Real-time validation
+    startDateInput.addEventListener('change', function() {
+      const startDate = new Date(this.value);
+      endDateInput.min = this.value;
+
+      if (startDate < requestDate) {
+        Swal.fire({
+          icon: 'error',
+          title: 'Invalid Date',
+          text: 'Start date must be on or after request date'
+        });
+        this.value = '<%= project.ImagingStartDate %>';
+      }
+    });
+
+    endDateInput.addEventListener('change', function() {
+      const startDate = new Date(startDateInput.value);
+      const endDate = new Date(this.value);
+
+      if (endDate < startDate) {
+        Swal.fire({
+          icon: 'error',
+          title: 'Invalid Date',
+          text: 'End date must be on or after start date'
+        });
+        this.value = '<%= project.ImagingEndDate %>';
+      }
+    });
+    // Form submission handler
+    form.addEventListener('submit', async function(e) {
+      e.preventDefault();
+      // Validate dates
+      console.log("here")
+      const startDate = new Date(startDateInput.value);
+      const endDate = new Date(endDateInput.value);
+      if (startDate < requestDate) {
+        Swal.fire({
+          icon: 'error',
+          title: 'Invalid Date',
+          text: 'Start date must be on or after request date'
+        });
+        return;
+      }
+
+      if (endDate < startDate) {
+        Swal.fire({
+          icon: 'error',
+          title: 'Invalid Date',
+          text: 'End date must be on or after start date'
+        });
+        return;
+      }
+      if (currentUser.UserType === 'admin') {
+        // Validate reason if status changed
+        if (statusSelect.value !== '<%= project.RequestStatusID %>' && !reasonField.value.trim()) {
           Swal.fire({
             icon: 'error',
-            title: 'Invalid Date',
-            text: 'Start date must be on or after request date'
-          });
-          this.value = '<%= project.ImagingStartDate %>';
-        }
-      });
-
-      endDateInput.addEventListener('change', function() {
-        const startDate = new Date(startDateInput.value);
-        const endDate = new Date(this.value);
-
-        if (endDate < startDate) {
-          Swal.fire({
-            icon: 'error',
-            title: 'Invalid Date',
-            text: 'End date must be on or after start date'
-          });
-          this.value = '<%= project.ImagingEndDate %>';
-        }
-      });
-      // Form submission handler
-      form.addEventListener('submit', async function(e) {
-        e.preventDefault();
-        // Validate dates
-        console.log("here")
-        const startDate = new Date(startDateInput.value);
-        const endDate = new Date(endDateInput.value);
-        if (startDate < requestDate) {
-          Swal.fire({
-            icon: 'error',
-            title: 'Invalid Date',
-            text: 'Start date must be on or after request date'
+            title: 'Missing Reason',
+            text: 'Please provide a reason for status change'
           });
           return;
         }
-
-        if (endDate < startDate) {
+        // Validate that a valid status is selected
+        if (statusSelect.value === '') {
           Swal.fire({
             icon: 'error',
-            title: 'Invalid Date',
-            text: 'End date must be on or after start date'
+            title: 'Invalid Status',
+            text: 'Please select a valid status.'
           });
           return;
         }
-        if (currentUser.UserType === 'admin') {
-          // Validate reason if status changed
-          if (statusSelect.value !== '<%= project.RequestStatusID %>' && !reasonField.value.trim()) {
-            Swal.fire({
-              icon: 'error',
-              title: 'Missing Reason',
-              text: 'Please provide a reason for status change'
-            });
-            return;
-          }
-          // Validate that a valid status is selected
-          if (statusSelect.value === '') {
-            Swal.fire({
-              icon: 'error',
-              title: 'Invalid Status',
-              text: 'Please select a valid status.'
-            });
-            return;
-          }
-        }
-        // Submit form via AJAX
-        try {
+      }
+      // Submit form via AJAX
+      try {
 
-          const formData = new FormData(form);
-          formData.append("projectOwnerID", "<%=project.ProjectOwnerID%>")
-          formData.append('selectedImagingPlatforms', newSelectedImagingPlatforms.getValue(true));
+        // const formData = new FormData(form);
+        // formData.append("projectOwnerID", "<%=project.ProjectOwnerID%>")
+        // formData.append('selectedImagingPlatforms', newSelectedImagingPlatforms.getValue(true));
 
-          formData.append('selectedPhotographers', newSelectedPhotographers.getValue(true));
-          console.log(formData)
-          const response = await fetch(form.action, {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(Object.fromEntries(formData))
+        // formData.append('selectedPhotographers', newSelectedPhotographers.getValue(true));
+        // formData.append('toBeCreatedPhotographers', toBeCreatedPhotographers)
+    const formData = {
+        projectName: form.projectName.value,
+        projectOwner:"<%=project.FullName%>",
+        projectOwnerID:"<%=project.ProjectOwnerID%>",
+        projectType: form.projectType.value,
+        imagingStartDate: form.imagingStartDate.value,
+        imagingEndDate: form.imagingEndDate.value,
+        summary: form.summaryOfProject.value,
+        specimenDetails: form.detailsOfSpecimens.value,
+        projectStatus: form.projectStatus.value,
+        selectedImagingPlatforms: newSelectedImagingPlatforms.getValue(true),
+        selectedPhotographers: newSelectedPhotographers.getValue(true),
+        toBeCreatedPhotographers: toBeCreatedPhotographers
+      };
+        console.log(formData)
+        const response = await fetch(form.action, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(formData)
+        });
+        const result = await response.json();
+        if (result.success) {
+          Swal.fire({
+            icon: 'success',
+            title: 'Success!',
+            text: result.message,
+            timer: 1500,
+            showConfirmButton: false
+          }).then(() => {
+            window.location.href = result.redirectUrl;
           });
-          const result = await response.json();
-          if (result.success) {
-            Swal.fire({
-              icon: 'success',
-              title: 'Success!',
-              text: result.message,
-              timer: 1500,
-              showConfirmButton: false
-            }).then(() => {
-              window.location.href = result.redirectUrl;
-            });
-          } else {
-            Swal.fire({
-              icon: 'error',
-              title: 'Error',
-              text: result.message
-            });
-          }
-        } catch (error) {
-          console.error('Error:', error);
+        } else {
           Swal.fire({
             icon: 'error',
             title: 'Error',
-            text: 'An error occurred while updating the request'
+            text: result.message
           });
         }
-      });
+      } catch (error) {
+        console.error('Error:', error);
+        Swal.fire({
+          icon: 'error',
+          title: 'Error',
+          text: 'An error occurred while updating the request'
+        });
+      }
     });
-  </script>
+  });
+</script>
+
 </html>
