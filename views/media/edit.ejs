@@ -29,7 +29,7 @@
 
       <div class="form-group">
         <label>Project and Photographer Pair</label>
-        <select name="projectAndPhotographerPair" id="projectAndPhotographerPair" requried <%= currentUser.UserType == 'phtographerOnly' ? 'disabled' : ''%>>
+        <select name="projectAndPhotographerPair" id="projectAndPhotographerPair" requried <%= currentUser.UserType == 'photographerOnly' ? 'disabled' : ''%>>
           <option value="">-- Select a project and photographer pair--</option>
           <%allProjectAndPhotographerPairs.forEach( u=>{%>
           <option value="<%=u.ProjectID%>,<%=u.UserID%>" <%=

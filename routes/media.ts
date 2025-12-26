@@ -527,8 +527,6 @@ router.get(
     const x:any[] = (await db.promise().query(currentMediaQuery))
     const toBeEditedMedia = x[0][0];
     console.log("-------");
-    console.log(toBeEditedMedia);
-    console.log("currentMedia", toBeEditedMedia);
     console.log("toBeEditedMedia", toBeEditedMedia);
     res.render("media/edit", {
       currentUser: req.session.passport.user,

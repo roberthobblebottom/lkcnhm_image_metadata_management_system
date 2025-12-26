@@ -74,7 +74,7 @@
         <select multiple id="newSelectedPhotographers">
           <option value="">Select Photographers</span>
             <% photographers.forEach(photographer=>{ %>
-          <option class="dropdown-item" value="<%=photographer.UserID%>" <%=photographer.UserID=='1' ? "selected":""%>>
+          <option class="dropdown-item" value="<%=photographer.UserID%>" <%=photographer.UserID==currentUser.UserID && currentUser.UserType!='admin' ? "selected disabled":""%>>
             <%=photographer.FullName%>
           </option>
           <%})%>
@@ -153,6 +153,13 @@
   // Initialize form with current datetime
   document.addEventListener('DOMContentLoaded', function() {
     // document.querySelector("[class='choices__inner']").style.float = "1000px"
+    if ("<%=currentUser.UserType != 'admin'%>") {
+      const x = document.querySelector("[data-value='<%=currentUser.UserID%>']")
+      x.removeChild(x.childNodes[1])
+      x.style.padding = "12px"
+      x.style.backgroundColor = "gray"
+      console.log(x)
+    }
     document.getElementById('addProjectTypeButton').addEventListener('click', async function(e) {
       e.preventDefault()
       Swal.fire({
@@ -398,7 +405,7 @@
         throw new Error(data.message || "Submission failed");
       }
 
-     
+
       // Show success message
       await Swal.fire({
         title: 'Success!',

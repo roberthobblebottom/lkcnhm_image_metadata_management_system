@@ -34,7 +34,7 @@
 
       <div class="form-group">
         <label>Project Owner</label>
-        <p class="form-control-static" >
+        <p class="form-control-static">
           <%= project.FullName || 'Not specified' %>
         </p>
       </div>
@@ -63,7 +63,7 @@
         <select multiple id="newSelectedPhotographers">
           <option value="">---Select Photographers---</option>
           <% allPhotographers.forEach(photographer=>{ %>
-          <option value="<%=photographer.UserID%>" id="<%=photographer.UserID%>ID" <%=photographer.UserID == project.ProjectOwnerID ? "disabled": ""%> <%=selectedPhotographers.includes(photographer.UserID) ? "selected":""%>>
+          <option value="<%=photographer.UserID%>" id="<%=photographer.UserID%>ID" <%=photographer.UserID == project.ProjectOwnerID && photographer.UserType != 'admin' ? "disabled": ""%> <%=selectedPhotographers.includes(photographer.UserID) ? "selected":""%>>
             <%=photographer.FullName%>
           </option>
           <%})%>
@@ -242,11 +242,13 @@
     }, false)
 
     // Removes the remove item button of the selected element that is also the project owner's id
-    const x = document.querySelector("[data-value='<%=project.ProjectOwnerID%>']")
-    x.removeChild(x.childNodes[1])
-    x.style.padding = "12px"
-    x.style.backgroundColor = "gray"
-    console.log(x)
+    if ("<%=currentUser.UserType%>" != 'admin') {
+      const x = document.querySelector("[data-value='<%=project.ProjectOwnerID%>']")
+      x.removeChild(x.childNodes[1])
+      x.style.padding = "12px"
+      x.style.backgroundColor = "gray"
+      console.log(x)
+    }
     const form = document.getElementById('main-form')
     // console.log(newSelectedPhotographersElement.childNodes)
     const requestDate = new Date('<%= project.DateofRequest %>');
@@ -342,20 +344,20 @@
 
         // formData.append('selectedPhotographers', newSelectedPhotographers.getValue(true));
         // formData.append('toBeCreatedPhotographers', toBeCreatedPhotographers)
-    const formData = {
-        projectName: form.projectName.value,
-        projectOwner:"<%=project.FullName%>",
-        projectOwnerID:"<%=project.ProjectOwnerID%>",
-        projectType: form.projectType.value,
-        imagingStartDate: form.imagingStartDate.value,
-        imagingEndDate: form.imagingEndDate.value,
-        summary: form.summaryOfProject.value,
-        specimenDetails: form.detailsOfSpecimens.value,
-        projectStatus: form.projectStatus.value,
-        selectedImagingPlatforms: newSelectedImagingPlatforms.getValue(true),
-        selectedPhotographers: newSelectedPhotographers.getValue(true),
-        toBeCreatedPhotographers: toBeCreatedPhotographers
-      };
+        const formData = {
+          projectName: form.projectName.value,
+          projectOwner: "<%=project.FullName%>",
+          projectOwnerID: "<%=project.ProjectOwnerID%>",
+          projectType: form.projectType.value,
+          imagingStartDate: form.imagingStartDate.value,
+          imagingEndDate: form.imagingEndDate.value,
+          summary: form.summaryOfProject.value,
+          specimenDetails: form.detailsOfSpecimens.value,
+          projectStatus: form.projectStatus.value,
+          selectedImagingPlatforms: newSelectedImagingPlatforms.getValue(true),
+          selectedPhotographers: newSelectedPhotographers.getValue(true),
+          toBeCreatedPhotographers: toBeCreatedPhotographers
+        };
         console.log(formData)
         const response = await fetch(form.action, {
           method: 'POST',
