@@ -5,6 +5,7 @@ import passport from "passport";
 import * as passportStrategy from "passport-local";
 import crypto from "crypto";
 import {
+  emailRegex,
   requestStatusEnumeration,
   userTypesEnumeration,
 } from "../middleware/utils";
@@ -113,7 +114,7 @@ router.post(
         message: "Missing required fields: " + missingFields.join(", "),
       });
     }
-    if (!/^[\w\-\.]+@([\w-]+\.)+[\w-]{2,}$/.test(email))
+    if (!emailRegex.test(email))
       return res.status(400).json({
         success: false,
         message:

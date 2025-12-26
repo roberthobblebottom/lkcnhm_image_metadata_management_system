@@ -1,9 +1,18 @@
 const express = require("express");
 const router = express.Router();
-import { FieldPacket, QueryError, QueryResult, RowDataPacket } from "mysql2";
+import {
+  FieldPacket,
+  QueryError,
+  QueryResult,
+  ResultSetHeader,
+  RowDataPacket,
+} from "mysql2";
 import { db } from "./db";
 import { Request, Session, User } from "../@types/types";
+import { emailRegex, userTypesEnumeration } from "../middleware/utils";
 
+import crypto from "crypto";
+import passport from "passport";
 const {
   isAuthenticated,
   isAdminOrProjectOwner,
@@ -86,6 +95,7 @@ router.post(
         summary: string;
         specimenDetails: string;
         comments: string;
+        toBeCreatedPhotographers: string[][];
       };
       session: Session;
     },
@@ -97,11 +107,15 @@ router.post(
           (arg0: { success: boolean; message: string; error?: any }): void;
           new (): any;
         };
+        send: (message: string) => any;
       };
+
+      redirect: (url: string) => any;
       json: (arg0: {
         success: boolean;
         message: string;
         redirectUrl: string;
+        // newlyCreatedPhotographers: Object[];
       }) => void;
     }
   ) => {
@@ -155,20 +169,101 @@ router.post(
           message: "there are no selected Imaging Platforms",
         });
       }
-      
+
       if (req.body.selectedPhotographers.length == 0) {
         return res.status(400).json({
           success: false,
           message: "there are no selected selected photographers",
         });
-      } else if (!req.body.selectedPhotographers.includes(userID.toString())) {
-        return res.status(400).json({
-          success: false,
-          message: "Photographers must include him or herself.",
-        });
       }
+      for (const x of req.body.toBeCreatedPhotographers) {
+        if (!emailRegex.test(x[1])) {
+          return res.status(400).json({
+            success: false,
+            message:
+              "there is at least a photographer with email of the wrong format",
+          });
+        }
+        //validating to be created photographer full name
+        if (x[0] == "" || !x[0]) {
+          return res.status(400).json({
+            success: false,
+            message: "there is at least a photographer with missing full name ",
+          });
+        }
+      }
+      //creation of new photographers
+      const newlyCreatedPhotographers: { email: string; password: string }[] =
+        [];
+      const selectedPhotographers = req.body.selectedPhotographers;
+      for (const x of req.body.toBeCreatedPhotographers) {
+        const fullName = x[0];
+        const email = x[1];
+        const newPasswordSalt = crypto.randomBytes(16).toString();
+        // const newPassword = crypto.randomBytes(8).toString() // TODO: switch to this in production
+        const newPassword = "1"; // For testing only
+        var insertedId = "";
+        const insertUserQuery = `
+            INSERT INTO User 
+            (Email, SaltedPassword,PasswordSalt,  UserType, RegisteredDate,
+              UpdatedDate,FullName,ContactNumber,Organisation,Comments,ReasonForRequest,RequestStatus)
+            VALUES (?, ?,?,  ?, NOW(),NOW(),  ?, ?,?,?,?,?)`;
+        const params = [
+          email,
+          Buffer.from("DUMMY_PASSWORD_CHANGE_THIS_IMMEDIATELY").toString("hex"),
+          newPasswordSalt,
+          userTypesEnumeration().photographerOnly,
+          fullName,
+          "",
+          "",
+          "",
+          "project owner or admin " +
+            req.session.passport.user.FullName +
+            ", " +
+            req.session.passport.user.Email +
+            "created this account during the creation of the project",
+          requestStatusEnumeration().approved,
+        ];
+        try {
+          const result = (await db.promise().query(insertUserQuery, params))[0];
+          const o: any = result;
+          insertedId = Object.values(o)[2].toString(); //the weird way of getting insertedId
+          newlyCreatedPhotographers.push({
+            email: email,
+            password: newPassword,
+          });
+          for (let x = 0; x < selectedPhotographers.length; x++) {
+            if (emailRegex.test(selectedPhotographers[x])) {
+              selectedPhotographers[x] = insertedId;
+              break;
+            }
+          }
+        } catch (err: any) {
+          const msg =
+            err.toString().toLowerCase().includes("duplicate") &&
+            err.toString().toLowerCase().includes("email")
+              ? "email already existed in the database."
+              : err;
+          res.status(400).json({ success: false, message: msg });
+        }
+        crypto.pbkdf2(
+          newPassword,
+          newPasswordSalt,
+          310000,
+          32,
+          "sha256",
+          async function (err, hashedPassword) {
+            db.promise().query("UPDATE User SET SaltedPassword = ? WHERE UserID = ?", [
 
-
+              hashedPassword,
+              insertedId,
+            ]);
+          }
+        );
+      }
+      req.session['newlyCreatedPhotographers'] = newlyCreatedPhotographers
+      req.session.save()
+      //alter table for Imaging Platform enums if any new values
       const selectedImagingPlatforms = req.body.selectedImagingPlatforms;
       var hasNewImagingPlatform = false;
       for (const i of selectedImagingPlatforms) {
@@ -196,22 +291,23 @@ router.post(
           );
       }
 
-
+      //alter tables for projec types enums if any new values
       const projectType = req.body.projectType;
       if (
         projectType != null &&
         projectType != "" &&
         !req.session["projectTypes"].includes(projectType)
-      ) 
+      ) {
         req.session["projectTypes"].push(projectType);
+        const i3: string[] = req.session.projectTypes;
+        await db
+          .promise()
+          .query("ALTER TABLE Project MODIFY COLUMN `ProjectType` enum(?)", [
+            i3,
+          ]);
+      }
 
-      const i3: string[] = req.session.projectTypes;
-      await db
-        .promise()
-        .query("ALTER TABLE Project MODIFY COLUMN `ProjectType` enum(?)", [i3]);
-
-      
-      
+      //main creation queries
       const insertQuery = `
         INSERT INTO Project (
             ProjectName,
@@ -230,16 +326,7 @@ router.post(
             ProjectStatus
         ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, NOW(), ?, NOW(), ?, 0, ?)
         `;
-      const insertPhotographersQuery = `
-        INSERT INTO ProjectUserPhotographyLink (PhotographerID,ProjectID)
-        VALUES ?
-        `;
-      const insertImagingPlatformsQuery = `
-        INSERT INTO ImagingPlatformInstance
-        (ImagingPlatform,ProjectID)
-        VALUES ?
-        `;
-      await db
+      const result = (await db
         .promise()
         .query(insertQuery, [
           req.body.projectName,
@@ -253,36 +340,41 @@ router.post(
           userID,
           userID,
           projectStatusEnumeration().in_progress,
-        ]);
+        ]))[0];
 
-      // Getting new project id
-      const r2: [RowDataPacket[], FieldPacket[]] = await db
-        .promise()
-        .query("SELECT ProjectID FROM Project ORDER BY ProjectID DESC LIMIT 1");
-      const projectID2: number = r2[0][0].ProjectID;
-
+      const insertedProjectID = Object.values(result)[2].toString()
+    
       const photographersTuple: string[][] = [];
-      for (var x of req.body.selectedPhotographers) {
-        photographersTuple.push([x, projectID2.toString()]);
+      for (var x of selectedPhotographers) {
+        photographersTuple.push([x, insertedProjectID]);
       }
+      const insertPhotographersQuery = `
+        INSERT INTO ProjectUserPhotographyLink (PhotographerID,ProjectID)
+        VALUES ?
+        `;
       await db.promise().query(insertPhotographersQuery, [photographersTuple]);
 
+      // insert into ImagingPlatformInstance Table
       const imagingPlatformsTuple: string[][] = [];
       for (x of req.body.selectedImagingPlatforms) {
-        imagingPlatformsTuple.push([x, projectID2.toString()]);
+        imagingPlatformsTuple.push([x, insertedProjectID]);
       }
+      const insertImagingPlatformsQuery = `
+        INSERT INTO ImagingPlatformInstance
+        (ImagingPlatform,ProjectID)
+        VALUES ?
+        `;
       await db
         .promise()
         .query(insertImagingPlatformsQuery, [imagingPlatformsTuple]);
 
-      console.log("📸 project inserted with  UserID:", projectID2);
-
-      const redirectUrl = `/project/view/${projectID2}`;
-      // Return success response
+      console.log("📸 project inserted with  projectID:", insertedProjectID);
+      const redirectUrl = `/project/view/${insertedProjectID}`;
       res.json({
         success: true,
         message: "project submitted successfully",
         redirectUrl: redirectUrl,
+        // newlyCreatedPhotographers,
       });
     } catch (err: any) {
       console.error("❌ Error in submitProject:", err);
@@ -408,7 +500,7 @@ router.get(
   isAuthenticated,
   isAdminOrProjectOwner,
   async (
-    req: { params: { projectID: number }; user: User },
+    req: { params: { projectID: number }; session:Session },
     res: {
       status: (arg0: number) => {
         (): any;
@@ -420,7 +512,7 @@ router.get(
       };
       render: (
         arg0: string,
-        arg1: { project: any; currentUser: User; title: string }
+        arg1: { project: any; currentUser: User; title: string,newlyCreatedPhotographers:any }
       ) => void;
     }
   ) => {
@@ -500,9 +592,13 @@ router.get(
               : "Not Specified",
         };
 
+        const newlyCreatedPhotographers = req.session.newlyCreatedPhotographers;
+        req.session.newlyCreatedPhotographers = []
+        req.session.save()
         res.render("project/view", {
           project: project,
-          currentUser: req.user,
+          currentUser: req.session.passport.user,
+          newlyCreatedPhotographers: newlyCreatedPhotographers,
           title: "View Project", // Add title here
         });
       }
@@ -589,7 +685,7 @@ router.get(
       for (var i of selectedPhotographersTemp[0]) {
         currentlySelectedPhotographers.push(i.UserID);
       }
-      
+
       const imagingPlatforms: any[] = [];
       for (const i of imagingPlatformTemp[0]) {
         imagingPlatforms.push(Object.values(i)[0]);
@@ -745,15 +841,14 @@ router.post(
           i != "" &&
           !req.session["imagingPlatforms"].includes(i)
         ) {
-          
-          console.log('adding ',i)
+          console.log("adding ", i);
           req.session["imagingPlatforms"].push(i);
           hasNewImagingPlatform = true;
         }
       }
       if (hasNewImagingPlatform) {
         const i2: string[] = req.session.imagingPlatforms;
-        console.log(i2)
+        console.log(i2);
         await db
           .promise()
           .query("ALTER TABLE Media MODIFY COLUMN `ImagingPlatform` enum(?)", [
@@ -767,24 +862,20 @@ router.post(
           );
       }
 
-
       // project Type operations for updating enum if any
       const projectType = req.body.projectType;
       if (
         projectType != null &&
         projectType != "" &&
         !req.session["projectTypes"].includes(projectType)
-      ) 
+      )
         req.session["projectTypes"].push(projectType);
 
       const i3: string[] = req.session.projectTypes;
-      console.log(i3)
+      console.log(i3);
       await db
         .promise()
         .query("ALTER TABLE Project MODIFY COLUMN `ProjectType` enum(?)", [i3]);
-
-
-
 
       /// IMAGING PLATFORMS OPERATIONS START
       const selectImagingQuery = `
@@ -796,7 +887,6 @@ router.post(
       for (var x of temp) {
         currentSelectedImagingPlatforms.push(x.ImagingPlatform);
       }
-      
 
       //Getting differences
       const temp2 = newSelectedImagingPlatforms.filter(
@@ -839,7 +929,6 @@ router.post(
       var currentSelectedPhotographers: string[] = [];
       for (x of temp3)
         currentSelectedPhotographers.push(x.PhotographerID.toString());
-
 
       //Getting differences
       const temp4 = newSelectedPhotographers.filter(

@@ -10,6 +10,7 @@ export interface Passport {
 }
 
 export interface Session {
+    newlyCreatedPhotographers: any;
     projectTypes: string[]; 
     passport: Passport;
     imagingPlatforms: string[],

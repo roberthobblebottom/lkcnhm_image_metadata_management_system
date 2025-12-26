@@ -5,7 +5,7 @@ import { db } from "./db";
 import { Session, User,Request } from "../@types/types";
 
 import crypto from "crypto";
-import { formatDisplayDate } from "../middleware/utils";
+import { emailRegex, formatDisplayDate } from "../middleware/utils";
 const { isAuthenticated } = require("../middleware/auth");
 
 router.get(
@@ -195,7 +195,7 @@ router.post(
         message: "Missing required fields: " + missingFields.join(", "),
       });
     }
-    if (!/^[\w\-\.]+@([\w-]+\.)+[\w-]{2,}$/.test(email))
+    if (!emailRegex.test(email))
       return res.status(400).json({
         success: false,
         message:

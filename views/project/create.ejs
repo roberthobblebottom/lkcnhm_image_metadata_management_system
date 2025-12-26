@@ -9,8 +9,14 @@
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
   <link rel="stylesheet" href="/css/form.css">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/choices.js@11.1.0/public/assets/styles/choices.min.css" />
-   <!-- <link ref="stylesheet" href="/css/choiceJS.css"> -->
+  <!-- <link ref="stylesheet" href="/css/choiceJS.css"> -->
   <script src="https://cdn.jsdelivr.net/npm/choices.js/public/assets/scripts/choices.min.js"></script>
+  <style>
+    /* #swal2-html-container{
+      height: 250px;
+      
+    } */
+  </style>
 </head>
 
 <body>
@@ -46,7 +52,7 @@
       <div class="form-group">
         <div class="horizontal-panel2">
           <label class="label2">Project Type*</label>
-          <button class="addButton" id="addProjectTypeButton">Add</button>
+          <button class="addButton" id="addProjectTypeButton">Add Project Type</button>
         </div>
 
         <select name="projectType" id="projectType" class="form-control" required>
@@ -60,7 +66,11 @@
 
       </div>
       <div class="form-group">
-        <label for="newSelectedPhotographers">Photographer(s)*</label>
+        <div class="horizontal-panel2">
+          <label for="newSelectedPhotographers">Photographer(s)*</label>
+
+          <button class="addButton" id="addPhotographerButton">Add Photographer</button>
+        </div>
         <select multiple id="newSelectedPhotographers">
           <option value="">Select Photographers</span>
             <% photographers.forEach(photographer=>{ %>
@@ -68,7 +78,8 @@
             <%=photographer.FullName%>
           </option>
           <%})%>
-        </select>        <div id="photographer-error" class="error-message">Please select a photographer</div>
+        </select>
+        <div id="photographer-error" class="error-message">Please select a photographer</div>
       </div>
 
 
@@ -101,12 +112,12 @@
       <div class="form-group">
         <div class="horizontal-panel2">
           <label class="label2" for="platform">Imaging Platform</label>
-          <button class='addButton' id="addImagingPlatformButton">Add</button>
+          <button class='addButton' id="addImagingPlatformButton">Add Imaging Platform</button>
         </div>
         <select multiple id="newSelectedImagingPlatforms">
           <option value="">Select Imaging Platforms</span>
             <% imagingPlatforms.forEach(i=>{ %>
-          <option value="<%=i%>" <%=i=='(Leica(L5))' ? "selected":""%>>
+          <option value="<%=i%>" <%=i=='Leica(L5)' ? "selected":""%>>
             <%=i%>
           </option>
           <%})%>
@@ -122,7 +133,7 @@
         <button type="submit" class="new"><i class="fas fa-paper-plane"></i> Submit</button>
       </div>
       <p class="note">
-        💡 New project types and/or imaging platform will only be in the system if said changes are submitted
+        💡 New project types, imaging platform and/or photographers will only be in the system if said changes are submitted
       </p>
     </form>
   </div>
@@ -138,6 +149,7 @@
     allowHTML: true,
     removeItemButton: true
   });
+  const toBeCreatedPhotographers = []
   // Initialize form with current datetime
   document.addEventListener('DOMContentLoaded', function() {
     // document.querySelector("[class='choices__inner']").style.float = "1000px"
@@ -178,6 +190,57 @@
         }
       });
     })
+    document.getElementById('addPhotographerButton').addEventListener('click', async function(e) {
+      e.preventDefault()
+      Swal.fire({
+        title: "Add new Photographer",
+        text: "Add new Photographer",
+        width: '700px',
+        html: `
+        <input 
+          id="newPhotographerEmail" 
+          placeholder="Enter Email"
+          style="width:95%;height:40%;font-size:30px;margin-bottom:5px" 
+          required>
+        <br>
+        <input 
+          id="newPhotographerFullName" 
+          placeholder="Enter Full Name" 
+          style="width:95%;height:40%;font-size:30px;" 
+          required">`,
+
+
+        showCancelButton: true,
+      }).then((result) => {
+        const email = document.getElementById('newPhotographerEmail').value
+
+        const emailRegex = /^[a-zA-Z0-9](\.?[a-zA-Z0-9_-])*[a-zA-Z0-9]@[a-zA-Z0-9-]+\.[a-zA-Z]{2,}$/
+
+        const fullName = document.getElementById('newPhotographerFullName').value
+        if (email && fullName) {
+          if (!emailRegex.test(email)) {
+            alert("you entered an email with an invalid format")
+            return
+          }
+          newSelectedPhotographers.setChoices([{
+            value: email,
+            label: fullName,
+            selected: true
+          }])
+          toBeCreatedPhotographers.push([fullName, email])
+          // console.log('toBeCreatedPhotographers', toBeCreatedPhotographers)
+        }
+      });
+    })
+    newSelectedPhotographers.passedElement.element.addEventListener('removeItem', function(e) {
+      toBeRemoved = [e.detail.label, e.detail.value]
+      for (x = 0; x < toBeCreatedPhotographers.length; x++) {
+        const o = toBeCreatedPhotographers[x]
+        if (o[0] == toBeRemoved[0] && o[1] == toBeRemoved[1]) {
+          toBeCreatedPhotographers.splice(x, 1)
+        }
+      }
+    }, false)
     const aDate = new Date()
     document.getElementById('startDate').value = aDate.toISOString().slice(0, 16).split('T')[0]
     aDate.setDate(aDate.getDate() + 4)
@@ -199,7 +262,6 @@
       document.getElementById('endDate').min = startDate;
 
   }
-
 
   // Function to setup form validation
   function setupFormValidation() {
@@ -292,7 +354,7 @@
     console.log('in submitForm')
     const submitBtn = form.querySelector('button[type="submit"]');
     console.log(newSelectedPhotographers.getValue(true))
-    console.log(newSelectedImagingPlatforms.getValue(true))
+
     const originalBtnText = submitBtn.innerHTML;
 
     try {
@@ -317,9 +379,8 @@
         comments: form.comments.value || null,
         selectedImagingPlatforms: newSelectedImagingPlatforms.getValue(true),
         selectedPhotographers: newSelectedPhotographers.getValue(true),
+        toBeCreatedPhotographers: toBeCreatedPhotographers
       };
-
-
       const response = await fetch('/project/create', {
         method: 'POST',
         headers: {
@@ -337,6 +398,7 @@
         throw new Error(data.message || "Submission failed");
       }
 
+     
       // Show success message
       await Swal.fire({
         title: 'Success!',

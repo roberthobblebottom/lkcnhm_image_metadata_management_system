@@ -48,8 +48,8 @@ const userTypesEnumeration = () => {
         admin: 'admin'
     }
 }
-
+const emailRegex  = /^[a-zA-Z0-9](\.?[a-zA-Z0-9_-])*[a-zA-Z0-9]@[a-zA-Z0-9-]+\.[a-zA-Z]{2,}$/
 export {
     formatDate, formatDisplayDate, requestStatusEnumeration, projectStatusEnumeration, projectTypeEnumeration,
-    mediaFileFormatEnumeration,  userTypesEnumeration
+    mediaFileFormatEnumeration,  userTypesEnumeration,emailRegex
 };

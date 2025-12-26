@@ -80,6 +80,17 @@
           <%= project.imagingPlatforms || 'Not specified' %>
         </div>
       </div>
+      <%if (newlyCreatedPhotographers != ""){%>
+              <div class="detail-row">
+        <div class="detail-label">newly Created Photographers</div>
+        <div class="detail-value">
+          <%newlyCreatedPhotographers.forEach( p =>{%>
+            Email: <%=p.email%> Password:<%=p.password%>
+            <%})%>
+            Please tell your photographers to change the password as soon as possible.
+        </div>
+      </div>
+        <%}%>
     </div>
     </div>
 
