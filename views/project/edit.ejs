@@ -158,16 +158,21 @@
         text: "Add new Project Type",
         input: 'text',
         showCancelButton: true,
-        inputPlaceholder: "Enter it here."
-      }).then((result) => {
-        if (result.value && result.value != "") {
-          const select = document.getElementById("projectType")
-          var option = document.createElement('option')
-          option.text = option.value = result.value
-          select.add(option, 1)
-          select.value = option.text
+        inputPlaceholder: "Enter it here.",
+        preConfirm: (value) => {
+          if (value) {
+            if ("<%=projectTypes%>".includes(value))
+              Swal.showValidationMessage('This Project Type value already exist')
+            const select = document.getElementById("projectType")
+            var option = document.createElement('option')
+            option.text = option.value = value
+            select.add(option, 1)
+            select.value = option.text
+          } else {
+            Swal.showValidationMessage('Value is required')
+          }
         }
-      });
+      })
     })
     document.getElementById('addImagingPlatformButton').addEventListener('click', async function(e) {
       console.log("add Imaging Platform button")
@@ -177,17 +182,22 @@
         text: "Add new Imaging Platform",
         input: 'text',
         showCancelButton: true,
-        inputPlaceholder: "Enter it here."
-      }).then((result) => {
-        if (result.value && result.value != "") {
-          console.log('adding', result.value)
-          newSelectedImagingPlatforms.setChoices([{
-            value: result.value,
-            label: result.value,
-            selected: true
-          }])
+        inputPlaceholder: "Enter it here.",
+        preConfirm: (value) => {
+          if (value) {
+            if ("<%=imagingPlatforms%>".includes(value))
+              Swal.showValidationMessage('This Imaging Platform value already exist')
+            const select = document.getElementById("newSelectedImagingPlatforms")
+            newSelectedImagingPlatforms.setChoices([{
+              value: value,
+              label: value,
+              selected: true
+            }])
+          } else {
+            Swal.showValidationMessage('Value is required')
+          }
         }
-      });
+      })
     })
     document.getElementById('addPhotographerButton').addEventListener('click', async function(e) {
       e.preventDefault()

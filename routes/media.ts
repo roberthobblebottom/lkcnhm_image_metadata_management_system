@@ -85,6 +85,9 @@ router.get(
       ) => void;
     }
   ) => {
+    /***
+     * Select Only relevant project andd photographer pairs based on user typer
+     */
     const allProjectAndPhotographerPairsQuery = `    Select pupl.ProjectID, photographer.UserID, 
           p.ProjectName as projectName, photographer.FullName as photographerName 
         FROM ProjectUserPhotographyLink pupl 
@@ -93,6 +96,8 @@ router.get(
         `;
     const user = req.session.passport.user;
     var q2: string;
+
+    
     if (user.UserType == userTypesEnumeration().projectOwner) {
       q2 = allProjectAndPhotographerPairsQuery + "WHERE p.ProjectOwnerID = ?";
     } else if (user.UserType == userTypesEnumeration().photographerOnly) {
@@ -276,13 +281,16 @@ router.post(
           .query<RowDataPacket[]>(
             "ALTER TABLE ImagingPlatformInstance MODIFY COLUMN `ImagingPlatform` enum(?)",
             [i2]
-          );
+        );
+
+        // for new enums, the list of imaging platforms that the entity project has
+        // needs to be updated:
         await db
           .promise()
           .query<RowDataPacket[]>(
             "INSERT IGNORE INTO ImagingPlatformInstance (ProjectID, ImagingPlatform) VALUES (?,?) ",
             [projectID, newImagingPlatform]
-          );
+          );// sorry unfortunately I cant' remember why I am ignoring errors here.
       }
       const result: any = (
         await db.promise().query<RowDataPacket[]>(insertQuery, values)
@@ -344,6 +352,10 @@ router.get(
     `;
     const user = req.session.passport.user;
     var query: string = "";
+    /**
+     * retrieve table data based on what user type 
+     * to show only relevant data and enforce authentication
+     */
     switch (user.UserType) {
       case userTypesEnumeration().admin:
         query = baseQuery + "\nORDER BY m.CreatedDate DESC";
@@ -497,6 +509,9 @@ router.get(
         `;
     const user = req.session.passport.user;
     var q2: string;
+    /**
+     * retrieve project photographer pair based on user privilleges
+     */
     if (user.UserType == userTypesEnumeration().projectOwner) {
       q2 = allProjectAndPhotographerPairsQuery + "WHERE p.ProjectOwnerID = ?";
     } else if (user.UserType == userTypesEnumeration().photographerOnly) {
@@ -513,7 +528,6 @@ router.get(
       allProjectAndPhotographerPairs
     );
 
-    //For EDIT only
     const currentMediaQuery =
       `SELECT Media.*,
         projectOwner.FullName projectOwnerName,
@@ -652,13 +666,15 @@ router.post(
         .query<RowDataPacket[]>(
           "ALTER TABLE ImagingPlatformInstance MODIFY COLUMN `ImagingPlatform` enum(?)",
           [i]
-        );
+      );
+        // for new enums, the list of imaging platforms that the entity project has
+        // needs to be updated:
       await db
         .promise()
         .query<RowDataPacket[]>(
           "INSERT IGNORE INTO ImagingPlatformInstance (ProjectID, ImagingPlatform) VALUES (?,?) ",
           [projectID, newImagingPlatform]
-        );
+        );// I can't remember why I ignore errors here, sorry.
     }
     req.session.save();
 
@@ -694,6 +710,7 @@ router.post(
     const userId = req.session.passport.user.UserID;
 
     // First verify the media exists and isn't already deleted
+    // this could be replace with catching the error but just using what works from the previous developers
     const checkQuery =
       "SELECT * FROM Media WHERE MediaID = ? AND IsDeleted = 0";
 
@@ -741,6 +758,7 @@ router.post(
     const userId = req.session.passport.user.UserID;
 
     // First verify the media exists and isn't already restored
+    // this could be replace with catching the error but just using what works from the previous developers
     const checkQuery =
       "SELECT * FROM Media WHERE MediaID = ? AND IsDeleted = 1";
 
@@ -794,6 +812,8 @@ router.get(
     SELECT  p.ProjectID, p.ProjectName
     FROM Project p
 `;
+    // list projects based on user type, 
+    // where non admins will only get projects that they photographs or owns.
     const q2 =
       user.UserType != userTypesEnumeration().admin
         ? query +
@@ -847,6 +867,8 @@ router.post(
       }
       console.log("File deleted successfully");
     });
+
+    //Conducts some validation for each row of the data.
     interface newRowColumnInterface {
       MorphoID: number;
       CatalogID: number;
@@ -896,7 +918,6 @@ router.post(
       if (newRowTempSplited.length == 1 && newRowTempSplited[0] == "") {
         continue;
       }
-      // console.log(newRowTempSplited)
       const newRow: string[] = [projectID.toString()];
       for (var j: number = 0; j < newRowTempSplited.length; j++) {
         const elementTemp = newRowTempSplited[j]
@@ -985,12 +1006,7 @@ router.post(
                 );
             break;
           case newRowColumns.ImagingPlatform:
-            // if (!Object.values(imagingPlatformEnumeration()).includes(element)) {
-            //     errorMessage = errorMessage + errorMessageBuilder(
-            //         " Invalid image platform. The platform should be any one of these: "
-            //         + Object.values(imagingPlatformEnumeration()).toString())
-
-            // } else
+            // checks for new Imaging platform to take note
             if (
               !req.session.imagingPlatforms.includes(element!) &&
               !newImagingPlatforms.includes(element!) &&
@@ -1001,11 +1017,7 @@ router.post(
             }
             break;
           case newRowColumns.ImageEditingTool:
-            // if (!Object.values(imageEditingToolEnumeration()).includes(element)) {
-            //     errorMessage = errorMessage + errorMessageBuilder(
-            //         " Invalid image editing tool. The tool should be any one of these: "
-            //         + Object.values(imageEditingToolEnumeration()).toString())
-            // } else
+            // checks for new image editing tools to take note
             if (
               !req.session.imageEditingTools.includes(element!) &&
               !newImageEditingTools.includes(element!) &&
@@ -1041,13 +1053,11 @@ router.post(
       });
       return;
     }
-    // console.log(req.session["imageEditingTools"])
-    // console.log(req.session['imagingPlatforms'])
-    // console.log('newImageEditingTools', newImageEditingTools)
-    // console.log('newImagingPlatforms', newImagingPlatforms)
-    // console.log('newTable', newTable)
+
     const allImageEditingTools =
       req.session["imageEditingTools"].concat(newImageEditingTools);
+    
+    //insert any new image editing tools or Image Platforms
     if (newImageEditingTools != null && newImageEditingTools.length != 0)
       await db
         .promise()
@@ -1065,7 +1075,6 @@ router.post(
         ]);
     req.session["imagingPlatforms"] = allImagingPlatforms;
 
-    // console.log('newTable',newTable)
     const insertQuery = `
       INSERT INTO Media(
             ProjectID,
@@ -1094,9 +1103,9 @@ router.get(
   "/download",
   isAuthenticated,
   async (req: any, res: { download: (arg0: string) => void }) => {
+    //helps to retrieve metadata template file for downloading.
     const filePath: string =
       "image metadata template for only one project.xlsx";
-
     res.download(filePath);
   }
 );

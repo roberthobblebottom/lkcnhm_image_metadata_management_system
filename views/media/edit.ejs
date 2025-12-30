@@ -118,11 +118,11 @@
       </div>
 
       <div class="form-group">
-        
-        <div class="horizontal-panel2">
-        <label class="label2"  for="imageEditingTool">Image Editing Tool</label>
 
-        <button class="addButton" id="addImageEditingTool">Add Image Editing Tool</button>
+        <div class="horizontal-panel2">
+          <label class="label2" for="imageEditingTool">Image Editing Tool</label>
+
+          <button class="addButton" id="addImageEditingTool">Add Image Editing Tool</button>
         </div>
         <select name="imageEditingTool" id="imageEditingTool">
           <option value="">-- Select a image editing tool --</option>
@@ -143,7 +143,8 @@
       <p class="note">
         💡 Note: If there is more than one image for a specimen, please use the pipeline script to capture the metadata
         details.
-        New project types and/or imaging platform will only be in the system if said changes are submitted
+        New image editing tool and/or imaging platform will only be in the system if said changes are submitted
+        Only one enum value of either features can be added at a single time of edit of a media.
       </p>
       <div class="buttons">
         <button type="submit"><i class="fas fa-paper-plane"></i> Submit Media</button>
@@ -158,46 +159,60 @@
       const temp = fileNameInput.value.split(".")[0]
       fileNameInput.value = temp + fileFormat.value
     };
-    document.getElementById('addImageEditingTool').addEventListener("click",
-      function enterNewImageEditingTool(e) {
-        e.preventDefault()
-        Swal.fire({
-          title: "Add new Image Editing Tool",
-          text: "Add new Image Editing Tool",
-          input: 'text',
-          showCancelButton: true,
-          inputPlaceholder: "Enter it here."
-        }).then((result) => {
-          if (result.value) {
-            const select = document.getElementById("imageEditingTool")
-            var option = document.createElement('option')
-            option.text = option.value = result.value
-            select.add(option, 1)
-            select.value = option.text
-          }
-        });
-      });
 
-    document.getElementById('addImagingPlatform').addEventListener("click",
+    document.getElementById('addImagingPlatform').addEventListener(
+      'click',
       function enterNewImagingPlatform(e) {
         e.preventDefault()
-        console.log('enterNewImagingPlatform')
         Swal.fire({
           title: "Add new Imaging Platform",
           text: "Add new Imaging Platform",
           input: 'text',
           showCancelButton: true,
-          inputPlaceholder: "Enter it here."
-        }).then((result) => {
-          if (result.value) {
-            const select = document.getElementById("imagingPlatform")
-            var option = document.createElement('option')
-            option.text = option.value = result.value
-            select.add(option, 1)
-            select.value = option.text
+          inputPlaceholder: "Enter it here.",
+          preConfirm: (value) => {
+            if (value) {
+              if ("<%=imagingPlatforms%>".includes(value))
+                Swal.showValidationMessage('This Imaging Platform value already exist')
+              const select = document.getElementById("imagingPlatform")
+              var option = document.createElement('option')
+              option.text = option.value = value
+              select.add(option, 1)
+              select.value = option.text
+            } else {
+              Swal.showValidationMessage('Value is required')
+            }
           }
-        });
-      });
+        })
+      }
+    )
+
+    document.getElementById('addImageEditingTool').addEventListener(
+      'click',
+      function enterNewImageEditingTool(e) {
+        e.preventDefault()
+        Swal.fire({
+          title: "Add new Imaging Editing Tool",
+          text: "Add new Imaging Editing Tool",
+          input: 'text',
+          showCancelButton: true,
+          inputPlaceholder: "Enter it here.",
+          preConfirm: (value) => {
+            if (value) {
+              if ("<%=imageEditingTools%>".includes(value))
+                Swal.showValidationMessage('This Image Editing Tool value already exist')
+              const select = document.getElementById("imageEditingTool")
+              var option = document.createElement('option')
+              option.text = option.value = value
+              select.add(option, 1)
+              select.value = option.text
+            } else {
+              Swal.showValidationMessage('Value is required')
+            }
+          }
+        })
+      }
+    )
     document.addEventListener("DOMContentLoaded", () => {
       const form = document.getElementById("main-form");
       const fileNameInput = document.getElementById("mediaFileName");
@@ -337,6 +352,8 @@
               confirmButtonText: 'OK',
               confirmButtonColor: '#dc3545'
             });
+            submitBtn.innerHTML = 'loading';
+            submitBtn.disabled = false;
           } finally {
             submitBtn.disabled = false;
             submitBtn.value = "Upload"

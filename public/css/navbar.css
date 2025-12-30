@@ -30,7 +30,7 @@ margin-bottom: 10px;
     color: #7e3ff2; /* Stylish purple */
     letter-spacing: 2px;
   }
-  
+
   .nav-links {
     list-style: none;
     padding: 0;
@@ -49,6 +49,8 @@ margin-bottom: 10px;
     align-items: center;
     border-radius: 10px;
     transition: background 0.3s;
+
+    text-align: left !important;
   }
   
   .nav-links li a:hover

@@ -11,12 +11,7 @@
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/choices.js@11.1.0/public/assets/styles/choices.min.css" />
   <!-- <link ref="stylesheet" href="/css/choiceJS.css"> -->
   <script src="https://cdn.jsdelivr.net/npm/choices.js/public/assets/scripts/choices.min.js"></script>
-  <style>
-    /* #swal2-html-container{
-      height: 250px;
-      
-    } */
-  </style>
+
 </head>
 
 <body>
@@ -134,6 +129,7 @@
       </div>
       <p class="note">
         💡 New project types, imaging platform and/or photographers will only be in the system if said changes are submitted
+        Only one enum value of either features can be added at a single time of creation of a project.
       </p>
     </form>
   </div>
@@ -152,9 +148,10 @@
   const toBeCreatedPhotographers = []
   // Initialize form with current datetime
   document.addEventListener('DOMContentLoaded', function() {
-    // document.querySelector("[class='choices__inner']").style.float = "1000px"
-    if ("<%=currentUser.UserType != 'admin'%>") {
+    if ("<%=currentUser.UserType %>" != 'admin') {
+      // grey out and disable this option
       const x = document.querySelector("[data-value='<%=currentUser.UserID%>']")
+      console.log(x)
       x.removeChild(x.childNodes[1])
       x.style.padding = "12px"
       x.style.backgroundColor = "gray"
@@ -167,17 +164,22 @@
         text: "Add new Project Type",
         input: 'text',
         showCancelButton: true,
-        inputPlaceholder: "Enter it here."
-      }).then((result) => {
-        if (result.value && result.value != "") {
-          const select = document.getElementById("projectType")
-          var option = document.createElement('option')
-          option.text = option.value = result.value
-          select.add(option, 1)
-          select.value = option.text
+        inputPlaceholder: "Enter it here.",
+        preConfirm: (value) => {
+          if (value) {
+            if ("<%=projectTypes%>".includes(value))
+              Swal.showValidationMessage('This Project Type value already exist')
+            const select = document.getElementById("projectType")
+            var option = document.createElement('option')
+            option.text = option.value = value
+            select.add(option, 1)
+            select.value = option.text
+          } else {
+            Swal.showValidationMessage('Value is required')
+          }
         }
-      });
-    })
+      })
+    });
     document.getElementById('addImagingPlatformButton').addEventListener('click', async function(e) {
       console.log("add Imaging Platform button")
       e.preventDefault()
@@ -186,16 +188,22 @@
         text: "Add new Imaging Platform",
         input: 'text',
         showCancelButton: true,
-        inputPlaceholder: "Enter it here."
-      }).then((result) => {
-        if (result.value && result.value != "") {
-          newSelectedImagingPlatforms.setChoices([{
-            value: result.value,
-            label: result.value,
+        inputPlaceholder: "Enter it here.",
+        preConfirm: (value) => {
+          if (value) {
+            if ("<%=imagingPlatforms%>".includes(value))
+              Swal.showValidationMessage('This Imaging Platform value already exist')
+            const select = document.getElementById("newSelectedImagingPlatforms")
+            newSelectedImagingPlatforms.setChoices([{
+              value: value,
+              label: value,
             selected: true
-          }])
+            }])
+          } else {
+            Swal.showValidationMessage('Value is required')
+          }
         }
-      });
+      })
     })
     document.getElementById('addPhotographerButton').addEventListener('click', async function(e) {
       e.preventDefault()

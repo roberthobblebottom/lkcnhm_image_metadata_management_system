@@ -7,11 +7,10 @@
   <link rel="stylesheet" href="/css/form.css" />
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
   <style>
-    h2{
+    h2 {
       float: center;
       font-size: 1.475rem;
     }
- 
   </style>
 </head>
 
@@ -144,8 +143,8 @@
       <p class="note">
         💡 Note: If there is more than one image for a specimen, please use the pipeline script to capture the metadata
         details.
-
-        New project types and/or imaging platform will only be in the system if said changes are submitted
+        New image editing tools and/or imaging platform will only be in the system if said changes are submitted
+        Only one enum value of either features can be added at a single time creation of media.
       </p>
 
       <div class="buttons">
@@ -164,48 +163,58 @@
 
 
 
+
     document.getElementById('addImagingPlatform').addEventListener(
       'click',
       function enterNewImagingPlatform(e) {
-        console.log('enterNewImagingPlatform')
         e.preventDefault()
         Swal.fire({
           title: "Add new Imaging Platform",
           text: "Add new Imaging Platform",
           input: 'text',
           showCancelButton: true,
-          inputPlaceholder: "Enter it here."
-        }).then((result) => {
-          if (result.value) {
-            const select = document.getElementById("imagingPlatform")
-            var option = document.createElement('option')
-            option.text = option.value = result.value
-            select.add(option, 1)
-            select.value = option.text
+          inputPlaceholder: "Enter it here.",
+          preConfirm: (value) => {
+            if (value) {
+              if ("<%=imagingPlatforms%>".includes(value))
+                Swal.showValidationMessage('This Imaging Platform value already exist')
+              const select = document.getElementById("imagingPlatform")
+              var option = document.createElement('option')
+              option.text = option.value = value
+              select.add(option, 1)
+              select.value = option.text
+            } else {
+              Swal.showValidationMessage('Value is required')
+            }
           }
-        });
+        })
       }
     )
-    document.getElementById('addImageEditingTool').addEventListener('click',
-      async function enterNewImageEditingTool(e) {
-        console.log('enterNewImageEditingTool')
+
+    document.getElementById('addImageEditingTool').addEventListener(
+      'click',
+      function enterNewImageEditingTool(e) {
         e.preventDefault()
-        await Swal.fire({
+        Swal.fire({
           title: "Add new Imaging Editing Tool",
           text: "Add new Imaging Editing Tool",
           input: 'text',
           showCancelButton: true,
-          inputPlaceholder: "Enter it here."
-        }).then((result) => {
-          console.log("HERE")
-          if (result.value) {
-            const select = document.getElementById("imageEditingTool")
-            var option = document.createElement('option')
-            option.text = option.value = result.value
-            select.add(option, 1)
-            select.value = option.text
+          inputPlaceholder: "Enter it here.",
+          preConfirm: (value) => {
+            if (value) {
+              if ("<%=imageEditingTools%>".includes(value))
+                Swal.showValidationMessage('This Image Editing Tool value already exist')
+              const select = document.getElementById("imageEditingTool")
+              var option = document.createElement('option')
+              option.text = option.value = value
+              select.add(option, 1)
+              select.value = option.text
+            } else {
+              Swal.showValidationMessage('Value is required')
+            }
           }
-        });
+        })
       }
     )
     document.addEventListener("DOMContentLoaded", () => {
@@ -346,6 +355,7 @@
           } finally {
             submitBtn.disabled = false;
             submitBtn.value = "Upload"
+            submitBtn.innerHTML = "Upload"
           }
         }
       });

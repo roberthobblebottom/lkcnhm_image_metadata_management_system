@@ -144,7 +144,20 @@ textarea[readonly] {
        resize: vertical;
        line-height: 1.5;
    }
-
+   .choices__input{
+      font-size: 20px !important;
+     }
+     .choices__list--dropdown 
+     .choices__item--selectable.is-highlighted,
+      .choices__list[aria-expanded]
+       .choices__item--selectable.is-highlighted,
+       .choices__list--multiple .choices__item{
+      font-size: 20px !important;
+     }
+    .choices__list--dropdown .choices__item,
+     .choices__list[aria-expanded] .choices__item{
+      font-size:20px !important;
+    } 
 
    .btn-primary {
        background-color: #007bff;
