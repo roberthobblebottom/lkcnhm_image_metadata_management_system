@@ -10,7 +10,7 @@ const {
 const multer = require("multer");
 import fs from "fs";
 import { RowDataPacket } from "mysql2";
-import { Session, User } from "../@types/types";
+import { Response, Request } from "express";
 const path = require("path");
 const upload = multer({ dest: "upload-bulk-metadata/" });
 
@@ -64,150 +64,86 @@ const upload = multer({ dest: "upload-bulk-metadata/" });
 
 // });
 
-router.get(
-  "/create",
-  isAuthenticated,
-  async (
-    req: {
-      session: Session;
-    },
-    res: {
-      render: (
-        arg0: string,
-        arg1: {
-          currentUser: User;
-          imageEditingTools: string[];
-          imagingPlatforms: string[];
-          allProjectAndPhotographerPairs: any;
-          fileFormats: string[];
-          title: string;
-        }
-      ) => void;
-    }
-  ) => {
-    /***
-     * Select Only relevant project andd photographer pairs based on user typer
-     */
-    const allProjectAndPhotographerPairsQuery = `    Select pupl.ProjectID, photographer.UserID, 
+router.get("/create", isAuthenticated, async (req: Request, res: Response) => {
+  /***
+   * Select Only relevant project andd photographer pairs based on user typer
+   */
+  const allProjectAndPhotographerPairsQuery = `    Select pupl.ProjectID, photographer.UserID, 
           p.ProjectName as projectName, photographer.FullName as photographerName 
         FROM ProjectUserPhotographyLink pupl 
         JOIN Project p ON p.ProjectID = pupl.ProjectID 
         JOIN User photographer ON photographer.UserID = pupl.PhotographerID
         `;
-    const user = req.session.passport.user;
-    var q2: string;
+  const user = req.session.passport.user;
+  var q2: string;
 
-    
-    if (user.UserType == userTypesEnumeration().projectOwner) {
-      q2 = allProjectAndPhotographerPairsQuery + "WHERE p.ProjectOwnerID = ?";
-    } else if (user.UserType == userTypesEnumeration().photographerOnly) {
-      q2 =
-        allProjectAndPhotographerPairsQuery + "WHERE photographer.UserID = ?";
-    } else {
-      q2 = allProjectAndPhotographerPairsQuery;
-    }
-    const allProjectAndPhotographerPairs = (
-      await db.promise().query(q2, [user.UserID])
-    )[0];
- 
-
-    res.render("media/create", {
-      currentUser: req.session.passport.user,
-      imageEditingTools: req.session["imageEditingTools"],
-      imagingPlatforms: req.session["imagingPlatforms"],
-      allProjectAndPhotographerPairs,
-      fileFormats: Object.values(mediaFileFormatEnumeration()),
-
-      title: "Media Form",
-    });
+  if (user.UserType == userTypesEnumeration().projectOwner) {
+    q2 = allProjectAndPhotographerPairsQuery + "WHERE p.ProjectOwnerID = ?";
+  } else if (user.UserType == userTypesEnumeration().photographerOnly) {
+    q2 = allProjectAndPhotographerPairsQuery + "WHERE photographer.UserID = ?";
+  } else {
+    q2 = allProjectAndPhotographerPairsQuery;
   }
-);
-router.post(
-  "/create",
-  isAuthenticated,
-  async (
-    req: {
-      body: {
-        fileName: string;
-        filePath: string;
-        catalogID: string;
-        morphoID: string;
-        clusterID: string;
-        imagingDate: string | number | Date;
-        resolution: string;
-        fileSizeBytes: number;
-        fileFormat: string;
-        description: string;
-        imagingPlatform: string;
-        imageEditingTool: string;
-        newImagingPlatform: string;
-        newImageEditingTool: string;
-        comments: string;
-        projectAndPhotographerPair: any;
-      };
-      session: Session;
-    },
-    res: {
-      status: (arg0: number) => {
-        (): any;
-        new (): any;
-        json: {
-          (arg0: { success: boolean; message: string; error?: any }): any;
-          new (): any;
-        };
-      };
-      json: (arg0: {
-        success: boolean;
-        message: string;
-        redirectUrl: string;
-      }) => void;
+  const allProjectAndPhotographerPairs = (
+    await db.promise().query(q2, [user.UserID])
+  )[0];
+
+  res.render("media/create", {
+    currentUser: req.session.passport.user,
+    imageEditingTools: req.session["imageEditingTools"],
+    imagingPlatforms: req.session["imagingPlatforms"],
+    allProjectAndPhotographerPairs,
+    fileFormats: Object.values(mediaFileFormatEnumeration()),
+
+    title: "Media Form",
+  });
+});
+router.post("/create", isAuthenticated, async (req: Request, res: Response) => {
+  try {
+    const {
+      fileName,
+      filePath,
+      catalogID,
+      morphoID,
+      clusterID,
+      imagingDate,
+      resolution,
+      fileSizeBytes,
+      fileFormat,
+      description,
+      imagingPlatform,
+      imageEditingTool,
+      newImagingPlatform,
+      newImageEditingTool,
+      comments,
+      projectAndPhotographerPair,
+    } = req.body;
+
+    console.log("📤 Media submission data:", req.body);
+    const createdBy = req.session.passport.user.UserID;
+    const updatedBy = createdBy;
+    // Validation: required fields
+    const missingFields = [];
+    if (!projectAndPhotographerPair)
+      missingFields.push("projectAndPhotographerPair");
+    if (!fileName) missingFields.push("fileName");
+    if (!filePath) missingFields.push("filePath");
+    if (!catalogID) missingFields.push("catalogID");
+    if (!morphoID) missingFields.push("morphoID");
+    // if (!clusterID) missingFields.push("clusterID");
+    // if (!imagingDate) missingFields.push("imagingDate");
+    if (!description) missingFields.push("description");
+    // if (!imagingPlatform) missingFields.push("imagingPlatform");
+
+    const splitX = projectAndPhotographerPair.split(",");
+    if (missingFields.length > 0) {
+      return res.status(400).json({
+        success: false,
+        message: "Missing required fields: " + missingFields.join(", "),
+      });
     }
-  ) => {
-    try {
-      const {
-        fileName,
-        filePath,
-        catalogID,
-        morphoID,
-        clusterID,
-        imagingDate,
-        resolution,
-        fileSizeBytes,
-        fileFormat,
-        description,
-        imagingPlatform,
-        imageEditingTool,
-        newImagingPlatform,
-        newImageEditingTool,
-        comments,
-        projectAndPhotographerPair,
-      } = req.body;
 
-      console.log("📤 Media submission data:", req.body);
-      const createdBy = req.session.passport.user.UserID;
-      const updatedBy = createdBy;
-      // Validation: required fields
-      const missingFields = [];
-      if (!projectAndPhotographerPair)
-        missingFields.push("projectAndPhotographerPair");
-      if (!fileName) missingFields.push("fileName");
-      if (!filePath) missingFields.push("filePath");
-      if (!catalogID) missingFields.push("catalogID");
-      if (!morphoID) missingFields.push("morphoID");
-      // if (!clusterID) missingFields.push("clusterID");
-      // if (!imagingDate) missingFields.push("imagingDate");
-      if (!description) missingFields.push("description");
-      // if (!imagingPlatform) missingFields.push("imagingPlatform");
-
-      const splitX = projectAndPhotographerPair.split(",");
-      if (missingFields.length > 0) {
-        return res.status(400).json({
-          success: false,
-          message: "Missing required fields: " + missingFields.join(", "),
-        });
-      }
-
-      const insertQuery = `
+    const insertQuery = `
       INSERT INTO Media(
             ProjectID,
             PhotographerID,
@@ -230,107 +166,90 @@ router.post(
             UpdatedByID
         ) VALUES(?,  ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW(), ?, NOW(),?)
         `;
-      const projectID = splitX[0];
-      const values = [
-        projectID,
-        splitX[1],
-        fileName,
-        filePath,
-        catalogID || null,
-        morphoID || null,
-        clusterID || null,
-        imagingDate || null,
-        resolution || null,
-        fileSizeBytes || null,
-        fileFormat || null,
-        description || null,
-        imagingPlatform,
-        imageEditingTool || null,
-        comments || null,
-        createdBy,
-        updatedBy,
-      ];
+    const projectID = splitX[0];
+    const values = [
+      projectID,
+      splitX[1],
+      fileName,
+      filePath,
+      catalogID || null,
+      morphoID || null,
+      clusterID || null,
+      imagingDate || null,
+      resolution || null,
+      fileSizeBytes || null,
+      fileFormat || null,
+      description || null,
+      imagingPlatform,
+      imageEditingTool || null,
+      comments || null,
+      createdBy,
+      updatedBy,
+    ];
 
-      if (
-        newImageEditingTool != null &&
-        newImageEditingTool != "" &&
-        !req.session["imageEditingTools"].includes(newImageEditingTool)
-      )
-        req.session.imageEditingTools.push(newImageEditingTool);
-      const i: string[] = req.session.imageEditingTools;
+    if (
+      newImageEditingTool != null &&
+      newImageEditingTool != "" &&
+      !req.session["imageEditingTools"].includes(newImageEditingTool)
+    )
+      req.session.imageEditingTools.push(newImageEditingTool);
+    const i: string[] = req.session.imageEditingTools;
+    await db
+      .promise()
+      .query("ALTER TABLE Media MODIFY COLUMN `ImageEditingTool` enum(?)", [i]);
+
+    if (
+      newImagingPlatform != null &&
+      newImagingPlatform != "" &&
+      !req.session["imagingPlatforms"].includes(newImagingPlatform)
+    ) {
+      req.session["imagingPlatforms"].push(newImagingPlatform);
+      const i2: string[] = req.session.imagingPlatforms;
       await db
         .promise()
-        .query("ALTER TABLE Media MODIFY COLUMN `ImageEditingTool` enum(?)", [
-          i,
+        .query("ALTER TABLE Media MODIFY COLUMN `ImagingPlatform` enum(?)", [
+          i2,
         ]);
-
-      if (
-        newImagingPlatform != null &&
-        newImagingPlatform != "" &&
-        !req.session["imagingPlatforms"].includes(newImagingPlatform)
-      ) {
-        req.session["imagingPlatforms"].push(newImagingPlatform);
-        const i2: string[] = req.session.imagingPlatforms;
-        await db
-          .promise()
-          .query("ALTER TABLE Media MODIFY COLUMN `ImagingPlatform` enum(?)", [
-            i2,
-          ]);
-        await db
-          .promise()
-          .query<RowDataPacket[]>(
-            "ALTER TABLE ImagingPlatformInstance MODIFY COLUMN `ImagingPlatform` enum(?)",
-            [i2]
+      await db
+        .promise()
+        .query<RowDataPacket[]>(
+          "ALTER TABLE ImagingPlatformInstance MODIFY COLUMN `ImagingPlatform` enum(?)",
+          [i2]
         );
 
-        // for new enums, the list of imaging platforms that the entity project has
-        // needs to be updated:
-        await db
-          .promise()
-          .query<RowDataPacket[]>(
-            "INSERT IGNORE INTO ImagingPlatformInstance (ProjectID, ImagingPlatform) VALUES (?,?) ",
-            [projectID, newImagingPlatform]
-          );// sorry unfortunately I cant' remember why I am ignoring errors here.
-      }
-      const result: any = (
-        await db.promise().query<RowDataPacket[]>(insertQuery, values)
-      )[0];
-      console.log("✅ Media submitted successfully, ID:", result.insertId);
-      req.session.save();
-      res.json({
-        success: true,
-        message: "Media metadata sucessfully created",
-        redirectUrl: `/media/view/${result.insertId} `,
-      });
-    } catch (error: any) {
-      console.error("❌ Media submission failed:", error);
-      return res.status(500).json({
-        success: false,
-        message: "Server error during media submission.",
-        error: error.message,
-      });
+      // for new enums, the list of imaging platforms that the entity project has
+      // needs to be updated:
+      await db
+        .promise()
+        .query<RowDataPacket[]>(
+          "INSERT IGNORE INTO ImagingPlatformInstance (ProjectID, ImagingPlatform) VALUES (?,?) ",
+          [projectID, newImagingPlatform]
+        ); // sorry unfortunately I cant' remember why I am ignoring errors here.
     }
+    const result: any = (
+      await db.promise().query<RowDataPacket[]>(insertQuery, values)
+    )[0];
+    console.log("✅ Media submitted successfully, ID:", result.insertId);
+    req.session.save();
+    res.json({
+      success: true,
+      message: "Media metadata sucessfully created",
+      redirectUrl: `/media/view/${result.insertId} `,
+    });
+  } catch (error: any) {
+    console.error("❌ Media submission failed:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Server error during media submission.",
+      error: error.message,
+    });
   }
-);
+});
 
 router.get(
   "/view-all",
   isAuthenticated,
-  async (
-    req: { session: Session; message: string },
-    res: {
-      render: (
-        arg0: string,
-        arg1: {
-          title: string;
-          medias: any;
-          errorMessage?: string;
-          currentUser?: User;
-          disableCreateMedia?: boolean;
-        }
-      ) => void;
-    }
-  ) => {
+  async (req: Request, res: Response) => {
     const baseQuery = `
       SELECT 
         m.MediaID,
@@ -353,7 +272,7 @@ router.get(
     const user = req.session.passport.user;
     var query: string = "";
     /**
-     * retrieve table data based on what user type 
+     * retrieve table data based on what user type
      * to show only relevant data and enforce authentication
      */
     switch (user.UserType) {
@@ -405,34 +324,10 @@ router.get(
   }
 );
 
-router.get(
-  "/view/:mediaID",
-  isAuthenticated,
-  (
-    req: { params: { mediaID: number }; session: Session },
-    res: {
-      status: (arg0: number) => {
-        (): any;
-        new (): any;
-        render: {
-          (arg0: string, arg1: { message: string; error?: any }): any;
-          new (): any;
-        };
-      };
-      render: (
-        arg0: string,
-        arg1: {
-          currentUser: User;
-          media: any; // Since we're querying by ID, we'll only get one record
-          mediaID: number;
-          title: string;
-        }
-      ) => void;
-    }
-  ) => {
-    const mediaID = req.params.mediaID;
+router.get("/view/:mediaID", isAuthenticated, (req: Request, res: Response) => {
+  const mediaID = req.params.mediaID;
 
-    const query = `
+  const query = `
     SELECT
         m.*,
         u1.Email AS CreatedByName,
@@ -448,58 +343,37 @@ router.get(
     ORDER BY m.CreatedDate DESC
         `;
 
-    db.query<RowDataPacket[]>(
-      query,
-      [mediaID],
-      (err: any, results: string | any[]) => {
-        if (err) {
-          console.error("❌ Error fetching media record:", err);
-          return res.status(500).render("error", {
-            message: "Error loading media entry",
-            error: process.env.NODE_ENV === "development" ? err : null,
-          });
-        }
-
-        if (results.length === 0) {
-          return res.status(404).render("error", {
-            message: "Media record not found",
-          });
-        }
-
-        res.render("media/view", {
-          currentUser: req.session.passport.user,
-          media: results[0], // Since we're querying by ID, we'll only get one record
-          mediaID,
-          title: "View Media",
+  db.query<RowDataPacket[]>(
+    query,
+    [mediaID],
+    (err: any, results: string | any[]) => {
+      if (err) {
+        console.error("❌ Error fetching media record:", err);
+        return res.status(500).render("error", {
+          message: "Error loading media entry",
+          error: process.env.NODE_ENV === "development" ? err : null,
         });
       }
-    );
-  }
-);
+
+      if (results.length === 0) {
+        return res.status(404).render("error", {
+          message: "Media record not found",
+        });
+      }
+
+      res.render("media/view", {
+        currentUser: req.session.passport.user,
+        media: results[0], // Since we're querying by ID, we'll only get one record
+        mediaID,
+        title: "View Media",
+      });
+    }
+  );
+});
 router.get(
   "/edit/:mediaID",
   isAuthenticated,
-  async (
-    req: {
-      params: { mediaID: number };
-      session: Session;
-    },
-    res: {
-      render: (
-        arg0: string,
-        arg1: {
-          currentUser: User;
-          imageEditingTools: string[];
-          imagingPlatforms: string[];
-          allProjectAndPhotographerPairs: any;
-          fileFormats: string[];
-          toBeEditedMedia: any;
-          toBeEditedImagingDate: string | number | Date;
-          title: string;
-        }
-      ) => void;
-    }
-  ) => {
+  async (req: Request, res: Response) => {
     const mediaID = req.params.mediaID;
     const allProjectAndPhotographerPairsQuery = `    Select pupl.ProjectID, photographer.UserID, 
           p.ProjectName as projectName, photographer.FullName as photographerName 
@@ -517,7 +391,7 @@ router.get(
     } else if (user.UserType == userTypesEnumeration().photographerOnly) {
       q2 =
         allProjectAndPhotographerPairsQuery + "WHERE photographer.UserID = ?";
-    } else  {
+    } else {
       q2 = allProjectAndPhotographerPairsQuery;
     }
     const allProjectAndPhotographerPairs = (
@@ -538,7 +412,7 @@ router.get(
         JOIN User projectOwner ON Project.ProjectOwnerID = projectOwner.UserID
         JOIN User photographer ON photographer.UserID = Media.PhotographerID
         WHERE Media.MediaID = ` + mediaID;
-    const x:any[] = (await db.promise().query(currentMediaQuery))
+    const x: any[] = await db.promise().query(currentMediaQuery);
     const toBeEditedMedia = x[0][0];
     console.log("-------");
     console.log("toBeEditedMedia", toBeEditedMedia);
@@ -556,33 +430,10 @@ router.get(
 );
 
 // Controller for handling form submission
-router.post(
-  "/edit",
-  isAuthenticated,
-  async (
-    req: {
-      body: any;
-      session: Session;
-    },
-    res: {
-      status: (arg0: number) => {
-        (): any;
-        new (): any;
-        json: {
-          (arg0: { success: boolean; message: string }): any;
-          new (): any;
-        };
-      };
-      json: (arg0: {
-        success: boolean;
-        message: string;
-        redirectUrl: string;
-      }) => void;
-    }
-  ) => {
-    const mediaData = req.body;
-    // Update existing media
-    const query = `
+router.post("/edit", isAuthenticated, async (req: Request, res: Response) => {
+  const mediaData = req.body;
+  // Update existing media
+  const query = `
         UPDATE Media SET
             FileName = ?,
             FilePath = ?,
@@ -603,109 +454,100 @@ router.post(
             PhotographerID = ?
         WHERE MediaID = ?
                 `;
-    const updatedBy = req.session.passport.user.UserID;
-    console.log("mediaData.imageEditingTool", mediaData.imageEditingTool);
-    const splitX = mediaData.projectAndPhotographerPair.split(",");
-    const projectID = splitX[0];
-    const params = [
-      mediaData.fileName,
-      mediaData.filePath,
-      mediaData.catalogID,
-      mediaData.morphoID,
-      mediaData.clusterID,
-      mediaData.imagingDate,
-      mediaData.resolution,
-      mediaData.fileSizeBytes,
-      mediaData.fileFormat,
-      mediaData.description,
-      mediaData.imagingPlatform,
-      mediaData.imageEditingTool,
-      mediaData.comments,
-      updatedBy, // current user making the update
-      projectID,
-      splitX[1],
-      mediaData.MediaID,
-    ];
-    const newImageEditingTool = mediaData.newImageEditingTool;
-    const newImagingPlatform = mediaData.newImagingPlatform;
+  const updatedBy = req.session.passport.user.UserID;
+  console.log("mediaData.imageEditingTool", mediaData.imageEditingTool);
+  const splitX = mediaData.projectAndPhotographerPair.split(",");
+  const projectID = splitX[0];
+  const params = [
+    mediaData.fileName,
+    mediaData.filePath,
+    mediaData.catalogID,
+    mediaData.morphoID,
+    mediaData.clusterID,
+    mediaData.imagingDate,
+    mediaData.resolution,
+    mediaData.fileSizeBytes,
+    mediaData.fileFormat,
+    mediaData.description,
+    mediaData.imagingPlatform,
+    mediaData.imageEditingTool,
+    mediaData.comments,
+    updatedBy, // current user making the update
+    projectID,
+    splitX[1],
+    mediaData.MediaID,
+  ];
+  const newImageEditingTool = mediaData.newImageEditingTool;
+  const newImagingPlatform = mediaData.newImagingPlatform;
 
-
-    console.log("newImageEditingTool", newImageEditingTool);
-    console.log("newImagingPlatform", newImagingPlatform);
-    if (
-      newImageEditingTool != null &&
-      newImageEditingTool != "" &&
-      !req.session.imageEditingTools.includes(newImageEditingTool)
-    ) {
-      req.session.imageEditingTools.push(newImageEditingTool);
-      const i = req.session.imageEditingTools;
-      console.log("i", i);
-      await db
-        .promise()
-        .query<RowDataPacket[]>(
-          "ALTER TABLE Media MODIFY COLUMN `ImageEditingTool` ENUM(?)",
-          [i]
-        );
-    }
-
-    if (
-      newImagingPlatform != null &&
-      newImagingPlatform != "" &&
-      !req.session.imagingPlatforms.includes(newImagingPlatform)
-    ) {
-      req.session.imagingPlatforms.push(newImagingPlatform);
-      const i = req.session.imagingPlatforms;
-      await db
-        .promise()
-        .query<RowDataPacket[]>(
-          "ALTER TABLE Media MODIFY COLUMN `ImagingPlatform` enum(?)",
-          [i]
-        );
-      await db
-        .promise()
-        .query<RowDataPacket[]>(
-          "ALTER TABLE ImagingPlatformInstance MODIFY COLUMN `ImagingPlatform` enum(?)",
-          [i]
+  console.log("newImageEditingTool", newImageEditingTool);
+  console.log("newImagingPlatform", newImagingPlatform);
+  if (
+    newImageEditingTool != null &&
+    newImageEditingTool != "" &&
+    !req.session.imageEditingTools.includes(newImageEditingTool)
+  ) {
+    req.session.imageEditingTools.push(newImageEditingTool);
+    const i = req.session.imageEditingTools;
+    console.log("i", i);
+    await db
+      .promise()
+      .query<RowDataPacket[]>(
+        "ALTER TABLE Media MODIFY COLUMN `ImageEditingTool` ENUM(?)",
+        [i]
       );
-        // for new enums, the list of imaging platforms that the entity project has
-        // needs to be updated:
-      await db
-        .promise()
-        .query<RowDataPacket[]>(
-          "INSERT IGNORE INTO ImagingPlatformInstance (ProjectID, ImagingPlatform) VALUES (?,?) ",
-          [projectID, newImagingPlatform]
-        );// I can't remember why I ignore errors here, sorry.
-    }
-    req.session.save();
-
-    db.query(query, params, (err: any) => {
-      if (err) {
-        console.error("❌ Error updating media:", err);
-        return res
-          .status(500)
-          .json({ success: false, message: "Error updating media" });
-      }
-      res.json({
-        success: true,
-        message: "sucessfully edited media",
-        redirectUrl: "/media/view/" + mediaData.MediaID,
-      });
-    });
   }
-);
+
+  if (
+    newImagingPlatform != null &&
+    newImagingPlatform != "" &&
+    !req.session.imagingPlatforms.includes(newImagingPlatform)
+  ) {
+    req.session.imagingPlatforms.push(newImagingPlatform);
+    const i = req.session.imagingPlatforms;
+    await db
+      .promise()
+      .query<RowDataPacket[]>(
+        "ALTER TABLE Media MODIFY COLUMN `ImagingPlatform` enum(?)",
+        [i]
+      );
+    await db
+      .promise()
+      .query<RowDataPacket[]>(
+        "ALTER TABLE ImagingPlatformInstance MODIFY COLUMN `ImagingPlatform` enum(?)",
+        [i]
+      );
+    // for new enums, the list of imaging platforms that the entity project has
+    // needs to be updated:
+    await db
+      .promise()
+      .query<RowDataPacket[]>(
+        "INSERT IGNORE INTO ImagingPlatformInstance (ProjectID, ImagingPlatform) VALUES (?,?) ",
+        [projectID, newImagingPlatform]
+      ); // I can't remember why I ignore errors here, sorry.
+  }
+  req.session.save();
+
+  db.query(query, params, (err: any) => {
+    if (err) {
+      console.error("❌ Error updating media:", err);
+      return res
+        .status(500)
+        .json({ success: false, message: "Error updating media" });
+    }
+    res.json({
+      success: true,
+      message: "sucessfully edited media",
+      redirectUrl: "/media/view/" + mediaData.MediaID,
+    });
+  });
+});
 
 // Soft delete media by setting IsDelete = 1 and redirect
 router.post(
   "/delete/:mediaID",
   isAuthenticated,
-  (
-    req: {
-      params: { mediaID: number };
-      session: Session;
-      flash: (arg0: string, arg1: string) => void;
-    },
-    res: { redirect: (arg0: string) => void }
-  ) => {
+  (req: Request, res: Response) => {
     const mediaID = req.params.mediaID;
     const userId = req.session.passport.user.UserID;
 
@@ -746,14 +588,7 @@ router.post(
 router.post(
   "/restore/:mediaID",
   isAuthenticated,
-  (
-    req: {
-      params: { mediaID: number };
-      session: Session;
-      flash: (arg0: string, arg1: string) => void;
-    },
-    res: { redirect: (arg0: string) => void }
-  ) => {
+  (req: Request, res: Response) => {
     const mediaID = req.params.mediaID;
     const userId = req.session.passport.user.UserID;
 
@@ -797,22 +632,14 @@ router.post(
 router.get(
   "/upload-bulk-metadata",
   isAuthenticated,
-  async (
-    req: { session: Session },
-    res: {
-      render: (
-        arg0: string,
-        arg1: { currentUser: User; allProjects: any; title: string }
-      ) => void;
-    }
-  ) => {
+  async (req: Request, res: Response) => {
     console.log("upload bulk metadata GET");
     const user = req.session.passport.user;
     const query = `
     SELECT  p.ProjectID, p.ProjectName
     FROM Project p
 `;
-    // list projects based on user type, 
+    // list projects based on user type,
     // where non admins will only get projects that they photographs or owns.
     const q2 =
       user.UserType != userTypesEnumeration().admin
@@ -836,21 +663,7 @@ router.post(
   "/upload-bulk-metadata/:projectID",
   upload.single("bulk-metadata"),
   isAuthenticated,
-  async (
-    req: {
-      params: { projectID: number };
-      file: { path: string };
-      session: Session;
-    },
-    res: {
-      json: (arg0: {
-        sucess?: boolean;
-        message: string;
-        success?: boolean;
-        redirectUrl?: string;
-      }) => void;
-    }
-  ) => {
+  async (req: Request, res: Response) => {
     const projectID = req.params.projectID;
 
     const absolutePath = path
@@ -982,7 +795,6 @@ router.post(
                 errorMessageBuilder("Invalid Imaging Date format.");
             break;
           case newRowColumns.Resolution:
-            // console.log(element)
             if (!/^\d{1,5}x\d{1,5}$/.test(element!) && element != null)
               errorMessage =
                 errorMessage +
@@ -1056,7 +868,7 @@ router.post(
 
     const allImageEditingTools =
       req.session["imageEditingTools"].concat(newImageEditingTools);
-    
+
     //insert any new image editing tools or Image Platforms
     if (newImageEditingTools != null && newImageEditingTools.length != 0)
       await db
@@ -1099,15 +911,10 @@ router.post(
   }
 );
 
-router.get(
-  "/download",
-  isAuthenticated,
-  async (req: any, res: { download: (arg0: string) => void }) => {
-    //helps to retrieve metadata template file for downloading.
-    const filePath: string =
-      "image metadata template for only one project.xlsx";
-    res.download(filePath);
-  }
-);
+router.get("/download", isAuthenticated, async (req: any, res: Response) => {
+  //helps to retrieve metadata template file for downloading.
+  const filePath: string = "image metadata template for only one project.xlsx";
+  res.download(filePath);
+});
 
 module.exports = router;

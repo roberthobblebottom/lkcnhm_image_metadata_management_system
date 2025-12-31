@@ -2,8 +2,7 @@ const express = require("express");
 const router = express.Router();
 import { RowDataPacket } from "mysql2";
 import { db } from "./db";
-import { Session, User,Request } from "../@types/types";
-
+import { Request, Response } from "express";
 import crypto from "crypto";
 import { emailRegex, formatDisplayDate } from "../middleware/utils";
 const { isAuthenticated } = require("../middleware/auth");
@@ -11,18 +10,7 @@ const { isAuthenticated } = require("../middleware/auth");
 router.get(
   "/change-password",
   isAuthenticated,
-  (
-    req: {
-      session: Session;
-    },
-    res: {
-      redirect: (arg0: string) => any;
-      render: (
-        arg0: string,
-        arg1: { currentUser: User; title: string }
-      ) => void;
-    }
-  ) => {
+  (req: Request, res: Response) => {
     if (!req.session.passport.user) {
       return res.redirect("/login");
     }
@@ -30,25 +18,14 @@ router.get(
     res.render("settings/change-password", {
       currentUser: req.session.passport.user,
       title: "Change Password",
-    }); // ✅ pass `user` to EJS
+    });
   }
 );
 
 router.post(
   "/change-password",
   isAuthenticated,
-  async (
-    req: {
-      session: Session;
-      body: {email:string,oldPassword:string,newPassword:string,confirmNewPassword:string};
-    },
-    res: {
-      status: Function;
-      json: (arg0: {
-        success: boolean;
-        message: string;
-      }) => void | PromiseLike<void>;
-    }  ) => {
+  async (req: Request, res: Response) => {
     // This may not be the best way to change passwords.
     const username = req.body.email;
     const oldPassword = req.body.oldPassword;
@@ -73,6 +50,8 @@ router.post(
     const currentPasswordSalt = results.PasswordSalt;
     try {
       const newPasswordSalt = crypto.randomBytes(16).toString("hex");
+      // first hash to see if old password matches and
+      // then second hash is used for updating the db with the new salted password.
       crypto.pbkdf2(
         oldPassword,
         currentPasswordSalt,
@@ -123,69 +102,34 @@ router.post(
     return;
   }
 );
-router.get(
-  "/profile",
-  isAuthenticated,
-  async (
-    req:Request,
-    res: {
-      render: (
-        arg0: string,
-        arg1: { currentUser: RowDataPacket; registeredDate: string|null }
-      ) => void;
-    }
-  ) => {
-    const query = "SELECT * FROM User WHERE User.UserID = ?";
-    const result = (
-      await db
-        .promise()
-        .query<RowDataPacket[]>(query, [req.session.passport.user.UserID])
-    )[0][0];
-    res.render("settings/profile", {
-      currentUser: result,
-      registeredDate: formatDisplayDate(result.RegisteredDate),
-    });
-  }
-);
+router.get("/profile", isAuthenticated, async (req: Request, res: Response) => {
+  const query = "SELECT * FROM User WHERE User.UserID = ?";
+  const result = (
+    await db
+      .promise()
+      .query<RowDataPacket[]>(query, [req.session.passport.user.UserID])
+  )[0][0];
+  res.render("settings/profile", {
+    currentUser: result,
+    registeredDate: formatDisplayDate(result.RegisteredDate),
+  });
+});
 
 router.post(
   "/profile",
   isAuthenticated,
-  async (
-    req: {
-      session: Session;
-      body: {
-        userID: number;
-        email: string;
-        fullName: string;
-        contactNumber: string;
-        organisation: string;
-        comments: string;
-        originalEmail: string;
-      };
-    },
-    res: {
-      status: {
-        (arg0: number): {
-          (): any;
-          new (): any;
-          json: {
-            (arg0: { success: boolean; message: string }): any;
-            new (): any;
-          };
-        };
-        json: any;
-      };
-      json: (arg0: {
-        success: boolean;
-        message: string;
-        redirectUrl: string;
-      }) => void;
-    }
-  ) => {
-    const { userID, email, fullName, contactNumber, organisation, comments,originalEmail } =
-      req.body;
+  async (req: Request, res: Response) => {
+    const {
+      userID,
+      email,
+      fullName,
+      contactNumber,
+      organisation,
+      comments,
+      originalEmail,
+    } = req.body;
     const missingFields = [];
+    //validation
     if (!userID) missingFields.push("userID");
     if (!email) missingFields.push("email");
     if (!fullName) missingFields.push("fullName");
@@ -202,19 +146,19 @@ router.post(
           "invalid email, email value does not have '@' or '.' character(s).",
       });
     if (email != originalEmail) {
-    const result = await db
-      .promise()
-      .query("SELECT 1 FROM User WHERE Email = ? AND Email != ? LIMIT 1;", [
-        email,
-        originalEmail,
-      ]);
-    if (result[0]) {
-      return res.status(400).json({
-        success: false,
-        message: "Email already exist",
-      });
+      const result = await db
+        .promise()
+        .query("SELECT 1 FROM User WHERE Email = ? AND Email != ? LIMIT 1;", [
+          email,
+          originalEmail,
+        ]);
+      if (result[0]) {
+        return res.status(400).json({
+          success: false,
+          message: "Email already exist",
+        });
+      }
     }
-  }
     const query = `
    UPDATE User SET
       Email =?,
@@ -233,11 +177,9 @@ router.post(
       userID,
     ];
     await db.promise().query<RowDataPacket[]>(query, params);
-    req.session.passport.user.Email = email
-    req.session.passport.user.FullName = fullName
-
-    console.log(req.session.passport.user)
-    req.session.save()
+    req.session.passport.user.Email = email;
+    req.session.passport.user.FullName = fullName;
+    req.session.save();
     res.json({
       success: true,
       message: "sucessfully edited user profile",
@@ -245,6 +187,5 @@ router.post(
     });
   }
 );
-
 
 module.exports = router;

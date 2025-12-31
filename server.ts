@@ -1,5 +1,6 @@
 require("dotenv").config();
 const express = require("express");
+import { Response ,Request} from 'express';
 const path = require("path");
 const session = require("express-session");
 const db = require("./routes/db");
@@ -13,9 +14,7 @@ const { isAuthenticated, isAdmin } = require("./middleware/auth");
 const passport = require("passport");
 const app = express();
 const PORT = process.env.PORT || 5000;
-import { RowDataPacket } from "mysql2";
 import { userTypesEnumeration } from "./middleware/utils";
-import { Passport, Session, User } from "./@types/types";
 // ✅ Middleware
 app.use(express.static("public"));
 app.use(express.json());
@@ -53,8 +52,9 @@ const serveHTML = (route: any, file: any) => {
 app.get(
   "/",
   (
-    req: any,
-    res: { render: (arg0: string, arg1: { title: string }) => void }
+    req: Request,
+    res: Response
+
   ) => {
     res.render("index", { title: "register" });
   }
@@ -63,13 +63,8 @@ app.get(
 app.get(
   "/register",
   async (
-    req: any,
-    res: {
-      render: (
-        arg0: string,
-        arg1: { title: string; userTypes: string[] }
-      ) => void;
-    }
+    req: Request,
+    res: Response
   ) => {
     res.render("register", {
       title: "register",
@@ -84,8 +79,8 @@ app.get(
 app.get(
   "/login",
   (
-    req: any,
-    res: { render: (arg0: string, arg1: { title: string }) => void }
+    req: Request,
+    res:Response
   ) => {
     res.render("login", { title: "Login Page" });
   }
@@ -95,18 +90,8 @@ app.get(
 app.get(
   "/user/dashboard",
   isAuthenticated,
-  (
-    req: { session: { passport: { user: any } } },
-    res: {
-      render: (
-        arg0: string,
-        arg1: {
-          layout: string; // Specify your layout file
-          user: any;
-          title: string;
-        }
-      ) => void;
-    }
+  (req: Request,
+    res:Response
   ) => {
     res.render("user/dashboard", {
       layout: "layout", // Specify your layout file
@@ -120,19 +105,8 @@ app.get(
 app.get(
   "/api/current-user",
   (
-    req: {
-      session: {
-        passport: Passport;
-      };
-    },
-    res: {
-      json: (arg0: User) => void;
-      status: (arg0: number) => {
-        (): any;
-        new (): any;
-        json: { (arg0: { error: string }): void; new (): any };
-      };
-    }
+    req: Request,
+    res:Response
   ) => {
     if (req.session && req.session.passport.user) {
       console.log(req.session.passport.user);
@@ -151,9 +125,8 @@ app.get(
 // ✅ Debug Route to Check Session Persistence
 app.get(
   "/session",
-  (
-    req: { session:Session},
-    res: { json: (arg0: { sessionData: any }) => void }
+  (    req: Request,
+    res:Response
   ) => {
     console.log("🟢 Session Check:", req.session.passport.user);
     res.json({ sessionData: req.session.passport.user || "No active session" });
@@ -206,25 +179,9 @@ app.get(
   "/form",
   isAuthenticated,
   (
-    req: { session: { passport: { user: { UserID: any; UserType: any } } } },
-    res: {
-      status: (arg0: number) => {
-        (): any;
-        new (): any;
-        send: { (arg0: string): any; new (): any };
-      };
-      render: (
-        arg0: string,
-        arg1: {
-          userTypesEnumeration?: any;
-          isAdmin: boolean;
-          isPrimaryUserRegistered: boolean;
-          userTypes?: any;
-          title?: string;
-        }
-      ) => any;
-      redirect: (arg0: string) => any;
-    }
+    req: Request,
+    res:Response
+      
   ) => {
     const loginUserId = req.session.passport.user.UserID;
     const isAdmin =
@@ -301,9 +258,8 @@ app.get(
   "/admin/UserRequest",
   isAuthenticated,
   isAdmin,
-  (
-    req: { session: { passport: { user: any } } },
-    res: { render: (arg0: string, arg1: { user: any }) => void }
+  (    req: Request,
+    res:Response
   ) => {
     res.render("admin", { user: req.session.passport.user });
   }
@@ -341,25 +297,10 @@ app.get(
 app.post(
   "/create",
   isAuthenticated,
-  (
-    req: {
-      body: {
-        email: any;
-        ContactNumber: any;
-        organisation: any;
-        UserType: any;
-        comments: any;
-      };
-      session: { passport: { user: { UserID: any } } };
-    },
-    res: {
-      status: (arg0: number) => {
-        (): any;
-        new (): any;
-        json: { (arg0: { error: string }): any; new (): any };
-      };
-      json: (arg0: { message: string }) => void;
-    }
+  (    req: Request,
+    res:Response
+   
+    
   ) => {
     const { email, ContactNumber, organisation, UserType, comments } = req.body;
     const created_by = req.session.passport.user.UserID;
@@ -416,19 +357,9 @@ app.post(
 // Handle forgot password page
 app.get(
   "/forgot-password",
-  (
-    req: any,
-    res: {
-      render: (
-        arg0: string,
-        arg1: {
-          title: string;
-          adminEmail: string;
-          forgotPasswordPath: string; // POST endpoint
-          redirectPath: string; // redirect after success
-        }
-      ) => void;
-    }
+  (    req: Request,
+    res:Response
+   
   ) => {
     res.render("forgot-password", {
       title: "Forgot Password",
@@ -443,19 +374,8 @@ app.get(
 app.post(
   "/forgot-password",
   (
-    req: { body: { userId: any; Password: any; newPassword: any } },
-    res: {
-      status: (arg0: number) => {
-        (): any;
-        new (): any;
-        json: { (arg0: { success: boolean; error: string }): any; new (): any };
-      };
-      json: (arg0: {
-        success: boolean;
-        error?: string;
-        message?: string;
-      }) => void;
-    }
+ req: Request,
+    res:Response 
   ) => {
     const { userId, Password, newPassword } = req.body;
 

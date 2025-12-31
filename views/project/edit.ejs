@@ -217,14 +217,10 @@
           placeholder="Enter Full Name" 
           style="width:95%;height:40%;font-size:30px;" 
           required">`,
-
-
         showCancelButton: true,
       }).then((result) => {
         const email = document.getElementById('newPhotographerEmail').value
-
         const emailRegex = /^[a-zA-Z0-9](\.?[a-zA-Z0-9_-])*[a-zA-Z0-9]@[a-zA-Z0-9-]+\.[a-zA-Z]{2,}$/
-
         const fullName = document.getElementById('newPhotographerFullName').value
         if (email && fullName) {
           if (!emailRegex.test(email)) {
@@ -237,7 +233,6 @@
             selected: true
           }])
           toBeCreatedPhotographers.push([fullName, email])
-          // console.log('toBeCreatedPhotographers', toBeCreatedPhotographers)
         }
       });
     })
@@ -347,13 +342,6 @@
       }
       // Submit form via AJAX
       try {
-
-        // const formData = new FormData(form);
-        // formData.append("projectOwnerID", "<%=project.ProjectOwnerID%>")
-        // formData.append('selectedImagingPlatforms', newSelectedImagingPlatforms.getValue(true));
-
-        // formData.append('selectedPhotographers', newSelectedPhotographers.getValue(true));
-        // formData.append('toBeCreatedPhotographers', toBeCreatedPhotographers)
         const formData = {
           projectName: form.projectName.value,
           projectOwner: "<%=project.FullName%>",

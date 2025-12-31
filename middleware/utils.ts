@@ -49,7 +49,8 @@ const userTypesEnumeration = () => {
     }
 }
 const emailRegex  = /^[a-zA-Z0-9](\.?[a-zA-Z0-9_-])*[a-zA-Z0-9]@[a-zA-Z0-9-]+\.[a-zA-Z]{2,}$/
+const catalogIDRegex = /^[A-Z]{6}\d{7}$/
 export {
     formatDate, formatDisplayDate, requestStatusEnumeration, projectStatusEnumeration, projectTypeEnumeration,
-    mediaFileFormatEnumeration,  userTypesEnumeration,emailRegex
+    mediaFileFormatEnumeration,  userTypesEnumeration,emailRegex, catalogIDRegex
 };

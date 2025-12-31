@@ -1,32 +1,21 @@
 const express = require("express");
 const router = express.Router();
 import crypto from "crypto";
-import { QueryResult, RowDataPacket } from "mysql2";
+import { RowDataPacket } from "mysql2";
 import { db } from "../db";
 import {
+  emailRegex,
   formatDisplayDate,
   requestStatusEnumeration,
   userTypesEnumeration,
 } from "../../middleware/utils";
-import { Request, Session, User } from "../../@types/types";
+import { Response, Request } from "express";
 const { isAuthenticated, isAdmin } = require("../../middleware/auth"); // Middleware
 router.get(
   "/create",
   isAuthenticated,
   isAdmin,
-  async (
-    req: Request,
-    res: {
-      render: (
-        view: string,
-        arg1: {
-          userTypes: string[];
-          requestStatuses: string[];
-          currentUser: User;
-        }
-      ) => void;
-    }
-  ) => {
+  async (req: Request, res: Response) => {
     res.render("admin/create", {
       userTypes: Object.values(userTypesEnumeration()),
       requestStatuses: Object.values(requestStatusEnumeration()),
@@ -39,38 +28,7 @@ router.post(
   "/create",
   isAuthenticated,
   isAdmin,
-  async (
-    req: {
-      session: Session;
-      body: {
-        userID: number;
-        email: string;
-        password: string;
-        confirmPassword: string;
-        userType: string;
-        fullName: string;
-        contactNumber: string;
-        organisation: string;
-        comments: string;
-        requestStatus: string;
-        reasonForRequest: string;
-      };
-    },
-    res: {
-      status: (arg0: number) => {
-        (): any;
-        new (): any;
-        json: {
-          (arg0: { success: boolean; message: string }): any;
-          new (): any;
-        };
-      };
-      json: (arg0: {
-        success: boolean;
-        message: string;
-      }) => void | PromiseLike<void>;
-    }
-  ) => {
+  async (req: Request, res: Response) => {
     const adminID = req.session.passport.user.UserID;
     const {
       userID,
@@ -85,7 +43,6 @@ router.post(
       requestStatus,
       reasonForRequest,
     } = req.body;
-    console.log(req.body);
     //Validation
     const missingFields = [];
     if (!email) missingFields.push("email");
@@ -98,7 +55,7 @@ router.post(
         message: "Missing required fields: " + missingFields.join(", "),
       });
     }
-    if (!/^[\w\-\.]+@([\w-]+\.)+[\w-]{2,}$/.test(email))
+    if (!emailRegex.test(email))
       return res.status(400).json({
         success: false,
         message:
@@ -191,20 +148,7 @@ router.get(
   "/view-all",
   isAuthenticated,
   isAdmin,
-  (
-    req: any,
-    res: {
-      status: (arg0: number) => {
-        (): any;
-        new (): any;
-        json: { (arg0: { error: string }): any; new (): any };
-      };
-      render: (
-        arg0: string,
-        arg1: { users: QueryResult; title: string }
-      ) => void;
-    }
-  ) => {
+  (req: Request, res: Response) => {
     console.log("Route /admin-users hit"); // Debug log 1
     const query = `SELECT UserID, Email,UserType,FullName,Organisation,
     RegisteredDate, LastLoginDate, RequestStatus, IsDeleted  FROM User`;
@@ -230,20 +174,7 @@ router.get(
   "/view/:userID",
   isAuthenticated,
   isAdmin,
-  (
-    req: { params: { userID: number } },
-    res: {
-      status: (arg0: number) => {
-        (): any;
-        new (): any;
-        send: { (arg0: string): any; new (): any };
-      };
-      render: (
-        arg0: string,
-        arg1: { user: any; title: string; registeredDate: string|null }
-      ) => void;
-    }
-  ) => {
+  (req: Request, res: Response) => {
     const userID = req.params.userID;
 
     const query = `
@@ -269,7 +200,6 @@ router.get(
       res.render("admin/view", {
         user: results[0],
         title: "Imaging User Details",
-
         registeredDate: formatDisplayDate(results[0].RegisteredDate),
       });
     });
@@ -281,25 +211,7 @@ router.get(
   "/edit/:userID",
   isAuthenticated,
   isAdmin,
-  async (
-    req: {
-      params: { userID: number };
-      session: { message: { type: string; text: string } };
-    },
-    res: {
-      render: (
-        arg0: string,
-        arg1: {
-          title: string;
-          message: any;
-          user: RowDataPacket | null;
-          userTypes?: string[];
-          requestStatuses?: string[];
-          registeredDate?: string|null;
-        }
-      ) => void;
-    }
-  ) => {
+  async (req: Request, res: Response) => {
     const userId = req.params.userID;
     const query =
       "SELECT UserID,Email,UserType,FullName,RegisteredDate,ContactNumber,Organisation,Comments,RequestStatus,IsDeleted,ReasonForRequest FROM User WHERE UserID = ?";
@@ -329,8 +241,6 @@ router.get(
       title: `Edit User - ${result[0].Email}`,
       message: message,
     });
-
-  
   }
 );
 
@@ -338,39 +248,7 @@ router.post(
   ["/edit/:userID"],
   isAuthenticated,
   isAdmin,
-  async (
-    req: {
-      params: { userID: number };
-      body: {
-        userID: number;
-        email: string;
-        password: string;
-        confirmPassword: string;
-        userType: string;
-        fullName: string;
-        contactNumber: string;
-        organisation: string;
-        comments: string;
-        requestStatus: string;
-        reasonForRequest: string;
-        originalEmail: string;
-      };
-    },
-    res: {
-      status: (arg0: number) => {
-        (): any;
-        new (): any;
-        json: {
-          (arg0: { success: boolean; message: string }): any;
-          new (): any;
-        };
-      };
-      json: (arg0: {
-        success: boolean;
-        message: string;
-      }) => void | PromiseLike<void>;
-    }
-  ) => {
+  async (req: Request, res: Response) => {
     const adminID = req.params.userID;
 
     const {
@@ -399,7 +277,7 @@ router.post(
         message: "Missing required fields: " + missingFields.join(", "),
       });
     }
-    if (!/^[\w\-\.]+@([\w-]+\.)+[\w-]{2,}$/.test(email))
+    if (!emailRegex.test(email))
       return res.status(400).json({
         success: false,
         message:
@@ -510,17 +388,7 @@ router.post(
   "/delete/:userID",
   isAuthenticated,
   isAdmin,
-  (
-    req: { params: { userID: number} },
-    res: {
-      status: (arg0: number) => {
-        (): any;
-        new (): any;
-        json: { (arg0: { success: boolean; error: string }): any; new (): any };
-      };
-      redirect: (arg0: string) => void;
-    }
-  ) => {
+  (req: Request, res: Response) => {
     const userId = req.params.userID;
     const query = "UPDATE User SET IsDeleted = 1 WHERE UserID = ?";
 
@@ -542,17 +410,7 @@ router.post(
   "/restore/:userID",
   isAuthenticated,
   isAdmin,
-  (
-    req: { params: { userID: number } },
-    res: {
-      status: (arg0: number) => {
-        (): any;
-        new (): any;
-        json: { (arg0: { error: string }): any; new (): any };
-      };
-      redirect: (arg0: string) => void;
-    }
-  ) => {
+  (req: Request, res: Response) => {
     const userID = req.params.userID;
     db.query(
       "UPDATE User SET IsDeleted = 0 WHERE UserID = ?",

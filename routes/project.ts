@@ -1,18 +1,11 @@
 const express = require("express");
 const router = express.Router();
-import {
-  FieldPacket,
-  QueryError,
-  QueryResult,
-  ResultSetHeader,
-  RowDataPacket,
-} from "mysql2";
+import { FieldPacket, QueryError, QueryResult, RowDataPacket } from "mysql2";
 import { db } from "./db";
-import { Request, Session, User } from "../@types/types";
+import { Response, Request } from "express";
 import { emailRegex, userTypesEnumeration } from "../middleware/utils";
 
 import crypto from "crypto";
-import passport from "passport";
 const {
   isAuthenticated,
   isAdminOrProjectOwner,
@@ -29,22 +22,7 @@ router.get(
   "/create",
   isAuthenticated,
   isAdminOrProjectOwner,
-  async (
-    req: Request,
-    res: {
-      render: (
-        arg0: string,
-        arg1: {
-          currentUser: User;
-          projectOwners: QueryResult;
-          photographers: QueryResult;
-          projectTypes: string[];
-          imagingPlatforms: string[];
-          title: string;
-        }
-      ) => void;
-    }
-  ) => {
+  async (req: Request, res: Response) => {
     const getProjectOwners = `
     SELECT u.UserID,u.FullName, u.Email, u.UserType 
     FROM User u
@@ -81,44 +59,7 @@ router.post(
   "/create",
   isAuthenticated,
   isAdminOrProjectOwner,
-  async (
-    req: {
-      body: {
-        [x: string]: any;
-        startDate: string | number | Date;
-        endDate: string | number | Date;
-        selectedImagingPlatforms: string[];
-        selectedPhotographers: string[];
-        projectName: string;
-        projectType: string;
-        projectOwner: string;
-        summary: string;
-        specimenDetails: string;
-        comments: string;
-        toBeCreatedPhotographers: string[][];
-      };
-      session: Session;
-    },
-    res: {
-      status: (arg0: number) => {
-        (): any;
-        new (): any;
-        json: {
-          (arg0: { success: boolean; message: string; error?: any }): void;
-          new (): any;
-        };
-        send: (message: string) => any;
-      };
-
-      redirect: (url: string) => any;
-      json: (arg0: {
-        success: boolean;
-        message: string;
-        redirectUrl: string;
-        // newlyCreatedPhotographers: Object[];
-      }) => void;
-    }
-  ) => {
+  async (req: Request, res: Response) => {
     try {
       const requiredFields = [
         "projectOwner",
@@ -387,29 +328,7 @@ router.get(
   "/view-all",
   isAuthenticated,
   isAdminOrProjectOwner,
-  async (
-    req: Request,
-    res: {
-      status: (arg0: number) => {
-        (): any;
-        new (): any;
-        render: {
-          (arg0: string, arg1: { message: string; error: any }): any;
-          new (): any;
-        };
-      };
-      render: (
-        arg0: string,
-        arg1: {
-          projects: any;
-          message?: string;
-          currentUser: User;
-          photographers?: {};
-          title?: string;
-        }
-      ) => void;
-    }
-  ) => {
+  async (req: Request, res: Response) => {
     const queryForAdmin = `
         SELECT 
             p.*,
@@ -494,28 +413,7 @@ router.get(
   "/view/:projectID",
   isAuthenticated,
   isAdminOrProjectOwner,
-  async (
-    req: { params: { projectID: number }; session: Session },
-    res: {
-      status: (arg0: number) => {
-        (): any;
-        new (): any;
-        render: {
-          (arg0: string, arg1: { message: string; error?: any }): any;
-          new (): any;
-        };
-      };
-      render: (
-        arg0: string,
-        arg1: {
-          project: any;
-          currentUser: User;
-          title: string;
-          newlyCreatedPhotographers: any;
-        }
-      ) => void;
-    }
-  ) => {
+  async (req: Request, res: Response) => {
     const projectID = req.params.projectID;
     const query = `
     SELECT
@@ -592,13 +490,15 @@ router.get(
               : "Not Specified",
         };
 
-        const newlyCreatedPhotographers = req.session.newlyCreatedPhotographers ;
+        const newlyCreatedPhotographers = req.session.newlyCreatedPhotographers;
         req.session.newlyCreatedPhotographers = [];
         req.session.save();
         res.render("project/view", {
           project: project,
           currentUser: req.session.passport.user,
-          newlyCreatedPhotographers: newlyCreatedPhotographers ? newlyCreatedPhotographers : []  ,
+          newlyCreatedPhotographers: newlyCreatedPhotographers
+            ? newlyCreatedPhotographers
+            : [],
           title: "View Project", // Add title here
         });
       }
@@ -612,35 +512,7 @@ router.get(
   "/edit/:projectID",
   isAuthenticated,
   isAdminOrProjectOwner,
-  async (
-    req: { params: { projectID: number }; user: User; session: Session },
-    res: {
-      status: (arg0: number) => {
-        (): any;
-        new (): any;
-        render: {
-          (arg0: string, arg1: { message: string }): void;
-          new (): any;
-        };
-      };
-      render: (
-        arg0: string,
-        arg1: {
-          project: any;
-          allPhotographers: any;
-          selectedPhotographers: any[];
-          statuses: unknown[];
-          projectTypes: string[];
-          imagingPlatforms: string[];
-          selectedImagingPlatforms: string[];
-          currentUser: User;
-          title: string;
-
-          newlyCreatedPhotographers: string[];
-        }
-      ) => void;
-    }
-  ) => {
+  async (req: Request, res: Response) => {
     try {
       const projectID = req.params.projectID;
       const requestQuery = `
@@ -713,8 +585,8 @@ router.get(
         selectedImagingPlatforms: imagingPlatforms,
         currentUser: req.user,
         title: "Edit Project", // Add title here
-        
-        newlyCreatedPhotographers:[]
+
+        newlyCreatedPhotographers: [],
       });
     } catch (err) {
       console.error("Error:", err);
@@ -727,40 +599,7 @@ router.post(
   "/edit/:projectID",
   isAuthenticated,
   isAdminOrProjectOwner,
-  async (
-    req: {
-      session: Session;
-      params: { projectID: number };
-      body: {
-        projectType: string;
-        projectName: string;
-        imagingStartDate: string | number | Date;
-        imagingEndDate: string | number | Date;
-        summaryOfProject: string;
-        detailsOfSpecimens: string;
-        projectStatus: string;
-        projectOwnerID: string;
-        selectedImagingPlatforms: string[];
-        selectedPhotographers: string[];
-        toBeCreatedPhotographers: string[];
-      };
-    },
-    res: {
-      status: (arg0: number) => {
-        (): any;
-        new (): any;
-        json: {
-          (arg0: { success: boolean; message: string; error?: any }): void;
-          new (): any;
-        };
-      };
-      json: (arg0: {
-        success: boolean;
-        message: string;
-        redirectUrl: string;
-      }) => void;
-    }
-  ) => {
+  async (req: Request, res: Response) => {
     try {
       const userID = req.session.passport.user.UserID;
       if (!req.session.passport.user || !userID) {
@@ -771,7 +610,7 @@ router.post(
         });
       }
 
-      const projectID: number = req.params.projectID;
+      const projectID: string = req.params.projectID;
       const {
         projectName,
         imagingStartDate,
@@ -1091,20 +930,7 @@ router.post(
   "/delete/:projectID",
   isAuthenticated,
   isAdminOrProjectOwner,
-  (
-    req: {
-      params: { projectID: number };
-      session: Session;
-    },
-    res: {
-      status: (arg0: number) => {
-        (): any;
-        new (): any;
-        send: { (arg0: string): any; new (): any };
-      };
-      redirect: (arg0: string) => void;
-    }
-  ) => {
+  (req: Request, res: Response) => {
     const projectID = req.params.projectID;
     const query = `
         UPDATE Project
@@ -1122,7 +948,6 @@ router.post(
           console.error("Error soft deleting request:", err);
           return res.status(500).send("Error marking request as deleted.");
         }
-
         res.redirect("/project/view-all");
       }
     );
@@ -1134,20 +959,7 @@ router.post(
   "/restore/:projectID",
   isAuthenticated,
   isAdminOrProjectOwner,
-  (
-    req: {
-      params: { projectID: number };
-      session: Session;
-    },
-    res: {
-      status: (arg0: number) => {
-        (): any;
-        new (): any;
-        send: { (arg0: string): any; new (): any };
-      };
-      redirect: (arg0: string) => void;
-    }
-  ) => {
+  (req: Request, res: Response) => {
     const projectID = req.params.projectID;
     const query = `
         UPDATE Project
@@ -1165,7 +977,6 @@ router.post(
           console.error("Error soft deleting request:", err);
           return res.status(500).send("Error marking request as deleted.");
         }
-
         res.redirect("/project/view-all");
       }
     );

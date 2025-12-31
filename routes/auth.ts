@@ -9,9 +9,9 @@ import {
   requestStatusEnumeration,
   userTypesEnumeration,
 } from "../middleware/utils";
-import { Response, NextFunction } from "express";
+import { Response, Request, NextFunction } from "express";
+import { User } from "../@types/types";
 
-import {Request, Passport, User } from "../@types/types";
 passport.use(
   new passportStrategy.Strategy(async function verify(
     username: string,
@@ -32,7 +32,6 @@ passport.use(
         console.error("❌ Database Error:", error);
         return cb(null, false, { message: "Database error" });
       });
-
 
     if (result.length === 0) {
       console.log("🚫 User Not Found");
@@ -65,7 +64,7 @@ passport.use(
 
 // serialise user to be added into session data.
 passport.serializeUser(
-  (user: any, done: (arg0: any, user: User| null) => any) => {
+  (user: any, done: (arg0: any, user: User | null) => any) => {
     process.nextTick(function () {
       return done(null, {
         UserID: user.UserID,
@@ -84,106 +83,101 @@ passport.deserializeUser((user: User, cb: (arg0: null, arg1: any) => any) => {
   });
 });
 
-router.post(
-  "/register",
-  (
-    req:any,res:any 
-  ) => {
-    console.log("register req.body", req.body);
-    const {
-      email,
+router.post("/register", (req: Request, res: Response) => {
+  console.log("register req.body", req.body);
+  const {
+    email,
+    password,
+    confirmPassword,
+    userType,
+    fullName,
+    contactNumber,
+    organisation,
+    comments,
+    reasonForRequest,
+  } = req.body;
+  const missingFields = [];
+  if (!email) missingFields.push("email");
+  if (!password) missingFields.push("password");
+  if (!confirmPassword) missingFields.push("confirmPassword");
+  if (!userType) missingFields.push("userType");
+  if (!fullName) missingFields.push("fullName");
+  if (!reasonForRequest) missingFields.push("reasonForRequest");
+  if (missingFields.length > 0) {
+    return res.status(400).json({
+      success: false,
+      message: "Missing required fields: " + missingFields.join(", "),
+    });
+  }
+  if (!emailRegex.test(email))
+    return res.status(400).json({
+      success: false,
+      message:
+        "invalid email, email value does not have '@' or '.' character(s).",
+    });
+  if (password != confirmPassword) {
+    return res.status(400).json({
+      success: false,
+      message: "the  passwords does not match",
+    });
+  }
+  console.log(`🔹 Register Attempt: ${email}`);
+
+  const checkEmailQuery = "SELECT * FROM User WHERE Email = ?";
+  db.query(checkEmailQuery, [email], (err: any, result: any, field: any) => {
+    if (err) {
+      console.error("❌ Database Error:", err);
+      return res.status(500).send("Database Error");
+    }
+
+    if (result.length > 0) {
+      console.warn("⚠️ Email already exists:", email);
+      return res
+        .status(400)
+        .send("Email already exists. Please enter a new email.");
+    }
+    const newPasswordSalt = crypto.randomBytes(16).toString("hex");
+    crypto.pbkdf2(
       password,
-      confirmPassword,
-      userType,
-      fullName,
-      contactNumber,
-      organisation,
-      comments,
-      reasonForRequest,
-    } = req.body;
-    const missingFields = [];
-    if (!email) missingFields.push("email");
-    if (!password) missingFields.push("password");
-    if (!confirmPassword) missingFields.push("confirmPassword");
-    if (!userType) missingFields.push("userType");
-    if (!fullName) missingFields.push("fullName");
-    if (!reasonForRequest) missingFields.push("reasonForRequest");
-    if (missingFields.length > 0) {
-      return res.status(400).json({
-        success: false,
-        message: "Missing required fields: " + missingFields.join(", "),
-      });
-    }
-    if (!emailRegex.test(email))
-      return res.status(400).json({
-        success: false,
-        message:
-          "invalid email, email value does not have '@' or '.' character(s).",
-      });
-    if (password != confirmPassword) {
-      return res.status(400).json({
-        success: false,
-        message: "the  passwords does not match",
-      });
-    }
-    console.log(`🔹 Register Attempt: ${email}`);
-
-    const checkEmailQuery = "SELECT * FROM User WHERE Email = ?";
-    db.query(checkEmailQuery, [email], (err: any, result: any, field: any) => {
-      if (err) {
-        console.error("❌ Database Error:", err);
-        return res.status(500).send("Database Error");
-      }
-
-      if (result.length > 0) {
-        console.warn("⚠️ Email already exists:", email);
-        return res
-          .status(400)
-          .send("Email already exists. Please enter a new email.");
-      }
-      const newPasswordSalt = crypto.randomBytes(16).toString("hex");
-      crypto.pbkdf2(
-        password,
-        newPasswordSalt,
-        310000,
-        32,
-        "sha256",
-        async function (err, hashedPassword) {
-          const insertUserQuery = `
+      newPasswordSalt,
+      310000,
+      32,
+      "sha256",
+      async function (err, hashedPassword) {
+        const insertUserQuery = `
             INSERT INTO User 
             (Email, SaltedPassword,PasswordSalt,  UserType, RegisteredDate,
               UpdatedDate,FullName,ContactNumber,Organisation,Comments,ReasonForRequest,RequestStatus)
             VALUES (?, ?,?,  ?, NOW(),NOW(),  ?, ?,?,?,?,?)`;
-          const params = [
-            email,
-            hashedPassword,
-            newPasswordSalt,
-            userType,
-            fullName,
-            contactNumber,
-            organisation,
-            comments,
-            reasonForRequest,
-            requestStatusEnumeration().approved, //TODO TEMPORARY APPROVED FOR ALL USERS FOR TESTING
-          ];
+        const params = [
+          email,
+          hashedPassword,
+          newPasswordSalt,
+          userType,
+          fullName,
+          contactNumber,
+          organisation,
+          comments,
+          reasonForRequest,
+          requestStatusEnumeration().approved, //TODO TEMPORARY APPROVED FOR ALL USERS FOR TESTING
+        ];
 
-          db.query(insertUserQuery, params, (err: any) => {
-            if (err) {
-              console.error("❌ Error Registering User:", err);
-              return res.status(500).send("Error Registering User");
-            }
-            console.log(`✅ User Registered Successfully: ${email}`);
-            // 🚀 Redirect from the backend itself
-            res.redirect("/login");
-          });
-        }
-      );
-    });
-  }
-);
+        db.query(insertUserQuery, params, (err: any) => {
+          if (err) {
+            console.error("❌ Error Registering User:", err);
+            return res.status(500).send("Error Registering User");
+          }
+          console.log(`✅ User Registered Successfully: ${email}`);
+          // 🚀 Redirect from the backend itself
+          res.redirect("/login");
+        });
+      }
+    );
+  });
+});
 
 // Login User
-router.post("/login", (req: any, res: Response, next: NextFunction) => {
+router.post("/login", (req: Request, res: Response, next: NextFunction) => {
   passport.authenticate(
     "local",
     {
@@ -263,46 +257,29 @@ router.post("/login", (req: any, res: Response, next: NextFunction) => {
 });
 
 // Logout User
-router.get(
-  "/logout",
-  (
-    req: any,
-    res: { redirect: (arg0: string) => any }
-  ) => {
-    try {
-      if (!req.session.passport.user || !req.session.passport.user.UserID) {
-        console.warn("⚠️ Logout Attempt Without Login");
+router.get("/logout", (req: Request, res: Response) => {
+  try {
+    if (!req.session.passport.user || !req.session.passport.user.UserID) {
+      console.warn("⚠️ Logout Attempt Without Login");
+      return res.redirect("/");
+    }
+    console.log(`🔹 Logout Attempt: ${req.session.passport.user.Email}`);
+
+    req.session.destroy((err: any) => {
+      if (err) {
+        console.error("❌ Logout Error:", err);
+
         return res.redirect("/");
       }
-      console.log(`🔹 Logout Attempt: ${req.session.passport.user.Email}`);
-
-      req.session.destroy((err: any) => {
-        if (err) {
-          console.error("❌ Logout Error:", err);
-
-          return res.redirect("/");
-          // return res.status(500).json({ error: "Logout failed" });
-        }
-        console.log("✅ User Logged Out");
-        return res.redirect("/");
-      });
-    } catch (error) {
-      console.error("❌ Logout Try-Catch Error:", error);
+      console.log("✅ User Logged Out");
       return res.redirect("/");
-      // res.status(500).json({ error: "Something went wrong during logout" });
-    }
+    });
+  } catch (error) {
+    console.error("❌ Logout Try-Catch Error:", error);
+    return res.redirect("/");
   }
-);
+});
 
-// // Get Logged-in User
-// router.get("/user", (req, res) => {
-//   if (!req.session.passport.user) {
-//     console.warn("⚠️ Unauthorized User Info Request");
-//     return res.status(401).json({ error: "Not logged in" });
-//   }
 
-//   console.log(`🔹 User Info Requested: ${req.session.passport.user.Email}`);
-//   res.json({ user: req.session.passport.user });
-// });
 
 module.exports = router;
