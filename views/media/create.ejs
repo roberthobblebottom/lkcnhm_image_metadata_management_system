@@ -34,11 +34,13 @@
 
       <div class="form-group">
         <label>Project and Photographer Pair</label>
-        <select name="projectAndPhotographerPair" id="projectAndPhotographerPair" requried <%= currentUser.UserType == 'phtographerOnly' ? 'disabled' : ''%>>
+        <select name="projectAndPhotographerPair" id="projectAndPhotographerPair" requried <%= currentUser.UserType == 'photographerOnly' ? 'disabled' : ''%>>
           <option value="">-- Select a project and photographer pair--</option>
           <%allProjectAndPhotographerPairs.forEach( u=>{%>
-          <option value="<%=u.ProjectID%>,<%=u.UserID%>">
-            <%=u.projectName%>-<%=u.photographerName%>
+          <option value="<%=u.ProjectID%>,<%=u.UserID%>" <%=currentUser.UserID.toString()==u.UserID.toString()
+            && currentUser.UserType == 'photographerOnly'
+            ?"selected":""%>>
+            <%=u.projectName%> - <%=u.photographerName%>
           </option>
           <%})%>
         </select>
@@ -216,7 +218,7 @@
       }
     )
 
-    function isValidFileName(filename) {
+    function isValidFileName(filename, validExtensions) {
       if (!filename) return false;
       const lower = filename.toLowerCase();
       if (!lower.endsWith(fileFormat.value)) return false
@@ -237,7 +239,7 @@
         e.preventDefault();
         const fileName = fileNameInput.value.trim();
         let errorMessages = [];
-        if (!isValidFileName(fileName)) {
+        if (!isValidFileName(fileName, validExtensions)) {
           errorMessages.push("📁 The media file name must include a valid extension like `.jpg`, `.png`, `.tiff`, etc. AND must the the same as media File Format from selection drop down box.\n\n");
           fileNameInput.style.borderColor = "red";
         } else {

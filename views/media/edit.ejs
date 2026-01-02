@@ -213,6 +213,13 @@
         })
       }
     )
+    function isValidFileName(filename,validExtensions) {
+        if (!filename) return false;
+        const lower = filename.toLowerCase();
+        if (!lower.endsWith(fileFormat.value)) return false
+        if (lower.replace(fileFormat.value, "") == "") return false
+        return validExtensions.some(ext => lower.endsWith(ext));
+      }
     document.addEventListener("DOMContentLoaded", () => {
       const form = document.getElementById("main-form");
       const fileNameInput = document.getElementById("mediaFileName");
@@ -223,20 +230,14 @@
       document.getElementById('imagingDate').value = now.toISOString().slice(0, 16).split('T')[0]
       fileFormatOnChange()
       // Check for a valid file extension
-      function isValidFileName(filename) {
-        if (!filename) return false;
-        const lower = filename.toLowerCase();
-        if (!lower.endsWith(fileFormat.value)) return false
-        if (lower.replace(fileFormat.value, "") == "") return false
-        return validExtensions.some(ext => lower.endsWith(ext));
-      }
+      
 
       form.addEventListener("submit", async (e) => {
 
         e.preventDefault();
         const fileName = fileNameInput.value.trim();
         let errorMessages = [];
-        if (!isValidFileName(fileName)) {
+        if (!isValidFileName(fileName,validExtensions)) {
           errorMessages.push("📁 The media file name must include a valid extension like `.jpg`, `.png`, `.tiff`, etc. AND must the the same as media File Format from selection drop down box.\n\n");
           fileNameInput.style.borderColor = "red";
         } else {
