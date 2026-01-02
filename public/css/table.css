@@ -29,7 +29,6 @@ h2 {
 /* Table Styles */
 table {
   width: 100%;
-  /* Slightly narrower */
   border-collapse: collapse;
   background: white;
   border-radius: 8px;
@@ -47,11 +46,9 @@ th {
   color: white;
   background-color: #007bff;
   padding: 10px;
-  /* Reduced padding */
   text-align: center;
   font-weight: 600;
   font-size: large;
-  /* Reduced font size */
   text-transform: uppercase;
   border-bottom: 2px solid #000435;
   white-space: nowrap;

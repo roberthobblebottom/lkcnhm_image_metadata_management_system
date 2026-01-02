@@ -1,6 +1,6 @@
 const express = require("express");
 const router = express.Router();
-import { FieldPacket, QueryError, QueryResult, RowDataPacket } from "mysql2";
+import { QueryError, RowDataPacket } from "mysql2";
 import { db } from "./db";
 import { Response, Request } from "express";
 import { emailRegex, userTypesEnumeration } from "../middleware/utils";
@@ -14,9 +14,9 @@ const {
   formatDate,
   formatDisplayDate,
   projectStatusEnumeration,
-  projectTypeEnumeration,
   requestStatusEnumeration,
 } = require("../middleware/utils");
+
 
 router.get(
   "/create",
@@ -50,6 +50,7 @@ router.get(
       projectTypes: req.session.projectTypes,
       imagingPlatforms: req.session.imagingPlatforms,
       title: "Project Form",
+     
     });
   }
 );
@@ -380,7 +381,7 @@ router.get(
       photographers[x.ProjectID] = x.photographersNames;
     }
 
-    db.query(query, adminID, (err: any, result: any, fields: FieldPacket[]) => {
+    db.query(query, adminID, (err: any, result: any) => {
       if (err) {
         console.error("❌ Error fetching projects:", err);
         return res.status(500).render("error", {
@@ -456,7 +457,7 @@ router.get(
     db.query(
       query,
       [projectID],
-      (err: QueryError | null, results: any, field: FieldPacket[]) => {
+      (err: QueryError | null, results: any) => {
         if (err) {
           console.error("Error fetching project:", err);
           return res.status(500).render("error", {
@@ -524,13 +525,22 @@ router.get(
             JOIN User projectOwner ON p.ProjectOwnerID = projectOwner.UserID
             WHERE p.ProjectID = ?;
     `;
+      
+      const getProjectOwners = `
+    SELECT u.UserID,u.FullName, u.Email, u.UserType 
+    FROM User u
+    WHERE u.UserType IN ('projectOwner','admin')
+    AND u.RequestStatus = 'approved'
+    AND u.IsDeleted = 0
+    `;
       // Get all needed data in parallel for better performance
       const [
         requestResults,
         imagingPlatformTemp,
         selectedPhotographersTemp,
         allPhotographers,
-      ]: [any, any, any, any] = await Promise.all([
+        projectOwners
+      ]: [any, any, any, any,any] = await Promise.all([
         db.promise().query(requestQuery, [projectID]),
         db
           .promise()
@@ -549,6 +559,7 @@ router.get(
           .query("SELECT UserID,FullName FROM User WHERE RequestStatus = ?", [
             requestStatusEnumeration().approved,
           ]),
+        db.promise().query(getProjectOwners)
       ]);
       if (requestResults[0].length === 0) {
         return res
@@ -575,6 +586,7 @@ router.get(
         ImagingEndDate: formatDisplayDate(requestResults[0][0].ImagingEndDate),
       };
 
+      console.log('projectOwners',projectOwners)
       res.render(`project/edit`, {
         project: project,
         allPhotographers: allPhotographers[0],
@@ -587,6 +599,7 @@ router.get(
         title: "Edit Project", // Add title here
 
         newlyCreatedPhotographers: [],
+        projectOwners : projectOwners[0]
       });
     } catch (err) {
       console.error("Error:", err);
@@ -892,7 +905,8 @@ router.post(
         ProjectStatus = ?,
         UpdatedByID = ?,
         UpdatedDate = NOW(),
-        ProjectType = ?
+        ProjectType = ?,
+        ProjectOwnerID = ?
         WHERE ProjectID = ?
         `;
       await db
@@ -906,6 +920,7 @@ router.post(
           projectStatus,
           req.session.passport.user.UserID,
           projectType,
+          projectOwnerID,
           projectID,
         ]);
 

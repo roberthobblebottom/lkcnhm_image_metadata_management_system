@@ -20,6 +20,7 @@
     form {
       margin-bottom: -5px;
     }
+
   </style>
 </head>
 
@@ -39,19 +40,19 @@
     <% if (medias.length===0) { %>
       <p class="no-data">No media records found.</p>
       <% } else { %>
-      <table id="dataTable">
+      <table id="dataTable" class="dataTable">
         <thead>
           <tr>
             <th>Media ID</th>
             <th>Project ID</th>
             <th>Project Name</th>
             <th>Photographer</th>
-          <th>File Name</th>
-          <th>File Path</th>
-          <th>Catalog ID</th>
-          <th>Resolution</th>
-          <th>Imaging Date</th>
-          <%if (currentUser.UserType=='admin' ){%>
+            <th>File Name</th>
+            <!-- <th id="forthColumn">File Path</th> -->
+            <th>Catalog ID</th>
+            <th>Resolution</th>
+            <th>Imaging Date</th>
+            <%if (currentUser.UserType=='admin' ){%>
             <th>Is Deleted?</th>
             <%}%>
           <th >Actions</th>
@@ -65,7 +66,7 @@
             <td> <%= media.ProjectName %></td>
             <td> <%= media.photographerName%></td>
             <td><%= media.FileName %></td>
-            <td><%= media.FilePath %></td>
+            <!-- <td><%= media.FilePath %></td> -->
             <td> <%= media.CatalogID  %></td>
             <td><%= media.Resolution%></td>
             <td> <%= media.ImagingDate?.toISOString().slice(0, 10) %></td>
@@ -99,7 +100,9 @@
 </body>
 
 <script>
-  new DataTable('#dataTable')
+  new DataTable('#dataTable',{pageLength:50, autoWidth: false})
+
+
 </script>
 
 </html>

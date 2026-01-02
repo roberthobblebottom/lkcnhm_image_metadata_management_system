@@ -84,7 +84,7 @@
   </div>
 
   <script>
-    new DataTable('#dataTable')
+    new DataTable('#dataTable',{pageLength:50,autoWidth:false})
     document.querySelectorAll('.delete-btn').forEach(button => {
       button.addEventListener('click', function(event) {
         event.preventDefault();

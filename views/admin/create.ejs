@@ -119,7 +119,6 @@
           });
           return
         }
-
         //   if (!passwordRegex.test(password)) {
         //     Swal.fire({
         //       title: 'Invalid Password',
@@ -140,8 +139,6 @@
           return
         }
         // Prepare form data
-        // const formData = new URLSearchParams(new FormData(form));
-        //   const data = Object.fromEntries(formData.entries());
         const params = JSON.stringify({
           email: form.email.value,
           password: form.password.value,
@@ -212,7 +209,6 @@
         } finally {
           submitBtn.disabled = false;
           submitBtn.value = "Upload"
-
           submitBtn.innerHTML = 'Edit Profile';
         }
       });
