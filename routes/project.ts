@@ -14,7 +14,6 @@ const {
   formatDate,
   formatDisplayDate,
   projectStatusEnumeration,
-  requestStatusEnumeration,
 } = require("../middleware/utils");
 
 
@@ -27,15 +26,13 @@ router.get(
     SELECT u.UserID,u.FullName, u.Email, u.UserType 
     FROM User u
     WHERE u.UserType IN ('projectOwner','admin')
-    AND u.RequestStatus = 'approved'
     AND u.IsDeleted = 0
     `;
 
     const getPhotographers = `
     SELECT u.UserID,u.FullName, u.Email 
     FROM User u
-    WHERE u.RequestStatus = 'approved'
-    AND u.IsDeleted = 0
+    WHERE u.IsDeleted = 0
     `;
 
     const [projectOwners, photographers] = await Promise.all([
@@ -155,8 +152,8 @@ router.post(
         const insertUserQuery = `
             INSERT INTO User 
             (Email, SaltedPassword,PasswordSalt,  UserType, RegisteredDate,
-              UpdatedDate,FullName,ContactNumber,Organisation,Comments,ReasonForRequest,RequestStatus)
-            VALUES (?, ?,?,  ?, NOW(),NOW(),  ?, ?,?,?,?,?)`;
+              UpdatedDate,FullName,ContactNumber,Organisation,Comments)
+            VALUES (?, ?,?,  ?, NOW(),NOW(),  ?, ?,?,?)`;
         const params = [
           email,
           saltedPassword,
@@ -165,18 +162,13 @@ router.post(
           fullName,
           "",
           "",
-          "",
-          "project owner or admin " +
-            req.session.passport.user.FullName +
-            ", " +
-            req.session.passport.user.Email +
-            "created this account during the creation of the project",
-          requestStatusEnumeration().approved,
+          "Created during the creation of a project this user is in by project owner of user id."+userID
         ];
         try {
           const result = (await db.promise().query(insertUserQuery, params))[0];
           const o: any = result;
           insertedId = Object.values(o)[2].toString(); //the weird way of getting insertedId
+          console.log("newly created user id:",insertedId)
           newlyCreatedPhotographers.push({
             email: email,
             password: newPassword,
@@ -193,54 +185,56 @@ router.post(
             err.toString().toLowerCase().includes("email")
               ? "email already existed in the database."
               : err;
+          console.log(msg)
           res.status(400).json({ success: false, message: msg });
         }
       }
       req.session["newlyCreatedPhotographers"] = newlyCreatedPhotographers;
       req.session.save();
+
       //alter table for Imaging Platform enums if any new values
-      const selectedImagingPlatforms = req.body.selectedImagingPlatforms;
-      var hasNewImagingPlatform = false;
-      for (const i of selectedImagingPlatforms) {
-        if (
-          i != null &&
-          i != "" &&
-          !req.session["imagingPlatforms"].includes(i)
-        ) {
-          req.session["imagingPlatforms"].push(i);
-          hasNewImagingPlatform = true;
-        }
-      }
-      if (hasNewImagingPlatform) {
-        const i2: string[] = req.session.imagingPlatforms;
-        await db
-          .promise()
-          .query("ALTER TABLE Media MODIFY COLUMN `ImagingPlatform` enum(?)", [
-            i2,
-          ]);
-        await db
-          .promise()
-          .query<RowDataPacket[]>(
-            "ALTER TABLE ImagingPlatformInstance MODIFY COLUMN `ImagingPlatform` enum(?)",
-            [i2]
-          );
-      }
+      // const selectedImagingPlatforms = req.body.selectedImagingPlatforms;
+      // var hasNewImagingPlatform = false;
+      // for (const i of selectedImagingPlatforms) {
+      //   if (
+      //     i != null &&
+      //     i != "" &&
+      //     !req.session["imagingPlatforms"].includes(i)
+      //   ) {
+      //     req.session["imagingPlatforms"].push(i);
+      //     hasNewImagingPlatform = true;
+      //   }
+      // }
+      // if (hasNewImagingPlatform) {
+      //   const i2: string[] = req.session.imagingPlatforms;
+      //   await db
+      //     .promise()
+      //     .query("ALTER TABLE Media MODIFY COLUMN `ImagingPlatform` enum(?)", [
+      //       i2,
+      //     ]);
+      //   await db
+      //     .promise()
+      //     .query<RowDataPacket[]>(
+      //       "ALTER TABLE ImagingPlatformInstance MODIFY COLUMN `ImagingPlatform` enum(?)",
+      //       [i2]
+      //     );
+      // }
 
       //alter tables for projec types enums if any new values
-      const projectType = req.body.projectType;
-      if (
-        projectType != null &&
-        projectType != "" &&
-        !req.session["projectTypes"].includes(projectType)
-      ) {
-        req.session["projectTypes"].push(projectType);
-        const i3: string[] = req.session.projectTypes;
-        await db
-          .promise()
-          .query("ALTER TABLE Project MODIFY COLUMN `ProjectType` enum(?)", [
-            i3,
-          ]);
-      }
+      // const projectType = req.body.projectType;
+      // if (
+      //   projectType != null &&
+      //   projectType != "" &&
+      //   !req.session["projectTypes"].includes(projectType)
+      // ) {
+      //   req.session["projectTypes"].push(projectType);
+      //   const i3: string[] = req.session.projectTypes;
+      //   await db
+      //     .promise()
+      //     .query("ALTER TABLE Project MODIFY COLUMN `ProjectType` enum(?)", [
+      //       i3,
+      //     ]);
+      // }
 
       //main creation queries
       const insertQuery = `
@@ -530,7 +524,6 @@ router.get(
     SELECT u.UserID,u.FullName, u.Email, u.UserType 
     FROM User u
     WHERE u.UserType IN ('projectOwner','admin')
-    AND u.RequestStatus = 'approved'
     AND u.IsDeleted = 0
     `;
       // Get all needed data in parallel for better performance
@@ -556,8 +549,7 @@ router.get(
           ),
         db
           .promise()
-          .query("SELECT UserID,FullName FROM User WHERE RequestStatus = ?", [
-            requestStatusEnumeration().approved,
+          .query("SELECT UserID,FullName FROM User ", [
           ]),
         db.promise().query(getProjectOwners)
       ]);
@@ -723,8 +715,8 @@ console.log(req.body)
         const insertUserQuery = `
             INSERT INTO User 
             (Email, SaltedPassword,PasswordSalt,  UserType, RegisteredDate,
-              UpdatedDate,FullName,ContactNumber,Organisation,Comments,ReasonForRequest,RequestStatus)
-            VALUES (?, ?,?,  ?, NOW(),NOW(),  ?, ?,?,?,?,?)`;
+              UpdatedDate,FullName,ContactNumber,Organisation,Comments)
+            VALUES (?, ?,?,  ?, NOW(),NOW(),  ?, ?,?,?)`;
         const params = [
           email,
           saltedPassword,
@@ -734,12 +726,6 @@ console.log(req.body)
           "",
           "",
           "",
-          "project owner or admin " +
-            req.session.passport.user.FullName +
-            ", " +
-            req.session.passport.user.Email +
-            "created this account during the creation of the project",
-          requestStatusEnumeration().approved,
         ];
         try {
           const result = (await db.promise().query(insertUserQuery, params))[0];

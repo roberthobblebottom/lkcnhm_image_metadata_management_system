@@ -30,7 +30,6 @@
         <th>Organisation</th>
         <th>Registered Date</th>
         <th>Last Login</th>
-        <th>Request Status</th>
         <th>Is Deleted</th>
         <th>Action</th>
       </tr>
@@ -60,9 +59,7 @@
           <%= user.LastLoginDate ? new Date(user.LastLoginDate).toLocaleDateString('en-IN') : '-' %>
         </td>
 
-        <td><span class="status <%= user.RequestStatus == 'pending' || user.RequestStatus == 'rejected' ? 'inactive' : 'active' %>">
-            <%= user.RequestStatus%>
-          </span></td>
+     
 
         <td class="<%= !user.IsDeleted  ? 'status-approved' :  'status-rejected'  %>">
           <%=!user.IsDeleted? 'No' : 'Yes' %>

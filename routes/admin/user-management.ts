@@ -6,7 +6,6 @@ import { db } from "../db";
 import {
   emailRegex,
   formatDisplayDate,
-  requestStatusEnumeration,
   userTypesEnumeration,
 } from "../../middleware/utils";
 import { Response, Request } from "express";
@@ -18,7 +17,6 @@ router.get(
   async (req: Request, res: Response) => {
     res.render("admin/create", {
       userTypes: Object.values(userTypesEnumeration()),
-      requestStatuses: Object.values(requestStatusEnumeration()),
       currentUser: req.session.passport.user,
     });
   }
@@ -31,7 +29,6 @@ router.post(
   async (req: Request, res: Response) => {
     const adminID = req.session.passport.user.UserID;
     const {
-      userID,
       email,
       password,
       confirmPassword,
@@ -40,8 +37,6 @@ router.post(
       contactNumber,
       organisation,
       comments,
-      requestStatus,
-      reasonForRequest,
     } = req.body;
     //Validation
     const missingFields = [];
@@ -90,13 +85,11 @@ router.post(
         ContactNumber,
         Organisation  ,
         Comments,
-        RequestStatus,
-        ReasonForRequest,
         UpdatedByID  ,
         CreatedByID  ,
         UpdatedDate 
         )
-        VALUES(?,?,?,?,?,?,?,?,?,?,?,?,NOW() )
+        VALUES(?,?,?,?,?,?,?,?,?,?,NOW() )
     `;
 
     const newPasswordSalt = crypto.randomBytes(16).toString("hex");
@@ -122,8 +115,6 @@ router.post(
             contactNumber,
             organisation,
             comments,
-            requestStatus,
-            reasonForRequest,
             adminID,
             adminID,
           ];
@@ -156,7 +147,7 @@ router.get(
   (req: Request, res: Response) => {
     console.log("Route /admin-users hit"); // Debug log 1
     const query = `SELECT UserID, Email,UserType,FullName,Organisation,
-    RegisteredDate, LastLoginDate, RequestStatus, IsDeleted  FROM User`;
+    RegisteredDate, LastLoginDate, IsDeleted  FROM User`;
 
     db.query(query, (err, result) => {
       console.log("Query executed", { err, result }); // Debug log 2
@@ -185,8 +176,8 @@ router.get(
     const query = `
     SELECT UserID,Email,UserType,FullName,
     RegisteredDate,ContactNumber,
-    Organisation,Comments,RequestStatus,
-    IsDeleted,ReasonForRequest
+    Organisation,Comments,
+    IsDeleted
     FROM User
     WHERE UserID = ?;
     `;
@@ -219,7 +210,7 @@ router.get(
   async (req: Request, res: Response) => {
     const userId = req.params.userID;
     const query =
-      "SELECT UserID,Email,UserType,FullName,RegisteredDate,ContactNumber,Organisation,Comments,RequestStatus,IsDeleted,ReasonForRequest FROM User WHERE UserID = ?";
+      "SELECT UserID,Email,UserType,FullName,RegisteredDate,ContactNumber,Organisation,Comments,IsDeleted FROM User WHERE UserID = ?";
 
     const result = (
       await db.promise().query<RowDataPacket[]>(query, [userId])
@@ -241,7 +232,6 @@ router.get(
     res.render("admin/edit", {
       user: result[0],
       userTypes: Object.values(userTypesEnumeration()),
-      requestStatuses: Object.values(requestStatusEnumeration()),
       registeredDate: formatDisplayDate(result[0].RegisteredDate),
       title: `Edit User - ${result[0].Email}`,
       message: message,
@@ -266,8 +256,6 @@ router.post(
       contactNumber,
       organisation,
       comments,
-      requestStatus,
-      reasonForRequest,
       originalEmail,
     } = req.body;
     console.log(req.body);
@@ -318,8 +306,6 @@ router.post(
         ContactNumber=?,
         Organisation = ?,
         Comments=?,
-        RequestStatus=?,
-        ReasonForRequest=?,
         UpdatedDate = NOW(),
         UpdatedByID = ?
     `;
@@ -351,8 +337,6 @@ router.post(
                   contactNumber,
                   organisation,
                   comments,
-                  requestStatus,
-                  reasonForRequest,
                   adminID,
                   hashedPassword,
                   newPasswordSalt,
@@ -365,8 +349,6 @@ router.post(
                   contactNumber,
                   organisation,
                   comments,
-                  requestStatus,
-                  reasonForRequest,
                   adminID,
                   userID,
                 ];

@@ -68,23 +68,7 @@
         <label for="comments">Comments </label>
         <textarea id="comments"></textarea>
       </div>
-      <div class="form-group">
-        <label>Request Status* </label>
-        <select name="requestStatus" id="requestStatus" requried>
-          <option value="">-- Select a Request Status--</option>
-          <%requestStatuses.forEach( u=>{%>
-          <option value="<%=u%>">
-            <%=u%>
-          </option>
-          <%})%>
-        </select>
-      </div>
-
-
-      <div class="form-group">
-        <label> Reason for Request: </label>
-        <textarea id="reasonForRequest"></textarea>
-      </div>
+ 
 
       <div class="buttons">
         <button type="submit">Create User</button>
@@ -148,8 +132,6 @@
           contactNumber: form.contactNumber.value,
           organisation: form.organisation.value,
           comments: form.comments.value,
-          requestStatus: form.requestStatus.value,
-          reasonForRequest: form.reasonForRequest.value,
         })
         try {
           // Show loading indicator

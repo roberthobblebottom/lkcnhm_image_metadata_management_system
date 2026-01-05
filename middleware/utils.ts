@@ -15,9 +15,6 @@ const formatDisplayDate = (date: Date) => {
   return d;
 };
 
-const requestStatusEnumeration = () => {
-  return { approved: "approved", rejected: "rejected", pending: "pending" };
-};
 const projectStatusEnumeration = () => {
   return {
     in_progress: "started",
@@ -62,7 +59,6 @@ const resolutionRegex = /^\d{1,5}x\d{1,5}$/;
 export {
   formatDate,
   formatDisplayDate,
-  requestStatusEnumeration,
   projectStatusEnumeration,
   projectTypeEnumeration,
   mediaFileFormatEnumeration,

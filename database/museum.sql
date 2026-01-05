@@ -18,8 +18,6 @@ CREATE TABLE User (
     ContactNumber VARCHAR(100), 
     Organisation VARCHAR(150), 
     Comments VARCHAR(255), 
-    RequestStatus ENUM('approved','rejected','pending') NOT NULL,
-    ReasonForRequest VARCHAR(255), 
     UpdatedDate DATETIME NULL,
     UpdatedByID INT , 
     CreatedByID INT ,
@@ -101,18 +99,18 @@ CREATE TABLE Media (
 
 -- Test Data, do not use them for production
 INSERT INTO User (Email,SaltedPassword,PasswordSalt,UserType,FullName,
-CreatedByID,UpdatedByID,RequestStatus,Organisation) 
+CreatedByID,UpdatedByID,Organisation) 
 VALUES ('admin@gmail.com',FROM_BASE64('W8VK+3eef900fOpSgH0HZmeD2E9wEr7hevUHM+GEQ3c='),
-'JR6lq3JUFxejg39f','admin',"jeff Jack",'1','1','approved','NUS');
+'JR6lq3JUFxejg39f','admin',"jeff Jack",'1','1','NUS');
 INSERT INTO User (Email,SaltedPassword,PasswordSalt,UserType,FullName,
-CreatedByID,UpdatedByID,RequestStatus,Organisation) 
+CreatedByID,UpdatedByID,Organisation) 
 VALUES ('r1@gmail.com',FROM_BASE64("hwXpWnraI+KqYkaChBAc4EjTdAEtXxKZXBn/cMss2/4="),
-'ZdYThKAg1ZD4ULyd','projectOwner',"Zesty wong",'2','2','approved','NUS');
+'ZdYThKAg1ZD4ULyd','projectOwner',"Zesty wong",'2','2','NUS');
 
 INSERT INTO User (Email,SaltedPassword,PasswordSalt,UserType,FullName,
-CreatedByID,UpdatedByID,RequestStatus,Organisation) 
+CreatedByID,UpdatedByID,Organisation) 
 VALUES ('p1@gmail.com',FROM_BASE64("sj1O+m695SCDA0cyNiHK/aEknLFcYPhoxP9YOZe0pvA="),
-'UkSbEVvinkts1Dbb','photographerOnly',"Ron Pass",'3','3','approved','NUS');
+'UkSbEVvinkts1Dbb','photographerOnly',"Ron Pass",'3','3','NUS');
 
 
 INSERT INTO Project (ProjectOwnerID ,ProjectName ,ProjectType,ImagingStartDate ,ImagingEndDate ,

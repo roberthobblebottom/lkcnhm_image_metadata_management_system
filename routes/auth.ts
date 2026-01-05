@@ -6,7 +6,6 @@ import * as passportStrategy from "passport-local";
 import crypto from "crypto";
 import {
   emailRegex,
-  requestStatusEnumeration,
   userTypesEnumeration,
 } from "../middleware/utils";
 import { Response, Request, NextFunction } from "express";
@@ -94,7 +93,6 @@ router.post("/register", (req: Request, res: Response) => {
     contactNumber,
     organisation,
     comments,
-    reasonForRequest,
   } = req.body;
   const missingFields = [];
   if (!email) missingFields.push("email");
@@ -102,7 +100,6 @@ router.post("/register", (req: Request, res: Response) => {
   if (!confirmPassword) missingFields.push("confirmPassword");
   if (!userType) missingFields.push("userType");
   if (!fullName) missingFields.push("fullName");
-  if (!reasonForRequest) missingFields.push("reasonForRequest");
   if (missingFields.length > 0) {
     return res.status(400).json({
       success: false,
@@ -147,8 +144,8 @@ router.post("/register", (req: Request, res: Response) => {
         const insertUserQuery = `
             INSERT INTO User 
             (Email, SaltedPassword,PasswordSalt,  UserType, RegisteredDate,
-              UpdatedDate,FullName,ContactNumber,Organisation,Comments,ReasonForRequest,RequestStatus)
-            VALUES (?, ?,?,  ?, NOW(),NOW(),  ?, ?,?,?,?,?)`;
+              UpdatedDate,FullName,ContactNumber,Organisation,Comments)
+            VALUES (?, ?,?,  ?, NOW(),NOW(),  ?, ?,?,?)`;
         const params = [
           email,
           hashedPassword,
@@ -157,9 +154,7 @@ router.post("/register", (req: Request, res: Response) => {
           fullName,
           contactNumber,
           organisation,
-          comments,
-          reasonForRequest,
-          requestStatusEnumeration().approved, //TODO TEMPORARY APPROVED FOR ALL USERS FOR TESTING
+          comments
         ];
 
         db.query(insertUserQuery, params, (err: any) => {

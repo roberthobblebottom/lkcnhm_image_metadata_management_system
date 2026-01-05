@@ -4,7 +4,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Edit User 
+  <title>Edit User
   </title>
 
   <link rel="stylesheet" href="/css/view.css">
@@ -13,8 +13,8 @@
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
   <style>
-    .request-container{
-      height:850px;
+    .request-container {
+      height: 850px;
     }
   </style>
 </head>
@@ -22,19 +22,19 @@
 <body>
   <main>
     <div class="main-con">
-      
-  <%- include('../sidenavs/admin') %>
-      <div class="container request-container">
-<div class="request-header">
 
-        <h1>View Login Details</h1>
-  <p class="text-muted mb-0">Registered on <%= registeredDate %> 
-        </p>
-        <% if(user.IsDeleted){%>
-        <span class="status-badge bg-danger">
-          Deleted
-        </span>
-        <%}%>
+      <%- include('../sidenavs/admin') %>
+      <div class="container request-container">
+        <div class="request-header">
+
+          <h1>View Login Details</h1>
+          <p class="text-muted mb-0">Registered on <%= registeredDate %>
+          </p>
+          <% if(user.IsDeleted){%>
+          <span class="status-badge bg-danger">
+            Deleted
+          </span>
+          <%}%>
       </div>
 <div class="row">
   <div class="col-md-6">
@@ -42,32 +42,30 @@
         <div class='detail-label' >User ID</div>
           <div class="detail-value">
         <%=user.UserID%>
+        </div>
       </div>
-    </div>
-    <div class="detail-row">
-      <div class='detail-label' >Email </div>
-      <div class="detail-value">
-        <%=user.Email%>
+      <div class="detail-row">
+        <div class='detail-label'>Email </div>
+        <div class="detail-value">
+          <%=user.Email%>
+        </div>
       </div>
-    </div>
-    <div class="detail-row">
-      <div class='detail-label' >User Type </div>
+      <div class="detail-row">
+        <div class='detail-label'>User Type </div>
 
-      <div class="detail-value">
-        <%= user.UserType %>
+        <div class="detail-value">
+          <%= user.UserType %>
+        </div>
       </div>
-    </div>
-    <div class="detail-row">
-      <div class='detail-label' >Full Name </div>
-      <div class="detail-value">
-        <%=user.FullName%>
+      <div class="detail-row">
+        <div class='detail-label'>Full Name </div>
+        <div class="detail-value">
+          <%=user.FullName%>
+        </div>
       </div>
-    </div>
-  
     </div>
 
     <div class="col-md-6">
- 
       <div class="detail-row">
         <div class='detail-label' for="contactNumber">Contact Number </div>
         <div class="detail-value">
@@ -80,28 +78,15 @@
           <%=user.Organisation%>
         </div>
       </div>
+    </div>
+    </div>
 
-  
-  <div class="detail-row">
-        <div class='detail-label'>Request Status </div>
-        <div class="detail-value">
-          <%=    user.RequestStatus%>
-        </div>
-      </div>
-    </div>
-    </div>
     <div class="detail-row">
-      <div class='detail-label'> Reason for Request: </div>
-      <div class="text-area-value detail-value">
-        <%=user.ReasonForRequest%>
+      <div class='detail-label' for="comments">Comments </div>
+      <div class="detail-value text-area-value">
+        <%=user.Comments%>
       </div>
     </div>
-          <div class="detail-row">
-        <div class='detail-label' for="comments">Comments </div>
-        <div class="detail-value text-area-value">
-          <%=user.Comments%>
-        </div>
-      </div>
     <div class="mt-4 d-flex justify-content-between">
       <a href="/admin/user-management/view-all" class="btn btn-primary">
         <i class="fas fa-arrow-left"></i> Back to view all media

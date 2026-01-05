@@ -47,7 +47,7 @@
       <div class="form-group">
         <div class="horizontal-panel2">
           <label class="label2">Project Type*</label>
-          <button class="addButton" id="addProjectTypeButton">Add Project Type</button>
+          <!-- <button class="addButton" id="addProjectTypeButton">Add Project Type</button> -->
         </div>
 
         <select name="projectType" id="projectType" class="form-control" required>
@@ -107,7 +107,7 @@
       <div class="form-group">
         <div class="horizontal-panel2">
           <label class="label2" for="platform">Imaging Platform</label>
-          <button class='addButton' id="addImagingPlatformButton">Add Imaging Platform</button>
+          <!-- <button class='addButton' id="addImagingPlatformButton">Add Imaging Platform</button> -->
         </div>
         <select multiple id="newSelectedImagingPlatforms">
           <option value="">Select Imaging Platforms</span>
@@ -141,6 +141,7 @@
     allowHTML: true,
     removeItemButton: true,
     callbackOnInit: async function() {
+      //for admins only to select project Owner
       const projectOwnerSelect = document.getElementById('projectOwner')
       projectOwnerSelect.addEventListener('change', function(e) {
         e.preventDefault()
@@ -181,54 +182,54 @@
   });
   const toBeCreatedPhotographers = []
   // Initialize form with current datetime
-  document.getElementById('addProjectTypeButton').addEventListener('click', async function(e) {
-    e.preventDefault()
-    Swal.fire({
-      title: "Add new Project Type",
-      text: "Add new Project Type",
-      input: 'text',
-      showCancelButton: true,
-      inputPlaceholder: "Enter it here.",
-      preConfirm: (value) => {
-        if (value) {
-          if ("<%=projectTypes%>".includes(value))
-            Swal.showValidationMessage('This Project Type value already exist')
-          const select = document.getElementById("projectType")
-          var option = document.createElement('option')
-          option.text = option.value = value
-          select.add(option, 1)
-          select.value = option.text
-        } else {
-          Swal.showValidationMessage('Value is required')
-        }
-      }
-    })
-  });
-  document.getElementById('addImagingPlatformButton').addEventListener('click', async function(e) {
-    console.log("add Imaging Platform button")
-    e.preventDefault()
-    Swal.fire({
-      title: "Add new Imaging Platform",
-      text: "Add new Imaging Platform",
-      input: 'text',
-      showCancelButton: true,
-      inputPlaceholder: "Enter it here.",
-      preConfirm: (value) => {
-        if (value) {
-          if ("<%=imagingPlatforms%>".includes(value))
-            Swal.showValidationMessage('This Imaging Platform value already exist')
-          const select = document.getElementById("newSelectedImagingPlatforms")
-          newSelectedImagingPlatforms.setChoices([{
-            value: value,
-            label: value,
-            selected: true
-          }])
-        } else {
-          Swal.showValidationMessage('Value is required')
-        }
-      }
-    })
-  })
+  // document.getElementById('addProjectTypeButton').addEventListener('click', async function(e) {
+  //   e.preventDefault()
+  //   Swal.fire({
+  //     title: "Add new Project Type",
+  //     text: "Add new Project Type",
+  //     input: 'text',
+  //     showCancelButton: true,
+  //     inputPlaceholder: "Enter it here.",
+  //     preConfirm: (value) => {
+  //       if (value) {
+  //         if ("<%=projectTypes%>".includes(value))
+  //           Swal.showValidationMessage('This Project Type value already exist')
+  //         const select = document.getElementById("projectType")
+  //         var option = document.createElement('option')
+  //         option.text = option.value = value
+  //         select.add(option, 1)
+  //         select.value = option.text
+  //       } else {
+  //         Swal.showValidationMessage('Value is required')
+  //       }
+  //     }
+  //   })
+  // });
+  // document.getElementById('addImagingPlatformButton').addEventListener('click', async function(e) {
+  //   console.log("add Imaging Platform button")
+  //   e.preventDefault()
+  //   Swal.fire({
+  //     title: "Add new Imaging Platform",
+  //     text: "Add new Imaging Platform",
+  //     input: 'text',
+  //     showCancelButton: true,
+  //     inputPlaceholder: "Enter it here.",
+  //     preConfirm: (value) => {
+  //       if (value) {
+  //         if ("<%=imagingPlatforms%>".includes(value))
+  //           Swal.showValidationMessage('This Imaging Platform value already exist')
+  //         const select = document.getElementById("newSelectedImagingPlatforms")
+  //         newSelectedImagingPlatforms.setChoices([{
+  //           value: value,
+  //           label: value,
+  //           selected: true
+  //         }])
+  //       } else {
+  //         Swal.showValidationMessage('Value is required')
+  //       }
+  //     }
+  //   })
+  // })
   document.getElementById('addPhotographerButton').addEventListener('click', async function(e) {
     e.preventDefault()
     Swal.fire({

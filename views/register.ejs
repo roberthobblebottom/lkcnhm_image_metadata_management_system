@@ -192,11 +192,7 @@
         <textarea id="comments"></textarea>
       </div>
 
-      <div class="form-group">
-        <label> Reason for Request*: </label>
 
-        <textarea required id="reasonForRequest"></textarea>
-      </div>
 
       <button type="submit">Sign Up</button>
     </form>
@@ -255,7 +251,6 @@
             contactNumber: registerForm.contactNumber.value,
             organisation: registerForm.organisation.value,
             comments: registerForm.comments.value,
-            reasonForRequest: registerForm.reasonForRequest.value
           })
         })
         .then(res => {
