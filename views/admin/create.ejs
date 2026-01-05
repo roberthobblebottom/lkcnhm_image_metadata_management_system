@@ -186,7 +186,7 @@
               showConfirmButton: true,
               timer: 1000
             }).then(() => {
-              window.location.href = "/admin/user-management/view-all"; // Redirect to the desired page after success
+              window.location.href = result.redirectUrl; // Redirect to the desired page after success
             });
           } else {
             // Show error alert

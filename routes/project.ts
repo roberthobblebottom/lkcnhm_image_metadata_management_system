@@ -277,9 +277,9 @@ router.post(
             userID,
             projectStatusEnumeration().in_progress,
           ])
-      )[0];
+      );
 
-      const insertedProjectID = Object.values(result)[2].toString();
+      const insertedProjectID = Object.values(result[0])[2].toString();
 
       const photographersTuple: string[][] = [];
       for (var x of selectedPhotographers) {
@@ -636,7 +636,7 @@ router.post(
         selectedPhotographers,
         toBeCreatedPhotographers,
       } = req.body;
-
+console.log(req.body)
       // === 1. VALIDATION ===
       if (!imagingStartDate || !imagingEndDate || !projectStatus) {
         return res
@@ -909,6 +909,8 @@ router.post(
         ProjectOwnerID = ?
         WHERE ProjectID = ?
         `;
+      console.log(summaryOfProject)
+      console.log(detailsOfSpecimens)
       await db
         .promise()
         .query(updateQuery, [

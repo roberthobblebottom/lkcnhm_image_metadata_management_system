@@ -80,7 +80,7 @@ router.post(
         message: "Email already exist",
       });
     }
-    const query = `
+    const insertUserQuery = `
         INSERT INTO User
         (Email,
         SaltedPassword  ,
@@ -127,10 +127,15 @@ router.post(
             adminID,
             adminID,
           ];
-          await db.promise().query<RowDataPacket[]>(query, params);
+          const result = await db.promise().query<RowDataPacket[]>(insertUserQuery, params);
+          const o: any = result;
+          console.log(o)
+          const insertID = Object.values(o[0])[2].toString()
+          console.log('insertID',insertID)
           return res.json({
             success: true,
             message: "User created successfully!",
+            redirectUrl: `/admin/user-management/view/${insertID}`
           });
         }
       );
