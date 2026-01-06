@@ -22,15 +22,7 @@ const projectStatusEnumeration = () => {
     completed: "completed",
   };
 };
-const projectTypeEnumeration = () => {
-  return {
-    BDP: "BDP",
-    GalleryBDP: "GalleryBDP",
-    InternalResearch: "InternalResearch",
-    StudentProject: "StudentProject",
-    Visitor: "Visitor",
-  };
-};
+
 const mediaFileFormatEnumeration = () => {
   return {
     jpg: ".jpg",
@@ -60,7 +52,6 @@ export {
   formatDate,
   formatDisplayDate,
   projectStatusEnumeration,
-  projectTypeEnumeration,
   mediaFileFormatEnumeration,
   userTypesEnumeration,
   emailRegex,

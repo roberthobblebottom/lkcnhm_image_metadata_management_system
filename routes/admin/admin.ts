@@ -22,14 +22,13 @@ router.get(
 
 // 🔒 Admin Routes (Protected)
 router.get(
-  "/dashboard",
+  "/login-landing-page",
   isAuthenticated,
   isAdmin,
   (req: Request, res: Response) => {
-    console.log("🟢 Accessing Admin Dashboard ");
-    res.render("admin/dashboard", {
+    res.render("admin/login-landing-page", {
       user: req.session.passport.user,
-      title: "Admin Dashboard",
+      title: "Admin Login Landing Page",
     });
   }
 );
@@ -335,6 +334,101 @@ router.post(
       success: true,
       message: "deleted table enum value for " + feature,
       redirectUrl: "/admin/other-admin-settings",
+    });
+  }
+);
+
+router.post(
+  "/purge-soft-deleted-medias",
+  isAuthenticated,
+  isAdmin,
+  async (req: Request, res: Response) => {
+    const result: any = await db
+      .promise()
+      .query(`SELECT * FROM Media WHERE IsDeleted = 1;`);
+    const mediaData: Array<Object> = Array.from(result[0]);
+    if (mediaData.length == 0)
+      res.status(400).json({
+        success: false,
+        message:
+          "There is no media data that is soft deleted or another words, marked for deletion",
+      });
+
+    const jsonMediaData = JSON.parse(JSON.stringify(mediaData));
+    const bufferMediaData = await fastcsv.writeToBuffer(jsonMediaData, {
+      headers: true,
+    });
+    const zip = new AdmZip();
+    zip.addFile("deleted media data.csv", bufferMediaData);
+    await db.promise().query(`DELETE FROM Media WHERE IsDeleted = 1;`);
+    return res.status(200).json({
+      success: true,
+      message:
+        "Deleted any media data that is soft deleted (or anotherwords, marked for deletion).",
+      buffer: zip.toBuffer(),
+    });
+  }
+);
+
+router.post(
+  "/purge-soft-deleted-projects",
+  isAuthenticated,
+  isAdmin,
+  async (req: Request, res: Response) => {
+    const result: any = await db
+      .promise()
+      .query(`SELECT * FROM Project WHERE IsDeleted = 1;`);
+    const projectData: Array<Object> = Array.from(result[0]);
+    if (projectData.length == 0)
+      res.status(400).json({
+        success: false,
+        message:
+          "There is no project data that is soft deleted or another words, marked for deletion",
+      });
+
+    const jsonProjectData = JSON.parse(JSON.stringify(projectData));
+    const bufferProjectData = await fastcsv.writeToBuffer(jsonProjectData, {
+      headers: true,
+    });
+    const zip = new AdmZip();
+    zip.addFile("deleted project data.csv", bufferProjectData);
+    db.promise().query(`DELETE FROM Project WHERE IsDeleted = 1;`);
+    return res.status(200).json({
+      success: true,
+      message:
+        "Deleted any project data that is soft deleted (or anotherwords, marked for deletion).",
+      buffer: zip.toBuffer(),
+    });
+  }
+);
+
+router.post(
+  "/purge-soft-deleted-users",
+  isAuthenticated,
+  isAdmin,
+  async (req: Request, res: Response) => {
+    const result: any = await db
+      .promise()
+      .query(`SELECT * FROM User WHERE IsDeleted = 1;`);
+    const userData: Array<Object> = Array.from(result[0]);
+    if (userData.length == 0)
+      res.status(400).json({
+        success: false,
+        message:
+          "There is no user data that is soft deleted or another words, marked for deletion",
+      });
+
+    const jsonUserData = JSON.parse(JSON.stringify(userData));
+    const bufferUserData = await fastcsv.writeToBuffer(jsonUserData, {
+      headers: true,
+    });
+    const zip = new AdmZip();
+    zip.addFile("deleted user data.csv", bufferUserData);
+    db.promise().query(`DELETE FROM User WHERE IsDeleted = 1;`);
+    return res.status(200).json({
+      success: true,
+      message:
+        "Deleted any User data that is soft deleted (or anotherwords, marked for deletion).",
     });
   }
 );

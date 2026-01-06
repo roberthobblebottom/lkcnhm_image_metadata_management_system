@@ -17,7 +17,7 @@
   <div class="main-con">
     <%- include(currentUser.UserType=='admin' 
   ? '../sidenavs/admin.ejs' 
-  : '../sidenavs/user' ) %>
+  : '../sidenavs/user.ejs' ) %>
 
     <form id='main-form'>
       <div class="horizontal-panel">
@@ -27,13 +27,16 @@
         </a>
         <h2>Edit Project</h2>
       </div>
+<div class="form-group">
+        <label>Project ID: <%=project.ProjectID%></label>
+      </div>
       <div class="form-group">
         <label>Project Name</label>
         <input type="text" id="projectName" name="projectName" value="<%= project.ProjectName %>" class="form-control" required>
       </div>
 
       <div class="form-group">
-       <label for="projectOwner">Project Owner Full Name* </label>
+        <label for="projectOwner">Project Owner Full Name* </label>
         <select id="projectOwner" name="projectOwner" "<%=currentUser.UserType==='admin' ? '' : 'disabled'%>" required>
           <option value="">Select Project Owner</option>
           <%=projectOwners%>
@@ -45,23 +48,22 @@
         </select>
         <div id="projectOwner-error" class="error-message">Please select a projectOwner</div>
       </div>
-
+      <%if(currentUser.UserType=='admin'){%>
       <div class="form-group">
         <div class="horizontal-panel2">
           <label id="label2">Project Type</label>
-          <button class='addButton' id="addProjectTypeButton">Add Project Type</button>
         </div>
-
         <select name="projectType" id="projectType" class="form-control">
           <option value="">-- Select Project Type --</option>
           <% projectTypes.forEach(projectType=> { %>
-          <option value="<%= projectType %>" <%=project.ProjectType==projectType ? 'selected' : ''%>>
-            <%= projectType %>
-          </option>
-          <% }) %>
+        <option value="<%= projectType %>" <%=project.ProjectType==projectType ? 'selected' : ''%>>
+          <%= projectType %>
+        </option>
+        <% }) %>
         </select>
       </div>
 
+        <%}%>
       <div class="form-group">
         <div class="horizontal-panel2">
           <label for="newSelectedImagingPlatforms">Photographer(s):</label>
@@ -70,8 +72,7 @@
         <select multiple id="newSelectedPhotographers">
           <option value="">---Select Photographers---</option>
           <% allPhotographers.forEach(photographer=>{ %>
-          <option value="<%=photographer.UserID%>" 
-            id="<%=photographer.UserID%>ID" %> 
+          <option value="<%=photographer.UserID%>" id="<%=photographer.UserID%>ID" %>
             <%=selectedPhotographers.includes(photographer.UserID) ? "selected":""%>>
             <%=photographer.FullName%>
           </option>
@@ -108,7 +109,6 @@
 
         <div class="horizontal-panel2">
           <label id="label2" for="imagingPlatform">Imaging Platform:</label>
-          <button class='addButton' id="addImagingPlatformButton">Add Imaging Platform</button>
         </div>
         <select multiple id="newSelectedImagingPlatforms">
           <option value="">Select Imaging Platforms</option>
@@ -159,7 +159,7 @@
         e.preventDefault()
 
         const temp = (projectOwnerSelect.value).toString()
-        if (temp=="") return
+        if (temp == "") return
         newSelectedPhotographers.removeActiveItems(); //clearChoices() doesn't work
         newSelectedPhotographers.setChoiceByValue(temp)
         const x = document.querySelector("[data-value='" + temp + "']")
@@ -175,54 +175,54 @@
     removeItemButton: true
   });
 
-  document.getElementById('addProjectTypeButton').addEventListener('click', async function(e) {
-    e.preventDefault()
-    Swal.fire({
-      title: "Add new Project Type",
-      text: "Add new Project Type",
-      input: 'text',
-      showCancelButton: true,
-      inputPlaceholder: "Enter it here.",
-      preConfirm: (value) => {
-        if (value) {
-          if ("<%=projectTypes%>".includes(value))
-            Swal.showValidationMessage('This Project Type value already exist')
-          const select = document.getElementById("projectType")
-          var option = document.createElement('option')
-          option.text = option.value = value
-          select.add(option, 1)
-          select.value = option.text
-        } else {
-          Swal.showValidationMessage('Value is required')
-        }
-      }
-    })
-  })
-  document.getElementById('addImagingPlatformButton').addEventListener('click', async function(e) {
-    console.log("add Imaging Platform button")
-    e.preventDefault()
-    Swal.fire({
-      title: "Add new Imaging Platform",
-      text: "Add new Imaging Platform",
-      input: 'text',
-      showCancelButton: true,
-      inputPlaceholder: "Enter it here.",
-      preConfirm: (value) => {
-        if (value) {
-          if ("<%=imagingPlatforms%>".includes(value))
-            Swal.showValidationMessage('This Imaging Platform value already exist')
-          const select = document.getElementById("newSelectedImagingPlatforms")
-          newSelectedImagingPlatforms.setChoices([{
-            value: value,
-            label: value,
-            selected: true
-          }])
-        } else {
-          Swal.showValidationMessage('Value is required')
-        }
-      }
-    })
-  })
+  // document.getElementById('addProjectTypeButton').addEventListener('click', async function(e) {
+  //   e.preventDefault()
+  //   Swal.fire({
+  //     title: "Add new Project Type",
+  //     text: "Add new Project Type",
+  //     input: 'text',
+  //     showCancelButton: true,
+  //     inputPlaceholder: "Enter it here.",
+  //     preConfirm: (value) => {
+  //       if (value) {
+  //         if ("<%=projectTypes%>".includes(value))
+  //           Swal.showValidationMessage('This Project Type value already exist')
+  //         const select = document.getElementById("projectType")
+  //         var option = document.createElement('option')
+  //         option.text = option.value = value
+  //         select.add(option, 1)
+  //         select.value = option.text
+  //       } else {
+  //         Swal.showValidationMessage('Value is required')
+  //       }
+  //     }
+  //   })
+  // })
+  // document.getElementById('addImagingPlatformButton').addEventListener('click', async function(e) {
+  //   console.log("add Imaging Platform button")
+  //   e.preventDefault()
+  //   Swal.fire({
+  //     title: "Add new Imaging Platform",
+  //     text: "Add new Imaging Platform",
+  //     input: 'text',
+  //     showCancelButton: true,
+  //     inputPlaceholder: "Enter it here.",
+  //     preConfirm: (value) => {
+  //       if (value) {
+  //         if ("<%=imagingPlatforms%>".includes(value))
+  //           Swal.showValidationMessage('This Imaging Platform value already exist')
+  //         const select = document.getElementById("newSelectedImagingPlatforms")
+  //         newSelectedImagingPlatforms.setChoices([{
+  //           value: value,
+  //           label: value,
+  //           selected: true
+  //         }])
+  //       } else {
+  //         Swal.showValidationMessage('Value is required')
+  //       }
+  //     }
+  //   })
+  // })
   document.getElementById('addPhotographerButton').addEventListener('click', async function(e) {
     e.preventDefault()
     Swal.fire({
@@ -271,24 +271,24 @@
   }, false)
 
   const toBeCreatedPhotographers = []
-  document.addEventListener('load',function(){
-  // grey out and disable this option
+  document.addEventListener('load', function() {
+    // grey out and disable this option
     //The repeated block for greying out is required for both load and DOMContentLoaded event
-   const x = document.querySelector("[data-value='<%=project.ProjectOwnerID%>']")
-      x.removeChild(x.childNodes[1])
-      x.style.padding = "12px"
-      x.style.backgroundColor = "gray"
-      console.log(x)
+    const x = document.querySelector("[data-value='<%=project.ProjectOwnerID%>']")
+    x.removeChild(x.childNodes[1])
+    x.style.padding = "12px"
+    x.style.backgroundColor = "gray"
+    console.log(x)
   })
 
   document.addEventListener('DOMContentLoaded', function() {
-  // grey out and disable this option
+    // grey out and disable this option
     //The repeated block for greying out is required for both load and DOMContentLoaded event
-      const x = document.querySelector("[data-value='<%=project.ProjectOwnerID%>']")
-      x.removeChild(x.childNodes[1])
-      x.style.padding = "12px"
-      x.style.backgroundColor = "gray"
-      console.log(x)
+    const x = document.querySelector("[data-value='<%=project.ProjectOwnerID%>']")
+    x.removeChild(x.childNodes[1])
+    x.style.padding = "12px"
+    x.style.backgroundColor = "gray"
+    console.log(x)
 
     const form = document.getElementById('main-form')
     const startDateInput = document.getElementById('imagingStartDate');
@@ -327,12 +327,12 @@
 
       // Submit form via AJAX
       try {
-        console.log()
+        const projectType = form.projectType == null? "" : form.projectType.value
         const formData = {
           projectName: form.projectName.value,
           projectOwner: "<%=project.FullName%>",
           projectOwnerID: form.projectOwner.value,
-          projectType: form.projectType.value,
+          projectType: projectType,
           imagingStartDate: form.imagingStartDate.value,
           imagingEndDate: form.imagingEndDate.value,
           summaryOfProject: form.summaryOfProject.value,

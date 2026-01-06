@@ -30,7 +30,7 @@ CREATE TABLE Project (
         ProjectOwnerID INT NOT NULL,
         ProjectName VARCHAR(150) NOT NULL ,
         ProjectType 
-        ENUM('BDP','GalleryBDP','InternalResearch','StudentProject','Visitor') 
+        ENUM('BDP','GalleryBDP','InternalResearch','StudentProject','Visitor','Other') 
         ,
         ImagingStartDate DATETIME NOT NULL,
         ImagingEndDate DATETIME NOT NULL,
@@ -55,7 +55,7 @@ CREATE TABLE ImagingPlatformInstance(
         ImagingPlatformInstanceID INT AUTO_INCREMENT PRIMARY KEY,
         ProjectID INT NOT NULL,
         ImagingPlatform ENUM('Leica(L5)','Mitutoyo(L5)','Olympus(L4Prep)',
-        'Olympus(L5)','Passport(L5)','VD(L4Prep)') ,
+        'Olympus(L5)','Passport(L5)','VD(L4Prep)','Other') ,
         FOREIGN KEY (ProjectID) REFERENCES Project(ProjectID)
 );
 
@@ -82,8 +82,8 @@ CREATE TABLE Media (
         FileFormat ENUM(".jpg", ".jpeg", ".png",".tiff", ".svg", ".raw",".tif") NOT NULL,
         Description VARCHAR(225),
         ImagingPlatform ENUM('Leica(L5)','Mitutoyo(L5)','Olympus(L4Prep)',
-        'Olympus(L5)','Passport(L5)','VD(L4Prep)') ,
-        ImageEditingTool ENUM('photoshop','gimp') ,
+        'Olympus(L5)','Passport(L5)','VD(L4Prep)','Other') ,
+        ImageEditingTool ENUM('photoshop','gimp','Other') ,
         Comments VARCHAR(255),
         CreatedDate DATETIME NOT NULL,
         CreatedByID INT NOT NULL,

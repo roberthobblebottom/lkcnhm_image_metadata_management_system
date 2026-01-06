@@ -6,6 +6,7 @@ import { Response, Request } from "express";
 import { emailRegex, userTypesEnumeration } from "../middleware/utils";
 
 import crypto from "crypto";
+import { isAdmin } from "../middleware/auth";
 const {
   isAuthenticated,
   isAdminOrProjectOwner,
@@ -62,7 +63,6 @@ router.post(
       const requiredFields = [
         "projectOwner",
         "projectName",
-        "projectType",
         "startDate",
         "endDate",
         "summary",
@@ -260,7 +260,7 @@ router.post(
           .promise()
           .query(insertQuery, [
             req.body.projectName,
-            req.body.projectType,
+            req.body.projectType == ''? null: req.body.projectType,
             req.body.projectOwner,
             req.body.startDate,
             req.body.endDate,
@@ -577,8 +577,7 @@ router.get(
         ),
         ImagingEndDate: formatDisplayDate(requestResults[0][0].ImagingEndDate),
       };
-
-      console.log('projectOwners',projectOwners)
+console.log("passport user",req.session.passport.user)
       res.render(`project/edit`, {
         project: project,
         allPhotographers: allPhotographers[0],
@@ -587,7 +586,7 @@ router.get(
         projectTypes: req.session.projectTypes,
         imagingPlatforms: req.session.imagingPlatforms,
         selectedImagingPlatforms: imagingPlatforms,
-        currentUser: req.user,
+        currentUser: req.session.passport.user,
         title: "Edit Project", // Add title here
 
         newlyCreatedPhotographers: [],
@@ -618,6 +617,7 @@ router.post(
       const projectID: string = req.params.projectID;
       const {
         projectName,
+        projectType,
         imagingStartDate,
         imagingEndDate,
         summaryOfProject,
@@ -627,8 +627,8 @@ router.post(
         selectedImagingPlatforms,
         selectedPhotographers,
         toBeCreatedPhotographers,
+        
       } = req.body;
-console.log(req.body)
       // === 1. VALIDATION ===
       if (!imagingStartDate || !imagingEndDate || !projectStatus) {
         return res
@@ -753,130 +753,130 @@ console.log(req.body)
       req.session["newlyCreatedPhotographers"] = newlyCreatedPhotographers;
       req.session.save();
       // imaging Platforms operations for updating enum if any
-      var hasNewImagingPlatform = false;
-      for (const i of selectedImagingPlatforms) {
-        if (
-          i != null &&
-          i != "" &&
-          !req.session["imagingPlatforms"].includes(i)
-        ) {
-          console.log("adding ", i);
-          req.session["imagingPlatforms"].push(i);
-          hasNewImagingPlatform = true;
-        }
-      }
-      if (hasNewImagingPlatform) {
-        const i2: string[] = req.session.imagingPlatforms;
-        console.log(i2);
-        await db
-          .promise()
-          .query("ALTER TABLE Media MODIFY COLUMN `ImagingPlatform` enum(?)", [
-            i2,
-          ]);
-        await db
-          .promise()
-          .query<RowDataPacket[]>(
-            "ALTER TABLE ImagingPlatformInstance MODIFY COLUMN `ImagingPlatform` enum(?)",
-            [i2]
-          );
-      }
+      // var hasNewImagingPlatform = false;
+      // for (const i of selectedImagingPlatforms) {
+      //   if (
+      //     i != null &&
+      //     i != "" &&
+      //     !req.session["imagingPlatforms"].includes(i)
+      //   ) {
+      //     console.log("adding ", i);
+      //     req.session["imagingPlatforms"].push(i);
+      //     hasNewImagingPlatform = true;
+      //   }
+      // }
+      // if (hasNewImagingPlatform) {
+      //   const i2: string[] = req.session.imagingPlatforms;
+      //   console.log(i2);
+      //   await db
+      //     .promise()
+      //     .query("ALTER TABLE Media MODIFY COLUMN `ImagingPlatform` enum(?)", [
+      //       i2,
+      //     ]);
+      //   await db
+      //     .promise()
+      //     .query<RowDataPacket[]>(
+      //       "ALTER TABLE ImagingPlatformInstance MODIFY COLUMN `ImagingPlatform` enum(?)",
+      //       [i2]
+      //     );
+      // }
 
       // project Type operations for updating enum if any
-      const projectType = req.body.projectType;
-      if (
-        projectType != null &&
-        projectType != "" &&
-        !req.session["projectTypes"].includes(projectType)
-      )
-        req.session["projectTypes"].push(projectType);
+      // const projectType = req.body.projectType;
+      // if (
+      //   projectType != null &&
+      //   projectType != "" &&
+      //   !req.session["projectTypes"].includes(projectType)
+      // )
+      //   req.session["projectTypes"].push(projectType);
 
-      const i3: string[] = req.session.projectTypes;
-      console.log(i3);
-      await db
-        .promise()
-        .query("ALTER TABLE Project MODIFY COLUMN `ProjectType` enum(?)", [i3]);
+      // const i3: string[] = req.session.projectTypes;
+      // console.log(i3);
+      // await db
+      //   .promise()
+      //   .query("ALTER TABLE Project MODIFY COLUMN `ProjectType` enum(?)", [i3]);
 
       /// IMAGING PLATFORMS OPERATIONS START
-      const selectImagingQuery = `
-        SELECT ImagingPlatform FROM ImagingPlatformInstance WHERE ProjectID = ?`;
-      const temp: any = (
-        await db.promise().query(selectImagingQuery, [projectID])
-      )[0];
-      const currentSelectedImagingPlatforms: string[] = [];
-      for (var x of temp) {
-        currentSelectedImagingPlatforms.push(x.ImagingPlatform);
-      }
+      // const selectImagingQuery = `
+      //   SELECT ImagingPlatform FROM ImagingPlatformInstance WHERE ProjectID = ?`;
+      // const temp: any = (
+      //   await db.promise().query(selectImagingQuery, [projectID])
+      // )[0];
+      // const currentSelectedImagingPlatforms: string[] = [];
+      // for (var x of temp) {
+      //   currentSelectedImagingPlatforms.push(x.ImagingPlatform);
+      // }
 
-      //Getting differences
-      const temp2 = selectedImagingPlatforms.filter(
-        (e: any) => !currentSelectedImagingPlatforms.includes(e)
-      );
-      const imagingPlatformsToBeAdded: string[][] = [];
-      for (x of temp2) {
-        imagingPlatformsToBeAdded.push([x, projectID]);
-      }
-      const imagingPlatformsToBeRemoved: any =
-        currentSelectedImagingPlatforms.filter(
-          (e: any) => !selectedImagingPlatforms.includes(e)
-        );
+      // //Getting differences
+      // const temp2 = selectedImagingPlatforms.filter(
+      //   (e: any) => !currentSelectedImagingPlatforms.includes(e)
+      // );
+      // const imagingPlatformsToBeAdded: string[][] = [];
+      // for (x of temp2) {
+      //   imagingPlatformsToBeAdded.push([x, projectID]);
+      // }
+      // const imagingPlatformsToBeRemoved: any =
+      //   currentSelectedImagingPlatforms.filter(
+      //     (e: any) => !selectedImagingPlatforms.includes(e)
+      //   );
 
-      //the update
-      if (imagingPlatformsToBeRemoved.length != 0) {
-        await db
-          .promise()
-          .query(
-            "DELETE FROM ImagingPlatformInstance WHERE ImagingPlatform in (?) AND ProjectID =?",
-            [imagingPlatformsToBeRemoved, projectID]
-          );
-      }
-      if (imagingPlatformsToBeAdded.length != 0) {
-        await db
-          .promise()
-          .query(
-            "INSERT INTO ImagingPlatformInstance(ImagingPlatform,ProjectID) VALUES ? ",
-            [imagingPlatformsToBeAdded]
-          );
-      }
+      // //the update
+      // if (imagingPlatformsToBeRemoved.length != 0) {
+      //   await db
+      //     .promise()
+      //     .query(
+      //       "DELETE FROM ImagingPlatformInstance WHERE ImagingPlatform in (?) AND ProjectID =?",
+      //       [imagingPlatformsToBeRemoved, projectID]
+      //     );
+      // }
+      // if (imagingPlatformsToBeAdded.length != 0) {
+      //   await db
+      //     .promise()
+      //     .query(
+      //       "INSERT INTO ImagingPlatformInstance(ImagingPlatform,ProjectID) VALUES ? ",
+      //       [imagingPlatformsToBeAdded]
+      //     );
+      // }
       /// IMAGING PLATFORMS OPERATIONS END
 
       /// Photographers OPERATIONS START
-      const selectPhotographerQuery = `
-        SELECT PhotographerID FROM ProjectUserPhotographyLink WHERE ProjectID = ?`;
-      const temp3: any = (
-        await db.promise().query(selectPhotographerQuery, [projectID])
-      )[0];
-      var currentSelectedPhotographers: string[] = [];
-      for (x of temp3)
-        currentSelectedPhotographers.push(x.PhotographerID.toString());
+      // const selectPhotographerQuery = `
+      //   SELECT PhotographerID FROM ProjectUserPhotographyLink WHERE ProjectID = ?`;
+      // const temp3: any = (
+      //   await db.promise().query(selectPhotographerQuery, [projectID])
+      // )[0];
+      // var currentSelectedPhotographers: string[] = [];
+      // for (x of temp3)
+      //   currentSelectedPhotographers.push(x.PhotographerID.toString());
 
-      //Getting differences
-      const temp4 = selectedPhotographers.filter(
-        (e: any) => !currentSelectedPhotographers.includes(e)
-      );
-      const photographersToBeAdded: string[][] = [];
-      for (x of temp4) photographersToBeAdded.push([x, projectID.toString()]);
+      // //Getting differences
+      // const temp4 = selectedPhotographers.filter(
+      //   (e: any) => !currentSelectedPhotographers.includes(e)
+      // );
+      // const photographersToBeAdded: string[][] = [];
+      // for (x of temp4) photographersToBeAdded.push([x, projectID.toString()]);
 
-      const photographersToBeRemoved: string[] =
-        currentSelectedPhotographers.filter(
-          (e: any) => !selectedPhotographers.includes(e)
-        );
-      //the update
-      if (photographersToBeRemoved.length != 0) {
-        await db
-          .promise()
-          .query(
-            "DELETE FROM ProjectUserPhotographyLink WHERE PhotographerID in (?) AND ProjectID =?",
-            [photographersToBeRemoved, projectID]
-          );
-      }
-      if (photographersToBeAdded.length != 0) {
-        await db
-          .promise()
-          .query(
-            "INSERT INTO ProjectUserPhotographyLink(PhotographerID,ProjectID) VALUES ? ",
-            [photographersToBeAdded]
-          );
-      }
+      // const photographersToBeRemoved: string[] =
+      //   currentSelectedPhotographers.filter(
+      //     (e: any) => !selectedPhotographers.includes(e)
+      //   );
+      // //the update
+      // if (photographersToBeRemoved.length != 0) {
+      //   await db
+      //     .promise()
+      //     .query(
+      //       "DELETE FROM ProjectUserPhotographyLink WHERE PhotographerID in (?) AND ProjectID =?",
+      //       [photographersToBeRemoved, projectID]
+      //     );
+      // }
+      // if (photographersToBeAdded.length != 0) {
+      //   await db
+      //     .promise()
+      //     .query(
+      //       "INSERT INTO ProjectUserPhotographyLink(PhotographerID,ProjectID) VALUES ? ",
+      //       [photographersToBeAdded]
+      //     );
+      // }
       /// Photographers OPERATIONS END
 
       // === 2. DATABASE UPDATE ===
@@ -907,7 +907,7 @@ console.log(req.body)
           detailsOfSpecimens || null,
           projectStatus,
           req.session.passport.user.UserID,
-          projectType,
+          projectType == "" ? null: projectType,
           projectOwnerID,
           projectID,
         ]);
@@ -985,5 +985,6 @@ router.post(
     );
   }
 );
+
 
 module.exports = router;

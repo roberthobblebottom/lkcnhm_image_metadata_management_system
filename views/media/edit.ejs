@@ -23,8 +23,8 @@
       </div>
       <div class='form-group'>
 
-        <label>Media ID</label>
-        <input readonly type='text' name="MediaID" value="<%= toBeEditedMedia.MediaID %>">
+        <label>Media ID: <%=toBeEditedMedia.MediaID%></label>
+        <input readonly type='text' name="MediaID" value="<%= toBeEditedMedia.MediaID %>" style="display:none;">
       </div>
 
       <div class="form-group">
@@ -104,7 +104,7 @@
       <div class="form-group">
         <div class="horizontal-panel2">
           <label class="label2" for="imagingPlatform">imaging Platform</label>
-          <button class="addButton" id="addImagingPlatform">Add Imaging Platform</button>
+          <!-- <button class="addButton" id="addImagingPlatform">Add Imaging Platform</button> -->
         </div>
         <select name="imagingPlatform" id="imagingPlatform">
           <option value="">-- Select a imaging platform --</option>
@@ -122,7 +122,7 @@
         <div class="horizontal-panel2">
           <label class="label2" for="imageEditingTool">Image Editing Tool</label>
 
-          <button class="addButton" id="addImageEditingTool">Add Image Editing Tool</button>
+          <!-- <button class="addButton" id="addImageEditingTool">Add Image Editing Tool</button> -->
         </div>
         <select name="imageEditingTool" id="imageEditingTool">
           <option value="">-- Select a image editing tool --</option>
@@ -160,59 +160,59 @@
       fileNameInput.value = temp + fileFormat.value
     };
 
-    document.getElementById('addImagingPlatform').addEventListener(
-      'click',
-      function enterNewImagingPlatform(e) {
-        e.preventDefault()
-        Swal.fire({
-          title: "Add new Imaging Platform",
-          text: "Add new Imaging Platform",
-          input: 'text',
-          showCancelButton: true,
-          inputPlaceholder: "Enter it here.",
-          preConfirm: (value) => {
-            if (value) {
-              if ("<%=imagingPlatforms%>".includes(value))
-                Swal.showValidationMessage('This Imaging Platform value already exist')
-              const select = document.getElementById("imagingPlatform")
-              var option = document.createElement('option')
-              option.text = option.value = value
-              select.add(option, 1)
-              select.value = option.text
-            } else {
-              Swal.showValidationMessage('Value is required')
-            }
-          }
-        })
-      }
-    )
+    // document.getElementById('addImagingPlatform').addEventListener(
+    //   'click',
+    //   function enterNewImagingPlatform(e) {
+    //     e.preventDefault()
+    //     Swal.fire({
+    //       title: "Add new Imaging Platform",
+    //       text: "Add new Imaging Platform",
+    //       input: 'text',
+    //       showCancelButton: true,
+    //       inputPlaceholder: "Enter it here.",
+    //       preConfirm: (value) => {
+    //         if (value) {
+    //           if ("<%=imagingPlatforms%>".includes(value))
+    //             Swal.showValidationMessage('This Imaging Platform value already exist')
+    //           const select = document.getElementById("imagingPlatform")
+    //           var option = document.createElement('option')
+    //           option.text = option.value = value
+    //           select.add(option, 1)
+    //           select.value = option.text
+    //         } else {
+    //           Swal.showValidationMessage('Value is required')
+    //         }
+    //       }
+    //     })
+    //   }
+    // )
 
-    document.getElementById('addImageEditingTool').addEventListener(
-      'click',
-      function enterNewImageEditingTool(e) {
-        e.preventDefault()
-        Swal.fire({
-          title: "Add new Imaging Editing Tool",
-          text: "Add new Imaging Editing Tool",
-          input: 'text',
-          showCancelButton: true,
-          inputPlaceholder: "Enter it here.",
-          preConfirm: (value) => {
-            if (value) {
-              if ("<%=imageEditingTools%>".includes(value))
-                Swal.showValidationMessage('This Image Editing Tool value already exist')
-              const select = document.getElementById("imageEditingTool")
-              var option = document.createElement('option')
-              option.text = option.value = value
-              select.add(option, 1)
-              select.value = option.text
-            } else {
-              Swal.showValidationMessage('Value is required')
-            }
-          }
-        })
-      }
-    )
+    // document.getElementById('addImageEditingTool').addEventListener(
+    //   'click',
+    //   function enterNewImageEditingTool(e) {
+    //     e.preventDefault()
+    //     Swal.fire({
+    //       title: "Add new Imaging Editing Tool",
+    //       text: "Add new Imaging Editing Tool",
+    //       input: 'text',
+    //       showCancelButton: true,
+    //       inputPlaceholder: "Enter it here.",
+    //       preConfirm: (value) => {
+    //         if (value) {
+    //           if ("<%=imageEditingTools%>".includes(value))
+    //             Swal.showValidationMessage('This Image Editing Tool value already exist')
+    //           const select = document.getElementById("imageEditingTool")
+    //           var option = document.createElement('option')
+    //           option.text = option.value = value
+    //           select.add(option, 1)
+    //           select.value = option.text
+    //         } else {
+    //           Swal.showValidationMessage('Value is required')
+    //         }
+    //       }
+    //     })
+    //   }
+    // )
     function isValidFileName(filename,validExtensions) {
         if (!filename) return false;
         const lower = filename.toLowerCase();
@@ -291,8 +291,8 @@
             description: form.description.value,
             imagingPlatform: form.imagingPlatform.value == "" ? null : form.imagingPlatform.value,
             imageEditingTool: form.imageEditingTool.value == "" ? null : form.imageEditingTool.value,
-            newImagingPlatform: (!imagingPlatforms.includes(form.imagingPlatform.value)) ? form.imagingPlatform.value : null,
-            newImageEditingTool: (!imageEditingTools.includes(form.imageEditingTool.value)) ? form.imageEditingTool.value : null,
+            // newImagingPlatform: (!imagingPlatforms.includes(form.imagingPlatform.value)) ? form.imagingPlatform.value : null,
+            // newImageEditingTool: (!imageEditingTools.includes(form.imageEditingTool.value)) ? form.imageEditingTool.value : null,
             comments: form.comments.value,
             MediaID: form.MediaID.value,
             projectAndPhotographerPair: form.projectAndPhotographerPair.value,

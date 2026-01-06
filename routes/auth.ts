@@ -188,7 +188,6 @@ router.post("/login", (req: Request, res: Response, next: NextFunction) => {
       req.login(user, (err: any) => {
         // I am not suppose to use this as password authenticate already does it, but somehow this guy's code from stackoverflow works
         if (err) return res.status(500).json({ error: "Login failed." });
-
         // 🔄 Update LastLoginDate
         const updateQuery =
           "UPDATE User SET LastLoginDate = NOW() WHERE UserID = ? ";
@@ -200,6 +199,7 @@ router.post("/login", (req: Request, res: Response, next: NextFunction) => {
             console.log("🕓 LastLoginDate updated");
           }
 
+          // these codes feels redundant now, may needed to be removed
           const x1: any[] = await db
             .promise()
             .query("SHOW COLUMNS FROM Media LIKE 'ImageEditingTool' ");
@@ -237,12 +237,14 @@ router.post("/login", (req: Request, res: Response, next: NextFunction) => {
               console.error("❌ Session Save Error:", err);
               return res.status(500).json({ error: "Session error" });
             }
+
+console.log("login in  serialised passport user",req.session.passport.user)
             return res.json({
               success: true,
               redirect:
                 user.UserType === userTypesEnumeration().admin
-                  ? "/admin/dashboard"
-                  : "/user/dashboard",
+                  ? "/admin/login-landing-page"
+                  : "/user/login-landing-page",
             });
           });
         });

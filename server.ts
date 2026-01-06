@@ -69,18 +69,16 @@ app.get("/login", (req: Request, res: Response) => {
 });
 
 // ✅ User Dashboard (Protected)
-app.get("/user/dashboard", isAuthenticated, (req: Request, res: Response) => {
-  res.render("user/dashboard", {
-    layout: "layout", // Specify your layout file
+app.get("/user/login-landing-page", isAuthenticated, (req: Request, res: Response) => {
+  res.render("user/login-landing-page", {
     user: req.session.passport.user,
-    title: "User Dashboard",
-    // Add other data
+    title: "User login landing page",
   });
 });
 
-app.get("/api/current-user", (req: Request, res: Response) => {
+app.get("/current-user", (req: Request, res: Response) => {
   if (req.session && req.session.passport.user) {
-    console.log(req.session.passport.user);
+    console.log("api current-user passport user",req.session.passport.user);
     res.json({
       Email: req.session.passport.user.Email,
       FullName: req.session.passport.user.FullName,
@@ -92,11 +90,6 @@ app.get("/api/current-user", (req: Request, res: Response) => {
   }
 });
 
-// ✅ Debug Route to Check Session Persistence
-app.get("/session", (req: Request, res: Response) => {
-  console.log("🟢 Session Check:", req.session.passport.user);
-  res.json({ sessionData: req.session.passport.user || "No active session" });
-});
 
 // ✅ Start Server
 app.listen(PORT, () => {
@@ -104,97 +97,59 @@ app.listen(PORT, () => {
 });
 
 
-app.get(
-  "/admin/UserRequest",
-  isAuthenticated,
-  isAdmin,
-  (req: Request, res: Response) => {
-    res.render("admin", { user: req.session.passport.user });
-  }
-);
-
-app.get(
-  "/check-email",
-  (
-    req: { query: { email: any } },
-    res: {
-      status: (arg0: number) => {
-        (): any;
-        new (): any;
-        json: { (arg0: { error: string }): any; new (): any };
-      };
-      json: (arg0: { exists: boolean }) => void;
-    }
-  ) => {
-    const { email } = req.query;
-    if (!email) return res.status(400).json({ error: "Email is required" });
-
-    const query = `SELECT id FROM User WHERE email = ? AND IsDeleted = 0`;
-    db.query(query, [email], (err: any, results: string | any[]) => {
-      if (err) {
-        console.error("❌ DB Error while checking email:", err);
-        return res.status(500).json({ error: "Server error" });
-      }
-
-      const exists = results.length > 0;
-      res.json({ exists });
-    });
-  }
-);
-
 
 
 // Handle forgot password page
-app.get("/forgot-password", (req: Request, res: Response) => {
-  res.render("forgot-password", {
-    title: "Forgot Password",
-    adminEmail: "admin@gmail.com",
-    forgotPasswordPath: "/forgot-password", // POST endpoint
-    redirectPath: "/login", // redirect after success
-  });
-});
+// app.get("/forgot-password", (req: Request, res: Response) => {
+//   res.render("forgot-password", {
+//     title: "Forgot Password",
+//     adminEmail: "admin@gmail.com",
+//     forgotPasswordPath: "/forgot-password", // POST endpoint
+//     redirectPath: "/login", // redirect after success
+//   });
+// });
 
 // Handle forgot password
-app.post("/forgot-password", (req: Request, res: Response) => {
-  const { userId, Password, newPassword } = req.body;
+// app.post("/forgot-password", (req: Request, res: Response) => {
+//   const { userId, Password, newPassword } = req.body;
 
-  console.log("🟢 Forgot Password Request:", req.body);
+//   console.log("🟢 Forgot Password Request:", req.body);
 
-  // Step 1: Verify userId and Password
-  const selectQuery =
-    "SELECT * FROM User WHERE Email = ? AND TemporaryPassword = ?";
-  db.query(
-    selectQuery,
-    [userId, Password],
-    (err: any, results: string | any[]) => {
-      if (err) {
-        console.error("DB error:", err);
-        return res.status(500).json({ success: false, error: "Server error" });
-      }
+//   // Step 1: Verify userId and Password
+//   const selectQuery =
+//     "SELECT * FROM User WHERE Email = ? AND TemporaryPassword = ?";
+//   db.query(
+//     selectQuery,
+//     [userId, Password],
+//     (err: any, results: string | any[]) => {
+//       if (err) {
+//         console.error("DB error:", err);
+//         return res.status(500).json({ success: false, error: "Server error" });
+//       }
 
-      if (results.length === 0) {
-        return res.json({
-          success: false,
-          error: "Invalid user ID or temp password",
-        });
-      }
+//       if (results.length === 0) {
+//         return res.json({
+//           success: false,
+//           error: "Invalid user ID or temp password",
+//         });
+//       }
 
-      // Step 2: Update the password
-      const updateQuery =
-        "UPDATE User SET Password = ?, TemporaryPassword = NULL WHERE Email = ?";
-      db.query(updateQuery, [newPassword, userId], (err2: any, result: any) => {
-        if (err2) {
-          console.error("DB error:", err2);
-          return res
-            .status(500)
-            .json({ success: false, error: "Update failed" });
-        }
+//       // Step 2: Update the password
+//       const updateQuery =
+//         "UPDATE User SET Password = ?, TemporaryPassword = NULL WHERE Email = ?";
+//       db.query(updateQuery, [newPassword, userId], (err2: any, result: any) => {
+//         if (err2) {
+//           console.error("DB error:", err2);
+//           return res
+//             .status(500)
+//             .json({ success: false, error: "Update failed" });
+//         }
 
-        res.json({
-          success: true,
-          message: "Password updated successfully",
-        });
-      });
-    }
-  );
-});
+//         res.json({
+//           success: true,
+//           message: "Password updated successfully",
+//         });
+//       });
+//     }
+//   );
+// });

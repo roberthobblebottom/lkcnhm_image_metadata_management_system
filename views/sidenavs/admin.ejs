@@ -25,8 +25,6 @@
         <div id="userID" class="loginDetails"></div>
       </li>
       <li><a href="/settings/profile"><i class="fas fa-key"></i><span>Profile</span></a></li>
-      <li class="active"><a href="/admin/dashboard"><i class="fas fa-chart-line"></i><span>Dashboard</span></a>
-      </li>
       <li><a href="/admin/user-management/view-all"><i class="fas fa-users"></i><span>Login Details Management</span></a></li>
       <!-- <li><a href="/admin/UserRequest"><i class="fas fa-file-alt"></i><span>Imaging User Management</span></a></li> -->
       <li><a href="/project/view-all"><i class="fas fa-file-medical"></i><span>Project
@@ -39,7 +37,7 @@
   </div>
   <script>
     document.addEventListener("DOMContentLoaded", function () {
-      fetch("/api/current-user")
+      fetch("/current-user")
         .then(res => res.json())
         .then(data => {
           const email = data.Email; // trim after @

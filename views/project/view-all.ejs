@@ -32,8 +32,8 @@
           <th>Project Name</th>
           <% if (currentUser.UserType=='admin' ) {%>
           <th>Project Owner</th>
-          <%}%>
           <th>Project Type</th>
+          <%}%>
           <th>Photographer</th>
           <th>Start</th>
           <th>End</th>
@@ -51,8 +51,8 @@
           <td><%=request.ProjectName %></td>
           <% if (currentUser.UserType=='admin' ) {%>
           <td><%= request.projectOwnerName  %></td>
+          <td><%= request.ProjectType || "Not Specified" %></td>
           <%}%>
-          <td><%= request.ProjectType %></td>
           <td><%= photographers[request.ProjectID] %></td>
           <td> <%= request.ImagingStartDate?.toDateString() %></td>
           <td> <%= request.ImagingEndDate?.toDateString()%></td>

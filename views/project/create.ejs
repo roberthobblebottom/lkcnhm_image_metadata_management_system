@@ -16,7 +16,7 @@
 
 <body>
   <div class="main-con">
-    <%- include(currentUser.UserType==='admin' ? '../sidenavs/admin.ejs' : '../sidenavs/user' ) %>
+    <%- include(currentUser.UserType==='admin' ? '../sidenavs/admin.ejs' : '../sidenavs/user.ejs' ) %>
 
     <form id="main-form">
       <div class="horizontal-panel">
@@ -43,15 +43,15 @@
         </select>
         <div id="projectOwner-error" class="error-message">Please select a projectOwner</div>
       </div>
-
+      <%if(currentUser.UserType=='admin'){%>
       <div class="form-group">
         <div class="horizontal-panel2">
-          <label class="label2">Project Type*</label>
+          <label class="label2">Project Type</label>
           <!-- <button class="addButton" id="addProjectTypeButton">Add Project Type</button> -->
         </div>
 
-        <select name="projectType" id="projectType" class="form-control" required>
-          <option value="">-- Select Project Type --</option>
+        <select name="projectType" id="projectType" class="form-control" >
+          <option value= "">-- Select Project Type --</option>
           <% projectTypes.forEach(projectType=> { %>
           <option value="<%= projectType %>" <%=projectType=='BDP' ? "selected":""%>>
             <%= projectType %>
@@ -60,6 +60,7 @@
         </select>
 
       </div>
+      <%}%>
       <div class="form-group">
         <div class="horizontal-panel2">
           <label for="newSelectedPhotographers">Photographer(s)*</label>
@@ -69,69 +70,69 @@
         <select multiple id="newSelectedPhotographers">
           <option value="">Select Photographers</span>
             <% photographers.forEach(photographer=>{ %>
-          <option class="dropdown-item" value="<%=photographer.UserID%>" <%=photographer.UserID==currentUser.UserID  ? "selected ":""%>>
-            <%=photographer.FullName%>
-          </option>
-          <%})%>
-        </select>
-        <div id="photographer-error" class="error-message">Please select a photographer</div>
-      </div>
+      <option class="dropdown-item" value="<%=photographer.UserID%>" <%=photographer.UserID==currentUser.UserID  ? "selected ":""%>>
+        <%=photographer.FullName%>
+      </option>
+      <%})%>
+      </select>
+      <div id="photographer-error" class="error-message">Please select a photographer</div>
+  </div>
 
 
-      <div class="form-group">
-        <label for="startDate">Imaging Start Date*</label>
-        <input type="date" id="startDate" name="startDate" required>
-        <div id="startDate-error" class="error-message">Start date must be after request date</div>
-      </div>
+  <div class="form-group">
+    <label for="startDate">Imaging Start Date*</label>
+    <input type="date" id="startDate" name="startDate" required>
+    <div id="startDate-error" class="error-message">Start date must be after request date</div>
+  </div>
 
-      <div class="form-group">
-        <label for="endDate">Imaging End Date*</label>
-        <input type="date" id="endDate" name="endDate" required>
-        <div id="endDate-error" class="error-message">End date must be after start date</div>
-      </div>
+  <div class="form-group">
+    <label for="endDate">Imaging End Date*</label>
+    <input type="date" id="endDate" name="endDate" required>
+    <div id="endDate-error" class="error-message">End date must be after start date</div>
+  </div>
 
-      <div class="form-group">
-        <label for="summary">Summary of Project*</label>
-        <textarea id="summary" name="summary" required>-----</textarea>
-        <div id="summary-error" class="error-message">Please provide a project summary</div>
-      </div>
+  <div class="form-group">
+    <label for="summary">Summary of Project*</label>
+    <textarea id="summary" name="summary" required>-----</textarea>
+    <div id="summary-error" class="error-message">Please provide a project summary</div>
+  </div>
 
-      <div class="form-group">
-        <label for="specimenDetails">Specimen Details*</label>
-        <textarea id="specimenDetails" name="specimenDetails" required>-------</textarea>
-        <div id="specimenDetails-error" class="error-message">Please provide specimen details</div>
-      </div>
+  <div class="form-group">
+    <label for="specimenDetails">Specimen Details*</label>
+    <textarea id="specimenDetails" name="specimenDetails" required>-------</textarea>
+    <div id="specimenDetails-error" class="error-message">Please provide specimen details</div>
+  </div>
 
 
 
-      <div class="form-group">
-        <div class="horizontal-panel2">
-          <label class="label2" for="platform">Imaging Platform</label>
-          <!-- <button class='addButton' id="addImagingPlatformButton">Add Imaging Platform</button> -->
-        </div>
-        <select multiple id="newSelectedImagingPlatforms">
-          <option value="">Select Imaging Platforms</span>
-            <% imagingPlatforms.forEach(i=>{ %>
-          <option value="<%=i%>" <%=i=='Leica(L5)' ? "selected":""%>>
-            <%=i%>
-          </option>
-          <%})%>
-        </select>
-      </div>
+  <div class="form-group">
+    <div class="horizontal-panel2">
+      <label class="label2" for="platform">Imaging Platform</label>
+      <!-- <button class='addButton' id="addImagingPlatformButton">Add Imaging Platform</button> -->
+    </div>
+    <select multiple id="newSelectedImagingPlatforms">
+      <option value="">Select Imaging Platforms</span>
+        <% imagingPlatforms.forEach(i=>{ %>
+      <option value="<%=i%>" <%=i=='Leica(L5)' ? "selected":""%>>
+        <%=i%>
+      </option>
+      <%})%>
+    </select>
+  </div>
 
-      <div class="form-group">
-        <label for="comments">Comments</label>
-        <textarea id="comments" name="comments"></textarea>
-      </div>
+  <div class="form-group">
+    <label for="comments">Comments</label>
+    <textarea id="comments" name="comments"></textarea>
+  </div>
 
-      <div class="buttons">
-        <button type="submit" class="new"><i class="fas fa-paper-plane"></i> Submit</button>
-      </div>
-      <p class="note">
-        💡 New project types, imaging platform and/or photographers will only be in the system if said changes are submitted
-        Only one enum value of either features can be added at a single time of creation of a project.
-      </p>
-    </form>
+  <div class="buttons">
+    <button type="submit" class="new"><i class="fas fa-paper-plane"></i> Submit</button>
+  </div>
+  <p class="note">
+    💡 New project types, imaging platform and/or photographers will only be in the system if said changes are submitted
+    Only one enum value of either features can be added at a single time of creation of a project.
+  </p>
+  </form>
   </div>
 </body>
 
@@ -150,14 +151,14 @@
         previouslySelected = newSelectedPhotographers.getValue(true)
         console.log(newSelectedPhotographers.getValue(true))
         // if (!previouslySelected.includes(temp)) {
-          // console.log("in here")
-          newSelectedPhotographers.removeActiveItems(); //clearChoices() doesn't work
-          newSelectedPhotographers.setChoiceByValue(temp)
+        // console.log("in here")
+        newSelectedPhotographers.removeActiveItems(); //clearChoices() doesn't work
+        newSelectedPhotographers.setChoiceByValue(temp)
 
         // } else {
-          //not working
-          // newSelectedPhotographers.removeActiveItems(); //clearChoices() doesn't work
-          // newSelectedPhotographers.setChoices(previouslySelected)
+        //not working
+        // newSelectedPhotographers.removeActiveItems(); //clearChoices() doesn't work
+        // newSelectedPhotographers.setChoices(previouslySelected)
         //   const t = document.querySelectorAll('[class="choices__button"]')
         //   for (var x2 of t) {
         //     if (x2.style != "display:none;")
@@ -387,12 +388,12 @@
         submitBtn.innerHTML = '<i class="fas fa-spinner"></i> Submitting...';
         submitBtn.disabled = true;
 
-        console.log(form.projectType.value)
+        const projectType = form.projectType == null? "" : form.projectType.value
         // Create a plain object from form data
         const formData = {
           projectName: form.projectName.value,
           projectOwner: form.projectOwner.value,
-          projectType: form.projectType.value,
+          projectType: projectType, 
           startDate: form.startDate.value,
           endDate: form.endDate.value,
           summary: form.summary.value,

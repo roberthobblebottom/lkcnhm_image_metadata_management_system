@@ -11,6 +11,7 @@ const multer = require("multer");
 import fs from "fs";
 import { RowDataPacket } from "mysql2";
 import { Response, Request } from "express";
+import { isAdmin } from "../middleware/auth";
 const path = require("path");
 const upload = multer({ dest: "upload-bulk-metadata/" });
 
@@ -113,8 +114,6 @@ router.post("/create", isAuthenticated, async (req: Request, res: Response) => {
       description,
       imagingPlatform,
       imageEditingTool,
-      newImagingPlatform,
-      newImageEditingTool,
       comments,
       projectAndPhotographerPair,
     } = req.body;
@@ -187,45 +186,45 @@ router.post("/create", isAuthenticated, async (req: Request, res: Response) => {
       updatedBy,
     ];
 
-    if (
-      newImageEditingTool != null &&
-      newImageEditingTool != "" &&
-      !req.session["imageEditingTools"].includes(newImageEditingTool)
-    )
-      req.session.imageEditingTools.push(newImageEditingTool);
-    const i: string[] = req.session.imageEditingTools;
-    await db
-      .promise()
-      .query("ALTER TABLE Media MODIFY COLUMN `ImageEditingTool` enum(?)", [i]);
+    // if (
+    //   newImageEditingTool != null &&
+    //   newImageEditingTool != "" &&
+    //   !req.session["imageEditingTools"].includes(newImageEditingTool)
+    // )
+    //   req.session.imageEditingTools.push(newImageEditingTool);
+    // const i: string[] = req.session.imageEditingTools;
+    // await db
+    //   .promise()
+    //   .query("ALTER TABLE Media MODIFY COLUMN `ImageEditingTool` enum(?)", [i]);
 
-    if (
-      newImagingPlatform != null &&
-      newImagingPlatform != "" &&
-      !req.session["imagingPlatforms"].includes(newImagingPlatform)
-    ) {
-      req.session["imagingPlatforms"].push(newImagingPlatform);
-      const i2: string[] = req.session.imagingPlatforms;
-      await db
-        .promise()
-        .query("ALTER TABLE Media MODIFY COLUMN `ImagingPlatform` enum(?)", [
-          i2,
-        ]);
-      await db
-        .promise()
-        .query<RowDataPacket[]>(
-          "ALTER TABLE ImagingPlatformInstance MODIFY COLUMN `ImagingPlatform` enum(?)",
-          [i2]
-        );
+    // if (
+    //   newImagingPlatform != null &&
+    //   newImagingPlatform != "" &&
+    //   !req.session["imagingPlatforms"].includes(newImagingPlatform)
+    // ) {
+    //   req.session["imagingPlatforms"].push(newImagingPlatform);
+    //   const i2: string[] = req.session.imagingPlatforms;
+    //   await db
+    //     .promise()
+    //     .query("ALTER TABLE Media MODIFY COLUMN `ImagingPlatform` enum(?)", [
+    //       i2,
+    //     ]);
+    //   await db
+    //     .promise()
+    //     .query<RowDataPacket[]>(
+    //       "ALTER TABLE ImagingPlatformInstance MODIFY COLUMN `ImagingPlatform` enum(?)",
+    //       [i2]
+    //     );
 
-      // for new enums, the list of imaging platforms that the entity project has
-      // needs to be updated:
-      await db
-        .promise()
-        .query<RowDataPacket[]>(
-          "INSERT IGNORE INTO ImagingPlatformInstance (ProjectID, ImagingPlatform) VALUES (?,?) ",
-          [projectID, newImagingPlatform]
-        ); // sorry unfortunately I cant' remember why I am ignoring errors here.
-    }
+    //   // for new enums, the list of imaging platforms that the entity project has
+    //   // needs to be updated:
+    //   await db
+    //     .promise()
+    //     .query<RowDataPacket[]>(
+    //       "INSERT IGNORE INTO ImagingPlatformInstance (ProjectID, ImagingPlatform) VALUES (?,?) ",
+    //       [projectID, newImagingPlatform]
+    //     ); // sorry unfortunately I cant' remember why I am ignoring errors here.
+    // }
     const result: any = (
       await db.promise().query<RowDataPacket[]>(insertQuery, values)
     )[0];
@@ -477,56 +476,56 @@ router.post("/edit", isAuthenticated, async (req: Request, res: Response) => {
     splitX[1],
     mediaData.MediaID,
   ];
-  const newImageEditingTool = mediaData.newImageEditingTool;
-  const newImagingPlatform = mediaData.newImagingPlatform;
+  // const newImageEditingTool = mediaData.newImageEditingTool;
+  // const newImagingPlatform = mediaData.newImagingPlatform;
 
-  console.log("newImageEditingTool", newImageEditingTool);
-  console.log("newImagingPlatform", newImagingPlatform);
-  if (
-    newImageEditingTool != null &&
-    newImageEditingTool != "" &&
-    !req.session.imageEditingTools.includes(newImageEditingTool)
-  ) {
-    req.session.imageEditingTools.push(newImageEditingTool);
-    const i = req.session.imageEditingTools;
-    console.log("i", i);
-    await db
-      .promise()
-      .query<RowDataPacket[]>(
-        "ALTER TABLE Media MODIFY COLUMN `ImageEditingTool` ENUM(?)",
-        [i]
-      );
-  }
+  // console.log("newImageEditingTool", newImageEditingTool);
+  // console.log("newImagingPlatform", newImagingPlatform);
+  // if (
+  //   newImageEditingTool != null &&
+  //   newImageEditingTool != "" &&
+  //   !req.session.imageEditingTools.includes(newImageEditingTool)
+  // ) {
+  //   req.session.imageEditingTools.push(newImageEditingTool);
+  //   const i = req.session.imageEditingTools;
+  //   console.log("i", i);
+  //   await db
+  //     .promise()
+  //     .query<RowDataPacket[]>(
+  //       "ALTER TABLE Media MODIFY COLUMN `ImageEditingTool` ENUM(?)",
+  //       [i]
+  //     );
+  // }
 
-  if (
-    newImagingPlatform != null &&
-    newImagingPlatform != "" &&
-    !req.session.imagingPlatforms.includes(newImagingPlatform)
-  ) {
-    req.session.imagingPlatforms.push(newImagingPlatform);
-    const i = req.session.imagingPlatforms;
-    await db
-      .promise()
-      .query<RowDataPacket[]>(
-        "ALTER TABLE Media MODIFY COLUMN `ImagingPlatform` enum(?)",
-        [i]
-      );
-    await db
-      .promise()
-      .query<RowDataPacket[]>(
-        "ALTER TABLE ImagingPlatformInstance MODIFY COLUMN `ImagingPlatform` enum(?)",
-        [i]
-      );
-    // for new enums, the list of imaging platforms that the entity project has
-    // needs to be updated:
-    await db
-      .promise()
-      .query<RowDataPacket[]>(
-        "INSERT IGNORE INTO ImagingPlatformInstance (ProjectID, ImagingPlatform) VALUES (?,?) ",
-        [projectID, newImagingPlatform]
-      ); // I can't remember why I ignore errors here, sorry.
-  }
-  req.session.save();
+//   if (
+//     newImagingPlatform != null &&
+//     newImagingPlatform != "" &&
+//     !req.session.imagingPlatforms.includes(newImagingPlatform)
+//   ) {
+//     req.session.imagingPlatforms.push(newImagingPlatform);
+//     const i = req.session.imagingPlatforms;
+//     await db
+//       .promise()
+//       .query<RowDataPacket[]>(
+//         "ALTER TABLE Media MODIFY COLUMN `ImagingPlatform` enum(?)",
+//         [i]
+//       );
+//     await db
+//       .promise()
+//       .query<RowDataPacket[]>(
+//         "ALTER TABLE ImagingPlatformInstance MODIFY COLUMN `ImagingPlatform` enum(?)",
+//         [i]
+//       );
+//     // for new enums, the list of imaging platforms that the entity project has
+//     // needs to be updated:
+//     await db
+//       .promise()
+//       .query<RowDataPacket[]>(
+//         "INSERT IGNORE INTO ImagingPlatformInstance (ProjectID, ImagingPlatform) VALUES (?,?) ",
+//         [projectID, newImagingPlatform]
+//       ); // I can't remember why I ignore errors here, sorry.
+//   }
+//   req.session.save();
 
   db.query(query, params, (err: any) => {
     if (err) {
@@ -628,6 +627,8 @@ router.post(
       });
   }
 );
+
+
 
 router.get(
   "/upload-bulk-metadata",
