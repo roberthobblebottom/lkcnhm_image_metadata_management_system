@@ -47,7 +47,7 @@
     <tbody>
       <% projects.forEach(request=> { %>
         <tr>
-          <td><%= request.ProjectID %></td>
+          <td><%= request.ProjectID  %></td>
           <td><%=request.ProjectName %></td>
           <% if (currentUser.UserType=='admin' ) {%>
           <td><%= request.projectOwnerName  %></td>

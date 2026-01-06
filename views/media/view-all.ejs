@@ -62,9 +62,9 @@
       <% medias.forEach(media=> { %>
           <tr>
             <td> <%= media.MediaID %></td>
-            <td> <%= media.ProjectID %></td>
-            <td> <%= media.ProjectName %></td>
-            <td> <%= media.photographerName%></td>
+            <td> <%= media.ProjectID || 'Not Specified'%></td>
+            <td> <%= media.ProjectName || 'Not Specified'%></td>
+            <td> <%= media.photographerName || 'Not Specified'%></td>
             <td><%= media.FileName %></td>
             <!-- <td><%= media.FilePath %></td> -->
             <td> <%= media.CatalogID  %></td>

@@ -27,7 +27,7 @@ CREATE TABLE User (
 
 CREATE TABLE Project (
         ProjectID INT AUTO_INCREMENT PRIMARY KEY,
-        ProjectOwnerID INT NOT NULL,
+        ProjectOwnerID INT ,
         ProjectName VARCHAR(150) NOT NULL ,
         ProjectType 
         ENUM('BDP','GalleryBDP','InternalResearch','StudentProject','Visitor','Other') 
@@ -39,9 +39,9 @@ CREATE TABLE Project (
         LocationsOfSpecimens VARCHAR(255),
         Comments VARCHAR(255),
         CreatedDate DATETIME NOT NULL ,
-        CreatedByID INT NOT NULL,
+        CreatedByID INT ,
         UpdatedDate DATETIME NOT NULL,
-        UpdatedByID INT NOT NULL,
+        UpdatedByID INT ,
         IsDeleted BOOL NOT NULL DEFAULT 0,
         ProjectStatus 
         ENUM('started','on hiatus','completed') 
@@ -69,8 +69,8 @@ CREATE TABLE ProjectUserPhotographyLink (
 
 CREATE TABLE Media (
         MediaID INT AUTO_INCREMENT PRIMARY KEY,
-        ProjectID INT NOT NULL,
-        PhotographerID INT NOT NULL,
+        ProjectID INT ,
+        PhotographerID INT ,
         FileName VARCHAR(100) NOT NULL ,
         FilePath VARCHAR(200) NOT NULL ,
         CatalogID VARCHAR(100) ,
@@ -86,9 +86,9 @@ CREATE TABLE Media (
         ImageEditingTool ENUM('photoshop','gimp','Other') ,
         Comments VARCHAR(255),
         CreatedDate DATETIME NOT NULL,
-        CreatedByID INT NOT NULL,
+        CreatedByID INT ,
         UpdatedDate DATETIME NOT NULL,
-        UpdatedByID INT NOT NULL,
+        UpdatedByID INT ,
         IsDeleted BOOL NOT NULL DEFAULT 0,
         FOREIGN KEY (ProjectID) REFERENCES Project(ProjectID),
         FOREIGN KEY (PhotographerID) REFERENCES User(UserID),

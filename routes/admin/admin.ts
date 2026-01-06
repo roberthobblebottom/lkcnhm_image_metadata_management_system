@@ -338,7 +338,7 @@ router.post(
   }
 );
 
-router.post(
+router.get(
   "/purge-soft-deleted-medias",
   isAuthenticated,
   isAdmin,
@@ -348,7 +348,7 @@ router.post(
       .query(`SELECT * FROM Media WHERE IsDeleted = 1;`);
     const mediaData: Array<Object> = Array.from(result[0]);
     if (mediaData.length == 0)
-      res.status(400).json({
+      return res.status(400).json({
         success: false,
         message:
           "There is no media data that is soft deleted or another words, marked for deletion",
@@ -359,18 +359,21 @@ router.post(
       headers: true,
     });
     const zip = new AdmZip();
-    zip.addFile("deleted media data.csv", bufferMediaData);
+    zip.addFile(
+      "purged media data " + new Date().toISOString() + ".csv",
+      bufferMediaData
+    );
     await db.promise().query(`DELETE FROM Media WHERE IsDeleted = 1;`);
     return res.status(200).json({
       success: true,
       message:
-        "Deleted any media data that is soft deleted (or anotherwords, marked for deletion).",
+        "Deleted any media data that is soft deleted (or another words, marked for deletion).",
       buffer: zip.toBuffer(),
     });
   }
 );
 
-router.post(
+router.get(
   "/purge-soft-deleted-projects",
   isAuthenticated,
   isAdmin,
@@ -380,19 +383,41 @@ router.post(
       .query(`SELECT * FROM Project WHERE IsDeleted = 1;`);
     const projectData: Array<Object> = Array.from(result[0]);
     if (projectData.length == 0)
-      res.status(400).json({
+      return res.status(400).json({
         success: false,
         message:
           "There is no project data that is soft deleted or another words, marked for deletion",
       });
-
+    const ids = [];
+    for (const x of projectData) {
+      const temp: any = x;
+      ids.push(temp.ProjectID);
+    }
     const jsonProjectData = JSON.parse(JSON.stringify(projectData));
     const bufferProjectData = await fastcsv.writeToBuffer(jsonProjectData, {
       headers: true,
     });
     const zip = new AdmZip();
-    zip.addFile("deleted project data.csv", bufferProjectData);
-    db.promise().query(`DELETE FROM Project WHERE IsDeleted = 1;`);
+    zip.addFile(
+      "purged project data " + new Date().toISOString() + ".csv",
+      bufferProjectData
+    );
+    for (const id of ids) {
+      await db
+        .promise()
+        .query("UPDATE Media SET ProjectID = null WHERE ProjectID = ?", [id]);
+    }
+    await db
+      .promise()
+      .query(`DELETE FROM ProjectUserPhotographyLink WHERE ProjectID in (?)`, [
+        ids,
+      ]);
+    await db
+      .promise()
+      .query(`DELETE FROM ImagingPlatformInstance WHERE ProjectID in (?)`, [
+        ids,
+      ]);
+    await db.promise().query(`DELETE FROM Project WHERE IsDeleted = 1;`);
     return res.status(200).json({
       success: true,
       message:
@@ -402,33 +427,96 @@ router.post(
   }
 );
 
-router.post(
+router.get(
   "/purge-soft-deleted-users",
   isAuthenticated,
   isAdmin,
   async (req: Request, res: Response) => {
+    console.log("1");
     const result: any = await db
       .promise()
       .query(`SELECT * FROM User WHERE IsDeleted = 1;`);
+
     const userData: Array<Object> = Array.from(result[0]);
-    if (userData.length == 0)
-      res.status(400).json({
+    console.log("2 userData",userData);
+    if (userData.length == 0) {
+      console.log("user data length is 0");
+      return res.status(400).json({
         success: false,
         message:
           "There is no user data that is soft deleted or another words, marked for deletion",
       });
-
+    }
+    const ids = [];
+    for (const x of userData) {
+      const temp: any = x;
+      ids.push(temp.UserID);
+    }
+    console.log("3, ids: ",ids);
     const jsonUserData = JSON.parse(JSON.stringify(userData));
     const bufferUserData = await fastcsv.writeToBuffer(jsonUserData, {
       headers: true,
     });
     const zip = new AdmZip();
-    zip.addFile("deleted user data.csv", bufferUserData);
-    db.promise().query(`DELETE FROM User WHERE IsDeleted = 1;`);
+    zip.addFile("purge user data.csv", bufferUserData);
+    console.log("4");
+    for (const id of ids) {
+      await db
+        .promise()
+        .query(
+          "UPDATE Media SET PhotographerID = null WHERE PhotographerID = ?",
+          [id]
+        );
+      await db
+        .promise()
+        .query("UPDATE Media SET CreatedByID = null WHERE CreatedByID = ?", [
+          id,
+        ]);
+      await db
+        .promise()
+        .query("UPDATE Media SET UpdatedByID = null WHERE UpdatedByID = ?", [
+          id,
+        ]);
+      await db
+        .promise()
+        .query(
+          "UPDATE Project SET ProjectOwnerID = null WHERE ProjectOwnerID = ?",
+          [id]
+        );
+      await db
+        .promise()
+        .query("UPDATE Project SET CreatedByID = null WHERE CreatedByID = ?", [
+          id,
+        ]);
+      await db
+        .promise()
+        .query("UPDATE Project SET UpdatedByID = null WHERE UpdatedByID = ?", [
+          id,
+        ]);
+await db
+        .promise()
+        .query("UPDATE User SET CreatedByID = null WHERE CreatedByID = ? ", [
+          id,id
+        ]);
+      await db
+        .promise()
+        .query("UPDATE User SET UpdatedByID = null WHERE UpdatedByID = ? ", [
+          id,id
+        ]);
+    }
+    await db
+      .promise()
+      .query(
+        `DELETE FROM ProjectUserPhotographyLink WHERE PhotographerID in (?)`,
+        [ids]
+      );
+    await db.promise().query(`DELETE FROM User WHERE IsDeleted = 1;`);
+    console.log("5");
     return res.status(200).json({
       success: true,
       message:
         "Deleted any User data that is soft deleted (or anotherwords, marked for deletion).",
+      buffer: zip.toBuffer(),
     });
   }
 );

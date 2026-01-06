@@ -28,7 +28,7 @@
       flex-direction: column;
     }
 
-    .form-group{
+    .form-group {
       margin-top: 20px;
       margin-bottom: 10px;
     }
@@ -59,26 +59,29 @@
       width: 100%;
       display: flex;
       justify-content: space-between;
-    }.horizontal-panel2 {
+    }
+
+    .horizontal-panel2 {
       float: right;
       width: 170px;
       display: flex;
       justify-content: space-between;
     }
-   .btn-primary {
-       background-color: #007bff;
-       color: #fff;
-       border: none;
-       padding: 0.75rem 2rem;
-       /* font-size: 1rem; */
-       border-radius: 8px;
-       cursor: pointer;
-       transition: background-color 0.3s ease;
-       font-weight: 600;
-       font-size: 1rem;
-       font-family: 'Segoe UI', sans-serif;
 
-   }
+    .btn-primary {
+      background-color: #007bff;
+      color: #fff;
+      border: none;
+      padding: 0.75rem 2rem;
+      /* font-size: 1rem; */
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+      font-weight: 600;
+      font-size: 1rem;
+      font-family: 'Segoe UI', sans-serif;
+
+    }
   </style>
 </head>
 
@@ -182,10 +185,20 @@
         </tbody>
       </table>
     </div>
-    <h2>Download System's Data</h2>
- 
-    <button onclick="downloadSystemData()" class="btn btn-primary">
+    <h2>Purge Data that are marked as Soft Delete from the Database</h2>
 
+    <button onclick="purgeData('user')" class="btn btn-primary">
+      <i class="fas fa-arrow-down"></i> Purge User Data
+    </button>
+    <button onclick="purgeData('project')" class="btn btn-primary">
+      <i class="fas fa-arrow-down"></i> Purge Project Data
+    </button>
+    <button onclick="purgeData('media')" class="btn btn-primary">
+      <i class="fas fa-arrow-down"></i> Purge Media Data
+    </button>
+
+    <h2>Download System's Data</h2>
+    <button onclick="downloadSystemData()" class="btn btn-primary">
       <i class="fas fa-arrow-down"></i> Download
     </button>
   </div>
@@ -397,21 +410,61 @@
       });
     }
   }
+
+  
+
+  async function purgeData(entity) {
+    try {
+      const response = await fetch('/admin/purge-soft-deleted-' + entity + 's', )
+      console.log(response)
+      const result = await response.json();
+      if (response.status == 400 && !result.success) {
+        Swal.fire({
+          title: 'Error!',
+          text: result.message,
+          icon: 'error',
+          confirmButtonColor: '#00bbff'
+        });
+        return
+      }
+      var bytes = new Uint8Array(result.buffer.data);
+      var blob = new Blob([bytes], {
+        type: "application/zip"
+      }); // change resultByte to bytes
+      Swal.fire({
+        title: 'Purge successful',
+        text: 'Successfully purged soft deleted ' + entity + 's. You may download the csv of the purged data',
+        icon: 'success',
+        showConfirmButton: true,
+        timer: 3000
+      }).then(() => {
+        var link = document.createElement('a');
+        link.href = window.URL.createObjectURL(blob);
+        link.download = "purged " + entity + " data " + new Date().toISOString() + ".zip";
+        link.click();
+      })
+
+    } catch (error) {
+      Swal.fire({
+        title: 'Error!',
+        text: 'An unexpected error occurred' + error,
+        icon: 'error',
+        confirmButtonColor: '#00bbff'
+      });
+    }
+  }
+
   async function downloadSystemData() {
     try {
       const response = await fetch('/admin/download-system-data', )
-
-
       const result = await response.json();
-
-
       var bytes = new Uint8Array(result.buffer.data); // pass your byte response to this constructor
       var blob = new Blob([bytes], {
         type: "application/zip"
       }); // change resultByte to bytes
       var link = document.createElement('a');
       link.href = window.URL.createObjectURL(blob);
-      link.download = "data.zip";
+      link.download = "data "+new Date().toISOString()+".zip";
       link.click();
     } catch (error) {
       Swal.fire({

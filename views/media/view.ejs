@@ -43,7 +43,7 @@
         <div class="detail-row">
           <div class="detail-label">Photographer's Name:</div>
           <div class="detail-value">
-            <%= media.photographerName%>
+            <%= media.photographerName || 'Not Specified'%>
       </div>
     </div>
 
@@ -74,13 +74,13 @@
    <div class="detail-row">
       <div class="detail-label">Project Name:</div>
       <div class="detail-value">
-        <%= media.projectName %>
+        <%= media.projectName || 'Not Specified'%>
       </div>
     </div>
     <div class="detail-row">
       <div class="detail-label">Project ID:</div>
       <div class="detail-value">
-        <%= media.ProjectID %>
+        <%= media.ProjectID || 'Not Specified'%>
       </div>
     </div>
   

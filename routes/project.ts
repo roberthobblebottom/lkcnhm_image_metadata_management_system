@@ -17,7 +17,6 @@ const {
   projectStatusEnumeration,
 } = require("../middleware/utils");
 
-
 router.get(
   "/create",
   isAuthenticated,
@@ -48,7 +47,6 @@ router.get(
       projectTypes: req.session.projectTypes,
       imagingPlatforms: req.session.imagingPlatforms,
       title: "Project Form",
-     
     });
   }
 );
@@ -162,13 +160,14 @@ router.post(
           fullName,
           "",
           "",
-          "Created during the creation of a project this user is in by project owner of user id."+userID
+          "Created during the creation of a project this user is in by project owner of user id." +
+            userID,
         ];
         try {
           const result = (await db.promise().query(insertUserQuery, params))[0];
           const o: any = result;
           insertedId = Object.values(o)[2].toString(); //the weird way of getting insertedId
-          console.log("newly created user id:",insertedId)
+          console.log("newly created user id:", insertedId);
           newlyCreatedPhotographers.push({
             email: email,
             password: newPassword,
@@ -185,7 +184,7 @@ router.post(
             err.toString().toLowerCase().includes("email")
               ? "email already existed in the database."
               : err;
-          console.log(msg)
+          console.log(msg);
           res.status(400).json({ success: false, message: msg });
         }
       }
@@ -255,23 +254,21 @@ router.post(
             ProjectStatus
         ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, NOW(), ?, NOW(), ?, 0, ?)
         `;
-      const result = (
-        await db
-          .promise()
-          .query(insertQuery, [
-            req.body.projectName,
-            req.body.projectType == ''? null: req.body.projectType,
-            req.body.projectOwner,
-            req.body.startDate,
-            req.body.endDate,
-            req.body.summary,
-            req.body.specimenDetails,
-            req.body.comments || null,
-            userID,
-            userID,
-            projectStatusEnumeration().in_progress,
-          ])
-      );
+      const result = await db
+        .promise()
+        .query(insertQuery, [
+          req.body.projectName,
+          req.body.projectType == "" ? null : req.body.projectType,
+          req.body.projectOwner,
+          req.body.startDate,
+          req.body.endDate,
+          req.body.summary,
+          req.body.specimenDetails,
+          req.body.comments || null,
+          userID,
+          userID,
+          projectStatusEnumeration().in_progress,
+        ]);
 
       const insertedProjectID = Object.values(result[0])[2].toString();
 
@@ -448,56 +445,52 @@ router.get(
     for (const x of imagingPlatformsTemp1) {
       imagingPlatforms.push(x.ImagingPlatform);
     }
-    db.query(
-      query,
-      [projectID],
-      (err: QueryError | null, results: any) => {
-        if (err) {
-          console.error("Error fetching project:", err);
-          return res.status(500).render("error", {
-            message: "Error loading project",
-            error: process.env.NODE_ENV === "development" ? err : null,
-          });
-        }
-
-        if (results.length === 0) {
-          return res.status(404).render("error", {
-            message: "project not found",
-          });
-        }
-        // Format dates for display
-        const project = {
-          ...results[0],
-          CreatedDate: formatDate(results[0].CreatedDate),
-          ImagingStartDate: formatDate(results[0].ImagingStartDate),
-          ImagingEndDate: formatDate(results[0].ImagingEndDate),
-          UpdatedDate: results[0].UpdatedDate
-            ? formatDate(results[0].UpdatedDate)
-            : null,
-          IsDeleted: results[0].IsDeleted,
-          photographers:
-            photographers.length != 0
-              ? photographers.toString().replace(",", ", ")
-              : "Not Specified",
-          imagingPlatforms:
-            imagingPlatforms.length != 0
-              ? imagingPlatforms.toString().replace(",", ", ")
-              : "Not Specified",
-        };
-
-        const newlyCreatedPhotographers = req.session.newlyCreatedPhotographers;
-        req.session.newlyCreatedPhotographers = [];
-        req.session.save();
-        res.render("project/view", {
-          project: project,
-          currentUser: req.session.passport.user,
-          newlyCreatedPhotographers: newlyCreatedPhotographers
-            ? newlyCreatedPhotographers
-            : [],
-          title: "View Project", // Add title here
+    db.query(query, [projectID], (err: QueryError | null, results: any) => {
+      if (err) {
+        console.error("Error fetching project:", err);
+        return res.status(500).render("error", {
+          message: "Error loading project",
+          error: process.env.NODE_ENV === "development" ? err : null,
         });
       }
-    );
+
+      if (results.length === 0) {
+        return res.status(404).render("error", {
+          message: "project not found",
+        });
+      }
+      // Format dates for display
+      const project = {
+        ...results[0],
+        CreatedDate: formatDate(results[0].CreatedDate),
+        ImagingStartDate: formatDate(results[0].ImagingStartDate),
+        ImagingEndDate: formatDate(results[0].ImagingEndDate),
+        UpdatedDate: results[0].UpdatedDate
+          ? formatDate(results[0].UpdatedDate)
+          : null,
+        IsDeleted: results[0].IsDeleted,
+        photographers:
+          photographers.length != 0
+            ? photographers.toString().replace(",", ", ")
+            : "Not Specified",
+        imagingPlatforms:
+          imagingPlatforms.length != 0
+            ? imagingPlatforms.toString().replace(",", ", ")
+            : "Not Specified",
+      };
+
+      const newlyCreatedPhotographers = req.session.newlyCreatedPhotographers;
+      req.session.newlyCreatedPhotographers = [];
+      req.session.save();
+      res.render("project/view", {
+        project: project,
+        currentUser: req.session.passport.user,
+        newlyCreatedPhotographers: newlyCreatedPhotographers
+          ? newlyCreatedPhotographers
+          : [],
+        title: "View Project", // Add title here
+      });
+    });
   }
 );
 
@@ -519,7 +512,7 @@ router.get(
             JOIN User projectOwner ON p.ProjectOwnerID = projectOwner.UserID
             WHERE p.ProjectID = ?;
     `;
-      
+
       const getProjectOwners = `
     SELECT u.UserID,u.FullName, u.Email, u.UserType 
     FROM User u
@@ -532,8 +525,8 @@ router.get(
         imagingPlatformTemp,
         selectedPhotographersTemp,
         allPhotographers,
-        projectOwners
-      ]: [any, any, any, any,any] = await Promise.all([
+        projectOwners,
+      ]: [any, any, any, any, any] = await Promise.all([
         db.promise().query(requestQuery, [projectID]),
         db
           .promise()
@@ -547,11 +540,8 @@ router.get(
             "SELECT user.UserID  FROM ProjectUserPhotographyLink p JOIN User user on user.UserID = p.PhotographerID WHERE p.ProjectID = ? ",
             [projectID]
           ),
-        db
-          .promise()
-          .query("SELECT UserID,FullName FROM User ", [
-          ]),
-        db.promise().query(getProjectOwners)
+        db.promise().query("SELECT UserID,FullName FROM User ", []),
+        db.promise().query(getProjectOwners),
       ]);
       if (requestResults[0].length === 0) {
         return res
@@ -577,7 +567,7 @@ router.get(
         ),
         ImagingEndDate: formatDisplayDate(requestResults[0][0].ImagingEndDate),
       };
-console.log("passport user",req.session.passport.user)
+      console.log("passport user", req.session.passport.user);
       res.render(`project/edit`, {
         project: project,
         allPhotographers: allPhotographers[0],
@@ -590,7 +580,7 @@ console.log("passport user",req.session.passport.user)
         title: "Edit Project", // Add title here
 
         newlyCreatedPhotographers: [],
-        projectOwners : projectOwners[0]
+        projectOwners: projectOwners[0],
       });
     } catch (err) {
       console.error("Error:", err);
@@ -627,7 +617,6 @@ router.post(
         selectedImagingPlatforms,
         selectedPhotographers,
         toBeCreatedPhotographers,
-        
       } = req.body;
       // === 1. VALIDATION ===
       if (!imagingStartDate || !imagingEndDate || !projectStatus) {
@@ -895,8 +884,8 @@ router.post(
         ProjectOwnerID = ?
         WHERE ProjectID = ?
         `;
-      console.log(summaryOfProject)
-      console.log(detailsOfSpecimens)
+      console.log(summaryOfProject);
+      console.log(detailsOfSpecimens);
       await db
         .promise()
         .query(updateQuery, [
@@ -907,7 +896,7 @@ router.post(
           detailsOfSpecimens || null,
           projectStatus,
           req.session.passport.user.UserID,
-          projectType == "" ? null: projectType,
+          projectType == "" ? null : projectType,
           projectOwnerID,
           projectID,
         ]);
@@ -985,6 +974,5 @@ router.post(
     );
   }
 );
-
 
 module.exports = router;

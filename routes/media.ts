@@ -265,8 +265,8 @@ router.get(
         p.ProjectName,
         photographer.FullName As photographerName
       FROM Media m
-      JOIN Project p ON m.ProjectID = p.ProjectID
-      JOIN User photographer ON m.PhotographerID = photographer.UserID  
+      LEFT JOIN Project p ON m.ProjectID = p.ProjectID
+      LEFT JOIN User photographer ON m.PhotographerID = photographer.UserID  
     `;
     const user = req.session.passport.user;
     var query: string = "";
@@ -336,8 +336,8 @@ router.get("/view/:mediaID", isAuthenticated, (req: Request, res: Response) => {
     FROM Media m
     LEFT JOIN User u1 ON m.CreatedByID = u1.UserID
     LEFT JOIN User u2 ON m.UpdatedByID = u2.UserID
-    JOIN User photographer ON m.PhotographerID = photographer.UserID  
-    JOIN Project project ON m.ProjectID = project.ProjectID
+    LEFT JOIN User photographer ON m.PhotographerID = photographer.UserID  
+    LEFT JOIN Project project ON m.ProjectID = project.ProjectID
     WHERE m.MediaID = ? 
     ORDER BY m.CreatedDate DESC
         `;
