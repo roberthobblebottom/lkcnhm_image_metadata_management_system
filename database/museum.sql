@@ -21,7 +21,7 @@ CREATE TABLE User (
     UpdatedDate DATETIME NULL,
     UpdatedByID INT , 
     CreatedByID INT ,
-    FOREIGN KEY (UpdatedByID) REFERENCES User(UserID),
+    FOREIGN KEY (UpdatedByID) REFERENCES User(UserID) ,
     FOREIGN KEY (CreatedByID) REFERENCES User(UserID)
 );
 
@@ -56,15 +56,15 @@ CREATE TABLE ImagingPlatformInstance(
         ProjectID INT NOT NULL,
         ImagingPlatform ENUM('Leica(L5)','Mitutoyo(L5)','Olympus(L4Prep)',
         'Olympus(L5)','Passport(L5)','VD(L4Prep)','Other') ,
-        FOREIGN KEY (ProjectID) REFERENCES Project(ProjectID)
+        FOREIGN KEY (ProjectID) REFERENCES Project(ProjectID) ON DELETE CASCADE
 );
 
 CREATE TABLE ProjectUserPhotographyLink (
    ProjectUserPhotographyLinkID INT AUTO_INCREMENT PRIMARY KEY,
    ProjectID INT NOT NULL,
    PhotographerID INT NOT NULL,
-   FOREIGN KEY (ProjectID) REFERENCES Project(ProjectID), 
-   FOREIGN KEY (PhotographerID) REFERENCES User(UserID) 
+   FOREIGN KEY (ProjectID) REFERENCES Project(ProjectID) ON DELETE CASCADE, 
+   FOREIGN KEY (PhotographerID) REFERENCES User(UserID) ON DELETE CASCADE
 );
 
 CREATE TABLE Media (
@@ -90,8 +90,8 @@ CREATE TABLE Media (
         UpdatedDate DATETIME NOT NULL,
         UpdatedByID INT ,
         IsDeleted BOOL NOT NULL DEFAULT 0,
-        FOREIGN KEY (ProjectID) REFERENCES Project(ProjectID),
-        FOREIGN KEY (PhotographerID) REFERENCES User(UserID),
+        FOREIGN KEY (ProjectID) REFERENCES Project(ProjectID) ON DELETE CASCADE,
+        FOREIGN KEY (PhotographerID) REFERENCES User(UserID) ON DELETE CASCADE,
         FOREIGN KEY (UpdatedByID) REFERENCES User(UserID),
         FOREIGN KEY (CreatedByID) REFERENCES User(UserID)
 
@@ -125,7 +125,7 @@ INSERT INTO ImagingPlatformInstance(ProjectID,ImagingPlatform) VALUES (1,'VD(L4P
 INSERT INTO Project (ProjectOwnerID ,ProjectName,ProjectType,ImagingStartDate ,ImagingEndDate ,
 CreatedDate ,UpdatedDate ,ProjectStatus,CreatedByID,UpdatedByID,SummaryOfProject,DetailsOfSpecimens) 
 VALUES (2,"test project 2",'BDP',NOW(),DATE_ADD(NOW(),INTERVAL 2 DAY),NOW(),NOW(),
-'started','1','1','sample project summary','sample specimen details');
+'started','2','2','sample project summary','sample specimen details');
 -- link the project owner as a phtogragpher
 INSERT INTO ProjectUserPhotographyLink (ProjectID,PhotographerID) VALUES ("2",2); 
 INSERT INTO ProjectUserPhotographyLink (ProjectID,PhotographerID) VALUES ("2",3); 
@@ -148,7 +148,7 @@ Description,ImagingPlatform,ImageEditingTool,
 Comments,CreatedDate,CreatedByID,UpdatedDate,UpdatedByID) VALUES (
 2,2,"photo.png","filepath",'catelogid',"MorphoID","ClusterID",NOW(),
 "1000x1000",1000,".png","Description",
-"Leica(L5)", "photoshop", 'comments', NOW(),1,NOW(),1);
+"Leica(L5)", "photoshop", 'comments', NOW(),2,NOW(),2);
 
 INSERT INTO Media (ProjectID,PhotographerID,FileName,FilePath,CatalogID,
 MorphoID,ClusterID,ImagingDate,Resolution,FileSizeBytes,FileFormat,
@@ -156,7 +156,7 @@ Description,ImagingPlatform,ImageEditingTool,
 Comments,CreatedDate,CreatedByID,UpdatedDate,UpdatedByID) VALUES (
 2,3,"photo.png","filepath",'catelogid',"MorphoID","ClusterID",NOW(),
 "1000x1000",1000,".png","Description",
-"Leica(L5)", "photoshop", 'comments', NOW(),1,NOW(),1);
+"Leica(L5)", "photoshop", 'comments', NOW(),3,NOW(),3);
 SELECT * FROM User;
 SELECT 1 FROM User limit 1;
 SELECT * FROM Project;

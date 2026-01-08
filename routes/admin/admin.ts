@@ -337,7 +337,7 @@ router.post(
     });
   }
 );
-
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 router.get(
   "/purge-soft-deleted-medias",
   isAuthenticated,
@@ -389,34 +389,86 @@ router.get(
           "There is no project data that is soft deleted or another words, marked for deletion",
       });
     const ids = [];
+    var imagingPlatformInstances = [];
+    var projectUserPhotographyLinks = [];
+    var medias = [];
     for (const x of projectData) {
       const temp: any = x;
       ids.push(temp.ProjectID);
+
+      // query Data
+      const imagingPlatformInstanceResults = await db.promise().query(
+        `SELECT * 
+        FROM ImagingPlatformInstance
+       WHERE ProjectID = ?`,
+        [temp.ProjectID]
+      );
+      imagingPlatformInstances = imagingPlatformInstances.concat(
+        imagingPlatformInstanceResults[0]
+      );
+      // console.log('temp.ProjectID',temp.ProjectID)
+      // console.log('imagingPlatformInstances',imagingPlatformInstances)
+      const projectUserPhotographyLinkResults = await db.promise().query(
+        `SELECT * 
+        FROM ProjectUserPhotographyLink
+       WHERE ProjectID = ?`,
+        [temp.ProjectID]
+      );
+      projectUserPhotographyLinks = projectUserPhotographyLinks.concat(
+        projectUserPhotographyLinkResults[0]
+      );
+      const mediasResults = await db.promise().query(
+        `SELECT * 
+        FROM Media
+       WHERE ProjectID = ?`,
+        [temp.ProjectID]
+      );
+      medias = medias.concat(mediasResults[0]);
     }
+    //     console.log('imagingPlatformInstances',imagingPlatformInstances)
+    // console.log('projectUserPhotographyLinks',projectUserPhotographyLinks)
+    // console.log('medias',medias)
+    //turning into buffer
     const jsonProjectData = JSON.parse(JSON.stringify(projectData));
     const bufferProjectData = await fastcsv.writeToBuffer(jsonProjectData, {
       headers: true,
     });
-    const zip = new AdmZip();
-    zip.addFile(
-      "purged project data " + new Date().toISOString() + ".csv",
-      bufferProjectData
+    const jsonImagingPlatformInstanceData = JSON.parse(
+      JSON.stringify(imagingPlatformInstances)
     );
-    for (const id of ids) {
-      await db
-        .promise()
-        .query("UPDATE Media SET ProjectID = null WHERE ProjectID = ?", [id]);
-    }
-    await db
-      .promise()
-      .query(`DELETE FROM ProjectUserPhotographyLink WHERE ProjectID in (?)`, [
-        ids,
-      ]);
-    await db
-      .promise()
-      .query(`DELETE FROM ImagingPlatformInstance WHERE ProjectID in (?)`, [
-        ids,
-      ]);
+    const bufferImagingPlatformInstanceData = await fastcsv.writeToBuffer(
+      jsonImagingPlatformInstanceData,
+      {
+        headers: true,
+      }
+    );
+    const jsonProjectUserPhotographyLinkData = JSON.parse(
+      JSON.stringify(projectUserPhotographyLinks)
+    );
+    const bufferProjectUserPhotographyLinkData = await fastcsv.writeToBuffer(
+      jsonProjectUserPhotographyLinkData,
+      {
+        headers: true,
+      }
+    );
+    const jsonMediaData = JSON.parse(JSON.stringify(medias));
+    const bufferMediaData = await fastcsv.writeToBuffer(jsonMediaData, {
+      headers: true,
+    });
+
+    //Zipping
+    const zip = new AdmZip();
+    zip.addFile("purged project data.csv", bufferProjectData);
+    zip.addFile(
+      "purged imaging platform instance data.csv",
+      bufferImagingPlatformInstanceData
+    );
+    zip.addFile(
+      "purged project user photography link data.csv",
+      bufferProjectUserPhotographyLinkData
+    );
+    zip.addFile("purged media data.csv", bufferMediaData);
+
     await db.promise().query(`DELETE FROM Project WHERE IsDeleted = 1;`);
     return res.status(200).json({
       success: true,
@@ -432,13 +484,11 @@ router.get(
   isAuthenticated,
   isAdmin,
   async (req: Request, res: Response) => {
-    console.log("1");
     const result: any = await db
       .promise()
       .query(`SELECT * FROM User WHERE IsDeleted = 1;`);
 
     const userData: Array<Object> = Array.from(result[0]);
-    console.log("2 userData", userData);
     if (userData.length == 0) {
       console.log("user data length is 0");
       return res.status(400).json({
@@ -448,25 +498,48 @@ router.get(
       });
     }
     const ids = [];
+    var projectUserPhotographyLinks = [];
     for (const x of userData) {
       const temp: any = x;
       ids.push(temp.UserID);
+
+      //query pupl
+      const projectUserPhotographyLinkResults = await db.promise().query(
+        `SELECT * 
+        FROM ProjectUserPhotographyLink
+       WHERE PhotographerID = ?`,
+        [temp.UserID]
+      );
+      projectUserPhotographyLinks = projectUserPhotographyLinks.concat(
+        projectUserPhotographyLinkResults[0]
+      );
     }
-    console.log("3, ids: ", ids);
+
+    // creating buffer
     const jsonUserData = JSON.parse(JSON.stringify(userData));
     const bufferUserData = await fastcsv.writeToBuffer(jsonUserData, {
       headers: true,
     });
+    const jsonProjectUserPhotographyLinkData = JSON.parse(
+      JSON.stringify(projectUserPhotographyLinks)
+    );
+    const bufferProjectUserPhotographyLinkData = await fastcsv.writeToBuffer(
+      jsonProjectUserPhotographyLinkData,
+      {
+        headers: true,
+      }
+    );
+
+    //zipping
     const zip = new AdmZip();
     zip.addFile("purge user data.csv", bufferUserData);
-    console.log("4");
+    zip.addFile(
+      "purged project user photography link data.csv",
+      bufferProjectUserPhotographyLinkData
+    );
+
+    //nulling uncascaded values to prevent errors
     for (const id of ids) {
-      await db
-        .promise()
-        .query(
-          "UPDATE Media SET PhotographerID = null WHERE PhotographerID = ?",
-          [id]
-        );
       await db
         .promise()
         .query("UPDATE Media SET CreatedByID = null WHERE CreatedByID = ?", [
@@ -497,23 +570,16 @@ router.get(
         .promise()
         .query("UPDATE User SET CreatedByID = null WHERE CreatedByID = ? ", [
           id,
-          id,
         ]);
       await db
         .promise()
         .query("UPDATE User SET UpdatedByID = null WHERE UpdatedByID = ? ", [
           id,
-          id,
         ]);
     }
-    await db
-      .promise()
-      .query(
-        `DELETE FROM ProjectUserPhotographyLink WHERE PhotographerID in (?)`,
-        [ids]
-      );
+
+    //main purge
     await db.promise().query(`DELETE FROM User WHERE IsDeleted = 1;`);
-    console.log("5");
     return res.status(200).json({
       success: true,
       message:

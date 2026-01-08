@@ -294,6 +294,7 @@
     });
   }
   async function sendEditValue(feature, oldValue, newValue) {
+    
     const response = await fetch("/admin/edit-enumeration-value", {
       method: 'POST',
       headers: {
