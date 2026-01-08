@@ -15,6 +15,9 @@ import { isAdmin } from "../middleware/auth";
 const path = require("path");
 const upload = multer({ dest: "upload-bulk-metadata/" });
 
+import pl, { list } from "nodejs-polars";
+import { error } from "console";
+import { match } from "assert";
 //OLD
 // router.get('/select-user-for/:mediaID/:projectID', isAuthenticated, async (req, res) => {
 //     const mediaID = req.params.mediaID;
@@ -497,35 +500,35 @@ router.post("/edit", isAuthenticated, async (req: Request, res: Response) => {
   //     );
   // }
 
-//   if (
-//     newImagingPlatform != null &&
-//     newImagingPlatform != "" &&
-//     !req.session.imagingPlatforms.includes(newImagingPlatform)
-//   ) {
-//     req.session.imagingPlatforms.push(newImagingPlatform);
-//     const i = req.session.imagingPlatforms;
-//     await db
-//       .promise()
-//       .query<RowDataPacket[]>(
-//         "ALTER TABLE Media MODIFY COLUMN `ImagingPlatform` enum(?)",
-//         [i]
-//       );
-//     await db
-//       .promise()
-//       .query<RowDataPacket[]>(
-//         "ALTER TABLE ImagingPlatformInstance MODIFY COLUMN `ImagingPlatform` enum(?)",
-//         [i]
-//       );
-//     // for new enums, the list of imaging platforms that the entity project has
-//     // needs to be updated:
-//     await db
-//       .promise()
-//       .query<RowDataPacket[]>(
-//         "INSERT IGNORE INTO ImagingPlatformInstance (ProjectID, ImagingPlatform) VALUES (?,?) ",
-//         [projectID, newImagingPlatform]
-//       ); // I can't remember why I ignore errors here, sorry.
-//   }
-//   req.session.save();
+  //   if (
+  //     newImagingPlatform != null &&
+  //     newImagingPlatform != "" &&
+  //     !req.session.imagingPlatforms.includes(newImagingPlatform)
+  //   ) {
+  //     req.session.imagingPlatforms.push(newImagingPlatform);
+  //     const i = req.session.imagingPlatforms;
+  //     await db
+  //       .promise()
+  //       .query<RowDataPacket[]>(
+  //         "ALTER TABLE Media MODIFY COLUMN `ImagingPlatform` enum(?)",
+  //         [i]
+  //       );
+  //     await db
+  //       .promise()
+  //       .query<RowDataPacket[]>(
+  //         "ALTER TABLE ImagingPlatformInstance MODIFY COLUMN `ImagingPlatform` enum(?)",
+  //         [i]
+  //       );
+  //     // for new enums, the list of imaging platforms that the entity project has
+  //     // needs to be updated:
+  //     await db
+  //       .promise()
+  //       .query<RowDataPacket[]>(
+  //         "INSERT IGNORE INTO ImagingPlatformInstance (ProjectID, ImagingPlatform) VALUES (?,?) ",
+  //         [projectID, newImagingPlatform]
+  //       ); // I can't remember why I ignore errors here, sorry.
+  //   }
+  //   req.session.save();
 
   db.query(query, params, (err: any) => {
     if (err) {
@@ -628,8 +631,6 @@ router.post(
   }
 );
 
-
-
 router.get(
   "/upload-bulk-metadata",
   isAuthenticated,
@@ -679,7 +680,6 @@ router.post(
         console.error(err.message);
         return;
       }
-      console.log("File deleted successfully");
     });
 
     //Conducts some validation for each row of the data.
@@ -695,7 +695,7 @@ router.post(
       ImageEditingTool: number;
       Description: number;
       Resolution: number;
-      ImagingPlatform: number;
+      // ImagingPlatform: number;
     }
 
     const newRowColumns: newRowColumnInterface = {
@@ -710,7 +710,7 @@ router.post(
       ImageEditingTool: 8,
       Description: 9,
       Resolution: 10,
-      ImagingPlatform: 11,
+      // ImagingPlatform: 11,
     };
     const user = req.session.passport.user;
     function isValidFileName(filename: string, fileFormat: any) {
@@ -724,15 +724,46 @@ router.post(
       );
     }
     const newTable: string[][] = [];
-    const newImagingPlatforms: string[] = [];
-    const newImageEditingTools: string[] = [];
-    var errorMessage = "";
+    var newTableDF: pl.DataFrame = pl.DataFrame();
+    var hasErrors = false;
+    // const newImagingPlatforms: string[] = [];
+    const newImageEditingTools = [];
+    const uniqueFileNames = [];
+
+    const tempListOfObjects1 = (
+      await db.promise().query("SELECT DISTINCT FileName FROM Media")
+    )[0];
+    const tempListOfObjects2: any = tempListOfObjects1;
+    const listOfFileNamesFromDB = [];
+    for (const x of tempListOfObjects2) {
+      listOfFileNamesFromDB.push(x.FileName);
+    }
+
+    const tempListOfLinks1 = (
+      await db
+        .promise()
+        .query("SELECT DISTINCT * FROM ProjectUserPhotographyLink")
+    )[0];
+    const tempListOfLinks2: any = tempListOfLinks1;
+    const listOfPhotographerProjectLinks = [];
+    for (const x of tempListOfLinks2) {
+      listOfPhotographerProjectLinks.push([x.PhotographerID, x.ProjectID]);
+    }
+    console.log(
+      "listOfPhotographerProjectLinks",
+      listOfPhotographerProjectLinks
+    );
+
+    //getting each row
     for (var i: number = 0; i < newRowsTemp.length; i++) {
       var newRowTempSplited = newRowsTemp[i].split(",");
       if (newRowTempSplited.length == 1 && newRowTempSplited[0] == "") {
         continue;
       }
       const newRow: string[] = [projectID.toString()];
+      const fileName = newRowTempSplited[newRowColumns.FileName];
+      var errorMessage = "";
+      // getting individual cells of the row.
       for (var j: number = 0; j < newRowTempSplited.length; j++) {
         const elementTemp = newRowTempSplited[j]
           .replaceAll('"', "")
@@ -742,43 +773,54 @@ router.post(
           .replaceAll("(", "(")
           .replaceAll(")", ")")
           .trim();
-        const forNullHandling = [
-          newRowColumns.ImagingPlatform,
-          newRowColumns.ImageEditingTool,
-          newRowColumns.ImagingDate,
-          newRowColumns.Resolution,
-        ];
+        // const forNullHandling = [
+        // newRowColumns.ImagingPlatform,
+        // newRowColumns.ImageEditingTool,
+        // newRowColumns.ImagingDate,
+        // newRowColumns.Resolution,
+        // ];
         const element =
-          elementTemp == "" && forNullHandling.includes(j) ? null : elementTemp;
-        if (element == null && !forNullHandling.includes(j))
-          (errorMessage = errorMessage + "This feature"),
-            Object.keys(newRowColumns)[j],
-            "is a null value. \n";
-        function errorMessageBuilder(msg: string) {
-          return "row " + (i + 1).toString() + " " + msg + "\n" + element;
-        }
+          // elementTemp == "" && forNullHandling.includes(j) ? null : elementTemp;
+          elementTemp == "" ? null : elementTemp;
+        // if (element == null && !forNullHandling.includes(j))
+        // (errorMessage = errorMessage + "This feature"),
+        //   Object.keys(newRowColumns)[j],
+        //   "is a null value. \n";
+
+        //VALIDATION SWITCH CASES with check for new image editing tools
         switch (j) {
           case newRowColumns.FileName:
-            if (
-              !isValidFileName(
-                element!,
-                newRowTempSplited[newRowColumns.FileFormat]
-              )
-            )
+            const fileNameToCheck = newRowTempSplited[newRowColumns.FileFormat];
+            if (!isValidFileName(element!, fileNameToCheck)) {
               errorMessage =
                 errorMessage +
-                errorMessageBuilder(
-                  `The media file name must include a valid extension like ` +
-                    Object.values(mediaFileFormatEnumeration())
-                );
+                `The media file name '${fileNameToCheck}' must include a valid extension like ` +
+                Object.values(mediaFileFormatEnumeration()) +
+                `or it needs to match FileFormat value in the same row
+                or your FileFormat value is wrong
+                or there needs to be a file name before the file format\n`;
+              break;
+            }
+            if (listOfFileNamesFromDB.includes(element)) {
+              errorMessage =
+                errorMessage +
+                `There is already an existing entry in the database for the  FileName: '${element}' \n`;
+              break;
+            }
+            if (!uniqueFileNames.includes(element))
+              uniqueFileNames.push(element);
+            else {
+              errorMessage =
+                errorMessage +
+                `There are duplicate FileName for '${element}' within this csv file.\n`;
+            }
             break;
           case newRowColumns.CatalogID:
-            if (!/^[A-Z]{6}\d{7,8}$/.test(element!))
+            if (!/^[A-Z]{6}\d{7,8}$/.test(element!)) {
               errorMessage =
                 errorMessage +
-                errorMessageBuilder(
-                  "catalogID is not in the correct format. Example of a correct format: ZRCBDP0012345. 6 capital letters and then 7 numbers."
-                );
+                `CatalogID '${element!}' is not in the correct format. Example of a correct format: ZRCBDP0012345. 6 capital letters and then 7 numbers. \n`;
+            }
             break;
           //   case newRowColumns.ClusterID:
           //     if (!/^[\d][A-Z]{7}\d{7}$/.test(element))
@@ -793,42 +835,71 @@ router.post(
             if (isNaN(new Date(element!).getTime()!) && element != null)
               errorMessage =
                 errorMessage +
-                errorMessageBuilder("Invalid Imaging Date format.");
+                `Invalid Imaging Date format. current value: ${element} \n`;
             break;
           case newRowColumns.Resolution:
             if (!/^\d{1,5}x\d{1,5}$/.test(element!) && element != null)
               errorMessage =
                 errorMessage +
-                errorMessageBuilder(
-                  "resolution is not in the correct format. example format: 1440x720, the length and width should not be more than 5 digits."
-                );
+                `Resolution value: '${element}' is not in the correct format. example format: 1440x720, the length and width should not be more than 5 digits. \n`;
             break;
           case newRowColumns.FileSizeBytes:
-            if (isNaN(parseInt(element!)))
+            if (isNaN(parseInt(element!))) {
               errorMessage =
                 errorMessage +
-                errorMessageBuilder("file size must be in integer.");
+                `File size must be in integer, not float or decimal or any other characters. Current Value: '${element}'\n`;
+            }
+
+            if (parseInt(element) <= 0)
+              errorMessage =
+                errorMessage +
+                `File size must be a positive integer. Current Value: ${element}\n`;
             break;
           case newRowColumns.FileFormat:
             if (!Object.values(mediaFileFormatEnumeration()).includes(element))
               errorMessage =
                 errorMessage +
-                errorMessageBuilder(
-                  "Invalid file format. The format should be any one of these: " +
-                    Object.values(mediaFileFormatEnumeration()).toString()
-                );
+                `Invalid file format: ${element}. The format should be any one of these: ` +
+                Object.values(mediaFileFormatEnumeration()).toString() +
+                "\n";
             break;
-          case newRowColumns.ImagingPlatform:
-            // checks for new Imaging platform to take note
-            if (
-              !req.session.imagingPlatforms.includes(element!) &&
-              !newImagingPlatforms.includes(element!) &&
-              element != null &&
-              element != ""
-            ) {
-              newImagingPlatforms.push(element);
+          case newRowColumns.PhotographerID:
+            console.log("in case photographer ID");
+            const photographerID = element;
+            if (isNaN(parseInt(photographerID!))) {
+              errorMessage =
+                errorMessage +
+                `Photographer ID must be in integer, not decimal or any other characters. Current Value: '${photographerID}'\n`;
+              break;
             }
+            var matched = false;
+            for (const x of listOfPhotographerProjectLinks) {
+              if (
+                x[0].toString() == photographerID &&
+                x[1].toString() == projectID
+              ) {
+                matched = true;
+                break;
+              }
+            }
+            if (!matched)
+              errorMessage =
+                errorMessage +
+                `The photographer (ID: ${photographerID}) is not the selected project (ID: ${projectID}). 
+                You may have selected the wrong project from the dropdown box or the wrong photographer ID in the config.ini \n`;
             break;
+
+          // case newRowColumns.ImagingPlatform:
+          // checks for new Imaging platform to take note
+          // if (
+          //   !req.session.imagingPlatforms.includes(element!) &&
+          //   !newImagingPlatforms.includes(element!) &&
+          //   element != null &&
+          //   element != ""
+          // ) {
+          //   newImagingPlatforms.push(element);
+          // }
+          // break;
           case newRowColumns.ImageEditingTool:
             // checks for new image editing tools to take note
             if (
@@ -842,31 +913,45 @@ router.post(
             break;
 
           case newRowColumns.PhotographerID:
-            if (isNaN(parseInt(element!)))
+            if (isNaN(parseInt(element!))) {
               errorMessage =
                 errorMessage +
-                errorMessageBuilder(" PhotographerID must be an integer ");
+                `PhotographerID must be an integer, not decimal or any other characters. Current Value: '${element}' \n`;
+              break;
+            }
+            if (parseInt(element) <= 0)
+              errorMessage =
+                errorMessage +
+                `PhotographerID must be a positive integer. Current Value: ${element} \n`;
+            break;
         }
         if (element == null) newRow.push(element!);
         else newRow.push(element.toString());
+        if (errorMessage.trim() != "" && !hasErrors) hasErrors = true;
       }
-      newRow.push(new Date().toISOString().split("T")[0]);
-      newRow.push(user.UserID);
-      newRow.push(new Date().toISOString().split("T")[0]);
-      newRow.push(user.UserID);
+      newRow.push(new Date().toISOString().split("T")[0]); //created date
+      newRow.push(user.UserID); // created by
+      newRow.push(new Date().toISOString().split("T")[0]); //updated date
+      newRow.push(user.UserID); //updated by
+      const rowPl = pl.DataFrame({
+        row: [(i + 1).toString()],
+        fileName: [errorMessage.trim() != "" ? fileName : ""],
+        errorLog: [errorMessage],
+      });
       newTable.push(newRow);
+      newTableDF = pl.concat([newTableDF, rowPl]);
     }
-    if (errorMessage.length > 0) {
-      console.log("there is error Message\n", errorMessage);
+    if (hasErrors) {
       res.json({
         success: false,
         message:
-          "Media metadata has contraints violations. \n These are the violations:\n" +
-          errorMessage,
+          "Media metadata has contraints violations. press okay to csv error log file with the error logs",
+        buffer: newTableDF.writeCSV(),
       });
       return;
     }
 
+    // START OF SECTION For adding new Image Editing Tools
     const allImageEditingTools =
       req.session["imageEditingTools"].concat(newImageEditingTools);
 
@@ -878,15 +963,16 @@ router.post(
           allImageEditingTools,
         ]);
     req.session["imageEditingTools"] = allImageEditingTools;
-    const allImagingPlatforms =
-      req.session["imagingPlatforms"].concat(newImagingPlatforms);
-    if (newImagingPlatforms != null && newImagingPlatforms.length != 0)
-      await db
-        .promise()
-        .query("ALTER TABLE Media MODIFY COLUMN `ImagingPlatform` enum(?)", [
-          allImagingPlatforms,
-        ]);
-    req.session["imagingPlatforms"] = allImagingPlatforms;
+    // const allImagingPlatforms =
+    //   req.session["imagingPlatforms"].concat(newImagingPlatforms);
+    // if (newImagingPlatforms != null && newImagingPlatforms.length != 0)
+    //   await db
+    //     .promise()
+    //     .query("ALTER TABLE Media MODIFY COLUMN `ImagingPlatform` enum(?)", [
+    //       allImagingPlatforms,
+    //     ]);
+    // req.session["imagingPlatforms"] = allImagingPlatforms;
+    // END OF SECTION
 
     const insertQuery = `
       INSERT INTO Media(
@@ -901,9 +987,7 @@ router.post(
             UpdatedByID 
         ) VALUES ?`;
     await db.promise().query(insertQuery, [newTable]);
-
     console.log("✅ bulk metadata submitted successfully");
-
     res.json({
       success: true,
       message: "Media metadata bulk upload sucessful",

@@ -6,9 +6,9 @@
   <title>📸 Upload Bulk Meta Data</title>
   <link rel="stylesheet" href="/css/form.css" />
   <style>
-    select{
-    }
-      /* Input Fields */
+    select {}
+
+    /* Input Fields */
     input[type="file"] {
       width: 95%;
       padding: 0.75rem 1rem;
@@ -24,8 +24,6 @@
       margin-bottom: 50px;
       margin-right: 10px;
     }
-
- 
   </style>
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
@@ -37,7 +35,7 @@
         ? include('../sidenavs/admin')
         : include('../sidenavs/user') %>
     </br>
-    <form id ='fileUploadForm'>
+    <form id='fileUploadForm'>
       <div class="form-group">
         <h2>📸 Upload Metadata in Bulk</h2></br>
       </div>
@@ -85,19 +83,35 @@
             enctype: "multipart/form-data",
             body: formData
           });
-          submitBtn.value = '<i class="fas fa-spinner"></i> Submitting...';
+          submitBtn.innerHTML = '<i class="fas fa-spinner"></i> Submitting...';
           submitBtn.disabled = true;
-          console.log(response)
           if (!response.ok) {
             const errorData = await response.json();
             throw new Error(errorData.message || "Submission failed with status " + response.status);
           }
-          console.log('before await res json')
           data = await response.json();
           console.log(data)
 
-          if (!data.success)
-            throw new Error(data.message || "Submission failed");
+          if (!data.success)          {
+            var bytes = new Uint8Array(data.buffer.data);
+            var blob = new Blob([bytes], {
+              type: "application/csv"
+            }); // change resultByte to bytes
+            await Swal.fire({
+              title: 'Error!',
+              text: data.message,
+              icon: 'error',
+              confirmButtonText: 'OK',
+              confirmButtonColor: '#dc3545'
+            }).then(() => {
+              var link = document.createElement('a');
+              link.href = window.URL.createObjectURL(blob);
+              link.download = "bulk metadata upload attempt error log " + new Date().toISOString() + ".csv";
+              link.click();
+            });
+            form.reset()
+            return
+          }
 
 
           // Show success message
@@ -128,7 +142,7 @@
           });
         } finally {
           submitBtn.disabled = false;
-          submitBtn.value = "Upload"
+          submitBtn.innerHTML = "Upload"
         }
 
       });

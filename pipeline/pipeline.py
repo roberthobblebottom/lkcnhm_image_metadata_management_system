@@ -9,8 +9,9 @@ from glob import glob
 import configparser
 import re
 from datetime import datetime
+import logging
+logger = logging.getLogger(__name__)
 # from PIL import ExifTags
-
 # IFD_CODE_LOOKUP = {i.value: i.name for i in ExifTags.IFD}
 
 
@@ -39,10 +40,10 @@ def recursion(
             "tif",
             "svg",
         ]:
-            print("not an valid image extension", file_or_folder_path)
+            logging.info(" the file "+file_or_folder_path+" not an valid image extension")
             continue
-        if "LABEL" in file_or_folder_path:
-            print("label or thumb file, skipping")
+        if "LABEL" in file_or_folder_path or "THUMB" in file_or_folder_path:
+            logging.info("label or thumb file, "+file_or_folder_path+" skipping.")
             continue
         # This line may be the bottleneck in terms of throughput and speed
         exifData = Image.open(file_or_folder_path).getexif()
@@ -57,19 +58,19 @@ def recursion(
             "_"
         )  
         new_row["CatalogID"] = fileNameArray[1]
-        if not re.search("^[A-Z]{6}\\d{7,8}$", new_row["CatalogID"]):
-            raise Exception(
-                "CatalogID in the file "
-                + new_row["FileName"]
-                + " is not in the correct format. Example of a correct format: ZRCBDP0012345. 6 capital letters and then 7 numbers."
-            )
+        # if not re.search("^[A-Z]{6}\\d{7,8}$", new_row["CatalogID"]):
+        #     raise Exception(
+        #         "CatalogID in the file "
+        #         + new_row["FileName"]
+        #         + " is not in the correct format. Example of a correct format: ZRCBDP0012345. 6 capital letters and then 7 numbers."
+        #     )
         new_row["MorphoID"] = fileNameArray[0]
-        if len(new_row["MorphoID"]) < 5 or new_row["MorphoID"] is int:
-            raise Exception(
-                "MorphoID in the file "
-                + new_row["FileName"]
-                + " may not not in the correct format of a taxon name."
-            )
+        # if len(new_row["MorphoID"]) < 5 or new_row["MorphoID"] is int:
+        #     raise Exception(
+        #         "MorphoID in the file "
+        #         + new_row["FileName"]
+        #         + " may not not in the correct format of a taxon name."
+        #     )
         # part_with_fileFormat = fileNameArray[-1].split(".")
         new_row["Description"] = fileNameArray[-2]+"   "+fileNameArray[-1].split('.')[0] \
                                 if fileNameArray[-2].lower() != "none" \
@@ -95,24 +96,24 @@ def recursion(
                     continue
                 value = value.hex().decode() if isinstance(value, bytes) else value
                 value = value.split(" ")[0] if tagname == "DateTime" else value
-                if tagname in ["ImageWidth", "ImageLength"]:
-                    try:
-                        int(value)
-                    except ValueError:
-                        raise Exception(
-                            "the file"
-                            + new_row["FileName"]
-                            + "has a image width or length value that is not integer. please change it to an integer"
-                        )
-                elif tagname == "DateTime":
-                    try:
-                        datetime.strptime(value, "%Y:%m:%d")
-                    except ValueError:
-                        raise Exception(
-                            "the file"
-                            + new_row["FileName"]
-                            + "has a DateTime value that is not in for format of %Y:%m:%d eg: 2005:11:08. please change it."
-                        )
+                # if tagname in ["ImageWidth", "ImageLength"]:
+                    # try:
+                        # int(value)
+                    # except Valu.info:
+                    #     raise Exception(
+                    #         "the file"
+                    #         + new_row["FileName"]
+                    #         + "has a image width or length value that is not integer. please change it to an integer"
+                    #     )
+                # elif tagname == "DateTime":
+                    # try:
+                    #     datetime.strptime(value, "%Y:%m:%d")
+                    # except Valu.info:
+                    #     raise Exception(
+                    #         "the file"
+                    #         + new_row["FileName"]
+                    #         + "has a DateTime value that is not in for format of %Y:%m:%d eg: 2005:11:08. please change it."
+                    #     )
                 new_row[tagname] = str(value)
 
             # if type(value) is bytes:
@@ -124,7 +125,7 @@ def recursion(
                 new_row[x1] = ""
         new_row = (
             pl.DataFrame(new_row)
-            .rename({"Software": "ImagingEditingTool"})
+            .rename({"Software": "ImageEditingTool"})
             .rename({"DateTime": "ImagingDate"})
             .select(
                 "MorphoID",
@@ -136,7 +137,7 @@ def recursion(
                 # "ProjectName",
                 "PhotographerID",
                 "ImagingDate",
-                "ImagingEditingTool",
+                "ImageEditingTool",
                 "ImageWidth",
                 "ImageLength",
                 "Make",
@@ -144,26 +145,30 @@ def recursion(
                 "Description",
             )
         )
-        print(new_row.transpose(include_header=True))
+        logging.info(new_row.transpose(include_header=True))
         output.append(new_row)
 
 
 def main():
+    logging.basicConfig(filename='pipeline '+datetime.now().isoformat()+'.log',level=logging.INFO)
     pl.Config.set_tbl_rows(100)
     pl.Config.set_tbl_cols(100)
     start = timer()
     output = []
     dir = "./*"
     config = configparser.ConfigParser()
-    config.read("config.ini")
+    try:
+      config.read("config.ini")
+    except Exception:
+        logger.info("Unable reading config.ini, Maybe config.ini is missing from the current directory?")
     try:
         photographerID = int(config["DEFAULT"]["photographerID"])
     except Exception:
-        print("Error, photographerID is not an integer. Exiting")
+        logger.info("photographerID is not an integer. Exiting")
         return
 
     if photographerID <= 0:
-        print("Error: photographerID can only be a positive integer. Exiting... ")
+        logger.info("photographerID can only be a positive integer. Exiting... ")
         return
 
     for f3 in [x for x in glob(dir) if isdir(x)]:
@@ -175,7 +180,7 @@ def main():
         )
 
     stop = timer()
-    print("estimated time taken ", timedelta(seconds=stop - start))
+    logger.info("estimated time taken "+ str(timedelta(seconds=stop - start)))
 
     df = (
         pl.concat(output)
@@ -192,7 +197,6 @@ def main():
         )
         .select(pl.exclude("ImageWidth", "ImageLength", "Make", "Model"))
     )
-    print(df.head())
     df.write_csv("metadata_for_photographer_ID_"+str(photographerID)+".csv")
 
 

@@ -438,7 +438,7 @@ router.get(
       .query(`SELECT * FROM User WHERE IsDeleted = 1;`);
 
     const userData: Array<Object> = Array.from(result[0]);
-    console.log("2 userData",userData);
+    console.log("2 userData", userData);
     if (userData.length == 0) {
       console.log("user data length is 0");
       return res.status(400).json({
@@ -452,7 +452,7 @@ router.get(
       const temp: any = x;
       ids.push(temp.UserID);
     }
-    console.log("3, ids: ",ids);
+    console.log("3, ids: ", ids);
     const jsonUserData = JSON.parse(JSON.stringify(userData));
     const bufferUserData = await fastcsv.writeToBuffer(jsonUserData, {
       headers: true,
@@ -493,15 +493,17 @@ router.get(
         .query("UPDATE Project SET UpdatedByID = null WHERE UpdatedByID = ?", [
           id,
         ]);
-await db
+      await db
         .promise()
         .query("UPDATE User SET CreatedByID = null WHERE CreatedByID = ? ", [
-          id,id
+          id,
+          id,
         ]);
       await db
         .promise()
         .query("UPDATE User SET UpdatedByID = null WHERE UpdatedByID = ? ", [
-          id,id
+          id,
+          id,
         ]);
     }
     await db
