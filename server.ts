@@ -78,7 +78,6 @@ app.get("/user/login-landing-page", isAuthenticated, (req: Request, res: Respons
 
 app.get("/current-user", (req: Request, res: Response) => {
   if (req.session && req.session.passport.user) {
-    console.log("api current-user passport user",req.session.passport.user);
     res.json({
       Email: req.session.passport.user.Email,
       FullName: req.session.passport.user.FullName,

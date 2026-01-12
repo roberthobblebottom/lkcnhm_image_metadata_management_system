@@ -5,11 +5,10 @@ const path = require("path");
 
 import { QueryResult } from "mysql2";
 import { db } from "../db"; // Database connection
-const { isAuthenticated, isAdmin } = require("../../middleware/auth"); // Middleware
+const { isAuthenticated, isAdmin,reconfirmPasswordFunction } = require("../../middleware/auth"); // Middleware
 const fastcsv = require("fast-csv");
 
 import AdmZip from "adm-zip";
-
 // router.get(
 //   "/admin-users",
 //   isAuthenticated,
@@ -97,6 +96,7 @@ router.post(
   "/edit-enumeration-value",
   isAuthenticated,
   isAdmin,
+  reconfirmPasswordFunction,
   async (req: Request, res: Response) => {
     const feature = req.body.feature;
     const oldValue = req.body.oldValue;
@@ -260,14 +260,17 @@ router.post(
   "/delete-enumeration-value",
   isAuthenticated,
   isAdmin,
+  reconfirmPasswordFunction,
   async (req: Request, res: Response) => {
     const feature = req.body.feature;
     const value = req.body.value;
+    console.log('req.body',req.body)
     switch (feature) {
       case "projectType":
         const projectTypes = req.session.projectTypes;
         projectTypes.includes(value) &&
           projectTypes.splice(projectTypes.indexOf(value), 1);
+        console.log(req.body)
         await db
           .promise()
           .query("UPDATE Project SET ProjectType =NULL WHERE ProjectType = ?", [
@@ -340,11 +343,13 @@ router.post(
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Purge soft deleted data
-router.get(
+router.post(
   "/purge-soft-deleted-medias",
   isAuthenticated,
   isAdmin,
+  reconfirmPasswordFunction,
   async (req: Request, res: Response) => {
+    console.log('req.body',req.body)
     const result: any = await db
       .promise()
       .query(`SELECT * FROM Media WHERE IsDeleted = 1;`);
@@ -375,10 +380,11 @@ router.get(
   }
 );
 
-router.get(
+router.post(
   "/purge-soft-deleted-projects",
   isAuthenticated,
   isAdmin,
+  reconfirmPasswordFunction,
   async (req: Request, res: Response) => {
     const result: any = await db
       .promise()
@@ -481,10 +487,11 @@ router.get(
   }
 );
 
-router.get(
+router.post(
  "/purge-soft-deleted-users",
   isAuthenticated,
   isAdmin,
+  reconfirmPasswordFunction,
   async (req: Request, res: Response) => {
     const result: any = await db
       .promise()

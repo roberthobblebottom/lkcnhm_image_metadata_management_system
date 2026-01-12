@@ -108,9 +108,14 @@
             <td><label><%=element%></label></td>
             <td>
               <div class="horizontal-panel2">
-                <button onclick="editValue('projectType','<%=element%>')" class="btn btn-edit">
+                <button onclick="editValue(entity = 'projectType',
+                 value ='<%=element%>')" class="btn btn-edit">
                   Edit</button>
-                <button onclick="deleteValue('projectType','<%=element%>')" class="btn btn-delete">
+                <button onclick="reconfirmPassword(
+                  entity='projectType',
+                message='Are you sure you want to delete this enumeration value <%=element%> for project type?',
+                value= '<%=element%>',
+                enumAction='delete')" class="btn btn-delete">
                   Delete</button>
               </div>
             </td>
@@ -140,9 +145,12 @@
             <td><label><%=element%></label></td>
             <td>
               <div class="horizontal-panel2">
-                <button onclick="editValue('imagingPlatform','<%=element%>')" class="btn btn-edit">
+                <button onclick="editValue(entity='imagingPlatform',
+                value='<%=element%>')" class="btn btn-edit">
                   Edit</button>
-                <button onclick="deleteValue('imagingPlatform','<%=element%>')"" class=" btn btn-delete">
+                <button onclick="reconfirmPassword(entity='imagingPlatform',
+                message='Are you sure you want to delete this enumeration value <%=element%> for imaging platform?',
+                value='<%=element%>',enumAction='delete')"" class=" btn btn-delete">
                   Delete</button>
               </div>
             </td>
@@ -172,9 +180,12 @@
             <td><label><%=element%></label></td>
             <td>
               <div class="horizontal-panel2">
-                <button onclick="editValue('imageEditingTool','<%=element%>')" class="btn btn-edit">
+                <button onclick="editValue(entity='imageEditingTool',
+                value='<%=element%>')" class="btn btn-edit">
                   Edit</button>
-                <button onclick="deleteValue('imageEditingTool','<%=element%>')" class="btn btn-delete">
+                <button onclick="reconfirmPassword(entity='imageEditingTool',
+                message='Are you sure you want to delete this enumeration value <%=element%> for image editing tool?',
+                value='<%=element%>',enumAction='delete')" class="btn btn-delete">
                   Delete</button>
               </div>
             </td>
@@ -185,13 +196,16 @@
     </div>
     <h2>Purge Data that are marked as Soft Delete from the Database</h2>
 
-    <button onclick="purgeData('user')" class="btn btn-primary">
+    <button onclick="reconfirmPassword('user',
+    'Are you sure you want to PERNAMANTLY purge user data?')" class="btn btn-primary">
       <i class="fas fa-arrow-down"></i> Purge User Data
     </button>
-    <button onclick="purgeData('project')" class="btn btn-primary">
+    <button onclick="reconfirmPassword('project','Are you sure you want to PERNAMANTLY purge project data?')" class="btn btn-primary">
       <i class="fas fa-arrow-down"></i> Purge Project Data
     </button>
-    <button onclick="purgeData('media')" class="btn btn-primary">
+    <button onclick="reconfirmPassword('media',
+      'Are you sure you want to PERNAMANTLY purge soft deleted media?'
+    )" class="btn btn-primary">
       <i class="fas fa-arrow-down"></i> Purge Media Data
     </button>
 
@@ -200,9 +214,6 @@
       <i class="fas fa-arrow-down"></i> Download
     </button>
   </div>
-
-
-
 </body>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
@@ -210,6 +221,42 @@
   new DataTable("#imagingPlatformsTable")
   new DataTable("#imageEditingToolsTable")
 
+  function reconfirmPassword(entity, message = "", value = '', enumAction = '') {
+    console.log('entity', entity)
+    console.log('value', value)
+    const originalValue = value
+    console.log('enumAction', enumAction)
+    Swal.fire({
+      title: "Confirm Your password",
+      html: `
+      <div style="height: 120px">
+      <label>${message} If so please reenter your password</label>
+      <input type="password" id="reconfirmPasswordInput" placeholder="Password" style="width:98%;height:30%">
+      </div>
+      `,
+      confirmButtonText: 'confirm',
+      preConfirm: (value) => {
+        if (!value) {
+          Swal.showValidationMessage('please enter your password')
+          return
+        }
+        if ((['user', 'project', 'media']).includes(entity))
+          purgeData(entity)
+        const passwordValue = document.getElementById('reconfirmPasswordInput').value
+        console.log('password value', passwordValue)
+        switch (enumAction) {
+          // case 'edit':
+          //   editValue(entity, originalValue, passwordValue)
+          //   break
+          case 'delete':
+            sendDeleteValue(entity,
+              originalValue,
+              passwordValue)
+            break
+        }
+      }
+    })
+  }
   async function addValue(feature) {
     Swal.fire({
       title: "Add new " + feature,
@@ -266,7 +313,6 @@
         return; // Stop further execution
       }
 
-
     } catch (error) {
       await Swal.fire({
         title: 'Error!',
@@ -281,24 +327,29 @@
   function editValue(feature, value) {
     Swal.fire({
       title: "Editing Value, " + value + " of the feature " + feature,
-      text: "Editing Value, " + value + " of the feature " + feature,
-      input: 'text',
       showCancelButton: true,
-      inputPlaceholder: "Enter it here."
+      html: `
+      <div style="height: 120px">
+      <label> Edit: you are editing the value '${value}'. please reenter your password if you are sure to edit the value</label>
+      <input id="editedValueInput" value=${value} style="width:98%;height:30%" >
+      <input type="password" id="reconfirmPasswordInput" placeholder="Password" style="width:98%;height:30%">
+      </div>
+      `
     }).then((result) => {
-      if (result.value) {
-        sendEditValue(feature, value, result.value)
-      }
+      sendEditValue(feature, value,
+        document.getElementById('editedValueInput').value,
+        document.getElementById('reconfirmPasswordInput').value)
     });
   }
-  async function sendEditValue(feature, oldValue, newValue) {
-    
+  async function sendEditValue(feature, oldValue, newValue, password) {
+    console.log(feature, oldValue, newValue, password)
     const response = await fetch("/admin/edit-enumeration-value", {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'
       },
       body: JSON.stringify({
+        reconfirmPassword: password,
         feature: feature,
         oldValue,
         newValue
@@ -345,17 +396,8 @@
       });
     }
   }
-  async function deleteValue(feature, value) {
 
-    Swal.fire({
-      title: "Are you sure you want to delete this value " + value + " from " + feature,
-      text: "Are you sure you want to delete this value " + value + " from " + feature,
-      showCancelButton: true,
-    }).then((result) => {
-      sendDeleteValue(feature, value)
-    });
-  }
-  async function sendDeleteValue(feature, value) {
+  async function sendDeleteValue(feature, value, password) {
 
     console.log(feature, value)
     const response = await fetch("/admin/delete-enumeration-value", {
@@ -365,7 +407,8 @@
       },
       body: JSON.stringify({
         feature: feature,
-        value: value
+        value: value,
+        reconfirmPassword: password
       })
     });
     try {
@@ -410,11 +453,19 @@
     }
   }
 
-  
+
 
   async function purgeData(entity) {
     try {
-      const response = await fetch('/admin/purge-soft-deleted-' + entity + 's', )
+      const response = await fetch('/admin/purge-soft-deleted-' + entity + 's', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          reconfirmPassword: document.getElementById("reconfirmPasswordInput").value
+        })
+      })
       console.log(response)
       const result = await response.json();
       if (response.status == 400 && !result.success) {
@@ -463,7 +514,7 @@
       }); // change resultByte to bytes
       var link = document.createElement('a');
       link.href = window.URL.createObjectURL(blob);
-      link.download = "data "+new Date().toISOString()+".zip";
+      link.download = "data " + new Date().toISOString() + ".zip";
       link.click();
     } catch (error) {
       Swal.fire({
