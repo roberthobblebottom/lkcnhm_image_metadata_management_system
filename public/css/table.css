@@ -5,12 +5,9 @@ body {
   display: flex;
 }
 
-
-
 .main-con {
   margin-top: 100px;
   margin-left: 350px;
-
 }
 
 
@@ -18,7 +15,7 @@ body {
 /* Heading */
 h2 {
   text-align: center;
-       font-size: 1.875rem;
+  font-size: 1.875rem;
   color: #212529;
   font-weight: 600;
   margin-bottom: 20px;
@@ -28,7 +25,6 @@ h2 {
 
 /* Table Styles */
 table {
-  width: 100%;
   border-collapse: collapse;
   background: white;
   border-radius: 8px;
@@ -48,7 +44,7 @@ th {
   padding: 10px;
   text-align: center;
   font-weight: 600;
-  font-size: large;
+  font-size: small;
   text-transform: uppercase;
   border-bottom: 2px solid #000435;
   white-space: nowrap;
@@ -60,8 +56,8 @@ td {
   padding: 10px;
   /* Reduced padding */
   border-bottom: 1px solid #ddd;
-  font-size: large;
-text-align: center;
+  font-size: x-small;
+  text-align: center;
   color: #333;
   white-space: nowrap;
 }
@@ -125,7 +121,7 @@ button.delete-btn:hover {
 .action-btns button {
   margin-right: 6px;
   padding: 5px 10px;
-  
+
   font-size: 14px;
   border-radius: 4px;
   cursor: pointer;
@@ -165,10 +161,12 @@ button.delete-btn:hover {
 .btn-restore {
   background: #54d300;
 }
+
 a.disabled {
-  color:#ccc;
+  color: #ccc;
   pointer-events: none;
 }
+
 #horizontal-panel {
   display: flex;
   align-items: center;

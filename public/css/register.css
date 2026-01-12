@@ -12,8 +12,12 @@ body {
 }
 
 /* Heading */
-h2 {
-    font-size: 24px;
+h1{
+    font-size: medium;
+}
+
+h2{
+    font-size: medium;
     color: #212529;
     font-weight: 600;
     margin-bottom: 20px;
@@ -36,7 +40,7 @@ input {
     margin: 10px 0;
     border: 1px solid #ddd;
     border-radius: 4px;
-    font-size: 14px;
+    font-size: small;
 }
 
 /* Input Focus Effect */
@@ -53,7 +57,7 @@ button {
     padding: 12px;
     border: none;
     cursor: pointer;
-    font-size: 14px;
+    font-size: small;
     border-radius: 4px;
     font-weight: 600;
     background: #007bff;
@@ -69,7 +73,7 @@ button:hover {
 /* Message Paragraph */
 p#message {
     margin-top: 15px;
-    font-size: 14px;
+    font-size: small;
     color: #dc3545;
 }
 

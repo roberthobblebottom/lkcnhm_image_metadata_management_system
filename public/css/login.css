@@ -35,14 +35,14 @@
   }
   
   /* .login-container h2 {
-    font-size: large;
+    font-size: medium;
     font-weight: 700;
     margin-bottom: 30px;
   } */
   
 
   .password-field{
-    font-size: 30px;
+    font-size: small;
     min-width: 400px;
     min-height: 80px;
   }
@@ -55,7 +55,7 @@
   .password-field input {
     width: 100%;
     padding: 12px 40px 12px 12px;
-    font-size: large;
+    font-size: small;
     border: 1px solid #ccc;
     border-radius: 6px;
     outline: none;
@@ -83,7 +83,7 @@
   }
   .forgot-password {
     text-align: right;
-    font-size: medium;
+    font-size: small;
     margin-bottom: 15px;
   }
   
@@ -117,7 +117,7 @@
     border-radius: 999px;
     background-color: #377dff;
     color: white;
-    font-size: large;
+    font-size: small;
     font-weight: 600;
     cursor: pointer;
     margin-top: 20px;
@@ -130,7 +130,7 @@
   
   .signup-text {
     margin-top: 20px;
-    font-size: medium;
+    font-size: small;
     color: #666;
   }
   

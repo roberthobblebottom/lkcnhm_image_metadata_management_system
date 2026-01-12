@@ -12,3 +12,4 @@ node_modules/
 *.venv*
 *.csv
 pipeline/dist/*
+*.log

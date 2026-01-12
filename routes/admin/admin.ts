@@ -7,20 +7,18 @@ import { QueryResult } from "mysql2";
 import { db } from "../db"; // Database connection
 const { isAuthenticated, isAdmin } = require("../../middleware/auth"); // Middleware
 const fastcsv = require("fast-csv");
-const fs = require("fs");
 
 import AdmZip from "adm-zip";
-// 📌 Serve Admin Users Page (HTML)
-router.get(
-  "/admin-users",
-  isAuthenticated,
-  isAdmin,
-  (req: any, res: { sendFile: (arg0: any) => void }) => {
-    res.sendFile(path.join(__dirname, "../views/admin-users.html"));
-  }
-);
 
-// 🔒 Admin Routes (Protected)
+// router.get(
+//   "/admin-users",
+//   isAuthenticated,
+//   isAdmin,
+//   (req: any, res: { sendFile: (arg0: any) => void }) => {
+//     res.sendFile(path.join(__dirname, "../views/admin-users.html"));
+//   }
+// );
+
 router.get(
   "/login-landing-page",
   isAuthenticated,
@@ -46,6 +44,8 @@ router.get(
   }
 );
 
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// Enumerations Operations
 router.post(
   "/add-enumeration-value",
   isAuthenticated,
@@ -337,7 +337,9 @@ router.post(
     });
   }
 );
+
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// Purge soft deleted data
 router.get(
   "/purge-soft-deleted-medias",
   isAuthenticated,
@@ -480,7 +482,7 @@ router.get(
 );
 
 router.get(
-  "/purge-soft-deleted-users",
+ "/purge-soft-deleted-users",
   isAuthenticated,
   isAdmin,
   async (req: Request, res: Response) => {
@@ -589,6 +591,8 @@ router.get(
   }
 );
 
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// Download Data
 router.get(
   "/download-system-data",
   isAuthenticated,

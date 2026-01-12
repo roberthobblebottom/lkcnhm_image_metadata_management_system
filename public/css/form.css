@@ -1,7 +1,7 @@
    body {
        font-family: 'Segoe UI', sans-serif;
        padding: 2rem;
-       font-size: medium;
+       font-size: small;
        background: #f8fafc;
    }
 
@@ -23,8 +23,7 @@
    }
 
    .form-group {
-       margin-bottom: 20px;
-       margin-bottom: 1.5rem;
+       margin-bottom: 1.2rem;
        display: grid;
        /* vertical-align: middle; */
        align-items: center;
@@ -69,7 +68,7 @@
    /* Labels */
    label {
        display: block;
-       font-size: large;
+       font-size: small;
        font-weight: 600;
        color: #475569;
        margin-bottom: 0.5rem;
@@ -77,8 +76,7 @@
    }
    .label2{
    display: block;
-       font-size: medium;
-       font-size: large;
+       font-size: small;
        font-weight: 600;
        color: #475569;
        float: left;
@@ -263,11 +261,11 @@ textarea[readonly] {
        border-radius: 8px;
        border: 1px dashed #cbd5e1;
        margin: 2rem 0;
-       font-size: medium;
+       font-size: small;
    }
 
    .error-message {
-       font-size: 0.9rem;
+       font-size: small;
        color: #e74c3c;
        display: none;
        margin-top: 0.3rem;

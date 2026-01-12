@@ -255,7 +255,7 @@ router.get(
     const baseQuery = `
       SELECT 
         m.MediaID,
-        m.FileName,
+        m.MorphoID,
         m.FilePath,
         m.CatalogID,
         m.ImagingDate,
