@@ -229,7 +229,7 @@
     Swal.fire({
       title: "Confirm Your password",
       html: `
-      <div style="height: 120px">
+      <div style="height: 250px">
       <label>${message} If so please reenter your password</label>
       <input type="password" id="reconfirmPasswordInput" placeholder="Password" style="width:98%;height:30%">
       </div>
@@ -324,21 +324,28 @@
     }
   }
 
+  
+  
   function editValue(feature, value) {
+  console.log('value',value)
     Swal.fire({
       title: "Editing Value, " + value + " of the feature " + feature,
       showCancelButton: true,
       html: `
-      <div style="height: 120px">
-      <label> Edit: you are editing the value '${value}'. please reenter your password if you are sure to edit the value</label>
-      <input id="editedValueInput" value=${value} style="width:98%;height:30%" >
-      <input type="password" id="reconfirmPasswordInput" placeholder="Password" style="width:98%;height:30%">
+      <div style="height: 200px">
+      <label> please reenter your password if you are sure to edit the value</label>
+      <input type="text" id="editedValueInput" value='${value}' style="width:98%;height:20%" >
+      <input type="password" id="reconfirmPasswordInput" placeholder="Password" style="width:98%;height:20%">
       </div>
-      `
-    }).then((result) => {
-      sendEditValue(feature, value,
-        document.getElementById('editedValueInput').value,
-        document.getElementById('reconfirmPasswordInput').value)
+      `,
+      preConfirm: () => {
+        const p = document.getElementById('reconfirmPasswordInput').value
+        if (p == "")
+          Swal.showValidationMessage('password required')
+        sendEditValue(feature, value,
+          document.getElementById('editedValueInput').value, p
+        )
+      }
     });
   }
   async function sendEditValue(feature, oldValue, newValue, password) {

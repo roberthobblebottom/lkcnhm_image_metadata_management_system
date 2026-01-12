@@ -103,7 +103,6 @@ router.post(
     const newValue = req.body.newValue;
     switch (feature) {
       case "projectType":
-        console.log(feature, oldValue, newValue);
         const projectTypes = req.session.projectTypes;
         projectTypes.includes(oldValue) &&
           projectTypes.splice(projectTypes.indexOf(oldValue), 1);
