@@ -80,17 +80,17 @@
           <label for="comments">Comments </label>
           <textarea id="comments"><%=user.Comments%></textarea>
         </div>
- 
+
 
         <div class="form-group">
           <label>Is Deleted? </label>
           <%=!user.IsDeleted? 'No' : 'Yes' %>
 
         </div>
-   
 
-<div class="buttons">
-        <button type="submit">Update User</button>
+
+        <div class="buttons">
+          <button type="submit">Update User</button>
         </div>
       </form>
     </div>
@@ -98,10 +98,32 @@
 
   <script>
     document.addEventListener("DOMContentLoaded", () => {
-
       const form = document.getElementById("editUserForm");
       form.addEventListener('submit', async function(e) {
         e.preventDefault();
+        Swal.fire({
+          title: "Confirm Your password",
+          html: `
+      <div style="height: 120px">
+      <label>Are you sure you want to edit this user? If so please reenter your password.</label>
+      <input type="password" id="reconfirmPasswordInput" placeholder="Password" style="width:98%;height:10%">
+      </div>
+      `,
+          confirmButtonText: 'confirm',
+          preConfirm: (value) => {
+            if (!value) {
+              Swal.showValidationMessage('please enter your password')
+              return
+            }
+            const passwordValue = document.getElementById('reconfirmPasswordInput').value
+            submit(form, passwordValue)
+          }
+        });
+
+
+      })
+
+      async function submit(form, reconfirmPasswordForAdmin) {
 
         // Validate form
         //   const passwordRegex = /^(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{8,}$/;
@@ -111,7 +133,6 @@
         submitBtn.innerHTML = '<i class="fas fa-spinner"></i> Submitting...';
         submitBtn.disabled = true;
         if (!/^[\w\-\.]+@([\w-]+\.)+[\w-]{2,}$/.test(form.email.value)) {
-
           submitBtn.disabled = false;
           submitBtn.innerHTML = 'Edit Profile';
           await Swal.fire({
@@ -156,7 +177,8 @@
           contactNumber: form.contactNumber.value,
           organisation: form.organisation.value,
           comments: form.comments.value,
-          originalEmail: "<%=user.Email%>"
+          originalEmail: "<%=user.Email%>",
+          reconfirmPasswordForAdmin: reconfirmPasswordForAdmin
         })
         try {
           // Show loading indicator
@@ -219,7 +241,7 @@
 
           submitBtn.innerHTML = 'Edit Profile';
         }
-      });
+      };
     });
   </script>
 </body>

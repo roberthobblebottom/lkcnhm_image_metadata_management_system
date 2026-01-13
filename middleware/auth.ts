@@ -53,20 +53,18 @@ const isAdminOrProjectOwner = (
   next();
 };
 
-const reconfirmPasswordFunction = async (
+const reconfirmPasswordFunctionForAdmin = async (
   req: Request,
   res: Response,
   next: NextFunction
 ) => {
-  const reconfirmPassword: string = req.body.reconfirmPassword;
+  const reconfirmPassword: string = req.body.reconfirmPasswordForAdmin;
   const username: string = req.session.passport.user.Email;
   if (!reconfirmPassword) {
     return res
       .status(400)
       .json({ success: false, message: "Password to reconfirm is empty" });
   }
-  console.log("reconfirm password function")
-  console.log('email', username)
   const query =
     "SELECT PasswordSalt, SaltedPassword FROM User WHERE Email = ? AND IsDeleted = 0 AND UserType = 'admin'";
   const [result]: any = await db
@@ -79,7 +77,6 @@ const reconfirmPasswordFunction = async (
         .json({ success: false, message: "Database error " + error });
     });
 
-  console.log('result', result)
   if (result.length === 0) {
     console.log("🚫 User Not Found");
     return res
@@ -110,4 +107,4 @@ const reconfirmPasswordFunction = async (
   }
   next();
 };
-module.exports = { isAuthenticated, isAdmin, isAdminOrProjectOwner,reconfirmPasswordFunction };
+module.exports = { isAuthenticated, isAdmin, isAdminOrProjectOwner,reconfirmPasswordFunctionForAdmin };

@@ -40,7 +40,7 @@
           <option value="<%=u.ProjectID%>,<%=u.UserID%>" <%=currentUser.UserID.toString()==u.UserID.toString()
             && currentUser.UserType == 'photographerOnly'
             ?"selected":""%>>
-            <%=u.projectName%> - <%=u.photographerName%>
+            <%=u.projectName%> | <%=u.photographerName%>
           </option>
           <%})%>
         </select>

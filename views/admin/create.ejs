@@ -68,7 +68,7 @@
         <label for="comments">Comments </label>
         <textarea id="comments"></textarea>
       </div>
- 
+
 
       <div class="buttons">
         <button type="submit">Create User</button>
@@ -82,7 +82,28 @@
       const form = document.getElementById("form");
       form.addEventListener('submit', async function(e) {
         e.preventDefault();
+        Swal.fire({
+          title: "Confirm Your password",
+          html: `
+      <div style="height: 250px">
+      <label>Are you sure you want to create this user? If so please reenter your password.</label>
+      <input type="password" id="reconfirmPasswordInput" placeholder="Password" style="width:98%;height:10%">
+      </div>
+      `,
+          confirmButtonText: 'confirm',
+          preConfirm: (value) => {
+            if (!value) {
+              Swal.showValidationMessage('please enter your password')
+              return
+            }
+            const passwordValue = document.getElementById('reconfirmPasswordInput').value
+            submit(form,passwordValue)
+          }
+        });
+      })
 
+      async function submit(form,reconfirmPasswordForAdmin) {
+        
         // Validate form
         //   const passwordRegex = /^(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{8,}$/;
         const submitBtn = form.querySelector('button[type="submit"]');
@@ -91,7 +112,6 @@
         submitBtn.innerHTML = '<i class="fas fa-spinner"></i> Submitting...';
         submitBtn.disabled = true;
         if (!/^[\w\-\.]+@([\w-]+\.)+[\w-]{2,}$/.test(form.email.value)) {
-
           submitBtn.disabled = false;
           submitBtn.innerHTML = 'Edit Profile';
           await Swal.fire({
@@ -132,6 +152,7 @@
           contactNumber: form.contactNumber.value,
           organisation: form.organisation.value,
           comments: form.comments.value,
+          reconfirmPasswordForAdmin:reconfirmPasswordForAdmin
         })
         try {
           // Show loading indicator
@@ -193,8 +214,8 @@
           submitBtn.value = "Upload"
           submitBtn.innerHTML = 'Edit Profile';
         }
-      });
-    });
+      };
+    })
   </script>
 </body>
 

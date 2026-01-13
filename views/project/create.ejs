@@ -50,8 +50,8 @@
           <!-- <button class="addButton" id="addProjectTypeButton">Add Project Type</button> -->
         </div>
 
-        <select name="projectType" id="projectType" class="form-control" >
-          <option value= "">-- Select Project Type --</option>
+        <select name="projectType" id="projectType" class="form-control">
+          <option value="">-- Select Project Type --</option>
           <% projectTypes.forEach(projectType=> { %>
           <option value="<%= projectType %>" <%=projectType=='BDP' ? "selected":""%>>
             <%= projectType %>
@@ -276,6 +276,8 @@
   document.addEventListener('load', function() {
     // grey out and disable this option
     //The repeated block for greying out is required for both load and DOMContentLoaded event
+    if ('<%=currentUser.UserType%>' == 'admin')
+      return
     const x = document.querySelector("[data-value='<%=currentUser.UserID%>']")
     // x.removeChild(x.childNodes[1])
 
@@ -286,11 +288,16 @@
   document.addEventListener('DOMContentLoaded', function() {
     // grey out and disable this option
     //The repeated block for greying out is required for both load and DOMContentLoaded event
-    const x = document.querySelector("[data-value='<%=currentUser.UserID%>']")
-    // x.removeChild(x.childNodes[1])
-    x.childNodes[1].style.display = 'none'
-    x.style.padding = "12px"
-    x.style.backgroundColor = "gray"
+    if ('<%=currentUser.UserType%>' != 'admin') {
+      const x = document.querySelector("[data-value='<%=currentUser.UserID%>']")
+      // x.removeChild(x.childNodes[1])
+      x.childNodes[1].style.display = 'none'
+      x.style.padding = "12px"
+      x.style.backgroundColor = "gray"
+
+    }
+
+
     newSelectedPhotographers.passedElement.element.addEventListener('removeItem', function(e) {
       toBeRemoved = [e.detail.label, e.detail.value]
       for (let x1 = 0; x1 < toBeCreatedPhotographers.length; x1++) {
@@ -388,12 +395,12 @@
         submitBtn.innerHTML = '<i class="fas fa-spinner"></i> Submitting...';
         submitBtn.disabled = true;
 
-        const projectType = form.projectType == null? "" : form.projectType.value
+        const projectType = form.projectType == null ? "" : form.projectType.value
         // Create a plain object from form data
         const formData = {
           projectName: form.projectName.value,
           projectOwner: form.projectOwner.value,
-          projectType: projectType, 
+          projectType: projectType,
           startDate: form.startDate.value,
           endDate: form.endDate.value,
           summary: form.summary.value,

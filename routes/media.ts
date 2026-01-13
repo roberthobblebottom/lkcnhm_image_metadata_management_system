@@ -77,6 +77,7 @@ router.get("/create", isAuthenticated, async (req: Request, res: Response) => {
         FROM ProjectUserPhotographyLink pupl 
         JOIN Project p ON p.ProjectID = pupl.ProjectID 
         JOIN User photographer ON photographer.UserID = pupl.PhotographerID
+        WHERE photographer.UserType != 'admin'
         `;
   const user = req.session.passport.user;
   var q2: string;
@@ -382,6 +383,7 @@ router.get(
         FROM ProjectUserPhotographyLink pupl 
         JOIN Project p ON p.ProjectID = pupl.ProjectID 
         JOIN User photographer ON photographer.UserID = pupl.PhotographerID
+        WHERE photographer.UserType != 'admin'
         `;
     const user = req.session.passport.user;
     var q2: string;

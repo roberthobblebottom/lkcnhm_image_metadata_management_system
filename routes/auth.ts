@@ -212,12 +212,10 @@ router.post("/login", (req: Request, res: Response, next: NextFunction) => {
           const x2: any[] = await db
             .promise()
             .query("SHOW COLUMNS FROM Media LIKE 'ImagingPlatform' ");
-          console.log(x2[0][0])
           const ip = x2[0][0]["Type"]
           const ip2 = ip.substring(5,ip.length-1)
             .replaceAll("'", "")
             .split(",");
-          console.log('ip2',ip2)
           req.session.imagingPlatforms = ip2;
           const x3: any[] = await db
             .promise()

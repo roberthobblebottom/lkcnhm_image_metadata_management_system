@@ -22,7 +22,6 @@
         </h2>
       </div>
       <div class='form-group'>
-
         <label>Media ID: <%=toBeEditedMedia.MediaID%></label>
         <input readonly type='text' name="MediaID" value="<%= toBeEditedMedia.MediaID %>" style="display:none;">
       </div>
@@ -36,7 +35,7 @@
             u.projectName== toBeEditedMedia.ProjectName  
             && (u.photographerName == toBeEditedMedia.photographerName) 
           ? 'selected'  : "" %>>
-            <%=u.projectName%>-<%=u.photographerName%>
+            <%=u.projectName%> | <%=u.photographerName%>
           </option>
           <%})%>
         </select>
@@ -121,7 +120,6 @@
 
         <div class="horizontal-panel2">
           <label class="label2" for="imageEditingTool">Image Editing Tool</label>
-
           <!-- <button class="addButton" id="addImageEditingTool">Add Image Editing Tool</button> -->
         </div>
         <select name="imageEditingTool" id="imageEditingTool">

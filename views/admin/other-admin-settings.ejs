@@ -356,7 +356,7 @@
         'Content-Type': 'application/json'
       },
       body: JSON.stringify({
-        reconfirmPassword: password,
+        reconfirmPasswordForAdmin: password,
         feature: feature,
         oldValue,
         newValue
@@ -415,7 +415,7 @@
       body: JSON.stringify({
         feature: feature,
         value: value,
-        reconfirmPassword: password
+        reconfirmPasswordForAdmin: password
       })
     });
     try {
@@ -470,7 +470,7 @@
           'Content-Type': 'application/json'
         },
         body: JSON.stringify({
-          reconfirmPassword: document.getElementById("reconfirmPasswordInput").value
+          reconfirmPasswordForAdmin: document.getElementById("reconfirmPasswordInput").value
         })
       })
       console.log(response)

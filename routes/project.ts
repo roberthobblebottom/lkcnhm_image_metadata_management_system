@@ -25,14 +25,14 @@ router.get(
     const getProjectOwners = `
     SELECT u.UserID,u.FullName, u.Email, u.UserType 
     FROM User u
-    WHERE u.UserType IN ('projectOwner','admin')
+    WHERE u.UserType = 'projectOwner'
     AND u.IsDeleted = 0
     `;
 
     const getPhotographers = `
     SELECT u.UserID,u.FullName, u.Email 
     FROM User u
-    WHERE u.IsDeleted = 0
+    WHERE u.UserType != 'admin' AND u.IsDeleted = 0
     `;
 
     const [projectOwners, photographers] = await Promise.all([
@@ -516,7 +516,7 @@ router.get(
       const getProjectOwners = `
     SELECT u.UserID,u.FullName, u.Email, u.UserType 
     FROM User u
-    WHERE u.UserType IN ('projectOwner','admin')
+    WHERE u.UserType ='projectOwner'
     AND u.IsDeleted = 0
     `;
       // Get all needed data in parallel for better performance
@@ -540,7 +540,7 @@ router.get(
             "SELECT user.UserID  FROM ProjectUserPhotographyLink p JOIN User user on user.UserID = p.PhotographerID WHERE p.ProjectID = ? ",
             [projectID]
           ),
-        db.promise().query("SELECT UserID,FullName FROM User ", []),
+        db.promise().query("SELECT UserID,FullName FROM User WHERE UserType!= 'admin' "),
         db.promise().query(getProjectOwners),
       ]);
       if (requestResults[0].length === 0) {
@@ -618,6 +618,7 @@ router.post(
         selectedPhotographers,
         toBeCreatedPhotographers,
       } = req.body;
+      console.log(selectedPhotographers)
       // === 1. VALIDATION ===
       if (!imagingStartDate || !imagingEndDate || !projectStatus) {
         return res
@@ -829,43 +830,43 @@ router.post(
       /// IMAGING PLATFORMS OPERATIONS END
 
       /// Photographers OPERATIONS START
-      // const selectPhotographerQuery = `
-      //   SELECT PhotographerID FROM ProjectUserPhotographyLink WHERE ProjectID = ?`;
-      // const temp3: any = (
-      //   await db.promise().query(selectPhotographerQuery, [projectID])
-      // )[0];
-      // var currentSelectedPhotographers: string[] = [];
-      // for (x of temp3)
-      //   currentSelectedPhotographers.push(x.PhotographerID.toString());
+      const selectPhotographerQuery = `
+        SELECT PhotographerID FROM ProjectUserPhotographyLink WHERE ProjectID = ?`;
+      const temp3: any = (
+        await db.promise().query(selectPhotographerQuery, [projectID])
+      )[0];
+      var currentSelectedPhotographers: string[] = [];
+      for (const x of temp3)
+        currentSelectedPhotographers.push(x.PhotographerID.toString());
 
-      // //Getting differences
-      // const temp4 = selectedPhotographers.filter(
-      //   (e: any) => !currentSelectedPhotographers.includes(e)
-      // );
-      // const photographersToBeAdded: string[][] = [];
-      // for (x of temp4) photographersToBeAdded.push([x, projectID.toString()]);
+      //Getting differences
+      const temp4 = selectedPhotographers.filter(
+        (e: any) => !currentSelectedPhotographers.includes(e)
+      );
+      const photographersToBeAdded: string[][] = [];
+      for (const x of temp4) photographersToBeAdded.push([x, projectID.toString()]);
 
-      // const photographersToBeRemoved: string[] =
-      //   currentSelectedPhotographers.filter(
-      //     (e: any) => !selectedPhotographers.includes(e)
-      //   );
-      // //the update
-      // if (photographersToBeRemoved.length != 0) {
-      //   await db
-      //     .promise()
-      //     .query(
-      //       "DELETE FROM ProjectUserPhotographyLink WHERE PhotographerID in (?) AND ProjectID =?",
-      //       [photographersToBeRemoved, projectID]
-      //     );
-      // }
-      // if (photographersToBeAdded.length != 0) {
-      //   await db
-      //     .promise()
-      //     .query(
-      //       "INSERT INTO ProjectUserPhotographyLink(PhotographerID,ProjectID) VALUES ? ",
-      //       [photographersToBeAdded]
-      //     );
-      // }
+      const photographersToBeRemoved: string[] =
+        currentSelectedPhotographers.filter(
+          (e: any) => !selectedPhotographers.includes(e)
+        );
+      //the update
+      if (photographersToBeRemoved.length != 0) {
+        await db
+          .promise()
+          .query(
+            "DELETE FROM ProjectUserPhotographyLink WHERE PhotographerID in (?) AND ProjectID =?",
+            [photographersToBeRemoved, projectID]
+          );
+      }
+      if (photographersToBeAdded.length != 0) {
+        await db
+          .promise()
+          .query(
+            "INSERT INTO ProjectUserPhotographyLink(PhotographerID,ProjectID) VALUES ? ",
+            [photographersToBeAdded]
+          );
+      }
       /// Photographers OPERATIONS END
 
       // === 2. DATABASE UPDATE ===

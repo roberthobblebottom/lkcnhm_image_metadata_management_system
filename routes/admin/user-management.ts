@@ -9,7 +9,11 @@ import {
   userTypesEnumeration,
 } from "../../middleware/utils";
 import { Response, Request } from "express";
-const { isAuthenticated, isAdmin } = require("../../middleware/auth"); // Middleware
+const {
+  isAuthenticated,
+  isAdmin,
+  reconfirmPasswordFunctionForAdmin,
+} = require("../../middleware/auth"); // Middleware
 router.get(
   "/create",
   isAuthenticated,
@@ -26,6 +30,7 @@ router.post(
   "/create",
   isAuthenticated,
   isAdmin,
+  reconfirmPasswordFunctionForAdmin,
   async (req: Request, res: Response) => {
     const adminID = req.session.passport.user.UserID;
     const {
@@ -118,15 +123,17 @@ router.post(
             adminID,
             adminID,
           ];
-          const result = await db.promise().query<RowDataPacket[]>(insertUserQuery, params);
+          const result = await db
+            .promise()
+            .query<RowDataPacket[]>(insertUserQuery, params);
           const o: any = result;
-          console.log(o)
-          const insertID = Object.values(o[0])[2].toString()
-          console.log('insertID',insertID)
+          console.log(o);
+          const insertID = Object.values(o[0])[2].toString();
+          console.log("insertID", insertID);
           return res.json({
             success: true,
             message: "User created successfully!",
-            redirectUrl: `/admin/user-management/view/${insertID}`
+            redirectUrl: `/admin/user-management/view/${insertID}`,
           });
         }
       );
@@ -243,6 +250,7 @@ router.post(
   ["/edit/:userID"],
   isAuthenticated,
   isAdmin,
+  reconfirmPasswordFunctionForAdmin,
   async (req: Request, res: Response) => {
     const adminID = req.params.userID;
 
@@ -375,18 +383,20 @@ router.post(
   "/delete/:userID",
   isAuthenticated,
   isAdmin,
+  reconfirmPasswordFunctionForAdmin,
   (req: Request, res: Response) => {
-    const userId = req.params.userID;
+    const userID = req.params.userID;
+    console.log(userID)
     const query = "UPDATE User SET IsDeleted = 1 WHERE UserID = ?";
 
-    db.query(query, [userId], (err, result) => {
+    db.query(query, [userID], (err, result) => {
       if (err) {
         console.error("❌ Database Error:", err);
         return res
           .status(500)
           .json({ success: false, error: "Database error" });
       }
-      console.log(`🗑️ User ${userId} marked as deleted`);
+      console.log(`🗑️ User ${userID} marked as deleted`);
 
       res.redirect("/admin/user-management/view-all");
     });
@@ -397,8 +407,10 @@ router.post(
   "/restore/:userID",
   isAuthenticated,
   isAdmin,
+  reconfirmPasswordFunctionForAdmin,
   (req: Request, res: Response) => {
     const userID = req.params.userID;
+    console.log(userID)
     db.query(
       "UPDATE User SET IsDeleted = 0 WHERE UserID = ?",
       [userID],

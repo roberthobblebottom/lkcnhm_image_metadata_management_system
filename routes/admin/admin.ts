@@ -5,7 +5,7 @@ const path = require("path");
 
 import { QueryResult } from "mysql2";
 import { db } from "../db"; // Database connection
-const { isAuthenticated, isAdmin,reconfirmPasswordFunction } = require("../../middleware/auth"); // Middleware
+const { isAuthenticated, isAdmin,reconfirmPasswordFunctionForAdmin } = require("../../middleware/auth"); // Middleware
 const fastcsv = require("fast-csv");
 
 import AdmZip from "adm-zip";
@@ -96,7 +96,7 @@ router.post(
   "/edit-enumeration-value",
   isAuthenticated,
   isAdmin,
-  reconfirmPasswordFunction,
+  reconfirmPasswordFunctionForAdmin,
   async (req: Request, res: Response) => {
     const feature = req.body.feature;
     const oldValue = req.body.oldValue;
@@ -259,7 +259,7 @@ router.post(
   "/delete-enumeration-value",
   isAuthenticated,
   isAdmin,
-  reconfirmPasswordFunction,
+  reconfirmPasswordFunctionForAdmin,
   async (req: Request, res: Response) => {
     const feature = req.body.feature;
     const value = req.body.value;
@@ -346,7 +346,7 @@ router.post(
   "/purge-soft-deleted-medias",
   isAuthenticated,
   isAdmin,
-  reconfirmPasswordFunction,
+  reconfirmPasswordFunctionForAdmin,
   async (req: Request, res: Response) => {
     console.log('req.body',req.body)
     const result: any = await db
@@ -383,7 +383,7 @@ router.post(
   "/purge-soft-deleted-projects",
   isAuthenticated,
   isAdmin,
-  reconfirmPasswordFunction,
+  reconfirmPasswordFunctionForAdmin,
   async (req: Request, res: Response) => {
     const result: any = await db
       .promise()
@@ -490,7 +490,7 @@ router.post(
  "/purge-soft-deleted-users",
   isAuthenticated,
   isAdmin,
-  reconfirmPasswordFunction,
+  reconfirmPasswordFunctionForAdmin,
   async (req: Request, res: Response) => {
     const result: any = await db
       .promise()
