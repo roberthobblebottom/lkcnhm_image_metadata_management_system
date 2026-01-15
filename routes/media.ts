@@ -998,10 +998,15 @@ router.post(
   }
 );
 
-router.get("/download", isAuthenticated, async (req: any, res: Response) => {
+router.get("/download-template", isAuthenticated, async (req: any, res: Response) => {
   //helps to retrieve metadata template file for downloading.
   const filePath: string = "image metadata template for only one project.xlsx";
   res.download(filePath);
 });
+
+router.get("/download-pipeline-script", isAuthenticated, (req: Request, res: Response) => { 
+
+  res.download("pipeline.zip")
+})
 
 module.exports = router;

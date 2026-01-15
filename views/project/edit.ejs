@@ -27,7 +27,7 @@
         </a>
         <h2>Edit Project</h2>
       </div>
-<div class="form-group">
+      <div class="form-group">
         <label>Project ID: <%=project.ProjectID%></label>
       </div>
       <div class="form-group">
@@ -56,14 +56,14 @@
         <select name="projectType" id="projectType" class="form-control">
           <option value="">-- Select Project Type --</option>
           <% projectTypes.forEach(projectType=> { %>
-        <option value="<%= projectType %>" <%=project.ProjectType==projectType ? 'selected' : ''%>>
-          <%= projectType %>
-        </option>
-        <% }) %>
+          <option value="<%= projectType %>" <%=project.ProjectType==projectType ? 'selected' : ''%>>
+            <%= projectType %>
+          </option>
+          <% }) %>
         </select>
       </div>
 
-        <%}%>
+      <%}%>
       <div class="form-group">
         <div class="horizontal-panel2">
           <label for="newSelectedImagingPlatforms">Photographer(s):</label>
@@ -72,77 +72,77 @@
         <select multiple id="newSelectedPhotographers">
           <option value="">---Select Photographers---</option>
           <% allPhotographers.forEach(photographer=>{ %>
-          <option value="<%=photographer.UserID%>" id="<%=photographer.UserID%>ID" %>
-            <%=selectedPhotographers.includes(photographer.UserID) ? "selected":""%>>
-            <%=photographer.FullName%>
-          </option>
-          <%})%>
-        </select>
-      </div>
+      <option value="<%=photographer.UserID%>" id="<%=photographer.UserID%>ID" %>
+        <%=selectedPhotographers.includes(photographer.UserID) ? "selected":""%>>
+        <%=photographer.FullName%>
+      </option>
+      <%})%>
+      </select>
+  </div>
 
-      <div class="form-group">
-        <label for="ImagingStartDate">Imaging Start Date:</label>
-        <input type="date" id="imagingStartDate" name="imagingStartDate" value="<%= project.ImagingStartDate %>" class="form-control" required>
-        <div id="startDate-error" class="error-message">Start date must be after request date</div>
-      </div>
+  <div class="form-group">
+    <label for="ImagingStartDate">Imaging Start Date:</label>
+    <input type="date" id="imagingStartDate" name="imagingStartDate" value="<%= project.ImagingStartDate %>" class="form-control" required>
+    <div id="startDate-error" class="error-message">Start date must be after request date</div>
+  </div>
 
-      <div class="form-group">
-        <label for="ImagingEndDate">Imaging End Date:</label>
-        <input type="date" id="imagingEndDate" name="imagingEndDate" value="<%= project.ImagingEndDate %>" class="form-control" required>
-        <div id="endDate-error" class="error-message">End date must be after start date</div>
-      </div>
+  <div class="form-group">
+    <label for="ImagingEndDate">Imaging End Date:</label>
+    <input type="date" id="imagingEndDate" name="imagingEndDate" value="<%= project.ImagingEndDate %>" class="form-control" required>
+    <div id="endDate-error" class="error-message">End date must be after start date</div>
+  </div>
 
-      <div class="form-group">
-        <label for="SummaryOfProject">Summary of Project:</label>
-        <textarea id="summaryOfProject" name="summaryOfProject" class="form-control" required>
+  <div class="form-group">
+    <label for="SummaryOfProject">Summary of Project:</label>
+    <textarea id="summaryOfProject" name="summaryOfProject" class="form-control" required>
             <%= project.SummaryOfProject %>
         </textarea>
-      </div>
+  </div>
 
-      <div class="form-group">
-        <label for="DetailsOfSpecimens">Details Of Specimens:</label>
-        <textarea id="detailsOfSpecimens" name="detailsOfSpecimens" class="form-control" required>
+  <div class="form-group">
+    <label for="DetailsOfSpecimens">Details Of Specimens:</label>
+    <textarea id="detailsOfSpecimens" name="detailsOfSpecimens" class="form-control" required>
             <%= project.DetailsOfSpecimens %>
         </textarea>
-      </div>
-      <div class="form-group">
+  </div>
+  <div class="form-group">
 
-        <div class="horizontal-panel2">
-          <label id="label2" for="imagingPlatform">Imaging Platform:</label>
-        </div>
-        <select multiple id="newSelectedImagingPlatforms">
-          <option value="">Select Imaging Platforms</option>
-          <% imagingPlatforms.forEach(i=>{ %>
-          <option value="<%=i%>" <%=selectedImagingPlatforms.includes(i) ? "selected":""%>>
-            <%=i%>
-          </option>
-          <%})%>
-        </select>
-      </div>
+    <div class="horizontal-panel2">
+      <label id="label2" for="imagingPlatform">Imaging Platform:</label>
+    </div>
+    <select multiple id="newSelectedImagingPlatforms">
+      <option value="">Select Imaging Platforms</option>
+      <% imagingPlatforms.forEach(i=>{ %>
+      <option value="<%=i%>" <%=selectedImagingPlatforms.includes(i) ? "selected":""%>>
+        <%=i%>
+      </option>
+      <%})%>
+    </select>
+  </div>
 
-      <div class=" form-group">
-        <label for="ProjectStatus">Status:</label>
-        <select name="projectStatus" id="projectStatus" class="form-control" required>
-          <option value="">-- Select Type --</option>
-          <% statuses.forEach(status=> { %>
-          <option value="<%= status %>" <%=project.ProjectStatus==status ? ' selected' : '' %>>
-            <%= status%>
-          </option>
-          <% }) %>
-        </select>
-      </div>
-      <div class='buttons'>
-        <button type="submit" class="btn btn-primary">
-          <i class="fas fa-paper-plane"></i>
-          Save Changes
-        </button>
-      </div>
-      <p class="note">
-        💡 New project types and/or imaging platform will only be in the system if said changes are submitted
-      </p>
-    </form>
+  <div class=" form-group">
+    <label for="ProjectStatus">Status:</label>
+    <select name="projectStatus" id="projectStatus" class="form-control" required>
+      <option value="">-- Select Type --</option>
+      <% statuses.forEach(status=> { %>
+      <option value="<%= status %>" <%=project.ProjectStatus==status ? ' selected' : '' %>>
+        <%= status%>
+      </option>
+      <% }) %>
+    </select>
+  </div>
+  <div class='buttons'>
+    <button type="submit" class="btn btn-primary">
+      <i class="fas fa-paper-plane"></i>
+      Save Changes
+    </button>
+  </div>
+  <p class="note">
+    💡 New project types and/or imaging platform will only be in the system if said changes are submitted
+  </p>
+  </form>
 
-    <br>
+  <br>
 
 
   </div>
@@ -327,7 +327,7 @@
 
       // Submit form via AJAX
       try {
-        const projectType = form.projectType == null? "" : form.projectType.value
+        const projectType = form.projectType == null ? "" : form.projectType.value
         const formData = {
           projectName: form.projectName.value,
           projectOwner: "<%=project.FullName%>",

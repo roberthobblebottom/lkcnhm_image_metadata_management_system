@@ -13,6 +13,7 @@ from datetime import datetime
 import logging
 from tkinter import font, ttk
 from tkinter import *
+from tkinter import filedialog, messagebox
 
 logger = logging.getLogger(__name__)
 # from PIL import ExifTags
@@ -27,8 +28,8 @@ def recursion(
     window_pending,
 ):
     for file_or_folder_path in glob(path + "/*"):
-        if not isRunning:
-            return
+        # if not isRunning:
+        # return
         if isdir(file_or_folder_path):
             return recursion(
                 file_or_folder_path,
@@ -62,7 +63,7 @@ def recursion(
         # new_row["ProjectName"] = projectID
         new_row["PhotographerID"] = photographerID
         new_row["FilePath"] = file_or_folder_path
-        new_row["FileName"] = file_or_folder_path.split("/")[-1]
+        new_row["FileName"] = file_or_folder_path.split("\\")[-1]
         new_row["FileFormat"] = "." + file_or_folder_path.split(".")[-1]
         fileNameArray = new_row["FileName"].split("_")
         new_row["CatalogID"] = fileNameArray[1]
@@ -162,124 +163,185 @@ def recursion(
 
 
 def main():
-    logging.basicConfig(
-        filename="pipeline " + datetime.now().isoformat() + ".log", level=logging.INFO
-    )
+    now = datetime.now().isoformat().replace(".", "-").replace(":", "-")
+    logging.basicConfig(filename="pipeline-" + now + ".log", level=logging.INFO)
     pl.Config.set_tbl_rows(100)
     pl.Config.set_tbl_cols(100)
     start = timer()
     output = []
-    dir = "./*"
-    config = configparser.ConfigParser()
+    font = ("Helvetica", 20)
+
     # global window_pending
-    window_pending = Tk()
-    window_pending.geometry("1500x200")
-    window_pending.title("Running")
-    label = ttk.Label(
-        window_pending,
-        text="Running Image Metadata pipeline",
-        font=("Helvetica", 30),
-        wraplength=0.3,
-    )
-    label.pack()
-    ttk.Style().configure("my.TButton", font=("Helvetica", 30))
-    global isRunning
-    isRunning = True
+    windowPending = Tk()
+    windowPending.geometry("1000x200")
+    windowPending.title("Set Up Pipeline")
 
-    def close_window_pending():
-        global isRunning
-        isRunning = False
-        window_pending.destroy()
-        exit()
-
-    # I don't know how to make a working close button TODO
-    window_pending.protocol("WM_DELETE_WINDOW", close_window_pending)
-    window_pending.bind("<Escape>", close_window_pending)
-    window_pending.update()
-
-    def error(x, window_pending):
-        window_pending.quit()
+    config = configparser.ConfigParser()
+    try:
+        config.read("config.ini")
+    except Exception:
+        x = "Unable reading config.ini, Maybe config.ini is missing from the current directory? Or the required variables ('photographerID' and 'directory') not present or not  in the format of `photographerID =`  at least."
+        logger.info(x)
+        windowPending.destroy()
         w = Toplevel()
         w.geometry("1500x200")
         w.title("Error")
-        label = ttk.Label(w, text=x, font=("Helvetica", 30), wraplength=0.3)
+        label = ttk.Label(w, text=x, font=font, wraplength=1500, justify="center")
+        exit_button = ttk.Button(w, text="Exit", command=lambda: w.quit(), font=font)
+        label.pack()
+        exit_button.pack(ipadx=5, ipady=5, expand=True)
+        w.mainloop()
+        return
+
+    photographerID = (
+        config["DEFAULT"]["photographerID"]
+        if config["DEFAULT"]["photographerID"]
+        else ""
+    )
+    dir = config["DEFAULT"]["directory"] if config["DEFAULT"]["directory"] else ""
+
+    label = ttk.Label(
+        windowPending,
+        text="Setting up image metadata pipeline",
+        font=font,
+        wraplength=0.3,
+        justify=CENTER,
+    )
+    msg = dir if dir != "" else "None selected"
+    labelFileOpen = ttk.Label(
+        windowPending,
+        text="Directory opened: " + msg,
+        font=font,
+        wraplength=0.3,
+    )
+    labelPhotographerID = ttk.Label(
+        windowPending, text="Photographer ID:", font=font, wraplength=0.3
+    )
+    photographerIDStringVar = StringVar(value=photographerID)
+    photographerIDEntry = ttk.Entry(
+        windowPending, textvariable=photographerIDStringVar, font=font
+    )
+    dirStringVar = StringVar(value=dir)
+
+    def browseFiles():
+        filename = filedialog.askdirectory(
+            initialdir="/",
+            title="Select a folder",
+        )
+        dirStringVar.set(filename)
+        labelFileOpen.configure(text="Directory opened: " + filename)
+
+    button_file_select = Button(
+        windowPending, text="Browse", command=browseFiles, font=font
+    )
+
+    def continue_main():
+        dir = dirStringVar.get()
+        photographerID = photographerIDStringVar.get()
+        if not photographerID.isdigit():
+            messagebox.showerror("Invalid Input", "must be an integer")
+            return
+        if dir == "":
+            messagebox.showerror("Missing folder selection", "folder must be selected")
+            return
+        config["DEFAULT"]["photographerID"] = photographerID
+        config["DEFAULT"]["directory"] = dir
+        with open("config.ini", "w") as c:
+            config.write(c)
+        windowPending.destroy()
+        w = Tk()
+        w.geometry("500x100")
+        w.title("Running")
+        label = ttk.Label(
+            w,
+            text="The Extraction is currently running",
+            font=font,
+            wraplength=1500,
+            justify="center",
+        )
+        buttonQuit2 = ttk.Button(w,text="quit",command=lambda: exit())
+        label.grid(column=1,row=1)
+        buttonQuit2.grid(column=1,row=2)
+        w.update()
+        for f3 in [x for x in glob(dir) if isdir(x)]:
+            recursion(
+                path=f3,
+                output=output,
+                photographerID=photographerID,
+                # projectID = f3.split("/")[-1]
+                window_pending=windowPending,
+            )
+            # if not isRunning:
+            # break
+
+        stop = timer()
+        logger.info("estimated time taken " + str(timedelta(seconds=stop - start)))
+
+        df = (
+            pl.concat(output)
+            .with_columns(
+                Resolution=when((col("ImageLength") != "") | (col("ImageWidth") != ""))
+                .then(pl.concat_str(col("ImageLength"), lit("x"), col("ImageWidth")))
+                .otherwise(lit("")),
+                ImagingDate=col("ImagingDate").str.to_datetime(
+                    "%Y:%m:%d", ambiguous="null", strict=False
+                ),
+                imagingPlatform=when((col("Make") != "") | (col("Model") != ""))
+                .then(pl.concat_str(col("Make"), lit(" "), col("Model")))
+                .otherwise(lit("")),
+            )
+            .select(pl.exclude("ImageWidth", "ImageLength", "Make", "Model"))
+        )
+        fileName = "metadata_for_photographer_ID_" + str(photographerID) + ".csv"
+        df.write_csv(fileName)
+        windowPending.quit()
+        w.destroy()
+        w = Tk()
+        w.geometry("1000x200")
+        w.title("Sucess!")
+        label = ttk.Label(
+            w,
+            text="The Metatdata is extracted as " + fileName,
+            font=("Helvetica", 30),
+            wraplength=1000,
+        )
         label.pack()
         exit_button = ttk.Button(
             w, text="Exit", command=lambda: w.quit(), style="my.TButton"
         )
         exit_button.pack(ipadx=5, ipady=5, expand=True)
         w.mainloop()
-        return
 
-    try:
-        config.read("config.ini")
-    except Exception:
-        x = "Unable reading config.ini, Maybe config.ini is missing from the current directory?"
-        logger.info(x)
-        error(x, window_pending)
-        return
-
-    try:
-        photographerID = int(config["DEFAULT"]["photographerID"])
-    except Exception:
-        x = "photographerID is not an integer."
-        logger.info(x)
-        error(x,window_pending)
-        return
-
-    if photographerID <= 0:
-        x = "photographerID can only be a positive integer."
-        logger.info(x)
-        error(x, window_pending)
-        return
-
-    for f3 in [x for x in glob(dir) if isdir(x)]:
-        recursion(
-            path=f3,
-            output=output,
-            photographerID=photographerID,
-            # projectID = f3.split("/")[-1]
-            window_pending=window_pending,
-        )
-        if not isRunning:
-            break
-
-    stop = timer()
-    logger.info("estimated time taken " + str(timedelta(seconds=stop - start)))
-
-    df = (
-        pl.concat(output)
-        .with_columns(
-            Resolution=when((col("ImageLength") != "") | (col("ImageWidth") != ""))
-            .then(pl.concat_str(col("ImageLength"), lit("x"), col("ImageWidth")))
-            .otherwise(lit("")),
-            ImagingDate=col("ImagingDate").str.to_datetime(
-                "%Y:%m:%d", ambiguous="null", strict=False
-            ),
-            imagingPlatform=when((col("Make") != "") | (col("Model") != ""))
-            .then(pl.concat_str(col("Make"), lit(" "), col("Model")))
-            .otherwise(lit("")),
-        )
-        .select(pl.exclude("ImageWidth", "ImageLength", "Make", "Model"))
+    buttonStart = Button(
+        windowPending, text="Extract", command=continue_main, font=font
     )
-    fileName = "metadata_for_photographer_ID_" + str(photographerID) + ".csv"
-    df.write_csv(fileName)
-    window_pending.quit()
-    w = Toplevel()
-    w.geometry("1600x200")
-    w.title("Sucess!")
-    label = ttk.Label(
-        w,
-        text="The Metatdata is extracted as " + fileName,
-        font=("Helvetica", 30),
-        wraplength=0.3,
+    buttonQuit = Button(
+        windowPending, text="Quit", command=lambda: windowPending.quit(), font=font
     )
-    label.pack()
-    exit_button = ttk.Button(
-        w, text="Exit", command=lambda: w.quit(), style="my.TButton"
-    )
-    exit_button.pack(ipadx=5, ipady=5, expand=True)
-    w.mainloop()
+    label.grid(column=1, row=1)
+    labelFileOpen.grid(column=1, row=2)
+    button_file_select.grid(column=2, row=2)
+
+    labelPhotographerID.grid(column=1, row=4)
+    photographerIDEntry.grid(column=2, row=4)
+
+    buttonStart.grid(column=1, row=5)
+    buttonQuit.grid(column=2, row=5)
+    windowPending.mainloop()
+
+    # I don't know how to make a working close button TODO
+    # global isRunning
+    # isRunning = True
+
+    # def close_window_pending():
+    #     global isRunning
+    #     isRunning = False
+    #     windowPending.destroy()
+    #     exit()
+
+    # window_pending.protocol("WM_DELETE_WINDOW", close_window_pending)
+    # window_pending.bind("<Escape>", close_window_pending)
+    # window_pending.update()
 
 
 if __name__ == "__main__":
