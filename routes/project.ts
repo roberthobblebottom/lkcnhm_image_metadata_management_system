@@ -150,15 +150,14 @@ router.post(
         const insertUserQuery = `
             INSERT INTO User 
             (Email, SaltedPassword,PasswordSalt,  UserType, RegisteredDate,
-              UpdatedDate,FullName,ContactNumber,Organisation,Comments)
-            VALUES (?, ?,?,  ?, NOW(),NOW(),  ?, ?,?,?)`;
+              UpdatedDate,FullName,ContactNumber,Comments)
+            VALUES (?, ?,?,  ?, NOW(),NOW(),  ?, ?,?)`;
         const params = [
           email,
           saltedPassword,
           newPasswordSalt,
           userTypesEnumeration().photographerOnly,
           fullName,
-          "",
           "",
           "Created during the creation of a project this user is in by project owner of user id." +
             userID,
@@ -557,7 +556,6 @@ router.get(
       for (const i of imagingPlatformTemp[0]) {
         imagingPlatforms.push(Object.values(i)[0]);
       }
-
       // Format dates for display
       const project = {
         ...requestResults[0][0],
@@ -567,7 +565,6 @@ router.get(
         ),
         ImagingEndDate: formatDisplayDate(requestResults[0][0].ImagingEndDate),
       };
-      console.log("passport user", req.session.passport.user);
       res.render(`project/edit`, {
         project: project,
         allPhotographers: allPhotographers[0],
@@ -618,7 +615,6 @@ router.post(
         selectedPhotographers,
         toBeCreatedPhotographers,
       } = req.body;
-      console.log(selectedPhotographers)
       // === 1. VALIDATION ===
       if (!imagingStartDate || !imagingEndDate || !projectStatus) {
         return res
@@ -666,9 +662,7 @@ router.post(
           message: "End date must be after start date",
         });
       }
-      console.log(toBeCreatedPhotographers);
       for (const x of toBeCreatedPhotographers) {
-        console.log("x", x);
         if (!emailRegex.test(x[1])) {
           return res.status(400).json({
             success: false,
@@ -687,6 +681,7 @@ router.post(
       //creation of new photographers
       const newlyCreatedPhotographers: { email: string; password: string }[] =
         [];
+      console.log('toBeCreatedPhotographers',toBeCreatedPhotographers)
       for (const x of toBeCreatedPhotographers) {
         const fullName = x[0];
         const email = x[1];
@@ -694,7 +689,6 @@ router.post(
         // const newPassword = crypto.randomBytes(8).toString() // TODO: switch to this in production
         const newPassword = "1"; // For testing only
         var insertedId = "";
-
         const saltedPassword = crypto.pbkdf2Sync(
           newPassword,
           newPasswordSalt,
@@ -705,8 +699,8 @@ router.post(
         const insertUserQuery = `
             INSERT INTO User 
             (Email, SaltedPassword,PasswordSalt,  UserType, RegisteredDate,
-              UpdatedDate,FullName,ContactNumber,Organisation,Comments)
-            VALUES (?, ?,?,  ?, NOW(),NOW(),  ?, ?,?,?)`;
+              UpdatedDate,FullName,ContactNumber,Comments)
+            VALUES (?, ?,?,  ?, NOW(),NOW(),  ?,?,?)`;
         const params = [
           email,
           saltedPassword,
@@ -714,20 +708,26 @@ router.post(
           userTypesEnumeration().photographerOnly,
           fullName,
           "",
-          "",
+        
           "",
         ];
         try {
+          console.log('a')
           const result = (await db.promise().query(insertUserQuery, params))[0];
+          console.log('b')
           const o: any = result;
+          console.log('c')
           insertedId = Object.values(o)[2].toString(); //the weird way of getting insertedId
           newlyCreatedPhotographers.push({
             email: email,
             password: newPassword,
           });
+          console.log('insertedId',insertedId)
           for (let x = 0; x < selectedPhotographers.length; x++) {
+            console.log(selectedPhotographers[x])
             if (emailRegex.test(selectedPhotographers[x])) {
               selectedPhotographers[x] = insertedId;
+              console.log('here')
               break;
             }
           }
@@ -885,8 +885,6 @@ router.post(
         ProjectOwnerID = ?
         WHERE ProjectID = ?
         `;
-      console.log(summaryOfProject);
-      console.log(detailsOfSpecimens);
       await db
         .promise()
         .query(updateQuery, [

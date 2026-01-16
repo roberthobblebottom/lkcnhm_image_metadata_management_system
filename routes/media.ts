@@ -31,7 +31,7 @@ import { match } from "assert";
 //                 u.FullName AS projectOwnerName,
 //                 u.Email AS projectOwnerEmail,
 //                 u.ContactNumber,
-//                 u.Organisation,
+//                 u.StaffType,
 //                 p.ImagingStartDate,
 //                 p.ImagingEndDate
 //             FROM Project p
@@ -1005,7 +1005,6 @@ router.get("/download-template", isAuthenticated, async (req: any, res: Response
 });
 
 router.get("/download-pipeline-script", isAuthenticated, (req: Request, res: Response) => { 
-
   res.download("pipeline.zip")
 })
 

@@ -6,6 +6,7 @@ import { db } from "../db";
 import {
   emailRegex,
   formatDisplayDate,
+  staffTypesEnumeration,
   userTypesEnumeration,
 } from "../../middleware/utils";
 import { Response, Request } from "express";
@@ -22,6 +23,7 @@ router.get(
     res.render("admin/create", {
       userTypes: Object.values(userTypesEnumeration()),
       currentUser: req.session.passport.user,
+      staffTypes: Object.values(staffTypesEnumeration()),
     });
   }
 );
@@ -40,7 +42,7 @@ router.post(
       userType,
       fullName,
       contactNumber,
-      organisation,
+      staffType,
       comments,
     } = req.body;
     //Validation
@@ -67,6 +69,22 @@ router.post(
         message: "the new passwords does not match",
       });
     }
+    if (!Object.values(userTypesEnumeration()).includes(userType)) {
+      return res.status(400).json({
+        success: false,
+        message:
+          "invalid user type that is not these values: " +
+          Object.values(userTypesEnumeration()),
+      });
+    }
+    if (!Object.values(staffTypesEnumeration()).includes(staffType)) {
+      return res.status(400).json({
+        success: false,
+        message:
+          "invalid staff type that is not these values: " +
+          Object.values(staffTypesEnumeration()),
+      });
+    }
     const result = (
       await db
         .promise()
@@ -88,7 +106,7 @@ router.post(
         UserType,
         FullName,
         ContactNumber,
-        Organisation  ,
+        StaffType  ,
         Comments,
         UpdatedByID  ,
         CreatedByID  ,
@@ -118,7 +136,7 @@ router.post(
             userType,
             fullName,
             contactNumber,
-            organisation,
+            staffType,
             comments,
             adminID,
             adminID,
@@ -153,7 +171,7 @@ router.get(
   isAdmin,
   (req: Request, res: Response) => {
     console.log("Route /admin-users hit"); // Debug log 1
-    const query = `SELECT UserID, Email,UserType,FullName,Organisation,
+    const query = `SELECT UserID, Email,UserType,FullName,StaffType,
     RegisteredDate, LastLoginDate, IsDeleted  FROM User`;
 
     db.query(query, (err, result) => {
@@ -183,7 +201,7 @@ router.get(
     const query = `
     SELECT UserID,Email,UserType,FullName,
     RegisteredDate,ContactNumber,
-    Organisation,Comments,
+    StaffType,Comments,
     IsDeleted
     FROM User
     WHERE UserID = ?;
@@ -217,7 +235,7 @@ router.get(
   async (req: Request, res: Response) => {
     const userId = req.params.userID;
     const query =
-      "SELECT UserID,Email,UserType,FullName,RegisteredDate,ContactNumber,Organisation,Comments,IsDeleted FROM User WHERE UserID = ?";
+      "SELECT UserID,Email,UserType,FullName,RegisteredDate,ContactNumber,StaffType,Comments,IsDeleted FROM User WHERE UserID = ?";
 
     const result = (
       await db.promise().query<RowDataPacket[]>(query, [userId])
@@ -239,6 +257,7 @@ router.get(
     res.render("admin/edit", {
       user: result[0],
       userTypes: Object.values(userTypesEnumeration()),
+      staffTypes: Object.values(staffTypesEnumeration()),
       registeredDate: formatDisplayDate(result[0].RegisteredDate),
       title: `Edit User - ${result[0].Email}`,
       message: message,
@@ -247,7 +266,7 @@ router.get(
 );
 
 router.post(
-  ["/edit/:userID"],
+  "/edit/:userID",
   isAuthenticated,
   isAdmin,
   reconfirmPasswordFunctionForAdmin,
@@ -262,7 +281,7 @@ router.post(
       userType,
       fullName,
       contactNumber,
-      organisation,
+      staffType,
       comments,
       originalEmail,
     } = req.body;
@@ -304,7 +323,22 @@ router.post(
         });
       }
     }
-
+    if (!Object.values(userTypesEnumeration()).includes(userType)) {
+      return res.status(400).json({
+        success: false,
+        message:
+          "invalid user type that is not these values: " +
+          Object.values(userTypesEnumeration()),
+      });
+    }
+    if (!Object.values(staffTypesEnumeration()).includes(staffType)) {
+      return res.status(400).json({
+        success: false,
+        message:
+          "invalid staff type that is not these values: " +
+          Object.values(staffTypesEnumeration()),
+      });
+    }
     const query = `
         UPDATE User 
     SET
@@ -312,7 +346,7 @@ router.post(
         UserType=?,
         FullName=?,
         ContactNumber=?,
-        Organisation = ?,
+        StaffType = ?,
         Comments=?,
         UpdatedDate = NOW(),
         UpdatedByID = ?
@@ -343,7 +377,7 @@ router.post(
                   userType,
                   fullName,
                   contactNumber,
-                  organisation,
+                  staffType,
                   comments,
                   adminID,
                   hashedPassword,
@@ -355,7 +389,7 @@ router.post(
                   userType,
                   fullName,
                   contactNumber,
-                  organisation,
+                  staffType,
                   comments,
                   adminID,
                   userID,
@@ -386,7 +420,7 @@ router.post(
   reconfirmPasswordFunctionForAdmin,
   (req: Request, res: Response) => {
     const userID = req.params.userID;
-    console.log(userID)
+    console.log(userID);
     const query = "UPDATE User SET IsDeleted = 1 WHERE UserID = ?";
 
     db.query(query, [userID], (err, result) => {
@@ -410,7 +444,7 @@ router.post(
   reconfirmPasswordFunctionForAdmin,
   (req: Request, res: Response) => {
     const userID = req.params.userID;
-    console.log(userID)
+    console.log(userID);
     db.query(
       "UPDATE User SET IsDeleted = 0 WHERE UserID = ?",
       [userID],

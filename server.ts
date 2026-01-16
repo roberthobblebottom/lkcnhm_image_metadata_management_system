@@ -54,15 +54,15 @@ app.get("/", (req: Request, res: Response) => {
   res.render("index", { title: "register" });
 });
 
-app.get("/register", async (req: Request, res: Response) => {
-  res.render("register", {
-    title: "register",
-    userTypes: [
-      userTypesEnumeration().photographerOnly,
-      userTypesEnumeration().projectOwner,
-    ],
-  });
-});
+// app.get("/register", async (req: Request, res: Response) => {
+//   res.render("register", {
+//     title: "register",
+//     userTypes: [
+//       userTypesEnumeration().photographerOnly,
+//       userTypesEnumeration().projectOwner,
+//     ],
+//   });
+// });
 
 app.get("/login", (req: Request, res: Response) => {
   res.render("login", { title: "Login Page" });

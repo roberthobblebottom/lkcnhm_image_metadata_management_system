@@ -619,7 +619,7 @@ router.get(
       await db
         .promise()
         .query(
-          `SELECT UserID,Email,UserType,FullName,RegisteredDate,LastLoginDate,IsDeleted,ContactNumber,Organisation,Comments,UpdatedDate,UpdatedByID,CreatedByID FROM User;`
+          `SELECT UserID,Email,UserType,FullName,RegisteredDate,LastLoginDate,IsDeleted,ContactNumber,StaffType,Comments,UpdatedDate,UpdatedByID,CreatedByID FROM User;`
         )
     )[0];
     const userData2: Array<Object> = Array.from(userData);

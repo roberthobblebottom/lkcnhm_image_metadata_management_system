@@ -163,6 +163,7 @@
         newSelectedPhotographers.removeActiveItems(); //clearChoices() doesn't work
         newSelectedPhotographers.setChoiceByValue(temp)
         const x = document.querySelector("[data-value='" + temp + "']")
+        console.log(x)
         x.removeChild(x.childNodes[1])
         x.style.padding = "12px"
         x.style.backgroundColor = "gray"

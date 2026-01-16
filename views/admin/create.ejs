@@ -61,8 +61,16 @@
         <input type="text" id="contactNumber" value="">
       </div>
       <div class=" form-group">
-        <label for="organisation">Organisation </label>
-        <input type="text" id="organisation" value="">
+        <label for="staffType">StaffType </label>
+ <select name="staffType" id="staffType">
+
+          <option value="">-- Select a staff type--</option>
+          <%staffTypes.forEach( staffType=>{%>
+          <option value="<%=staffType%>">
+            <%=staffType%>
+          </option>
+          <%})%>
+        </select>
       </div>
       <div class="form-group">
         <label for="comments">Comments </label>
@@ -150,7 +158,7 @@
           userType: form.userType.value,
           fullName: form.fullName.value,
           contactNumber: form.contactNumber.value,
-          organisation: form.organisation.value,
+          staffType: form.staffType.value,
           comments: form.comments.value,
           reconfirmPasswordForAdmin:reconfirmPasswordForAdmin
         })

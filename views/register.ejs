@@ -182,8 +182,16 @@
         <input type="text" id="contactNumber" ">
       </div>
       <div class=" form-group">
-        <label for="organisation">Organisation </label>
-        <input type="text" id="organisation" ">
+        <label for="staffType">StaffType </label>
+         <select name="staffType" id="staffType">
+
+          <option value="">-- Select a staff type--</option>
+          <%staffTypes.forEach( staffType=>{%>
+          <option value="<%=staffType%>">
+            <%=staffType%>
+          </option>
+          <%})%>
+        </select>
       </div>
       <div class=" form-group">
         <label for="comments">Comments </label>
@@ -247,7 +255,7 @@
             userType: registerForm.userType.value,
             fullName: registerForm.fullName.value,
             contactNumber: registerForm.contactNumber.value,
-            organisation: registerForm.organisation.value,
+            staffType: registerForm.staffType.value,
             comments: registerForm.comments.value,
           })
         })

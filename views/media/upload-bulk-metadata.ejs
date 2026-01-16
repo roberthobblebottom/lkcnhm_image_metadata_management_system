@@ -57,12 +57,10 @@
       <a href="/media/view-all" class="btn ">
         <i class="fas fa-arrow-left"></i> Back to all media
       </a>
-
-
       <a href="/media/download-template" class="btn ">
         <i class="fas fa-arrow-down"></i> Download Template
       </a>
-<a href="/media/download-pipeline-script" class="btn ">
+      <a href="/media/download-pipeline-script" class="btn ">
         <i class="fas fa-arrow-down"></i> Download Pipeline Script
       </a>
       <input type="submit" class="btn" id="submitButton" value="Upload" />
@@ -94,7 +92,7 @@
           data = await response.json();
           console.log(data)
 
-          if (!data.success)          {
+          if (!data.success) {
             var bytes = new Uint8Array(data.buffer.data);
             var blob = new Blob([bytes], {
               type: "application/csv"

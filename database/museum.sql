@@ -16,7 +16,7 @@ CREATE TABLE User (
     LastLoginDate DATETIME NULL,
     IsDeleted BOOLEAN NOT NULL DEFAULT 0,
     ContactNumber VARCHAR(100), 
-    Organisation VARCHAR(150), 
+    StaffType ENUM('NHM Staff','NHM Intern','NHM Research Visitor','NUS Undergraduate Student','NUS Graduate Student','Non-NUS Student','Other'), 
     Comments VARCHAR(255), 
     UpdatedDate DATETIME NULL,
     UpdatedByID INT , 
@@ -99,18 +99,18 @@ CREATE TABLE Media (
 
 -- Test Data, do not use them for production
 INSERT INTO User (Email,SaltedPassword,PasswordSalt,UserType,FullName,
-CreatedByID,UpdatedByID,Organisation) 
+CreatedByID,UpdatedByID,StaffType) 
 VALUES ('admin@gmail.com',FROM_BASE64('W8VK+3eef900fOpSgH0HZmeD2E9wEr7hevUHM+GEQ3c='),
-'JR6lq3JUFxejg39f','admin',"jeff Jack",'1','1','NUS');
+'JR6lq3JUFxejg39f','admin',"jeff Jack",'1','1','NHM Staff');
 INSERT INTO User (Email,SaltedPassword,PasswordSalt,UserType,FullName,
-CreatedByID,UpdatedByID,Organisation) 
+CreatedByID,UpdatedByID,StaffType) 
 VALUES ('r1@gmail.com',FROM_BASE64("hwXpWnraI+KqYkaChBAc4EjTdAEtXxKZXBn/cMss2/4="),
-'ZdYThKAg1ZD4ULyd','projectOwner',"Zesty wong",'2','2','NUS');
+'ZdYThKAg1ZD4ULyd','projectOwner',"Zesty wong",'2','2','NHM Staff');
 
 INSERT INTO User (Email,SaltedPassword,PasswordSalt,UserType,FullName,
-CreatedByID,UpdatedByID,Organisation) 
+CreatedByID,UpdatedByID,StaffType) 
 VALUES ('p1@gmail.com',FROM_BASE64("sj1O+m695SCDA0cyNiHK/aEknLFcYPhoxP9YOZe0pvA="),
-'UkSbEVvinkts1Dbb','photographerOnly',"Ron Pass",'3','3','NUS');
+'UkSbEVvinkts1Dbb','photographerOnly',"Ron Pass",'3','3','NHM Staff');
 
 
 INSERT INTO Project (ProjectOwnerID ,ProjectName ,ProjectType,ImagingStartDate ,ImagingEndDate ,
@@ -118,7 +118,7 @@ CreatedDate ,UpdatedDate ,ProjectStatus,CreatedByID,UpdatedByID,SummaryOfProject
 VALUES (2,"test project 1","BDP",NOW(),DATE_ADD(NOW(), INTERVAL 2 DAY),NOW(),NOW(),
 'started','1','1','sample project summary','sample specimen details');
 -- link the project owner as a phtogragpher
-INSERT INTO ProjectUserPhotographyLink (ProjectID,PhotographerID) VALUES ("1",'1'); 
+INSERT INTO ProjectUserPhotographyLink (ProjectID,PhotographerID) VALUES ("1",'2'); 
 INSERT INTO ImagingPlatformInstance(ProjectID,ImagingPlatform) VALUES (1,'Olympus(L5)');
 INSERT INTO ImagingPlatformInstance(ProjectID,ImagingPlatform) VALUES (1,'VD(L4Prep)');
 

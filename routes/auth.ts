@@ -6,6 +6,7 @@ import * as passportStrategy from "passport-local";
 import crypto from "crypto";
 import {
   emailRegex,
+  staffTypesEnumeration,
   userTypesEnumeration,
 } from "../middleware/utils";
 import { Response, Request, NextFunction } from "express";
@@ -81,7 +82,15 @@ passport.deserializeUser((user: User, cb: (arg0: null, arg1: any) => any) => {
     return cb(null, user);
   });
 });
-
+router.get("/register",async (req: Request, res, Response) => {
+  return res.render('register', {
+    staffTypes: Object.values(staffTypesEnumeration()),
+    userTypes: [
+      userTypesEnumeration().projectOwner,
+      userTypesEnumeration().photographerOnly
+    ]
+  })
+})
 router.post("/register", (req: Request, res: Response) => {
   console.log("register req.body", req.body);
   const {
@@ -91,7 +100,7 @@ router.post("/register", (req: Request, res: Response) => {
     userType,
     fullName,
     contactNumber,
-    organisation,
+    staffType,
     comments,
   } = req.body;
   const missingFields = [];
@@ -100,6 +109,7 @@ router.post("/register", (req: Request, res: Response) => {
   if (!confirmPassword) missingFields.push("confirmPassword");
   if (!userType) missingFields.push("userType");
   if (!fullName) missingFields.push("fullName");
+
   if (missingFields.length > 0) {
     return res.status(400).json({
       success: false,
@@ -116,6 +126,20 @@ router.post("/register", (req: Request, res: Response) => {
     return res.status(400).json({
       success: false,
       message: "the  passwords does not match",
+    });
+  }
+if (!Object.values(userTypesEnumeration()).includes(userType)) { 
+    return res.status(400).json({
+      success: false,
+      message:
+        "invalid user type that is not these values: "+Object.values(userTypesEnumeration()),
+    });
+  }
+  if (!Object.values(staffTypesEnumeration()).includes(staffType)) { 
+    return res.status(400).json({
+      success: false,
+      message:
+        "invalid staff type that is not these values: "+Object.values(staffTypesEnumeration()),
     });
   }
   console.log(`🔹 Register Attempt: ${email}`);
@@ -144,7 +168,7 @@ router.post("/register", (req: Request, res: Response) => {
         const insertUserQuery = `
             INSERT INTO User 
             (Email, SaltedPassword,PasswordSalt,  UserType, RegisteredDate,
-              UpdatedDate,FullName,ContactNumber,Organisation,Comments)
+              UpdatedDate,FullName,ContactNumber,StaffType,Comments)
             VALUES (?, ?,?,  ?, NOW(),NOW(),  ?, ?,?,?)`;
         const params = [
           email,
@@ -153,7 +177,7 @@ router.post("/register", (req: Request, res: Response) => {
           userType,
           fullName,
           contactNumber,
-          organisation,
+          staffType,
           comments
         ];
 

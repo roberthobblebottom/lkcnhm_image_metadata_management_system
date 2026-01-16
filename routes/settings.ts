@@ -4,7 +4,11 @@ import { RowDataPacket } from "mysql2";
 import { db } from "./db";
 import { Request, Response } from "express";
 import crypto from "crypto";
-import { emailRegex, formatDisplayDate } from "../middleware/utils";
+import {
+  emailRegex,
+  formatDisplayDate,
+  staffTypesEnumeration,
+} from "../middleware/utils";
 const { isAuthenticated } = require("../middleware/auth");
 
 router.get(
@@ -112,6 +116,7 @@ router.get("/profile", isAuthenticated, async (req: Request, res: Response) => {
   res.render("settings/profile", {
     currentUser: result,
     registeredDate: formatDisplayDate(result.RegisteredDate),
+    staffTypes: Object.values(staffTypesEnumeration()),
   });
 });
 
@@ -124,7 +129,7 @@ router.post(
       email,
       fullName,
       contactNumber,
-      organisation,
+      staffType,
       comments,
       originalEmail,
     } = req.body;
@@ -159,12 +164,20 @@ router.post(
         });
       }
     }
+    if (!Object.values(staffTypesEnumeration()).includes(staffType)) {
+      return res.status(400).json({
+        success: false,
+        message:
+          "invalid staff type that is not these values: " +
+          Object.values(staffTypesEnumeration()),
+      });
+    }
     const query = `
    UPDATE User SET
       Email =?,
       FullName = ?,
       ContactNumber = ?,
-      Organisation =?,
+      StaffType =?,
       Comments = ?
    WHERE UserID = ?
   `;
@@ -172,7 +185,7 @@ router.post(
       email,
       fullName,
       contactNumber,
-      organisation,
+      staffType,
       comments,
       userID,
     ];

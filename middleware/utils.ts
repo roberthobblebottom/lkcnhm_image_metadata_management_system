@@ -42,6 +42,20 @@ const userTypesEnumeration = () => {
     admin: "admin",
   };
 };
+
+const staffTypesEnumeration = () => { 
+  return {
+
+    NHMStaff: 'NHM Staff',
+    NHMIntern: 'NHM Intern',
+    NHMResearchVisitor: 'NHM Research Visitor',
+    NUSUndergraduateStudent: 'NUS Undergraduate Student',
+    NUSGraduateStudent: 'NUS Graduate Student',
+    NonNUSStudent: 'Non-NUS Student',
+    Other:'Other'
+  }
+}
+
 const emailRegex =
   /^[a-zA-Z0-9](\.?[a-zA-Z0-9_-])*[a-zA-Z0-9]@[a-zA-Z0-9-]+\.[a-zA-Z]{2,}$/;
 const catalogIDRegex = /^[A-Z]{6}\d{7}$/;
@@ -54,6 +68,7 @@ export {
   projectStatusEnumeration,
   mediaFileFormatEnumeration,
   userTypesEnumeration,
+  staffTypesEnumeration,
   emailRegex,
   catalogIDRegex,
   clusterIDRegex,
