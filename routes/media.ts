@@ -936,7 +936,6 @@ router.post(
       newRow.push(new Date().toISOString().split("T")[0]); //updated date
       newRow.push(user.UserID); //updated by
       const rowPl = pl.DataFrame({
-        row: [(i + 1).toString()],
         fileName: [errorMessage.trim() != "" ? fileName : ""],
         errorLog: [errorMessage],
       });
