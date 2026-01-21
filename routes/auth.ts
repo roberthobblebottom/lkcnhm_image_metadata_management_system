@@ -262,6 +262,7 @@ router.post("/login", (req: Request, res: Response, next: NextFunction) => {
             }
 
 console.log("login in  serialised passport user",req.session.passport.user)
+
             return res.json({
               success: true,
               redirect:

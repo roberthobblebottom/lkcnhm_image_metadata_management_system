@@ -264,6 +264,9 @@ textarea[readonly] {
        font-size: small;
    }
 
+   .requirement-of-field{
+    color:red;
+   }
    .error-message {
        font-size: small;
        color: #e74c3c;

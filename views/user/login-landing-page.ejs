@@ -40,11 +40,21 @@
   <div class="welcome-section">
     <h1 class="welcome-title">Welcome to Image Metadata Management System System</h1>
     <h2>Help Guide:</h2>
-    <p> TO BE WRITTEN</p>
+    <% if(currentUser.UserType == 'photographerOnly'){%>
+    <p>If you are using a newly created photographer account made by your project\'s owner, please change your password as soon as possible</p>
+      <%}else{%>
+        
+    <p>If you have created newly created photographer account(s) made during the creation of editing of project(s), please change tell your photographers in your password as soon as possible</p>
+        <%}%>
+    <p> Do make sure to create a project before creating or uploading metadatas.  
+        
+    </p>
+    <p>You may also create new photographers within the Project's create or edit functionality.</p>
   </div>
 
 
 </div>
 
 <script>
-</script>/main>
+ console.log("current user <%=currentUser.UserType == 'photographerOnly'%>") 
+</script></main>

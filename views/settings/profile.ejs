@@ -12,18 +12,22 @@
     #main-form {
       width :200%;
     }
+    .requirement-of-field{
+    color:red;
+   }
   </style>
 </head>
 
 <body>
 
-  <%- include(currentUser.UserType=='admin' 
-  ? '../sidenavs/admin' 
-  : '../sidenavs/user' ) %>
+  <%- currentUser.UserType=='admin' 
+  ? include('../sidenavs/admin')
+  : include('../sidenavs/user' ) %>
   <div class="main-con">
     <form id="main-form">
       <div class="form-group">
         <h2>View or Edit your Profile</h2>
+        <p class="requirement-of-field">* = required</p>
       </div>
 
 
@@ -32,7 +36,7 @@
         <input type="text" id="userID" value="<%=currentUser.UserID%>" readonly>
       </div>
       <div class="form-group">
-        <label for="email">Email </label>
+        <label for="email">Email* </label>
         <input type="text" name="email" id="email" value="<%=currentUser.Email%>" required>
       </div>
       <div class="form-group">
@@ -40,7 +44,7 @@
         <input type="text" value="<%=currentUser.UserType%>" readonly>
       </div>
       <div class="form-group">
-        <label for="fullName">Full Name </label>
+        <label for="fullName">Full Name* </label>
         <input type="text" name="fullName" id="fullname" value="<%=currentUser.FullName%>" required>
       </div>
       <div class="form-group">

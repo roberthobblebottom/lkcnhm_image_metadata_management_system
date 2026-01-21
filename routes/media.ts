@@ -83,9 +83,9 @@ router.get("/create", isAuthenticated, async (req: Request, res: Response) => {
   var q2: string;
 
   if (user.UserType == userTypesEnumeration().projectOwner) {
-    q2 = allProjectAndPhotographerPairsQuery + "WHERE p.ProjectOwnerID = ?";
+    q2 = allProjectAndPhotographerPairsQuery + "AND p.ProjectOwnerID = ?";
   } else if (user.UserType == userTypesEnumeration().photographerOnly) {
-    q2 = allProjectAndPhotographerPairsQuery + "WHERE photographer.UserID = ?";
+    q2 = allProjectAndPhotographerPairsQuery + "AND photographer.UserID = ?";
   } else {
     q2 = allProjectAndPhotographerPairsQuery;
   }
@@ -391,10 +391,10 @@ router.get(
      * retrieve project photographer pair based on user privilleges
      */
     if (user.UserType == userTypesEnumeration().projectOwner) {
-      q2 = allProjectAndPhotographerPairsQuery + "WHERE p.ProjectOwnerID = ?";
+      q2 = allProjectAndPhotographerPairsQuery + "AND p.ProjectOwnerID = ?";
     } else if (user.UserType == userTypesEnumeration().photographerOnly) {
       q2 =
-        allProjectAndPhotographerPairsQuery + "WHERE photographer.UserID = ?";
+        allProjectAndPhotographerPairsQuery + "AND photographer.UserID = ?";
     } else {
       q2 = allProjectAndPhotographerPairsQuery;
     }

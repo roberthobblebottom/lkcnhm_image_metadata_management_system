@@ -156,7 +156,7 @@ def recursion(
                 "Description",
             )
         )
-        logging.info(new_row.transpose(include_header=True))
+        logging.info(str(new_row.transpose(include_header=True)))
         output.append(new_row)
 
         window_pending.update()
@@ -173,7 +173,7 @@ def main():
 
     # global window_pending
     windowPending = Tk()
-    windowPending.geometry("1000x200")
+    windowPending.geometry("1000x250")
     windowPending.title("Set Up Pipeline")
 
     config = configparser.ConfigParser()
@@ -212,7 +212,7 @@ def main():
         windowPending,
         text="Directory opened: " + msg,
         font=font,
-        wraplength=0.3,
+        wraplength=500,
     )
     labelPhotographerID = ttk.Label(
         windowPending, text="Photographer ID:", font=font, wraplength=0.3
@@ -259,11 +259,12 @@ def main():
             wraplength=1500,
             justify="center",
         )
-        buttonQuit2 = ttk.Button(w,text="quit",command=lambda: exit())
+        buttonQuit2 = Button(w,text="quit",command=lambda: exit(),font=font)
         label.grid(column=1,row=1)
         buttonQuit2.grid(column=1,row=2)
         w.update()
-        for f3 in [x for x in glob(dir) if isdir(x)]:
+        for f3 in [x for x in glob(dir+"\\*") if isdir(x)]:
+            print('file path: '+f3)
             recursion(
                 path=f3,
                 output=output,
@@ -306,8 +307,8 @@ def main():
             wraplength=1000,
         )
         label.pack()
-        exit_button = ttk.Button(
-            w, text="Exit", command=lambda: w.quit(), style="my.TButton"
+        exit_button = Button(
+            w, text="Exit", command=lambda: w.quit(), font=font
         )
         exit_button.pack(ipadx=5, ipady=5, expand=True)
         w.mainloop()

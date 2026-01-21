@@ -20,6 +20,7 @@
         <h2>
           Edit image metadata entry
         </h2>
+        <p class="requirement-of-field">* = required</p>
       </div>
       <div class='form-group'>
         <label>Media ID: <%=toBeEditedMedia.MediaID%></label>
@@ -27,7 +28,7 @@
       </div>
 
       <div class="form-group">
-        <label>Project and Photographer Pair</label>
+        <label>Project and Photographer Pair*</label>
         <select name="projectAndPhotographerPair" id="projectAndPhotographerPair" requried <%= currentUser.UserType == 'photographerOnly' ? 'disabled' : ''%>>
           <option value="">-- Select a project and photographer pair--</option>
           <%allProjectAndPhotographerPairs.forEach( u=>{%>
@@ -42,23 +43,23 @@
       </div>
 
       <div class="form-group">
-        <label for="mediaFileName">Media File Full Name</label>
+        <label for="mediaFileName">Media File Full Name*</label>
         <input type="text" name="mediaFileName" id="mediaFileName" value="<%=toBeEditedMedia.FileName%>" required>
       </div>
 
       <div class="form-group">
-        <label for="filePath">File Path</label>
+        <label for="filePath">File Path*</label>
         <input type="text" name="filePath" id="filePath" value="<%=toBeEditedMedia.FilePath %>" required>
       </div>
 
       <div class="form-group">
-        <label for="catalogID">Catalog ID (default id ZRCBDP0012345 is for testing purposes, remove
+        <label for="catalogID">Catalog ID* (default id ZRCBDP0012345 is for testing purposes, remove
           later)</label>
         <input type="text" name="catalogID" id="catalogID" value="<%=toBeEditedMedia.CatalogID %>" required>
       </div>
 
       <div class="form-group">
-        <label for="morphoID">Morpho ID</label>
+        <label for="morphoID">Morpho ID*</label>
         <input type="text" name="morphoID" id="morphoID" value="<%= toBeEditedMedia.MorphoID  %>" required>
       </div>
 
@@ -79,12 +80,12 @@
       </div>
 
       <div class="form-group">
-        <label for="fileSize">File Size in Bytes</label>
+        <label for="fileSize">File Size in Bytes* </label>
         <input required type="number" name="fileSizeBytes" id="fileSizeBytes" value="<%=toBeEditedMedia.FileSizeBytes%>">
       </div>
 
       <div class="form-group">
-        <label for="fileFormat">Media File Format</label>
+        <label for="fileFormat">Media File Format* </label>
         <select name="fileFormat" id="fileFormat" onchange="fileFormatOnChange()" requried>
           <option value="">-- Select a media file format --</option>
           <%fileFormats.forEach( fileFormat=>{%>

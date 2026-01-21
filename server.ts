@@ -14,7 +14,6 @@ const { isAuthenticated, isAdmin } = require("./middleware/auth");
 const passport = require("passport");
 const app = express();
 const PORT = process.env.PORT || 5000;
-import { userTypesEnumeration } from "./middleware/utils";
 // ✅ Middleware
 app.use(express.static("public"));
 // app.use(express.static(path.join(__dirname,"/public/")));
@@ -70,13 +69,17 @@ app.get("/login", (req: Request, res: Response) => {
 
 // ✅ User Dashboard (Protected)
 app.get("/user/login-landing-page", isAuthenticated, (req: Request, res: Response) => {
+
   res.render("user/login-landing-page", {
     user: req.session.passport.user,
     title: "User login landing page",
+    currentUser:req.session.passport.user,
   });
 });
 
-app.get("/current-user", (req: Request, res: Response) => {
+app.get("/current-user2", (req: Request, res: Response) => {
+console.log('/current user')
+    console.log('current user',req.session.passport.user)
   if (req.session && req.session.passport.user) {
     res.json({
       Email: req.session.passport.user.Email,
