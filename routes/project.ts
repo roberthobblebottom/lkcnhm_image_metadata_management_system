@@ -36,8 +36,8 @@ router.get(
     `;
 
     const [projectOwners, photographers] = await Promise.all([
-      db.promise().query(getProjectOwners),
-      db.promise().query(getPhotographers),
+      db.query(getProjectOwners),
+      db.query(getPhotographers),
     ]);
 
     res.render("project/create", {
@@ -163,7 +163,7 @@ router.post(
             userID,
         ];
         try {
-          const result = (await db.promise().query(insertUserQuery, params))[0];
+          const result = (await db.query(insertUserQuery, params))[0];
           const o: any = result;
           insertedId = Object.values(o)[2].toString(); //the weird way of getting insertedId
           console.log("newly created user id:", insertedId);
@@ -206,12 +206,12 @@ router.post(
       // if (hasNewImagingPlatform) {
       //   const i2: string[] = req.session.imagingPlatforms;
       //   await db
-      //     .promise()
+      //     
       //     .query("ALTER TABLE Media MODIFY COLUMN `ImagingPlatform` enum(?)", [
       //       i2,
       //     ]);
       //   await db
-      //     .promise()
+      //     
       //     .query<RowDataPacket[]>(
       //       "ALTER TABLE ImagingPlatformInstance MODIFY COLUMN `ImagingPlatform` enum(?)",
       //       [i2]
@@ -228,7 +228,7 @@ router.post(
       //   req.session["projectTypes"].push(projectType);
       //   const i3: string[] = req.session.projectTypes;
       //   await db
-      //     .promise()
+      //     
       //     .query("ALTER TABLE Project MODIFY COLUMN `ProjectType` enum(?)", [
       //       i3,
       //     ]);
@@ -254,7 +254,7 @@ router.post(
         ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, NOW(), ?, NOW(), ?, 0, ?)
         `;
       const result = await db
-        .promise()
+        
         .query(insertQuery, [
           req.body.projectName,
           req.body.projectType == "" ? null : req.body.projectType,
@@ -279,7 +279,7 @@ router.post(
         INSERT INTO ProjectUserPhotographyLink (PhotographerID,ProjectID)
         VALUES ?
         `;
-      await db.promise().query(insertPhotographersQuery, [photographersTuple]);
+      await db.query(insertPhotographersQuery, [photographersTuple]);
 
       // insert into ImagingPlatformInstance Table
       const imagingPlatformsTuple: string[][] = [];
@@ -292,7 +292,7 @@ router.post(
         VALUES ?
         `;
       await db
-        .promise()
+        
         .query(insertImagingPlatformsQuery, [imagingPlatformsTuple]);
 
       console.log("📸 project inserted with  projectID:", insertedProjectID);
@@ -364,7 +364,7 @@ router.get(
 
     console.log("📩 Fetching Projects...");
     const photographersTemp: any = (
-      await db.promise().query(queryForPhotographers, [user.UserID])
+      await db.query(queryForPhotographers, [user.UserID])
     )[0];
     const photographers: any = {};
     for (var x of photographersTemp) {
@@ -430,7 +430,7 @@ router.get(
     `;
 
     const photographersTemp1: any = (
-      await db.promise().query(photographersQuery, [projectID])
+      await db.query(photographersQuery, [projectID])
     )[0];
     const photographers: any[] = [];
     for (var x of photographersTemp1) {
@@ -438,7 +438,7 @@ router.get(
     }
 
     const imagingPlatformsTemp1: any = (
-      await db.promise().query(imagingPlatformsQuery, [projectID])
+      await db.query(imagingPlatformsQuery, [projectID])
     )[0];
     const imagingPlatforms: any[] = [];
     for (const x of imagingPlatformsTemp1) {
@@ -526,21 +526,21 @@ router.get(
         allPhotographers,
         projectOwners,
       ]: [any, any, any, any, any] = await Promise.all([
-        db.promise().query(requestQuery, [projectID]),
+        db.query(requestQuery, [projectID]),
         db
-          .promise()
+          
           .query(
             "SELECT ImagingPlatform FROM ImagingPlatformInstance WHERE ProjectID = ? ORDER BY ImagingPlatform",
             [projectID]
           ),
         db
-          .promise()
+          
           .query(
             "SELECT user.UserID  FROM ProjectUserPhotographyLink p JOIN User user on user.UserID = p.PhotographerID WHERE p.ProjectID = ? ",
             [projectID]
           ),
-        db.promise().query("SELECT UserID,FullName FROM User WHERE UserType!= 'admin' "),
-        db.promise().query(getProjectOwners),
+        db.query("SELECT UserID,FullName FROM User WHERE UserType!= 'admin' "),
+        db.query(getProjectOwners),
       ]);
       if (requestResults[0].length === 0) {
         return res
@@ -713,7 +713,7 @@ router.post(
         ];
         try {
           console.log('a')
-          const result = (await db.promise().query(insertUserQuery, params))[0];
+          const result = (await db.query(insertUserQuery, params))[0];
           console.log('b')
           const o: any = result;
           console.log('c')
@@ -759,12 +759,12 @@ router.post(
       //   const i2: string[] = req.session.imagingPlatforms;
       //   console.log(i2);
       //   await db
-      //     .promise()
+      //     
       //     .query("ALTER TABLE Media MODIFY COLUMN `ImagingPlatform` enum(?)", [
       //       i2,
       //     ]);
       //   await db
-      //     .promise()
+      //     
       //     .query<RowDataPacket[]>(
       //       "ALTER TABLE ImagingPlatformInstance MODIFY COLUMN `ImagingPlatform` enum(?)",
       //       [i2]
@@ -783,14 +783,14 @@ router.post(
       // const i3: string[] = req.session.projectTypes;
       // console.log(i3);
       // await db
-      //   .promise()
+      //   
       //   .query("ALTER TABLE Project MODIFY COLUMN `ProjectType` enum(?)", [i3]);
 
       /// IMAGING PLATFORMS OPERATIONS START
       // const selectImagingQuery = `
       //   SELECT ImagingPlatform FROM ImagingPlatformInstance WHERE ProjectID = ?`;
       // const temp: any = (
-      //   await db.promise().query(selectImagingQuery, [projectID])
+      //   await db.query(selectImagingQuery, [projectID])
       // )[0];
       // const currentSelectedImagingPlatforms: string[] = [];
       // for (var x of temp) {
@@ -813,7 +813,7 @@ router.post(
       // //the update
       // if (imagingPlatformsToBeRemoved.length != 0) {
       //   await db
-      //     .promise()
+      //     
       //     .query(
       //       "DELETE FROM ImagingPlatformInstance WHERE ImagingPlatform in (?) AND ProjectID =?",
       //       [imagingPlatformsToBeRemoved, projectID]
@@ -821,7 +821,7 @@ router.post(
       // }
       // if (imagingPlatformsToBeAdded.length != 0) {
       //   await db
-      //     .promise()
+      //     
       //     .query(
       //       "INSERT INTO ImagingPlatformInstance(ImagingPlatform,ProjectID) VALUES ? ",
       //       [imagingPlatformsToBeAdded]
@@ -833,7 +833,7 @@ router.post(
       const selectPhotographerQuery = `
         SELECT PhotographerID FROM ProjectUserPhotographyLink WHERE ProjectID = ?`;
       const temp3: any = (
-        await db.promise().query(selectPhotographerQuery, [projectID])
+        await db.query(selectPhotographerQuery, [projectID])
       )[0];
       var currentSelectedPhotographers: string[] = [];
       for (const x of temp3)
@@ -853,7 +853,7 @@ router.post(
       //the update
       if (photographersToBeRemoved.length != 0) {
         await db
-          .promise()
+          
           .query(
             "DELETE FROM ProjectUserPhotographyLink WHERE PhotographerID in (?) AND ProjectID =?",
             [photographersToBeRemoved, projectID]
@@ -861,7 +861,7 @@ router.post(
       }
       if (photographersToBeAdded.length != 0) {
         await db
-          .promise()
+          
           .query(
             "INSERT INTO ProjectUserPhotographyLink(PhotographerID,ProjectID) VALUES ? ",
             [photographersToBeAdded]
@@ -886,7 +886,7 @@ router.post(
         WHERE ProjectID = ?
         `;
       await db
-        .promise()
+        
         .query(updateQuery, [
           projectName,
           startDate,

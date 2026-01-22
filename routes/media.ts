@@ -47,7 +47,7 @@ import { match } from "assert";
 //                         FROM Project p
 //                         WHERE p.ProjectID = ?  `;
 //     const currentProject = isEdit
-//         ? await db.promise().query(currentProjectQuery, [projectID])
+//         ? await db.query(currentProjectQuery, [projectID])
 //         : null;
 //     const query = req.session.passport.user.UserType != userTypesEnumeration().admin
 //         ? baseQuery + " AND photographer.UserID = " + req.session.passport.user.UserID
@@ -55,7 +55,7 @@ import { match } from "assert";
 //     const query2 = isEdit
 //         ? query + " AND photographer.UserID !=" + currentProject[0][0].photographerID
 //         : query
-//     const users = (await db.promise().query(query2))[0];
+//     const users = (await db.query(query2))[0];
 //     console.log('isEdit', isEdit)
 //     res.render('media/user-list', {
 //         users: users,
@@ -90,7 +90,7 @@ router.get("/create", isAuthenticated, async (req: Request, res: Response) => {
     q2 = allProjectAndPhotographerPairsQuery;
   }
   const allProjectAndPhotographerPairs = (
-    await db.promise().query(q2, [user.UserID])
+    await db.query(q2, [user.UserID])
   )[0];
 
   res.render("media/create", {
@@ -198,7 +198,7 @@ router.post("/create", isAuthenticated, async (req: Request, res: Response) => {
     //   req.session.imageEditingTools.push(newImageEditingTool);
     // const i: string[] = req.session.imageEditingTools;
     // await db
-    //   .promise()
+    //   
     //   .query("ALTER TABLE Media MODIFY COLUMN `ImageEditingTool` enum(?)", [i]);
 
     // if (
@@ -209,12 +209,12 @@ router.post("/create", isAuthenticated, async (req: Request, res: Response) => {
     //   req.session["imagingPlatforms"].push(newImagingPlatform);
     //   const i2: string[] = req.session.imagingPlatforms;
     //   await db
-    //     .promise()
+    //     
     //     .query("ALTER TABLE Media MODIFY COLUMN `ImagingPlatform` enum(?)", [
     //       i2,
     //     ]);
     //   await db
-    //     .promise()
+    //     
     //     .query<RowDataPacket[]>(
     //       "ALTER TABLE ImagingPlatformInstance MODIFY COLUMN `ImagingPlatform` enum(?)",
     //       [i2]
@@ -223,14 +223,14 @@ router.post("/create", isAuthenticated, async (req: Request, res: Response) => {
     //   // for new enums, the list of imaging platforms that the entity project has
     //   // needs to be updated:
     //   await db
-    //     .promise()
+    //     
     //     .query<RowDataPacket[]>(
     //       "INSERT IGNORE INTO ImagingPlatformInstance (ProjectID, ImagingPlatform) VALUES (?,?) ",
     //       [projectID, newImagingPlatform]
     //     ); // sorry unfortunately I cant' remember why I am ignoring errors here.
     // }
     const result: any = (
-      await db.promise().query<RowDataPacket[]>(insertQuery, values)
+      await db.query<RowDataPacket[]>(insertQuery, values)
     )[0];
     console.log("✅ Media submitted successfully, ID:", result.insertId);
     req.session.save();
@@ -294,7 +294,7 @@ router.get(
         break;
     }
     const anyLinks = (
-      await db.promise().query<RowDataPacket[]>(
+      await db.query<RowDataPacket[]>(
         `
         SELECT * 
         FROM ProjectUserPhotographyLink pupl 
@@ -399,7 +399,7 @@ router.get(
       q2 = allProjectAndPhotographerPairsQuery;
     }
     const allProjectAndPhotographerPairs = (
-      await db.promise().query(q2, [user.UserID])
+      await db.query(q2, [user.UserID])
     )[0];
     console.log(
       "allProjectAndPhotographerPairs",
@@ -416,7 +416,7 @@ router.get(
         JOIN User projectOwner ON Project.ProjectOwnerID = projectOwner.UserID
         JOIN User photographer ON photographer.UserID = Media.PhotographerID
         WHERE Media.MediaID = ` + mediaID;
-    const x: any[] = await db.promise().query(currentMediaQuery);
+    const x: any[] = await db.query(currentMediaQuery);
     const toBeEditedMedia = x[0][0];
     console.log("-------");
     console.log("toBeEditedMedia", toBeEditedMedia);
@@ -495,7 +495,7 @@ router.post("/edit", isAuthenticated, async (req: Request, res: Response) => {
   //   const i = req.session.imageEditingTools;
   //   console.log("i", i);
   //   await db
-  //     .promise()
+  //     
   //     .query<RowDataPacket[]>(
   //       "ALTER TABLE Media MODIFY COLUMN `ImageEditingTool` ENUM(?)",
   //       [i]
@@ -510,13 +510,13 @@ router.post("/edit", isAuthenticated, async (req: Request, res: Response) => {
   //     req.session.imagingPlatforms.push(newImagingPlatform);
   //     const i = req.session.imagingPlatforms;
   //     await db
-  //       .promise()
+  //       
   //       .query<RowDataPacket[]>(
   //         "ALTER TABLE Media MODIFY COLUMN `ImagingPlatform` enum(?)",
   //         [i]
   //       );
   //     await db
-  //       .promise()
+  //       
   //       .query<RowDataPacket[]>(
   //         "ALTER TABLE ImagingPlatformInstance MODIFY COLUMN `ImagingPlatform` enum(?)",
   //         [i]
@@ -524,7 +524,7 @@ router.post("/edit", isAuthenticated, async (req: Request, res: Response) => {
   //     // for new enums, the list of imaging platforms that the entity project has
   //     // needs to be updated:
   //     await db
-  //       .promise()
+  //       
   //       .query<RowDataPacket[]>(
   //         "INSERT IGNORE INTO ImagingPlatformInstance (ProjectID, ImagingPlatform) VALUES (?,?) ",
   //         [projectID, newImagingPlatform]
@@ -560,7 +560,7 @@ router.post(
     const checkQuery =
       "SELECT * FROM Media WHERE MediaID = ? AND IsDeleted = 0";
 
-    db.promise()
+    db
       .query<RowDataPacket[]>(checkQuery, [mediaID])
       .then((results) => {
         if (results[0].length === 0) {
@@ -577,7 +577,7 @@ router.post(
                 WHERE MediaID = ?
         `;
 
-        return db.promise().query(updateQuery, [userId, mediaID]);
+        return db.query(updateQuery, [userId, mediaID]);
       })
       .then(() => res.redirect("/media/view-all"))
       .catch((error: any) => {
@@ -601,7 +601,7 @@ router.post(
     const checkQuery =
       "SELECT * FROM Media WHERE MediaID = ? AND IsDeleted = 1";
 
-    db.promise()
+    db
       .query<RowDataPacket[]>(checkQuery, [mediaID])
       .then((results) => {
         if (results[0].length == 0) {
@@ -618,7 +618,7 @@ router.post(
                 WHERE MediaID = ?
             `;
 
-        return db.promise().query(updateQuery, [userId, mediaID]);
+        return db.query(updateQuery, [userId, mediaID]);
       })
       .then(() => {
         res.redirect("/media/view-all");
@@ -653,7 +653,7 @@ router.get(
         WHERE pupl.PhotographerID = ` +
           user.UserID
         : query;
-    const allProjects = (await db.promise().query(q2))[0];
+    const allProjects = (await db.query(q2))[0];
     console.log(allProjects);
     res.render("media/upload-bulk-metadata", {
       currentUser: user,
@@ -733,7 +733,7 @@ router.post(
     const uniqueFileNames = [];
 
     const tempListOfObjects1 = (
-      await db.promise().query("SELECT DISTINCT FileName FROM Media")
+      await db.query("SELECT DISTINCT FileName FROM Media")
     )[0];
     const tempListOfObjects2: any = tempListOfObjects1;
     const listOfFileNamesFromDB = [];
@@ -743,7 +743,7 @@ router.post(
 
     const tempListOfLinks1 = (
       await db
-        .promise()
+        
         .query("SELECT DISTINCT * FROM ProjectUserPhotographyLink")
     )[0];
     const tempListOfLinks2: any = tempListOfLinks1;
@@ -959,7 +959,7 @@ router.post(
     //insert any new image editing tools or Image Platforms
     if (newImageEditingTools != null && newImageEditingTools.length != 0)
       await db
-        .promise()
+        
         .query("ALTER TABLE Media MODIFY COLUMN `ImageEditingTool` enum(?)", [
           allImageEditingTools,
         ]);
@@ -968,7 +968,7 @@ router.post(
     //   req.session["imagingPlatforms"].concat(newImagingPlatforms);
     // if (newImagingPlatforms != null && newImagingPlatforms.length != 0)
     //   await db
-    //     .promise()
+    //     
     //     .query("ALTER TABLE Media MODIFY COLUMN `ImagingPlatform` enum(?)", [
     //       allImagingPlatforms,
     //     ]);
@@ -987,7 +987,7 @@ router.post(
             UpdatedDate ,
             UpdatedByID 
         ) VALUES ?`;
-    await db.promise().query(insertQuery, [newTable]);
+    await db.query(insertQuery, [newTable]);
     console.log("✅ bulk metadata submitted successfully");
     res.json({
       success: true,

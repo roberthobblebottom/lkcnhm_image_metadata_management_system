@@ -1,6 +1,7 @@
-import express from "express";
+const express = require('express');
 const router = express.Router();
-import { db } from "./db";
+const db = require('./db');
+// import { db } from "./db";
 import passport from "passport";
 import * as passportStrategy from "passport-local";
 import crypto from "crypto";
@@ -26,7 +27,7 @@ passport.use(
     const query =
       "SELECT PasswordSalt, SaltedPassword, UserID,UserType,FullName,Email FROM User WHERE Email = ? AND IsDeleted = 0";
     const [result]: any = await db
-      .promise()
+
       .query(query, [username])
       .catch((error: any) => {
         console.error("❌ Database Error:", error);
@@ -66,6 +67,7 @@ passport.use(
 passport.serializeUser(
   (user: any, done: (arg0: any, user: User | null) => any) => {
     process.nextTick(function () {
+      console.log('serialise user',user)
       return done(null, {
         UserID: user.UserID,
         FullName: user.FullName,
@@ -79,10 +81,12 @@ passport.serializeUser(
 // retrieving session data
 passport.deserializeUser((user: User, cb: (arg0: null, arg1: any) => any) => {
   process.nextTick(function () {
+console.log('deserialise user',user)
+
     return cb(null, user);
   });
 });
-router.get("/register",async (req: Request, res, Response) => {
+router.get("/register", async (req: Request, res, Response) => {
   return res.render('register', {
     staffTypes: Object.values(staffTypesEnumeration()),
     userTypes: [
@@ -128,18 +132,18 @@ router.post("/register", (req: Request, res: Response) => {
       message: "the  passwords does not match",
     });
   }
-if (!Object.values(userTypesEnumeration()).includes(userType)) { 
+  if (!Object.values(userTypesEnumeration()).includes(userType)) {
     return res.status(400).json({
       success: false,
       message:
-        "invalid user type that is not these values: "+Object.values(userTypesEnumeration()),
+        "invalid user type that is not these values: " + Object.values(userTypesEnumeration()),
     });
   }
-  if (!Object.values(staffTypesEnumeration()).includes(staffType)) { 
+  if (!Object.values(staffTypesEnumeration()).includes(staffType)) {
     return res.status(400).json({
       success: false,
       message:
-        "invalid staff type that is not these values: "+Object.values(staffTypesEnumeration()),
+        "invalid staff type that is not these values: " + Object.values(staffTypesEnumeration()),
     });
   }
   console.log(`🔹 Register Attempt: ${email}`);
@@ -207,69 +211,68 @@ router.post("/login", (req: Request, res: Response, next: NextFunction) => {
       failureMessage: "CUSTOM", // not working
     },
     (err: any, user: User, info: any) => {
+      console.log("HERE")
       if (err) return next(err);
       if (!user) return res.status(401).send(info);
-      req.login(user, (err: any) => {
+      req.login(user, async (err: any) => {
+        console.log("1")
         // I am not suppose to use this as password authenticate already does it, but somehow this guy's code from stackoverflow works
         if (err) return res.status(500).json({ error: "Login failed." });
         // 🔄 Update LastLoginDate
+        console.log('2')
         const updateQuery =
           "UPDATE User SET LastLoginDate = NOW() WHERE UserID = ? ";
-        db.query(updateQuery, [user.UserID], async (updateErr: any) => {
-          if (updateErr) {
-            console.error("❌ Failed to update LastLoginDate:", updateErr);
-            // Not blocking login if date update fails
-          } else {
-            console.log("🕓 LastLoginDate updated");
+        await db.query(updateQuery, [user.UserID])
+
+
+        console.log('3')
+
+
+        // these codes feels redundant now, may needed to be removed
+        const x1: any[] = await db
+
+          .query("SHOW COLUMNS FROM Media LIKE 'ImageEditingTool' ");
+        req.session.imageEditingTools = x1[0][0]["Type"]
+          .replace("enum(", "")
+          .replace(")", "")
+          .replaceAll("'", "")
+          .split(",");
+
+        const x2: any[] = await db
+
+          .query("SHOW COLUMNS FROM Media LIKE 'ImagingPlatform' ");
+        const ip = x2[0][0]["Type"]
+        const ip2 = ip.substring(5, ip.length - 1)
+          .replaceAll("'", "")
+          .split(",");
+        req.session.imagingPlatforms = ip2;
+        const x3: any[] = await db
+
+          .query("SHOW COLUMNS FROM Project LIKE 'ProjectType' ");
+        const projectTypes = x3[0][0]["Type"]
+          .replaceAll("enum(", "")
+          .replaceAll("'", "")
+          .split(",");
+        projectTypes.splice(
+          projectTypes.length - 1,
+          1,
+          projectTypes.at(-1).replace(")", "")
+        );
+        req.session.projectTypes = projectTypes;
+        req.session.save((err: any) => {
+          if (err) {
+            console.error("❌ Session Save Error:", err);
+            return res.status(500).json({ error: "Session error" });
           }
 
-          // these codes feels redundant now, may needed to be removed
-          const x1: any[] = await db
-            .promise()
-            .query("SHOW COLUMNS FROM Media LIKE 'ImageEditingTool' ");
-          req.session.imageEditingTools = x1[0][0]["Type"]
-            .replace("enum(", "")
-            .replace(")", "")
-            .replaceAll("'", "")
-            .split(",");
+          console.log("login in  serialised passport user", req.session.passport.user)
 
-          const x2: any[] = await db
-            .promise()
-            .query("SHOW COLUMNS FROM Media LIKE 'ImagingPlatform' ");
-          const ip = x2[0][0]["Type"]
-          const ip2 = ip.substring(5,ip.length-1)
-            .replaceAll("'", "")
-            .split(",");
-          req.session.imagingPlatforms = ip2;
-          const x3: any[] = await db
-            .promise()
-            .query("SHOW COLUMNS FROM Project LIKE 'ProjectType' ");
-          const projectTypes = x3[0][0]["Type"]
-            .replaceAll("enum(", "")
-            .replaceAll("'", "")
-            .split(",");
-          projectTypes.splice(
-            projectTypes.length - 1,
-            1,
-            projectTypes.at(-1).replace(")", "")
-          );
-          req.session.projectTypes = projectTypes;
-
-          req.session.save((err: any) => {
-            if (err) {
-              console.error("❌ Session Save Error:", err);
-              return res.status(500).json({ error: "Session error" });
-            }
-
-console.log("login in  serialised passport user",req.session.passport.user)
-
-            return res.json({
-              success: true,
-              redirect:
-                user.UserType === userTypesEnumeration().admin
-                  ? "/admin/login-landing-page"
-                  : "/user/login-landing-page",
-            });
+          return res.json({
+            success: true,
+            redirect:
+              user.UserType === userTypesEnumeration().admin
+                ? "/admin/login-landing-page"
+                : "/user/login-landing-page",
           });
         });
       });

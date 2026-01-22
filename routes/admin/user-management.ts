@@ -87,7 +87,7 @@ router.post(
     }
     const result = (
       await db
-        .promise()
+        
         .query<RowDataPacket[]>("SELECT 1 FROM User WHERE Email = ? LIMIT 1", [
           email,
         ])
@@ -142,7 +142,7 @@ router.post(
             adminID,
           ];
           const result = await db
-            .promise()
+            
             .query<RowDataPacket[]>(insertUserQuery, params);
           const o: any = result;
           console.log(o);
@@ -238,7 +238,7 @@ router.get(
       "SELECT UserID,Email,UserType,FullName,RegisteredDate,ContactNumber,StaffType,Comments,IsDeleted FROM User WHERE UserID = ?";
 
     const result = (
-      await db.promise().query<RowDataPacket[]>(query, [userId])
+      await db.query<RowDataPacket[]>(query, [userId])
     )[0];
     if (result.length === 0) {
       return res.render("admin/edit", {
@@ -311,7 +311,7 @@ router.post(
     }
     if (email != originalEmail) {
       const result = await db
-        .promise()
+        
         .query("SELECT 1 FROM User WHERE Email = ? AND Email != ? LIMIT 1;", [
           email,
           originalEmail,
@@ -395,7 +395,7 @@ router.post(
                   userID,
                 ];
 
-          await db.promise().query<RowDataPacket[]>(q2, params);
+          await db.query<RowDataPacket[]>(q2, params);
           return res.json({
             success: true,
             message: "User updated successfully!",

@@ -1,12 +1,14 @@
 {
   "compilerOptions": {
-    "target": "es2021",
+    "target": "es2022",
+
     "module": "commonjs",
     "rootDir": "./",
     "outDir": "./build",
     "esModuleInterop": true,
     "strict": false,
-"types":["node"],  
-    "typeRoots": ["./node_modules/@types", "./@types"]
-  } 
+"types":["node","express"],  
+    "typeRoots": ["./node_modules/@types", "./@types"] 
+},
+  "include": ["**/*.ts",  "@types/**/*.d.ts"]
 }

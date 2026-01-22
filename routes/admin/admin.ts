@@ -56,7 +56,7 @@ router.post(
       case "projectType":
         req.session.projectTypes.push(value);
         await db
-          .promise()
+          
           .query("ALTER TABLE Project MODIFY COLUMN `ProjectType` enum(?)", [
             req.session.projectTypes,
           ]);
@@ -65,13 +65,13 @@ router.post(
       case "imagingPlatform":
         req.session.imagingPlatforms.push(value);
         await db
-          .promise()
+          
           .query(
             "ALTER TABLE ImagingPlatformInstance MODIFY COLUMN `ImagingPlatform` enum(?)",
             [req.session.imagingPlatforms]
           );
         await db
-          .promise()
+          
           .query("ALTER TABLE Media MODIFY COLUMN `ImagingPlatform` enum(?)", [
             req.session.imagingPlatforms,
           ]);
@@ -79,7 +79,7 @@ router.post(
       case "imageEditingTool":
         req.session.imageEditingTools.push(value);
         await db
-          .promise()
+          
           .query("ALTER TABLE Media MODIFY COLUMN `ImageEditingTool` enum(?)", [
             req.session.imageEditingTools,
           ]);
@@ -109,17 +109,17 @@ router.post(
         projectTypes.push(newValue);
         req.session.save();
         await db
-          .promise()
+          
           .query("UPDATE Project SET ProjectType =NULL WHERE ProjectType = ?", [
             oldValue,
           ]);
         await db
-          .promise()
+          
           .query("ALTER TABLE Project CHANGE ProjectType ProjectType ENUM(?)", [
             projectTypes,
           ]);
         await db
-          .promise()
+          
           .query(
             "UPDATE Project SET ProjectType = ? WHERE ProjectType IS NULL",
             [newValue]
@@ -135,7 +135,7 @@ router.post(
         //QUERY IDs
         const temp1: QueryResult = (
           await db
-            .promise()
+            
             .query(
               "SELECT ImagingPlatformInstanceID FROM ImagingPlatformInstance WHERE ImagingPlatform = ?",
               [oldValue]
@@ -147,7 +147,7 @@ router.post(
         //SET  ImagingPlatform of certain types to null so that data truncated error won't appear
         if (imagingPlatformIDsResults.length != 0)
           await db
-            .promise()
+            
             .query(
               "UPDATE ImagingPlatformInstance SET ImagingPlatform =NULL WHERE ImagingPlatform = ?",
               [oldValue]
@@ -155,7 +155,7 @@ router.post(
 
         // update enum
         await db
-          .promise()
+          
           .query(
             "ALTER TABLE ImagingPlatformInstance CHANGE ImagingPlatform ImagingPlatform ENUM(?)",
             [imagingPlatforms]
@@ -170,7 +170,7 @@ router.post(
             );
           }
           await db
-            .promise()
+            
             .query(
               "UPDATE ImagingPlatformInstance SET ImagingPlatform = ? WHERE ImagingPlatformInstanceID in (?)",
               [newValue, imagingPlatformInstanceIDs]
@@ -182,7 +182,7 @@ router.post(
         //QUERY IDs
         const temp = (
           await db
-            .promise()
+            
             .query("SELECT MediaID FROM Media WHERE ImagingPlatform = ?", [
               oldValue,
             ])
@@ -192,7 +192,7 @@ router.post(
         //SET  ImagingPlatform of certain types to null so that data truncated error won't appear
         if (mediaIDsResults.length != 0)
           await db
-            .promise()
+            
             .query(
               "UPDATE Media SET ImagingPlatform =NULL WHERE ImagingPlatform = ?",
               [oldValue]
@@ -200,7 +200,7 @@ router.post(
 
         //update enums
         await db
-          .promise()
+          
           .query(
             "ALTER TABLE Media CHANGE ImagingPlatform ImagingPlatform ENUM(?)",
             [imagingPlatforms]
@@ -213,7 +213,7 @@ router.post(
             mediaIDs.push(r.MediaID.toString());
           }
           await db
-            .promise()
+            
             .query(
               "UPDATE Media SET ImagingPlatform = ? WHERE MediaID in (?)",
               [newValue, mediaIDs]
@@ -229,19 +229,19 @@ router.post(
         imageEditingTools.push(newValue);
         req.session.save();
         await db
-          .promise()
+          
           .query(
             "UPDATE Media SET ImageEditingTool =NULL WHERE ImageEditingTool = ?",
             [oldValue]
           );
         await db
-          .promise()
+          
           .query(
             "ALTER TABLE Media CHANGE ImageEditingTool ImageEditingTool ENUM(?)",
             [imageEditingTools]
           );
         await db
-          .promise()
+          
           .query(
             "UPDATE Media SET ImageEditingTool  = ? WHERE ImageEditingTool IS NULL",
             [newValue]
@@ -271,12 +271,12 @@ router.post(
           projectTypes.splice(projectTypes.indexOf(value), 1);
         console.log(req.body)
         await db
-          .promise()
+          
           .query("UPDATE Project SET ProjectType =NULL WHERE ProjectType = ?", [
             value,
           ]);
         await db
-          .promise()
+          
           .query("ALTER TABLE Project CHANGE ProjectType ProjectType ENUM(?)", [
             req.session.projectTypes,
           ]);
@@ -286,28 +286,28 @@ router.post(
         imagingPlatforms.includes(value) &&
           imagingPlatforms.splice(imagingPlatforms.indexOf(value), 1);
         await db
-          .promise()
+          
           .query(
             "DELETE FROM ImagingPlatformInstance  WHERE ImagingPlatform = ?",
             [value]
           );
         console.log(req.session.imagingPlatforms);
         await db
-          .promise()
+          
           .query(
             "ALTER TABLE ImagingPlatformInstance CHANGE ImagingPlatform ImagingPlatform enum(?)",
             [req.session.imagingPlatforms]
           );
 
         await db
-          .promise()
+          
           .query(
             "UPDATE Media SET ImagingPlatform= NULL WHERE ImagingPlatform = ?",
             [value]
           );
 
         await db
-          .promise()
+          
           .query(
             "ALTER TABLE Media CHANGE  ImagingPlatform ImagingPlatform enum(?)",
             [req.session.imagingPlatforms]
@@ -318,14 +318,14 @@ router.post(
         imageEditingTools.includes(value) &&
           imageEditingTools.splice(imageEditingTools.indexOf(value), 1);
         await db
-          .promise()
+          
           .query(
             "UPDATE Media SET ImageEditingTool=NULL WHERE ImageEditingTool = ?",
             [value]
           );
 
         await db
-          .promise()
+          
           .query(
             "ALTER TABLE Media CHANGE COLUMN ImageEditingTool ImageEditingTool enum(?)",
             [req.session.imageEditingTools]
@@ -350,7 +350,7 @@ router.post(
   async (req: Request, res: Response) => {
     console.log('req.body',req.body)
     const result: any = await db
-      .promise()
+      
       .query(`SELECT * FROM Media WHERE IsDeleted = 1;`);
     const mediaData: Array<Object> = Array.from(result[0]);
     if (mediaData.length == 0)
@@ -369,7 +369,7 @@ router.post(
       "purged media data " + new Date().toISOString() + ".csv",
       bufferMediaData
     );
-    await db.promise().query(`DELETE FROM Media WHERE IsDeleted = 1;`);
+    await db.query(`DELETE FROM Media WHERE IsDeleted = 1;`);
     return res.status(200).json({
       success: true,
       message:
@@ -386,7 +386,7 @@ router.post(
   reconfirmPasswordFunctionForAdmin,
   async (req: Request, res: Response) => {
     const result: any = await db
-      .promise()
+      
       .query(`SELECT * FROM Project WHERE IsDeleted = 1;`);
     const projectData: Array<Object> = Array.from(result[0]);
     if (projectData.length == 0)
@@ -404,7 +404,7 @@ router.post(
       ids.push(temp.ProjectID);
 
       // query Data
-      const imagingPlatformInstanceResults = await db.promise().query(
+      const imagingPlatformInstanceResults = await db.query(
         `SELECT * 
         FROM ImagingPlatformInstance
        WHERE ProjectID = ?`,
@@ -415,7 +415,7 @@ router.post(
       );
       // console.log('temp.ProjectID',temp.ProjectID)
       // console.log('imagingPlatformInstances',imagingPlatformInstances)
-      const projectUserPhotographyLinkResults = await db.promise().query(
+      const projectUserPhotographyLinkResults = await db.query(
         `SELECT * 
         FROM ProjectUserPhotographyLink
        WHERE ProjectID = ?`,
@@ -424,7 +424,7 @@ router.post(
       projectUserPhotographyLinks = projectUserPhotographyLinks.concat(
         projectUserPhotographyLinkResults[0]
       );
-      const mediasResults = await db.promise().query(
+      const mediasResults = await db.query(
         `SELECT * 
         FROM Media
        WHERE ProjectID = ?`,
@@ -476,7 +476,7 @@ router.post(
     );
     zip.addFile("purged media data.csv", bufferMediaData);
 
-    await db.promise().query(`DELETE FROM Project WHERE IsDeleted = 1;`);
+    await db.query(`DELETE FROM Project WHERE IsDeleted = 1;`);
     return res.status(200).json({
       success: true,
       message:
@@ -493,7 +493,7 @@ router.post(
   reconfirmPasswordFunctionForAdmin,
   async (req: Request, res: Response) => {
     const result: any = await db
-      .promise()
+      
       .query(`SELECT * FROM User WHERE IsDeleted = 1;`);
 
     const userData: Array<Object> = Array.from(result[0]);
@@ -512,7 +512,7 @@ router.post(
       ids.push(temp.UserID);
 
       //query pupl
-      const projectUserPhotographyLinkResults = await db.promise().query(
+      const projectUserPhotographyLinkResults = await db.query(
         `SELECT * 
         FROM ProjectUserPhotographyLink
        WHERE PhotographerID = ?`,
@@ -549,45 +549,45 @@ router.post(
     //nulling uncascaded values to prevent errors
     for (const id of ids) {
       await db
-        .promise()
+        
         .query("UPDATE Media SET CreatedByID = null WHERE CreatedByID = ?", [
           id,
         ]);
       await db
-        .promise()
+        
         .query("UPDATE Media SET UpdatedByID = null WHERE UpdatedByID = ?", [
           id,
         ]);
       await db
-        .promise()
+        
         .query(
           "UPDATE Project SET ProjectOwnerID = null WHERE ProjectOwnerID = ?",
           [id]
         );
       await db
-        .promise()
+        
         .query("UPDATE Project SET CreatedByID = null WHERE CreatedByID = ?", [
           id,
         ]);
       await db
-        .promise()
+        
         .query("UPDATE Project SET UpdatedByID = null WHERE UpdatedByID = ?", [
           id,
         ]);
       await db
-        .promise()
+        
         .query("UPDATE User SET CreatedByID = null WHERE CreatedByID = ? ", [
           id,
         ]);
       await db
-        .promise()
+        
         .query("UPDATE User SET UpdatedByID = null WHERE UpdatedByID = ? ", [
           id,
         ]);
     }
 
     //main purge
-    await db.promise().query(`DELETE FROM User WHERE IsDeleted = 1;`);
+    await db.query(`DELETE FROM User WHERE IsDeleted = 1;`);
     return res.status(200).json({
       success: true,
       message:
@@ -606,7 +606,7 @@ router.get(
   async (req: Request, res: Response) => {
     //MEDIA
     const mediaData: any = (
-      await db.promise().query(`SELECT * FROM Media;`)
+      await db.query(`SELECT * FROM Media;`)
     )[0];
     const mediaData2: Array<Object> = Array.from(mediaData);
     const jsonMediaData2 = JSON.parse(JSON.stringify(mediaData2));
@@ -617,7 +617,7 @@ router.get(
     //USER
     const userData: any = (
       await db
-        .promise()
+        
         .query(
           `SELECT UserID,Email,UserType,FullName,RegisteredDate,LastLoginDate,IsDeleted,ContactNumber,StaffType,Comments,UpdatedDate,UpdatedByID,CreatedByID FROM User;`
         )
@@ -630,7 +630,7 @@ router.get(
 
     //PROJECT
     const projectData: any = (
-      await db.promise().query(`SELECT * FROM Project;`)
+      await db.query(`SELECT * FROM Project;`)
     )[0];
     const projectData2: Array<Object> = Array.from(projectData);
     const jsonProjectData = JSON.parse(JSON.stringify(projectData2));
@@ -640,7 +640,7 @@ router.get(
 
     //IMAGINGPLATFORMINSTANCE
     const imagingPlatformInstanceData: any = (
-      await db.promise().query(`SELECT * FROM ImagingPlatformInstance;`)
+      await db.query(`SELECT * FROM ImagingPlatformInstance;`)
     )[0];
     const imagingPlatformInstanceData2: Array<Object> = Array.from(
       imagingPlatformInstanceData
@@ -655,7 +655,7 @@ router.get(
 
     //PROJECT USER PHOTOGRAPHY LINK
     const projectUserPhotographyLinkData: any = (
-      await db.promise().query(`SELECT * FROM ProjectUserPhotographyLink;`)
+      await db.query(`SELECT * FROM ProjectUserPhotographyLink;`)
     )[0];
     const projectUserPhotographyLinkData2: Array<Object> = Array.from(
       projectUserPhotographyLinkData

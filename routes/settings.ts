@@ -48,7 +48,7 @@ router.post(
     const query =
       "SELECT SaltedPassword,PasswordSalt FROM User WHERE Email = ?";
     const results = (
-      await db.promise().query<RowDataPacket[]>(query, [username])
+      await db.query<RowDataPacket[]>(query, [username])
     )[0][0];
     const currentSaltedPassword = results.SaltedPassword;
     const currentPasswordSalt = results.PasswordSalt;
@@ -82,7 +82,7 @@ router.post(
               const updatePasswordQuery =
                 "UPDATE User SET SaltedPassword = ?, PasswordSalt = ? WHERE Email = ?";
               await db
-                .promise()
+                
                 .query<RowDataPacket[]>(updatePasswordQuery, [
                   hashedPassword,
                   newPasswordSalt,
@@ -110,7 +110,7 @@ router.get("/profile", isAuthenticated, async (req: Request, res: Response) => {
   const query = "SELECT * FROM User WHERE User.UserID = ?";
   const result = (
     await db
-      .promise()
+      
       .query<RowDataPacket[]>(query, [req.session.passport.user.UserID])
   )[0][0];
   res.render("settings/profile", {
@@ -152,7 +152,7 @@ router.post(
       });
     if (email != originalEmail) {
       const result = await db
-        .promise()
+        
         .query("SELECT 1 FROM User WHERE Email = ? AND Email != ? LIMIT 1;", [
           email,
           originalEmail,
@@ -189,7 +189,7 @@ router.post(
       comments,
       userID,
     ];
-    await db.promise().query<RowDataPacket[]>(query, params);
+    await db.query<RowDataPacket[]>(query, params);
     req.session.passport.user.Email = email;
     req.session.passport.user.FullName = fullName;
     req.session.save();

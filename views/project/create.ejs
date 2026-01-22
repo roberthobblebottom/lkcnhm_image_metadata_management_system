@@ -29,7 +29,7 @@
       <div class="form-group">
 
         <label for="projectName">Project Name*</label>
-        <input type="text" id="projectName" name="projectName" required value="----">
+        <input type="text" id="projectName" name="projectName" required value="">
       </div>
 
       <div class="form-group">
@@ -37,7 +37,7 @@
         <select id="projectOwner" name="projectOwner" <%=currentUser.UserType=='admin' ? '' : 'disabled'%> required>
           <option value="">Select Project Owner</option>
           <% projectOwners.forEach(user=> { %>
-          <option value="<%=user.UserID %>" <%=currentUser.UserID==user.UserID ? 'selected' : '' %>>
+          <option value="<%=user.UserID %>" >
             <%=user.FullName%>
           </option>
           <% }) %>
@@ -54,7 +54,7 @@
         <select name="projectType" id="projectType" class="form-control">
           <option value="">-- Select Project Type --</option>
           <% projectTypes.forEach(projectType=> { %>
-          <option value="<%= projectType %>" <%=projectType=='BDP' ? "selected":""%>>
+          <option value="<%= projectType %>" >
             <%= projectType %>
           </option>
           <% }) %>
@@ -71,7 +71,7 @@
         <select multiple id="newSelectedPhotographers">
           <option value="">Select Photographers</span>
             <% photographers.forEach(photographer=>{ %>
-      <option class="dropdown-item" value="<%=photographer.UserID%>" <%=photographer.UserID==currentUser.UserID  ? "selected ":""%>>
+      <option class="dropdown-item" value="<%=photographer.UserID%>" >
         <%=photographer.FullName%>
       </option>
       <%})%>
@@ -94,13 +94,13 @@
 
   <div class="form-group">
     <label for="summary">Summary of Project*</label>
-    <textarea id="summary" name="summary" required>-----</textarea>
+    <textarea id="summary" name="summary" required></textarea>
     <div id="summary-error" class="error-message">Please provide a project summary</div>
   </div>
 
   <div class="form-group">
     <label for="specimenDetails">Specimen Details*</label>
-    <textarea id="specimenDetails" name="specimenDetails" required>-------</textarea>
+    <textarea id="specimenDetails" name="specimenDetails" required></textarea>
     <div id="specimenDetails-error" class="error-message">Please provide specimen details</div>
   </div>
 
@@ -114,7 +114,7 @@
     <select multiple id="newSelectedImagingPlatforms">
       <option value="">Select Imaging Platforms</span>
         <% imagingPlatforms.forEach(i=>{ %>
-      <option value="<%=i%>" <%=i=='Leica(L5)' ? "selected":""%>>
+      <option value="<%=i%>" >
         <%=i%>
       </option>
       <%})%>

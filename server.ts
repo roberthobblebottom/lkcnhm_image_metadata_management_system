@@ -13,7 +13,7 @@ const adminUserManagementRoutes = require("./routes/admin/user-management");
 const { isAuthenticated, isAdmin } = require("./middleware/auth");
 const passport = require("passport");
 const app = express();
-const PORT = process.env.PORT || 5000;
+const PORT = process.env.PORT || 3001;
 // ✅ Middleware
 app.use(express.static("public"));
 // app.use(express.static(path.join(__dirname,"/public/")));
@@ -28,10 +28,16 @@ app.use(
     secret: process.env.SessionSecret,
     resave: false,
     saveUninitialized: false,
-    cookie: { secure: false, httpOnly: true }, // 1-hour expiry
-    //maxAge: 1000 * 60 * 60
+rolling: true, 
+    cookie: { 
+      // secure: true, 
+      httpOnly: true,
+       maxAge: 1000 * 60 * 60 * 6,// 6-hour expiry
+      }, 
+    //
   })
 );
+app.use(passport.initialize());
 app.use(passport.session());
 
 // ✅ API Routes
@@ -73,13 +79,13 @@ app.get("/user/login-landing-page", isAuthenticated, (req: Request, res: Respons
   res.render("user/login-landing-page", {
     user: req.session.passport.user,
     title: "User login landing page",
-    currentUser:req.session.passport.user,
+    currentUser: req.session.passport.user,
   });
 });
 
 app.get("/current-user2", (req: Request, res: Response) => {
-console.log('/current user')
-    console.log('current user',req.session.passport.user)
+  console.log('/current user')
+  console.log('current user', req.session.passport.user)
   if (req.session && req.session.passport.user) {
     res.json({
       Email: req.session.passport.user.Email,
@@ -94,7 +100,7 @@ console.log('/current user')
 
 
 // ✅ Start Server
-app.listen(PORT, () => {
+app.listen(PORT,'0.0.0.0', () => {
   console.log(`✅ Server running at http://localhost:${PORT}`);
 });
 
