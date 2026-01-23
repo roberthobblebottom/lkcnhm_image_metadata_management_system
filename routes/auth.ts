@@ -67,7 +67,7 @@ passport.use(
 passport.serializeUser(
   (user: any, done: (arg0: any, user: User | null) => any) => {
     process.nextTick(function () {
-      console.log('serialise user',user)
+      // console.log('serialise user',user)
       return done(null, {
         UserID: user.UserID,
         FullName: user.FullName,
@@ -81,7 +81,7 @@ passport.serializeUser(
 // retrieving session data
 passport.deserializeUser((user: User, cb: (arg0: null, arg1: any) => any) => {
   process.nextTick(function () {
-console.log('deserialise user',user)
+// console.log('deserialise user',user)
 
     return cb(null, user);
   });
@@ -211,21 +211,16 @@ router.post("/login", (req: Request, res: Response, next: NextFunction) => {
       failureMessage: "CUSTOM", // not working
     },
     (err: any, user: User, info: any) => {
-      console.log("HERE")
       if (err) return next(err);
       if (!user) return res.status(401).send(info);
       req.login(user, async (err: any) => {
-        console.log("1")
         // I am not suppose to use this as password authenticate already does it, but somehow this guy's code from stackoverflow works
         if (err) return res.status(500).json({ error: "Login failed." });
         // 🔄 Update LastLoginDate
-        console.log('2')
         const updateQuery =
           "UPDATE User SET LastLoginDate = NOW() WHERE UserID = ? ";
         await db.query(updateQuery, [user.UserID])
 
-
-        console.log('3')
 
 
         // these codes feels redundant now, may needed to be removed
@@ -265,7 +260,7 @@ router.post("/login", (req: Request, res: Response, next: NextFunction) => {
             return res.status(500).json({ error: "Session error" });
           }
 
-          console.log("login in  serialised passport user", req.session.passport.user)
+          console.log("login in  serialised passport user", req.session.passport.user.Email)
 
           return res.json({
             success: true,

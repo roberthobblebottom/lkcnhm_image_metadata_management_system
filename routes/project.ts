@@ -1,12 +1,12 @@
 const express = require("express");
 const router = express.Router();
-import { QueryError, RowDataPacket } from "mysql2";
-import { db } from "./db";
+import { QueryError } from "mysql2";
+// import { db } from "./db";
+const db = require('./db');
 import { Response, Request } from "express";
 import { emailRegex, userTypesEnumeration } from "../middleware/utils";
 
 import crypto from "crypto";
-import { isAdmin } from "../middleware/auth";
 const {
   isAuthenticated,
   isAdminOrProjectOwner,
@@ -160,7 +160,7 @@ router.post(
           fullName,
           "",
           "Created during the creation of a project this user is in by project owner of user id." +
-            userID,
+          userID,
         ];
         try {
           const result = (await db.query(insertUserQuery, params))[0];
@@ -180,7 +180,7 @@ router.post(
         } catch (err: any) {
           const msg =
             err.toString().toLowerCase().includes("duplicate") &&
-            err.toString().toLowerCase().includes("email")
+              err.toString().toLowerCase().includes("email")
               ? "email already existed in the database."
               : err;
           console.log(msg);
@@ -254,7 +254,6 @@ router.post(
         ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, NOW(), ?, NOW(), ?, 0, ?)
         `;
       const result = await db
-        
         .query(insertQuery, [
           req.body.projectName,
           req.body.projectType == "" ? null : req.body.projectType,
@@ -268,13 +267,12 @@ router.post(
           userID,
           projectStatusEnumeration().in_progress,
         ]);
-
       const insertedProjectID = Object.values(result[0])[2].toString();
-
       const photographersTuple: string[][] = [];
       for (var x of selectedPhotographers) {
         photographersTuple.push([x, insertedProjectID]);
       }
+      console.log(photographersTuple)
       const insertPhotographersQuery = `
         INSERT INTO ProjectUserPhotographyLink (PhotographerID,ProjectID)
         VALUES ?
@@ -292,7 +290,7 @@ router.post(
         VALUES ?
         `;
       await db
-        
+
         .query(insertImagingPlatformsQuery, [imagingPlatformsTuple]);
 
       console.log("📸 project inserted with  projectID:", insertedProjectID);
@@ -362,7 +360,7 @@ router.get(
     const query = user.UserType != "admin" ? queryForNonAdmin : queryForAdmin;
     const adminID = user.UserType != "admin" ? [user.UserID] : [];
 
-    console.log("📩 Fetching Projects...");
+    console.log("📩 Fetching Projects...", db.query);
     const photographersTemp: any = (
       await db.query(queryForPhotographers, [user.UserID])
     )[0];
@@ -370,33 +368,34 @@ router.get(
     for (var x of photographersTemp) {
       photographers[x.ProjectID] = x.photographersNames;
     }
+    console.log("here photographers:", photographers)
+    const result = (await db.query(query, [adminID]))[0];
+    console.log("1")
+    // if (err) {
+    //   console.error("❌ Error fetching projects:", err);
+    //   return res.status(500).render("error", {
+    //     message: "Error loading projects",
+    //     error: process.env.NODE_ENV === "development" ? err : null,
+    //   });
+    // }
 
-    db.query(query, adminID, (err: any, result: any) => {
-      if (err) {
-        console.error("❌ Error fetching projects:", err);
-        return res.status(500).render("error", {
-          message: "Error loading projects",
-          error: process.env.NODE_ENV === "development" ? err : null,
-        });
-      }
+    console.log(`📄 Fetched ${result.length} projects`);
+    // console.log(results)
 
-      console.log(`📄 Fetched ${result.length} projects`);
-      // console.log(results)
-
-      if (result.length === 0) {
-        return res.render("project/view-all", {
-          projects: [],
-          message: "No projects found",
-          currentUser: user,
-        });
-      }
-      res.render("project/view-all", {
-        projects: result,
+    if (result.length === 0) {
+      return res.render("project/view-all", {
+        projects: [],
+        message: "No projects found",
         currentUser: user,
-        photographers: photographers,
-        title: "Projects Dashboard", // Add title here
       });
+    }
+    res.render("project/view-all", {
+      projects: result,
+      currentUser: user,
+      photographers: photographers,
+      title: "Projects Dashboard", // Add title here
     });
+
   }
 );
 
@@ -444,51 +443,51 @@ router.get(
     for (const x of imagingPlatformsTemp1) {
       imagingPlatforms.push(x.ImagingPlatform);
     }
-    db.query(query, [projectID], (err: QueryError | null, results: any) => {
-      if (err) {
-        console.error("Error fetching project:", err);
-        return res.status(500).render("error", {
-          message: "Error loading project",
-          error: process.env.NODE_ENV === "development" ? err : null,
-        });
-      }
+    const results = await db.query(query, [projectID])
+    // if (err) {
+    //   console.error("Error fetching project:", err);
+    //   return res.status(500).render("error", {
+    //     message: "Error loading project",
+    //     error: process.env.NODE_ENV === "development" ? err : null,
+    //   });
+    // }
 
-      if (results.length === 0) {
-        return res.status(404).render("error", {
-          message: "project not found",
-        });
-      }
-      // Format dates for display
-      const project = {
-        ...results[0],
-        CreatedDate: formatDate(results[0].CreatedDate),
-        ImagingStartDate: formatDate(results[0].ImagingStartDate),
-        ImagingEndDate: formatDate(results[0].ImagingEndDate),
-        UpdatedDate: results[0].UpdatedDate
-          ? formatDate(results[0].UpdatedDate)
-          : null,
-        IsDeleted: results[0].IsDeleted,
-        photographers:
-          photographers.length != 0
-            ? photographers.toString().replace(",", ", ")
-            : "Not Specified",
-        imagingPlatforms:
-          imagingPlatforms.length != 0
-            ? imagingPlatforms.toString().replace(",", ", ")
-            : "Not Specified",
-      };
+    // if (results.length === 0) {
+    //   return res.status(404).render("error", {
+    //     message: "project not found",
+    //   });
+    // }
+    // Format dates for display
+    console.log(results[0][0])
+    const project = {
+      ...results[0][0],
+      CreatedDate: formatDate(results[0].CreatedDate),
+      ImagingStartDate: formatDate(results[0].ImagingStartDate),
+      ImagingEndDate: formatDate(results[0].ImagingEndDate),
+      UpdatedDate: results[0].UpdatedDate
+        ? formatDate(results[0].UpdatedDate)
+        : null,
+      IsDeleted: results[0].IsDeleted,
+      photographers:
+        photographers.length != 0
+          ? photographers.toString().replace(",", ", ")
+          : "Not Specified",
+      imagingPlatforms:
+        imagingPlatforms.length != 0
+          ? imagingPlatforms.toString().replace(",", ", ")
+          : "Not Specified",
+    };
 
-      const newlyCreatedPhotographers = req.session.newlyCreatedPhotographers;
-      req.session.newlyCreatedPhotographers = [];
-      req.session.save();
-      res.render("project/view", {
-        project: project,
-        currentUser: req.session.passport.user,
-        newlyCreatedPhotographers: newlyCreatedPhotographers
-          ? newlyCreatedPhotographers
-          : [],
-        title: "View Project", // Add title here
-      });
+    const newlyCreatedPhotographers = req.session.newlyCreatedPhotographers;
+    req.session.newlyCreatedPhotographers = [];
+    req.session.save();
+    res.render("project/view", {
+      project: project,
+      currentUser: req.session.passport.user,
+      newlyCreatedPhotographers: newlyCreatedPhotographers
+        ? newlyCreatedPhotographers
+        : [],
+      title: "View Project", // Add title here
     });
   }
 );
@@ -528,13 +527,13 @@ router.get(
       ]: [any, any, any, any, any] = await Promise.all([
         db.query(requestQuery, [projectID]),
         db
-          
+
           .query(
             "SELECT ImagingPlatform FROM ImagingPlatformInstance WHERE ProjectID = ? ORDER BY ImagingPlatform",
             [projectID]
           ),
         db
-          
+
           .query(
             "SELECT user.UserID  FROM ProjectUserPhotographyLink p JOIN User user on user.UserID = p.PhotographerID WHERE p.ProjectID = ? ",
             [projectID]
@@ -681,7 +680,7 @@ router.post(
       //creation of new photographers
       const newlyCreatedPhotographers: { email: string; password: string }[] =
         [];
-      console.log('toBeCreatedPhotographers',toBeCreatedPhotographers)
+      console.log('toBeCreatedPhotographers', toBeCreatedPhotographers)
       for (const x of toBeCreatedPhotographers) {
         const fullName = x[0];
         const email = x[1];
@@ -708,7 +707,7 @@ router.post(
           userTypesEnumeration().photographerOnly,
           fullName,
           "",
-        
+
           "",
         ];
         try {
@@ -722,7 +721,7 @@ router.post(
             email: email,
             password: newPassword,
           });
-          console.log('insertedId',insertedId)
+          console.log('insertedId', insertedId)
           for (let x = 0; x < selectedPhotographers.length; x++) {
             console.log(selectedPhotographers[x])
             if (emailRegex.test(selectedPhotographers[x])) {
@@ -734,7 +733,7 @@ router.post(
         } catch (err: any) {
           const msg =
             err.toString().toLowerCase().includes("duplicate") &&
-            err.toString().toLowerCase().includes("email")
+              err.toString().toLowerCase().includes("email")
               ? "email already existed in the database."
               : err;
           res.status(400).json({ success: false, message: msg });
@@ -787,46 +786,44 @@ router.post(
       //   .query("ALTER TABLE Project MODIFY COLUMN `ProjectType` enum(?)", [i3]);
 
       /// IMAGING PLATFORMS OPERATIONS START
-      // const selectImagingQuery = `
-      //   SELECT ImagingPlatform FROM ImagingPlatformInstance WHERE ProjectID = ?`;
-      // const temp: any = (
-      //   await db.query(selectImagingQuery, [projectID])
-      // )[0];
-      // const currentSelectedImagingPlatforms: string[] = [];
-      // for (var x of temp) {
-      //   currentSelectedImagingPlatforms.push(x.ImagingPlatform);
-      // }
+      const selectImagingQuery = `
+        SELECT ImagingPlatform FROM ImagingPlatformInstance WHERE ProjectID = ?`;
+      const temp: any = (
+        await db.query(selectImagingQuery, [projectID])
+      )[0];
+      const currentSelectedImagingPlatforms: string[] = [];
+      for (var x of temp) {
+        currentSelectedImagingPlatforms.push(x.ImagingPlatform);
+      }
 
-      // //Getting differences
-      // const temp2 = selectedImagingPlatforms.filter(
-      //   (e: any) => !currentSelectedImagingPlatforms.includes(e)
-      // );
-      // const imagingPlatformsToBeAdded: string[][] = [];
-      // for (x of temp2) {
-      //   imagingPlatformsToBeAdded.push([x, projectID]);
-      // }
-      // const imagingPlatformsToBeRemoved: any =
-      //   currentSelectedImagingPlatforms.filter(
-      //     (e: any) => !selectedImagingPlatforms.includes(e)
-      //   );
+      //Getting differences
+      const temp2 = selectedImagingPlatforms.filter(
+        (e: any) => !currentSelectedImagingPlatforms.includes(e)
+      );
+      const imagingPlatformsToBeAdded: string[][] = [];
+      for (x of temp2) {
+        imagingPlatformsToBeAdded.push([x, projectID]);
+      }
+      const imagingPlatformsToBeRemoved: any =
+        currentSelectedImagingPlatforms.filter(
+          (e: any) => !selectedImagingPlatforms.includes(e)
+        );
 
-      // //the update
-      // if (imagingPlatformsToBeRemoved.length != 0) {
-      //   await db
-      //     
-      //     .query(
-      //       "DELETE FROM ImagingPlatformInstance WHERE ImagingPlatform in (?) AND ProjectID =?",
-      //       [imagingPlatformsToBeRemoved, projectID]
-      //     );
-      // }
-      // if (imagingPlatformsToBeAdded.length != 0) {
-      //   await db
-      //     
-      //     .query(
-      //       "INSERT INTO ImagingPlatformInstance(ImagingPlatform,ProjectID) VALUES ? ",
-      //       [imagingPlatformsToBeAdded]
-      //     );
-      // }
+      //the update
+      if (imagingPlatformsToBeRemoved.length != 0) {
+        await db
+          .query(
+            "DELETE FROM ImagingPlatformInstance WHERE ImagingPlatform in (?) AND ProjectID =?",
+            [imagingPlatformsToBeRemoved, projectID]
+          );
+      }
+      if (imagingPlatformsToBeAdded.length != 0) {
+        await db
+          .query(
+            "INSERT INTO ImagingPlatformInstance(ImagingPlatform,ProjectID) VALUES ? ",
+            [imagingPlatformsToBeAdded]
+          );
+      }
       /// IMAGING PLATFORMS OPERATIONS END
 
       /// Photographers OPERATIONS START
@@ -853,7 +850,7 @@ router.post(
       //the update
       if (photographersToBeRemoved.length != 0) {
         await db
-          
+
           .query(
             "DELETE FROM ProjectUserPhotographyLink WHERE PhotographerID in (?) AND ProjectID =?",
             [photographersToBeRemoved, projectID]
@@ -861,7 +858,7 @@ router.post(
       }
       if (photographersToBeAdded.length != 0) {
         await db
-          
+
           .query(
             "INSERT INTO ProjectUserPhotographyLink(PhotographerID,ProjectID) VALUES ? ",
             [photographersToBeAdded]
@@ -886,7 +883,7 @@ router.post(
         WHERE ProjectID = ?
         `;
       await db
-        
+
         .query(updateQuery, [
           projectName,
           startDate,
@@ -921,7 +918,7 @@ router.post(
   "/delete/:projectID",
   isAuthenticated,
   isAdminOrProjectOwner,
-  (req: Request, res: Response) => {
+  async (req: Request, res: Response) => {
     const projectID = req.params.projectID;
     const query = `
         UPDATE Project
@@ -931,17 +928,17 @@ router.post(
             UpdatedDate = NOW()
         WHERE ProjectID = ?
         `;
-    db.query(
+    await db.query(
       query,
       [req.session.passport.user.UserID, projectID],
-      (err: any) => {
-        if (err) {
-          console.error("Error soft deleting request:", err);
-          return res.status(500).send("Error marking request as deleted.");
-        }
-        res.redirect("/project/view-all");
-      }
+      // (err: any,results,field) => {
+      //   if (err) {
+      //     console.error("Error soft deleting request:", err);
+      //     return res.status(500).send("Error marking request as deleted.");
+      //   }
+      // }
     );
+    res.redirect("/project/view-all");
   }
 );
 
@@ -950,7 +947,7 @@ router.post(
   "/restore/:projectID",
   isAuthenticated,
   isAdminOrProjectOwner,
-  (req: Request, res: Response) => {
+  async (req: Request, res: Response) => {
     const projectID = req.params.projectID;
     const query = `
         UPDATE Project
@@ -960,17 +957,18 @@ router.post(
             UpdatedDate = NOW()
         WHERE ProjectID = ?
         `;
-    db.query(
+    await db.query(
       query,
       [req.session.passport.user.UserID, projectID],
-      (err: any) => {
-        if (err) {
-          console.error("Error soft deleting request:", err);
-          return res.status(500).send("Error marking request as deleted.");
-        }
-        res.redirect("/project/view-all");
-      }
+      // (err: any) => {
+      //   if (err) {
+      //     console.error("Error soft deleting request:", err);
+      //     return res.status(500).send("Error marking request as deleted.");
+      //   }
+      // }
     );
+
+    res.redirect("/project/view-all");
   }
 );
 
