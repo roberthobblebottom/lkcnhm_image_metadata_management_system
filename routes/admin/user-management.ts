@@ -2,7 +2,8 @@ const express = require("express");
 const router = express.Router();
 import crypto from "crypto";
 import { RowDataPacket } from "mysql2";
-import { db } from "../db";
+// import { db } from "../db";
+const db =require('../db')
 import {
   emailRegex,
   formatDisplayDate,
@@ -87,8 +88,8 @@ router.post(
     }
     const result = (
       await db
-        .promise()
-        .query<RowDataPacket[]>("SELECT 1 FROM User WHERE Email = ? LIMIT 1", [
+        
+        .query("SELECT 1 FROM User WHERE Email = ? LIMIT 1", [
           email,
         ])
     )[0];
@@ -142,8 +143,8 @@ router.post(
             adminID,
           ];
           const result = await db
-            .promise()
-            .query<RowDataPacket[]>(insertUserQuery, params);
+            
+            .query(insertUserQuery, params);
           const o: any = result;
           console.log(o);
           const insertID = Object.values(o[0])[2].toString();
@@ -238,7 +239,7 @@ router.get(
       "SELECT UserID,Email,UserType,FullName,RegisteredDate,ContactNumber,StaffType,Comments,IsDeleted FROM User WHERE UserID = ?";
 
     const result = (
-      await db.promise().query<RowDataPacket[]>(query, [userId])
+      await db.query(query, [userId])
     )[0];
     if (result.length === 0) {
       return res.render("admin/edit", {
@@ -311,7 +312,7 @@ router.post(
     }
     if (email != originalEmail) {
       const result = await db
-        .promise()
+        
         .query("SELECT 1 FROM User WHERE Email = ? AND Email != ? LIMIT 1;", [
           email,
           originalEmail,
@@ -395,7 +396,7 @@ router.post(
                   userID,
                 ];
 
-          await db.promise().query<RowDataPacket[]>(q2, params);
+          await db.query(q2, params);
           return res.json({
             success: true,
             message: "User updated successfully!",

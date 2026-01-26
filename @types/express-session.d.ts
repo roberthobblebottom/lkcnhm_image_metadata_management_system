@@ -1,12 +1,9 @@
-import { Request } from 'express';
-import { Session } from './express-session'; // or the type you're using for session
-declare global {
-  namespace Express {
+import 'express';
+import session from 'express-session'; 
+declare module 'express'{
     interface Request {
-      session?: Session; // Add your specific session type here
+        session?: session.Session & { passport?: { user?: any } };
     }
-  }
 }
 
-export { Session };
 
