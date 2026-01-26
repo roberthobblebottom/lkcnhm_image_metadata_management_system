@@ -98,7 +98,6 @@ const reconfirmPasswordFunctionForAdmin = async (
   );
   if (!crypto.timingSafeEqual(user.SaltedPassword, saltedPasswordFromDB)) {
     console.log("❌ Invalid Password");
-
     return res
       .status(400)
       .json({ success: false, message: "Invalid password" });
