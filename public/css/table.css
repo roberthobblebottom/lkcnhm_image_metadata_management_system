@@ -22,7 +22,6 @@ h2 {
 }
 
 
-
 /* Table Styles */
 table {
   border-collapse: collapse;
@@ -33,7 +32,7 @@ table {
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
 
   margin-top: 30px;
-
+  
 }
 
 /* Table Header */
@@ -54,9 +53,8 @@ th {
 /* Table Data */
 td {
   padding: 10px;
-  /* Reduced padding */
   border-bottom: 1px solid #ddd;
-  font-size: x-small;
+  font-size: small;
   text-align: center;
   color: #333;
   white-space: nowrap;

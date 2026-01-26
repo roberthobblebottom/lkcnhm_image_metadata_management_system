@@ -3,7 +3,7 @@ const router = express.Router();
 import crypto from "crypto";
 import { RowDataPacket } from "mysql2";
 // import { db } from "../db";
-const db =require('../db')
+const db = require('../db')
 import {
   emailRegex,
   formatDisplayDate,
@@ -78,7 +78,7 @@ router.post(
           Object.values(userTypesEnumeration()),
       });
     }
-    if (!Object.values(staffTypesEnumeration()).includes(staffType)) {
+    if (!Object.values(staffTypesEnumeration()).includes(staffType) && staffType != "") {
       return res.status(400).json({
         success: false,
         message:
@@ -88,7 +88,7 @@ router.post(
     }
     const result = (
       await db
-        
+
         .query("SELECT 1 FROM User WHERE Email = ? LIMIT 1", [
           email,
         ])
@@ -137,13 +137,13 @@ router.post(
             userType,
             fullName,
             contactNumber,
-            staffType,
+            staffType == "" ? null:staffType,
             comments,
             adminID,
             adminID,
           ];
           const result = await db
-            
+
             .query(insertUserQuery, params);
           const o: any = result;
           console.log(o);
@@ -170,33 +170,27 @@ router.get(
   "/view-all",
   isAuthenticated,
   isAdmin,
-  (req: Request, res: Response) => {
+  async (req: Request, res: Response) => {
     console.log("Route /admin-users hit"); // Debug log 1
     const query = `SELECT UserID, Email,UserType,FullName,StaffType,
     RegisteredDate, LastLoginDate, IsDeleted  FROM User`;
 
-    db.query(query, (err, result) => {
-      console.log("Query executed", { err, result }); // Debug log 2
-      if (err) {
-        console.error("❌ Database Error:", err);
-        return res.status(500).json({ error: "Database error" });
-      }
-
-      console.log("Rendering template"); // Debug log 3
-      res.render("admin/view-all", {
-        users: result,
-        title: "User Management",
-      });
+    const results = await db.query(query)
+    console.log("Rendering template"); // Debug log 3
+    res.render("admin/view-all", {
+      users: results[0],
+      title: "User Management",
     });
-  }
-);
+  });
+
+
 
 //refactored from server.js, not tested and may not be needed
 router.get(
   "/view/:userID",
   isAuthenticated,
   isAdmin,
-  (req: Request, res: Response) => {
+  async (req: Request, res: Response) => {
     const userID = req.params.userID;
 
     const query = `
@@ -208,25 +202,24 @@ router.get(
     WHERE UserID = ?;
     `;
 
-    db.query(query, [userID], (err, results: any) => {
-      if (err) {
-        console.error("❌ Error fetching user with joins:", err);
-        return res.status(500).send("Error fetching user.");
-      }
+    const results = (await db.query(query, [userID]))[0]
+    // if (err) {
+    //   console.error("❌ Error fetching user with joins:", err);
+    //   return res.status(500).send("Error fetching user.");
+    // }
 
-      if (results.length === 0) {
-        return res.status(404).send("User not found or has been deleted.");
-      }
+    if (results.length === 0) {
+      return res.status(404).send("User not found or has been deleted.");
+    }
 
-      console.log("📄 User Data Fetched:", results[0]);
-      res.render("admin/view", {
-        user: results[0],
-        title: "Imaging User Details",
-        registeredDate: formatDisplayDate(results[0].RegisteredDate),
-      });
+    console.log("📄 User Data Fetched:", results[0]);
+    res.render("admin/view", {
+      user: results[0],
+      title: "Imaging User Details",
+      registeredDate: formatDisplayDate(results[0].RegisteredDate),
     });
-  }
-);
+  });
+
 //update user details
 // Render edit user page (support both singular and plural URLs)
 router.get(
@@ -312,7 +305,7 @@ router.post(
     }
     if (email != originalEmail) {
       const result = await db
-        
+
         .query("SELECT 1 FROM User WHERE Email = ? AND Email != ? LIMIT 1;", [
           email,
           originalEmail,
@@ -332,7 +325,7 @@ router.post(
           Object.values(userTypesEnumeration()),
       });
     }
-    if (!Object.values(staffTypesEnumeration()).includes(staffType)) {
+    if (!Object.values(staffTypesEnumeration()).includes(staffType) && staffType != "") {
       return res.status(400).json({
         success: false,
         message:
@@ -374,27 +367,27 @@ router.post(
           const params =
             password.trim() != ""
               ? [
-                  email,
-                  userType,
-                  fullName,
-                  contactNumber,
-                  staffType,
-                  comments,
-                  adminID,
-                  hashedPassword,
-                  newPasswordSalt,
-                  userID,
-                ]
+                email,
+                userType,
+                fullName,
+                contactNumber,
+                staffType == ""? null:staffType,
+                comments,
+                adminID,
+                hashedPassword,
+                newPasswordSalt,
+                userID,
+              ]
               : [
-                  email,
-                  userType,
-                  fullName,
-                  contactNumber,
-                  staffType,
-                  comments,
-                  adminID,
-                  userID,
-                ];
+                email,
+                userType,
+                fullName,
+                contactNumber,
+                staffType ==""?null:staffType,
+                comments,
+                adminID,
+                userID,
+              ];
 
           await db.query(q2, params);
           return res.json({
@@ -419,22 +412,20 @@ router.post(
   isAuthenticated,
   isAdmin,
   reconfirmPasswordFunctionForAdmin,
-  (req: Request, res: Response) => {
+  async (req: Request, res: Response) => {
     const userID = req.params.userID;
     console.log(userID);
     const query = "UPDATE User SET IsDeleted = 1 WHERE UserID = ?";
 
-    db.query(query, [userID], (err, result) => {
-      if (err) {
-        console.error("❌ Database Error:", err);
-        return res
-          .status(500)
-          .json({ success: false, error: "Database error" });
-      }
-      console.log(`🗑️ User ${userID} marked as deleted`);
-
-      res.redirect("/admin/user-management/view-all");
-    });
+    await db.query(query, [userID])
+    // if (err) {
+    //   console.error("❌ Database Error:", err);
+    //   return res
+    //     .status(500)
+    //     .json({ success: false, error: "Database error" });
+    // }
+    console.log(`🗑️ User ${userID} marked as deleted`);
+    res.redirect("/admin/user-management/view-all");
   }
 );
 
@@ -443,21 +434,20 @@ router.post(
   isAuthenticated,
   isAdmin,
   reconfirmPasswordFunctionForAdmin,
-  (req: Request, res: Response) => {
+  async (req: Request, res: Response) => {
     const userID = req.params.userID;
     console.log(userID);
-    db.query(
+    await db.query(
       "UPDATE User SET IsDeleted = 0 WHERE UserID = ?",
-      [userID],
-      (err, result) => {
-        if (err) {
-          console.error(err);
-          return res.status(500).json({ error: "Error recovering user" });
-        }
-        console.log(`✅ User with ID ${userID} recovered`);
-        res.redirect("/admin/user-management/view-all"); // Redirect to admin page after recovery
-      }
-    );
+      [userID])
+    // (err, result) => {
+    // if (err) {
+    //   console.error(err);
+    //   return res.status(500).json({ error: "Error recovering user" });
+    // }
+    console.log(`✅ User with ID ${userID} recovered`);
+    res.redirect("/admin/user-management/view-all"); // Redirect to admin page after recovery
+
   }
 );
 

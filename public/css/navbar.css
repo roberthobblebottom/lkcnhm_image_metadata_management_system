@@ -15,6 +15,7 @@
     border-bottom-right-radius: 15px;
     color: white;
 
+      anchor-name: --sidebar;
   }
       .loginDetails{
 margin-left: 15px;

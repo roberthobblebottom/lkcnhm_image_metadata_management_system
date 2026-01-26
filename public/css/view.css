@@ -9,10 +9,12 @@
       margin-top: -100px;
       box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
       height: 1000px;
-      width: 1300px;
+      max-width: 800px !important;
       margin: 40px auto;
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-
+    margin-left: 80px;
+      position-anchor: --sidebar;
+position:absolute;
   }
 
   .request-header {

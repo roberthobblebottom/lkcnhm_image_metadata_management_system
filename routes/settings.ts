@@ -1,7 +1,8 @@
 const express = require("express");
 const router = express.Router();
 import { RowDataPacket } from "mysql2";
-import { db } from "./db";
+// import { db } from "./db";
+const db = require('./db')
 import { Request, Response } from "express";
 import crypto from "crypto";
 import {
@@ -48,7 +49,7 @@ router.post(
     const query =
       "SELECT SaltedPassword,PasswordSalt FROM User WHERE Email = ?";
     const results = (
-      await db.query<RowDataPacket[]>(query, [username])
+      await db.query(query, [username])
     )[0][0];
     const currentSaltedPassword = results.SaltedPassword;
     const currentPasswordSalt = results.PasswordSalt;
@@ -56,46 +57,38 @@ router.post(
       const newPasswordSalt = crypto.randomBytes(16).toString("hex");
       // first hash to see if old password matches and
       // then second hash is used for updating the db with the new salted password.
-      crypto.pbkdf2(
+      const saltedOldPassword = crypto.pbkdf2Sync(
         oldPassword,
         currentPasswordSalt,
         310000,
         32,
-        "sha256",
-        async function (err, hashedPassword) {
-          if (!crypto.timingSafeEqual(hashedPassword, currentSaltedPassword)) {
-            console.log("old passwords matched");
-            return res.json({
-              success: false,
-              message: "old password is incorrect",
-            });
-          }
+        "sha256")
+      if (!crypto.timingSafeEqual(saltedOldPassword, currentSaltedPassword)) {
+        console.log("old passwords matched");
+        return res.json({
+          success: false,
+          message: "old password is incorrect",
+        });
+      }
 
-          crypto.pbkdf2(
-            newPassword,
-            newPasswordSalt,
-            310000,
-            32,
-            "sha256",
-            async function (err, hashedPassword) {
-              console.log("inside password hashed functions");
-              const updatePasswordQuery =
-                "UPDATE User SET SaltedPassword = ?, PasswordSalt = ? WHERE Email = ?";
-              await db
-                
-                .query<RowDataPacket[]>(updatePasswordQuery, [
-                  hashedPassword,
-                  newPasswordSalt,
-                  username,
-                ]);
-              return res.json({
-                success: true,
-                message: "sucessfully changed password",
-              });
-            }
-          );
-        }
-      );
+      const saltedPassword = crypto.pbkdf2Sync(
+        newPassword,
+        newPasswordSalt,
+        310000,
+        32,
+        "sha256")
+      console.log("inside password hashed functions");
+      const updatePasswordQuery =
+        "UPDATE User SET SaltedPassword = ?, PasswordSalt = ? WHERE Email = ?";
+      await db.query(updatePasswordQuery, [
+        saltedPassword,
+        newPasswordSalt,
+        username,
+      ]);
+      return res.json({
+        success: true,
+        message: "sucessfully changed password",
+      });
     } catch (error) {
       console.error("password change error:", error);
       return res.json({
@@ -109,9 +102,7 @@ router.post(
 router.get("/profile", isAuthenticated, async (req: Request, res: Response) => {
   const query = "SELECT * FROM User WHERE User.UserID = ?";
   const result = (
-    await db
-      
-      .query<RowDataPacket[]>(query, [req.session.passport.user.UserID])
+    await db.query(query, [req.session.passport.user.UserID])
   )[0][0];
   res.render("settings/profile", {
     currentUser: result,
@@ -150,14 +141,16 @@ router.post(
         message:
           "invalid email, email value does not have '@' or '.' character(s).",
       });
+    console.log('email',email)
+    console.log('originalEmail',originalEmail)
     if (email != originalEmail) {
       const result = await db
-        
         .query("SELECT 1 FROM User WHERE Email = ? AND Email != ? LIMIT 1;", [
           email,
           originalEmail,
         ]);
-      if (result[0]) {
+      console.log(result[0][0])
+      if (result[0][0]) {
         return res.status(400).json({
           success: false,
           message: "Email already exist",
@@ -189,7 +182,7 @@ router.post(
       comments,
       userID,
     ];
-    await db.query<RowDataPacket[]>(query, params);
+    await db.query(query, params);
     req.session.passport.user.Email = email;
     req.session.passport.user.FullName = fullName;
     req.session.save();
