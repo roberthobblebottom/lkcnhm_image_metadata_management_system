@@ -1,7 +1,8 @@
 const { userTypesEnumeration } = require("./utils");
 import { Request, Response, NextFunction } from "express";
 
-import { db } from "../routes/db";
+// import { db } from "../routes/db";
+const db = require("../routes/db");
 import crypto from "crypto";
 export const isAuthenticated = (
   req: Request,
@@ -68,7 +69,6 @@ const reconfirmPasswordFunctionForAdmin = async (
   const query =
     "SELECT PasswordSalt, SaltedPassword FROM User WHERE Email = ? AND IsDeleted = 0 AND UserType = 'admin'";
   const [result]: any = await db
-    .promise()
     .query(query, [username])
     .catch((error: any) => {
       console.error("❌ Database Error:", error);

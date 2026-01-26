@@ -4,7 +4,9 @@ const router = express.Router();
 const path = require("path");
 
 import { QueryResult } from "mysql2";
-import { db } from "../db"; // Database connection
+const db = require("../db");
+          
+          
 const { isAuthenticated, isAdmin,reconfirmPasswordFunctionForAdmin } = require("../../middleware/auth"); // Middleware
 const fastcsv = require("fast-csv");
 
@@ -263,20 +265,16 @@ router.post(
   async (req: Request, res: Response) => {
     const feature = req.body.feature;
     const value = req.body.value;
-    console.log('req.body',req.body)
     switch (feature) {
       case "projectType":
         const projectTypes = req.session.projectTypes;
         projectTypes.includes(value) &&
           projectTypes.splice(projectTypes.indexOf(value), 1);
-        console.log(req.body)
         await db
-          
           .query("UPDATE Project SET ProjectType =NULL WHERE ProjectType = ?", [
             value,
           ]);
         await db
-          
           .query("ALTER TABLE Project CHANGE ProjectType ProjectType ENUM(?)", [
             req.session.projectTypes,
           ]);
@@ -286,7 +284,6 @@ router.post(
         imagingPlatforms.includes(value) &&
           imagingPlatforms.splice(imagingPlatforms.indexOf(value), 1);
         await db
-          
           .query(
             "DELETE FROM ImagingPlatformInstance  WHERE ImagingPlatform = ?",
             [value]
