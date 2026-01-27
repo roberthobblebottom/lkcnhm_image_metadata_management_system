@@ -15,7 +15,7 @@ jobs:
           username: ${{secrets.SSH_USERNAME}}
           # passphrase: ${{secrets.SSH_PASSPHRASE}}
           script: |
-            cd /home/image_metadata_management_system  
+            cd /home/image-metadata-management-system  
             git clone git@github.com:roberthobblebottom/lkcnhm-image-metadata-management-system.git  
             echo 'Deployment sucessful to digital ocean'  
 
