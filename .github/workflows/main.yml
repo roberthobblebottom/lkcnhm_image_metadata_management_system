@@ -13,7 +13,7 @@ jobs:
           host: ${{secrets.SSH_HOST}}
           key: ${{secrets.SSH_KEY}}
           username: ${{secrets.SSH_USERNAME}}
-
+          passphrase: ${{secrets.SSH_PASSPHRASE}}
           script:
             cd /home/image_metadata_management_system
             git clone git@github.com:roberthobblebottom/lkcnhm_image_metadata_management_system.git
