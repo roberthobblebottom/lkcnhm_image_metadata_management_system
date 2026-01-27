@@ -16,7 +16,7 @@ jobs:
           passphrase: ${{secrets.SSH_PASSPHRASE}}
           script: |
             cd /home/image-metadata-management-system  
-            eval ${`ssh-agent -s`}
+            eval `ssh-agent -s`
             ssh-add /root/.ssh/for_github_repo_access <<< ${{secrets.HUB_SSH_PASSPHRASE}}
             ssh-add -l | echo
             GIT_SSH_COMMAND='ssh -i /root/.ssh/for_github_repo_access -o StrictHostKeyChecking=no' 
