@@ -16,6 +16,10 @@ jobs:
           passphrase: ${{secrets.SSH_PASSPHRASE}}
           script: |
             cd /home/image-metadata-management-system  
+            #Start the SSH agent
+            eval $(ssh-agent -s)
+            # Add the private key using the passphrase from secrets
+            echo "${{ secrets.HUB_SSH_PASSPHRASE }}" | ssh-add /root/.ssh/for_github_repo_access
             git pull origin main
             echo 'Deployment sucessful to digital ocean'  
 
