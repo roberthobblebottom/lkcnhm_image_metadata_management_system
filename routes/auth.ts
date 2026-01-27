@@ -27,7 +27,6 @@ passport.use(
     const query =
       "SELECT PasswordSalt, SaltedPassword, UserID,UserType,FullName,Email FROM User WHERE Email = ? AND IsDeleted = 0";
     const [result]: any = await db
-
       .query(query, [username])
       .catch((error: any) => {
         console.error("❌ Database Error:", error);
@@ -68,6 +67,7 @@ passport.serializeUser(
   (user: any, done: (arg0: any, user: User | null) => any) => {
     process.nextTick(function () {
       // console.log('serialise user',user)
+      
       return done(null, {
         UserID: user.UserID,
         FullName: user.FullName,
@@ -225,7 +225,6 @@ router.post("/login", (req: Request, res: Response, next: NextFunction) => {
 
         // these codes feels redundant now, may needed to be removed
         const x1: any[] = await db
-
           .query("SHOW COLUMNS FROM Media LIKE 'ImageEditingTool' ");
         req.session.imageEditingTools = x1[0][0]["Type"]
           .replace("enum(", "")
@@ -234,7 +233,6 @@ router.post("/login", (req: Request, res: Response, next: NextFunction) => {
           .split(",");
 
         const x2: any[] = await db
-
           .query("SHOW COLUMNS FROM Media LIKE 'ImagingPlatform' ");
         const ip = x2[0][0]["Type"]
         const ip2 = ip.substring(5, ip.length - 1)
@@ -242,7 +240,6 @@ router.post("/login", (req: Request, res: Response, next: NextFunction) => {
           .split(",");
         req.session.imagingPlatforms = ip2;
         const x3: any[] = await db
-
           .query("SHOW COLUMNS FROM Project LIKE 'ProjectType' ");
         const projectTypes = x3[0][0]["Type"]
           .replaceAll("enum(", "")
@@ -254,6 +251,7 @@ router.post("/login", (req: Request, res: Response, next: NextFunction) => {
           projectTypes.at(-1).replace(")", "")
         );
         req.session.projectTypes = projectTypes;
+        console.log('user session before save',req.session.passport.user)
         req.session.save((err: any) => {
           if (err) {
             console.error("❌ Session Save Error:", err);
@@ -299,6 +297,20 @@ router.get("/logout", (req: Request, res: Response) => {
   }
 });
 
+router.get("/current-user", (req: Request, res: Response) => {
+  // console.log('/current user')
+  // console.log('current user', req.session.passport.user)
+  if (req.session && req.session.passport.user) {
 
+    res.json({
+      Email: req.session.passport.user.Email,
+      FullName: req.session.passport.user.FullName,
+      UserType: req.session.passport.user.UserType,
+      UserID: req.session.passport.user.UserID,
+    });
+  } else {
+    res.status(401).json({ error: "Not logged in" });
+  }
+});
 
 module.exports = router;

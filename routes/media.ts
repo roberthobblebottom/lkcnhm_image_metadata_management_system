@@ -93,12 +93,12 @@ router.get("/create", isAuthenticated, async (req: Request, res: Response) => {
   const allProjectAndPhotographerPairs = (
     await db.query(q2, [user.UserID])
   )[0];
-
+console.log(allProjectAndPhotographerPairs)
   res.render("media/create", {
     currentUser: req.session.passport.user,
     imageEditingTools: req.session["imageEditingTools"],
     imagingPlatforms: req.session["imagingPlatforms"],
-    allProjectAndPhotographerPairs,
+    allProjectAndPhotographerPairs:allProjectAndPhotographerPairs,
     fileFormats: Object.values(mediaFileFormatEnumeration()),
 
     title: "Media Form",

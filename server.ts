@@ -56,20 +56,12 @@ const serveHTML = (route: any, file: any) => {
 };
 
 app.get("/", (req: Request, res: Response) => {
+  req.session.destroy()
   res.render("index", { title: "register" });
 });
 
-// app.get("/register", async (req: Request, res: Response) => {
-//   res.render("register", {
-//     title: "register",
-//     userTypes: [
-//       userTypesEnumeration().photographerOnly,
-//       userTypesEnumeration().projectOwner,
-//     ],
-//   });
-// });
-
 app.get("/login", (req: Request, res: Response) => {
+  req.session.destroy()
   res.render("login", { title: "Login Page" });
 });
 
@@ -82,22 +74,6 @@ app.get("/user/login-landing-page", isAuthenticated, (req: Request, res: Respons
     currentUser: req.session.passport.user,
   });
 });
-
-app.get("/current-user2", (req: Request, res: Response) => {
-  console.log('/current user')
-  console.log('current user', req.session.passport.user)
-  if (req.session && req.session.passport.user) {
-    res.json({
-      Email: req.session.passport.user.Email,
-      FullName: req.session.passport.user.FullName,
-      UserType: req.session.passport.user.UserType,
-      UserID: req.session.passport.user.UserID,
-    });
-  } else {
-    res.status(401).json({ error: "Not logged in" });
-  }
-});
-
 
 // ✅ Start Server
 app.listen(PORT,'0.0.0.0', () => {

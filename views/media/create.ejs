@@ -36,10 +36,12 @@
 
       <div class="form-group">
         <label>Project and Photographer Pair*</label>
-        <select name="projectAndPhotographerPair" id="projectAndPhotographerPair" requried <%= currentUser.UserType == 'photographerOnly' ? 'disabled' : ''%>>
+        <select name="projectAndPhotographerPair" id="projectAndPhotographerPair" requried 
+        <%= currentUser.UserType == 'photographerOnly' ? 'disabled' : ''%>>
           <option value="">-- Select a project and photographer pair--</option>
           <%allProjectAndPhotographerPairs.forEach( u=>{%>
-          <option value="<%=u.ProjectID%>,<%=u.UserID%>" 
+          <option value="<%=u.ProjectID%>,<%=u.UserID%>">
+
 
             <%=u.projectName%> | <%=u.photographerName%>
           </option>
@@ -55,7 +57,7 @@
 
       <div class="form-group">
         <label for="filePath">File Path*</label>
-        <input type="text" name="filePath" id="filePath" value=" required>
+        <input type="text" name="filePath" id="filePath" value="" required>
       </div>
 
       <div class="form-group">

@@ -35,9 +35,9 @@
       <div class="form-group">
         <label for="projectOwner">Project Owner Full Name* </label>
         <select id="projectOwner" name="projectOwner" <%=currentUser.UserType=='admin' ? '' : 'disabled'%> required>
-          <option value="">Select Project Owner</option>
+          <option value="">Select Project Owner </option>
           <% projectOwners.forEach(user=> { %>
-          <option value="<%=user.UserID %>" >
+          <option value="<%=user.UserID %>" <%=user.UserID == currentUser.UserID ? 'selected':''%>>
             <%=user.FullName%>
           </option>
           <% }) %>
@@ -71,8 +71,9 @@
         <select multiple id="newSelectedPhotographers">
           <option value="">Select Photographers</span>
             <% photographers.forEach(photographer=>{ %>
-      <option class="dropdown-item" value="<%=photographer.UserID%>" >
-        <%=photographer.FullName%>
+      <option class="dropdown-item" value="<%=photographer.UserID%>" 
+        <%=photographer.UserID == currentUser.UserID && currentUser.UserType != 'admin' ? 'selected':''%>>
+        <%=photographer.FullName%> 
       </option>
       <%})%>
       </select>
@@ -139,7 +140,7 @@
 
 <script>
   const element = document.getElementById('newSelectedPhotographers');
-  const newSelectedPhotographers = new Choices(element, {
+    const newSelectedPhotographers = new Choices(element, {
     allowHTML: true,
     removeItemButton: true,
     callbackOnInit: async function() {

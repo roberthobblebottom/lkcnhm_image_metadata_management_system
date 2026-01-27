@@ -40,6 +40,7 @@ router.get(
       db.query(getPhotographers),
     ]);
 
+    console.log('photographers',photographers)
     res.render("project/create", {
       currentUser: req.session.passport.user,
       projectOwners: projectOwners[0],
@@ -272,7 +273,6 @@ router.post(
       for (var x of selectedPhotographers) {
         photographersTuple.push([x, insertedProjectID]);
       }
-      console.log(photographersTuple)
       const insertPhotographersQuery = `
         INSERT INTO ProjectUserPhotographyLink (PhotographerID,ProjectID)
         VALUES ?
@@ -290,7 +290,6 @@ router.post(
         VALUES ?
         `;
       await db
-
         .query(insertImagingPlatformsQuery, [imagingPlatformsTuple]);
 
       console.log("📸 project inserted with  projectID:", insertedProjectID);
@@ -358,7 +357,7 @@ router.get(
 
     const user = req.session.passport.user;
     const query = user.UserType != "admin" ? queryForNonAdmin : queryForAdmin;
-    const adminID = user.UserType != "admin" ? [user.UserID] : [];
+    const userID = user.UserType != "admin" ? [user.UserID] : [];
 
     console.log("📩 Fetching Projects...", db.query);
     const photographersTemp: any = (
@@ -368,9 +367,7 @@ router.get(
     for (var x of photographersTemp) {
       photographers[x.ProjectID] = x.photographersNames;
     }
-    console.log("here photographers:", photographers)
-    const result = (await db.query(query, [adminID]))[0];
-    console.log("1")
+    const result = (await db.query(query, [userID]))[0];
     // if (err) {
     //   console.error("❌ Error fetching projects:", err);
     //   return res.status(500).render("error", {

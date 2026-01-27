@@ -2,11 +2,8 @@ const express = require("express");
 import { Response, Request } from "express";
 const router = express.Router();
 const path = require("path");
-
 import { QueryResult } from "mysql2";
 const db = require("../db");
-          
-          
 const { isAuthenticated, isAdmin,reconfirmPasswordFunctionForAdmin } = require("../../middleware/auth"); // Middleware
 const fastcsv = require("fast-csv");
 
@@ -25,6 +22,7 @@ router.get(
   isAuthenticated,
   isAdmin,
   (req: Request, res: Response) => {
+    console.log(req.session.passport.user)
     res.render("admin/login-landing-page", {
       user: req.session.passport.user,
       title: "Admin Login Landing Page",
@@ -58,7 +56,6 @@ router.post(
       case "projectType":
         req.session.projectTypes.push(value);
         await db
-          
           .query("ALTER TABLE Project MODIFY COLUMN `ProjectType` enum(?)", [
             req.session.projectTypes,
           ]);
@@ -67,13 +64,11 @@ router.post(
       case "imagingPlatform":
         req.session.imagingPlatforms.push(value);
         await db
-          
           .query(
             "ALTER TABLE ImagingPlatformInstance MODIFY COLUMN `ImagingPlatform` enum(?)",
             [req.session.imagingPlatforms]
           );
         await db
-          
           .query("ALTER TABLE Media MODIFY COLUMN `ImagingPlatform` enum(?)", [
             req.session.imagingPlatforms,
           ]);
@@ -615,7 +610,6 @@ router.post(
     //USER
     const userData: any = (
       await db
-        
         .query(
           `SELECT UserID,Email,UserType,FullName,RegisteredDate,LastLoginDate,IsDeleted,ContactNumber,StaffType,Comments,UpdatedDate,UpdatedByID,CreatedByID FROM User;`
         )
