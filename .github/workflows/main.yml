@@ -16,6 +16,10 @@ jobs:
           passphrase: ${{secrets.SSH_PASSPHRASE}}
           script: |
             cd /home/image-metadata-management-system  
+            eval `ssh-agent -s`
+            ssh-add /root/.ssh/for_github_repo_access
+            ssh-add -l | echo
+            GIT_SSH_COMMAND='ssh -i /root/.ssh/for_github_repo_access -o StrictHostKeyChecking=no' 
             git clone git@github.com:roberthobblebottom/lkcnhm_image_metadata_management_system.git
             echo 'Deployment sucessful to digital ocean'  
 
