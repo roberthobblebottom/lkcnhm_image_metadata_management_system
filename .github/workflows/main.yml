@@ -17,9 +17,9 @@ jobs:
           script: |
             cd /home/image-metadata-management-system  
             #Start the SSH agent
-            eval $(ssh-agent -s)
+            # eval $(ssh-agent -s)
             # Add the private key using the passphrase from secrets
-            echo "${{ secrets.HUB_SSH_PASSPHRASE }}" | ssh-add /root/.ssh/for_github_repo_access
+            # echo "${{ secrets.HUB_SSH_PASSPHRASE }}" | ssh-add /root/.ssh/for_github_repo_access
             git pull git@github.com:roberthobblebottom/lkcnhm_image_metadata_management_system.git origin main
 
             echo 'Deployment sucessful to digital ocean'  
