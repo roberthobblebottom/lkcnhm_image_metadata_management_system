@@ -27,7 +27,7 @@ def recursion(
     # projectID
     window_pending,
 ):
-    for file_or_folder_path in glob(path + "/*"):
+    for file_or_folder_path in glob(path + "\\*"):
         # if not isRunning:
         # return
         if isdir(file_or_folder_path):
@@ -53,6 +53,7 @@ def recursion(
                 " the file " + file_or_folder_path + " not an valid image extension"
             )
             continue
+        logger.info('file_or_folder_path'+file_or_folder_path)
         if "LABEL" in file_or_folder_path or "THUMB" in file_or_folder_path:
             logging.info("label or thumb file, " + file_or_folder_path + " skipping.")
             continue
@@ -134,6 +135,7 @@ def recursion(
         for x1 in f:
             if x1 not in list(new_row.keys()):
                 new_row[x1] = ""
+        logger.info('new_row '+str(new_row))
         new_row = (
             pl.DataFrame(new_row)
             .rename({"Software": "ImageEditingTool"})
@@ -223,6 +225,7 @@ def main():
     )
     dirStringVar = StringVar(value=dir)
 
+    logger.info('dir'+dirStringVar.get())
     def browseFiles():
         filename = filedialog.askdirectory(
             initialdir="/",
@@ -263,17 +266,13 @@ def main():
         label.grid(column=1,row=1)
         buttonQuit2.grid(column=1,row=2)
         w.update()
-        for f3 in [x for x in glob(dir+"\\*") if isdir(x)]:
-            print('file path: '+f3)
-            recursion(
-                path=f3,
+        recursion(
+                path=dir,
                 output=output,
                 photographerID=photographerID,
                 # projectID = f3.split("/")[-1]
                 window_pending=windowPending,
             )
-            # if not isRunning:
-            # break
 
         stop = timer()
         logger.info("estimated time taken " + str(timedelta(seconds=stop - start)))
