@@ -10,7 +10,7 @@
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
   <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
   <script src="https://cdn.datatables.net/2.3.5/js/dataTables.js"></script>
- 
+
 </head>
 
 <body>
@@ -84,7 +84,7 @@
   </div>
 
   <script>
-    new DataTable('#dataTable',{pageLength:50,autoWidth:false})
+    const t = new DataTable('#dataTable',{pageLength:50,autoWidth:false, columnDefs:[{width:'900px',targets:'_all'}]})
     document.querySelectorAll('.delete-btn').forEach(button => {
       button.addEventListener('click', function(event) {
         event.preventDefault();

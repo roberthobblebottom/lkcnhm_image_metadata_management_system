@@ -7,7 +7,8 @@ body {
 
 .main-con {
   margin-top: 100px;
-  margin-left: 350px;
+  margin-left: 280px;
+
 }
 
 
@@ -30,7 +31,6 @@ table {
   overflow: hidden;
   margin: 0 auto;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
-
   margin-top: 30px;
   
 }
@@ -40,10 +40,8 @@ th {
   background: #000435;
   color: white;
   background-color: #007bff;
-  padding: 10px;
-  text-align: center;
-  font-weight: 600;
-  font-size: small;
+  /* padding: 10px; */
+  /* font-weight: 600; */
   text-transform: uppercase;
   border-bottom: 2px solid #000435;
   white-space: nowrap;
@@ -52,9 +50,8 @@ th {
 
 /* Table Data */
 td {
-  padding: 10px;
+  /* padding: 10px; */
   border-bottom: 1px solid #ddd;
-  font-size: small;
   text-align: center;
   color: #333;
   white-space: nowrap;

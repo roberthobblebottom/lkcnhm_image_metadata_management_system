@@ -56,12 +56,12 @@ const serveHTML = (route: any, file: any) => {
 };
 
 app.get("/", (req: Request, res: Response) => {
-  req.session.destroy()
+  req.session.destroy((err)=>{})
   res.render("index", { title: "register" });
 });
 
 app.get("/login", (req: Request, res: Response) => {
-  req.session.destroy()
+  req.session.destroy((err)=>{})
   res.render("login", { title: "Login Page" });
 });
 

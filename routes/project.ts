@@ -7,6 +7,7 @@ import { Response, Request } from "express";
 import { emailRegex, userTypesEnumeration } from "../middleware/utils";
 
 import crypto from "crypto";
+import { param, validationResult } from "express-validator";
 const {
   isAuthenticated,
   isAdminOrProjectOwner,
@@ -40,7 +41,7 @@ router.get(
       db.query(getPhotographers),
     ]);
 
-    console.log('photographers',photographers)
+    console.log('photographers', photographers)
     res.render("project/create", {
       currentUser: req.session.passport.user,
       projectOwners: projectOwners[0],
@@ -398,9 +399,14 @@ router.get(
 
 router.get(
   "/view/:projectID",
+  param('projectID').isInt({ min: 1 }).withMessage('unknown id'),
   isAuthenticated,
   isAdminOrProjectOwner,
   async (req: Request, res: Response) => {
+    const errors = validationResult(req)
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ errors: errors.array() })
+    }
     const projectID = req.params.projectID;
     const query = `
     SELECT
@@ -493,9 +499,14 @@ router.get(
 // Define queries at the top of your file for better maintainability
 router.get(
   "/edit/:projectID",
+  param('projectID').isInt({ min: 1 }).withMessage('unknown id'),
   isAuthenticated,
   isAdminOrProjectOwner,
   async (req: Request, res: Response) => {
+    const errors = validationResult(req)
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ errors: errors.array() })
+    }
     try {
       const projectID = req.params.projectID;
       const requestQuery = `
@@ -913,9 +924,15 @@ router.post(
 // Soft Delete Request (POST)
 router.post(
   "/delete/:projectID",
+
+  param('projectID').isInt({ min: 1 }).withMessage('unknown id'),
   isAuthenticated,
   isAdminOrProjectOwner,
   async (req: Request, res: Response) => {
+    const errors = validationResult(req)
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ errors: errors.array() })
+    }
     const projectID = req.params.projectID;
     const query = `
         UPDATE Project
@@ -942,9 +959,15 @@ router.post(
 //undo soft delete
 router.post(
   "/restore/:projectID",
+
+  param('projectID').isInt({ min: 1 }).withMessage('unknown id'),
   isAuthenticated,
   isAdminOrProjectOwner,
   async (req: Request, res: Response) => {
+    const errors = validationResult(req)
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ errors: errors.array() })
+    }
     const projectID = req.params.projectID;
     const query = `
         UPDATE Project

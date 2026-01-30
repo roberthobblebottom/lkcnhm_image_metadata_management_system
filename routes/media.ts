@@ -1,8 +1,9 @@
 const express = require("express");
 const router = express.Router();
 // import { db } from "./db";
-const db =require('./db')
+const db = require('./db')
 const { isAuthenticated } = require("../middleware/auth");
+import { param, query, validationResult } from "express-validator";
 const {
   formatDisplayDate,
   userTypesEnumeration,
@@ -10,15 +11,11 @@ const {
 } = require("../middleware/utils");
 const multer = require("multer");
 import fs from "fs";
-import { RowDataPacket } from "mysql2";
 import { Response, Request } from "express";
-import { isAdmin } from "../middleware/auth";
 const path = require("path");
 const upload = multer({ dest: "upload-bulk-metadata/" });
 
-import pl, { list } from "nodejs-polars";
-import { error } from "console";
-import { match } from "assert";
+import pl from "nodejs-polars";
 //OLD
 // router.get('/select-user-for/:mediaID/:projectID', isAuthenticated, async (req, res) => {
 //     const mediaID = req.params.mediaID;
@@ -93,12 +90,12 @@ router.get("/create", isAuthenticated, async (req: Request, res: Response) => {
   const allProjectAndPhotographerPairs = (
     await db.query(q2, [user.UserID])
   )[0];
-console.log(allProjectAndPhotographerPairs)
+  console.log(allProjectAndPhotographerPairs)
   res.render("media/create", {
     currentUser: req.session.passport.user,
     imageEditingTools: req.session["imageEditingTools"],
     imagingPlatforms: req.session["imagingPlatforms"],
-    allProjectAndPhotographerPairs:allProjectAndPhotographerPairs,
+    allProjectAndPhotographerPairs: allProjectAndPhotographerPairs,
     fileFormats: Object.values(mediaFileFormatEnumeration()),
 
     title: "Media Form",
@@ -191,7 +188,7 @@ router.post("/create", isAuthenticated, async (req: Request, res: Response) => {
       updatedBy,
     ];
 
-        const result: any = (
+    const result: any = (
       await db.query(insertQuery, values)
     )[0];
     console.log("✅ Media submitted successfully, ID:", result.insertId);
@@ -266,18 +263,22 @@ router.get(
       )
     )[0];
 
-    const results = await db.query(query, [user.UserID] );
+    const results = await db.query(query, [user.UserID]);
     res.render("media/view-all", {
-        title: "Media Management",
-        medias: results[0],
-        currentUser: user,
-        disableCreateMedia:
-          anyLinks.length == 0 && user.UserType != userTypesEnumeration().admin,
-      });
+      title: "Media Management",
+      medias: results[0],
+      currentUser: user,
+      disableCreateMedia:
+        anyLinks.length == 0 && user.UserType != userTypesEnumeration().admin,
+    });
   }
 );
 
-router.get("/view/:mediaID", isAuthenticated, async(req: Request, res: Response) => {
+router.get("/view/:mediaID", param('mediaID').isInt({ min: 1 }).withMessage("unknown ID"), isAuthenticated, async (req: Request, res: Response) => {
+  const errors = validationResult(req)
+  if (!errors.isEmpty()) {
+    return res.status(400).json({ errors: errors.array() })
+  }
   const mediaID = req.params.mediaID;
 
   const query = `
@@ -314,20 +315,25 @@ router.get("/view/:mediaID", isAuthenticated, async(req: Request, res: Response)
     //     });
     //   }
 
-      
-    
+
+
   );
   res.render("media/view", {
-        currentUser: req.session.passport.user,
-        media: results[0][0], // Since we're querying by ID, we'll only get one record
-        mediaID,
-        title: "View Media",
-      });
+    currentUser: req.session.passport.user,
+    media: results[0][0], // Since we're querying by ID, we'll only get one record
+    mediaID,
+    title: "View Media",
+  });
 });
 router.get(
   "/edit/:mediaID",
+  param('mediaID').isInt({ min: 1 }).withMessage('unknown ID'),
   isAuthenticated,
   async (req: Request, res: Response) => {
+    const errors = validationResult(req)
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ errors: errors.array() })
+    }
     const mediaID = req.params.mediaID;
     const allProjectAndPhotographerPairsQuery = `    Select pupl.ProjectID, photographer.UserID, 
           p.ProjectName as projectName, photographer.FullName as photographerName 
@@ -501,8 +507,13 @@ router.post("/edit", isAuthenticated, async (req: Request, res: Response) => {
 // Soft delete media by setting IsDelete = 1 and redirect
 router.post(
   "/delete/:mediaID",
+  param('mediaID').isInt({ min: 1 }).withMessage('unknown id'),
   isAuthenticated,
   (req: Request, res: Response) => {
+    const errors = validationResult(req)
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ errors: errors.array() })
+    }
     const mediaID = req.params.mediaID;
     const userId = req.session.passport.user.UserID;
 
@@ -542,8 +553,13 @@ router.post(
 
 router.post(
   "/restore/:mediaID",
+  param('mediaID').isInt({ min: 1 }).withMessage('unknown id'),
   isAuthenticated,
   (req: Request, res: Response) => {
+    const errors = validationResult(req)
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ errors: errors.array() })
+    }
     const mediaID = req.params.mediaID;
     const userId = req.session.passport.user.UserID;
 
@@ -599,10 +615,10 @@ router.get(
     const q2 =
       user.UserType != userTypesEnumeration().admin
         ? query +
-          `
+        `
         JOIN ProjectUserPhotographyLink pupl ON pupl.ProjectID = p.ProjectID
         WHERE pupl.PhotographerID = ` +
-          user.UserID
+        user.UserID
         : query;
     const allProjects = (await db.query(q2))[0];
     console.log(allProjects);
@@ -694,7 +710,7 @@ router.post(
 
     const tempListOfLinks1 = (
       await db
-        
+
         .query("SELECT DISTINCT * FROM ProjectUserPhotographyLink")
     )[0];
     const tempListOfLinks2: any = tempListOfLinks1;
@@ -910,7 +926,7 @@ router.post(
     //insert any new image editing tools or Image Platforms
     if (newImageEditingTools != null && newImageEditingTools.length != 0)
       await db
-        
+
         .query("ALTER TABLE Media MODIFY COLUMN `ImageEditingTool` enum(?)", [
           allImageEditingTools,
         ]);
@@ -954,8 +970,12 @@ router.get("/download-template", isAuthenticated, async (req: any, res: Response
   res.download(filePath);
 });
 
-router.get("/download-pipeline-script", isAuthenticated, (req: Request, res: Response) => { 
+router.get("/download-pipeline-script", isAuthenticated, (req: Request, res: Response) => {
   res.download("pipeline.zip")
 })
 
 module.exports = router;
+function params(arg0: string) {
+  throw new Error("Function not implemented.");
+}
+

@@ -11,6 +11,7 @@ import {
   userTypesEnumeration,
 } from "../../middleware/utils";
 import { Response, Request } from "express";
+import { param, validationResult } from "express-validator";
 const {
   isAuthenticated,
   isAdmin,
@@ -137,7 +138,7 @@ router.post(
             userType,
             fullName,
             contactNumber,
-            staffType == "" ? null:staffType,
+            staffType == "" ? null : staffType,
             comments,
             adminID,
             adminID,
@@ -188,9 +189,16 @@ router.get(
 //refactored from server.js, not tested and may not be needed
 router.get(
   "/view/:userID",
+
+
+  param('userID').isInt({ min: 1 }).withMessage('unknown id'),
   isAuthenticated,
   isAdmin,
   async (req: Request, res: Response) => {
+    const errors = validationResult(req)
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ errors: errors.array() })
+    }
     const userID = req.params.userID;
 
     const query = `
@@ -224,9 +232,15 @@ router.get(
 // Render edit user page (support both singular and plural URLs)
 router.get(
   "/edit/:userID",
+  param('userID').isInt({ min: 1 }).withMessage('unknown id'),
   isAuthenticated,
   isAdmin,
   async (req: Request, res: Response) => {
+    const errors = validationResult(req)
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ errors: errors.array() })
+    }
+    const userID = req.params.userID;
     const userId = req.params.userID;
     const query =
       "SELECT UserID,Email,UserType,FullName,RegisteredDate,ContactNumber,StaffType,Comments,IsDeleted FROM User WHERE UserID = ?";
@@ -261,6 +275,7 @@ router.get(
 
 router.post(
   "/edit/:userID",
+
   isAuthenticated,
   isAdmin,
   reconfirmPasswordFunctionForAdmin,
@@ -371,7 +386,7 @@ router.post(
                 userType,
                 fullName,
                 contactNumber,
-                staffType == ""? null:staffType,
+                staffType == "" ? null : staffType,
                 comments,
                 adminID,
                 hashedPassword,
@@ -383,7 +398,7 @@ router.post(
                 userType,
                 fullName,
                 contactNumber,
-                staffType ==""?null:staffType,
+                staffType == "" ? null : staffType,
                 comments,
                 adminID,
                 userID,
@@ -409,10 +424,16 @@ router.post(
 // ✅ Delete User (Soft Delete - Update IsDeleted to 1)
 router.post(
   "/delete/:userID",
+
+  param('userID').isInt({ min: 1 }).withMessage('unknown id'),
   isAuthenticated,
   isAdmin,
   reconfirmPasswordFunctionForAdmin,
   async (req: Request, res: Response) => {
+    const errors = validationResult(req)
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ errors: errors.array() })
+    }
     const userID = req.params.userID;
     console.log(userID);
     const query = "UPDATE User SET IsDeleted = 1 WHERE UserID = ?";
@@ -431,10 +452,16 @@ router.post(
 
 router.post(
   "/restore/:userID",
+
+  param('userID').isInt({ min: 1 }).withMessage('unknown id'),
   isAuthenticated,
   isAdmin,
   reconfirmPasswordFunctionForAdmin,
   async (req: Request, res: Response) => {
+    const errors = validationResult(req)
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ errors: errors.array() })
+    }
     const userID = req.params.userID;
     console.log(userID);
     await db.query(
