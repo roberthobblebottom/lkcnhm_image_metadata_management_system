@@ -244,7 +244,8 @@ router.get(
       case userTypesEnumeration().projectOwner:
         query =
           baseQuery +
-          "\nWHERE m.IsDeleted = 0 AND (p.ProjectOwnerID =? )  ORDER BY m.CreatedDate DESC";
+          "\nWHERE (p.ProjectOwnerID =? )  ORDER BY m.CreatedDate DESC";
+        // m.IsDeleted = 0 AND 
         break;
       case userTypesEnumeration().photographerOnly:
         query =
@@ -489,18 +490,12 @@ router.post("/edit", isAuthenticated, async (req: Request, res: Response) => {
   //   }
   //   req.session.save();
 
-  db.query(query, params, (err: any) => {
-    if (err) {
-      console.error("❌ Error updating media:", err);
-      return res
-        .status(500)
-        .json({ success: false, message: "Error updating media" });
-    }
-    res.json({
-      success: true,
-      message: "sucessfully edited media",
-      redirectUrl: "/media/view/" + mediaData.MediaID,
-    });
+  await db.query(query, params)
+
+  res.json({
+    success: true,
+    message: "sucessfully edited media",
+    redirectUrl: "/media/view/" + mediaData.MediaID,
   });
 });
 

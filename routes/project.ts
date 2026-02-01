@@ -719,22 +719,16 @@ router.post(
           "",
         ];
         try {
-          console.log('a')
           const result = (await db.query(insertUserQuery, params))[0];
-          console.log('b')
           const o: any = result;
-          console.log('c')
           insertedId = Object.values(o)[2].toString(); //the weird way of getting insertedId
           newlyCreatedPhotographers.push({
             email: email,
             password: newPassword,
           });
-          console.log('insertedId', insertedId)
           for (let x = 0; x < selectedPhotographers.length; x++) {
-            console.log(selectedPhotographers[x])
             if (emailRegex.test(selectedPhotographers[x])) {
               selectedPhotographers[x] = insertedId;
-              console.log('here')
               break;
             }
           }
