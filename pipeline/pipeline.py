@@ -14,10 +14,13 @@ import logging
 from tkinter import font, ttk
 from tkinter import *
 from tkinter import filedialog, messagebox
-
+from PIL.ExifTags import TAGS, GPSTAGS, IFD
+import platform
 logger = logging.getLogger(__name__)
 # from PIL import ExifTags
 # IFD_CODE_LOOKUP = {i.value: i.name for i in ExifTags.IFD}
+now = datetime.now().isoformat().replace(".", "-").replace(":", "-")
+logging.basicConfig(filename="pipeline-" + now + ".log", level=logging.INFO)
 
 
 def recursion(
@@ -26,8 +29,10 @@ def recursion(
     photographerID,
     # projectID
     window_pending,
+    logger,
 ):
-    for file_or_folder_path in glob(path + "\\*"):
+    _p =path + "\\*" if platform.system() == 'Windows' else path + "/*"
+    for file_or_folder_path in glob(_p):
         # if not isRunning:
         # return
         if isdir(file_or_folder_path):
@@ -37,6 +42,7 @@ def recursion(
                 photographerID,
                 # projectID
                 window_pending,
+                logger,
             )
         if file_or_folder_path.split(".")[-1] not in [
             "tiff",
@@ -49,22 +55,21 @@ def recursion(
             "tif",
             "svg",
         ]:
-            logging.info(
+            logger.info(
                 " the file " + file_or_folder_path + " not an valid image extension"
             )
             continue
-        logger.info('file_or_folder_path'+file_or_folder_path)
         if "LABEL" in file_or_folder_path or "THUMB" in file_or_folder_path:
-            logging.info("label or thumb file, " + file_or_folder_path + " skipping.")
+            logger.info("label or thumb file, " + file_or_folder_path + " skipping.")
             continue
         # This line may be the bottleneck in terms of throughput and speed
         exifData = PIL.Image.open(file_or_folder_path).getexif()
-
         new_row = {}
         # new_row["ProjectName"] = projectID
         new_row["PhotographerID"] = photographerID
         new_row["FilePath"] = file_or_folder_path
-        new_row["FileName"] = file_or_folder_path.split("\\")[-1]
+        splitter = "\\" if platform.system() == 'Windows' else '/'
+        new_row["FileName"] = file_or_folder_path.split(splitter)[-1]
         new_row["FileFormat"] = "." + file_or_folder_path.split(".")[-1]
         fileNameArray = new_row["FileName"].split("_")
         new_row["CatalogID"] = fileNameArray[1]
@@ -91,7 +96,7 @@ def recursion(
         new_row["FileSizeBytes"] = getsize(file_or_folder_path)
 
         f = [
-            "DateTime",  # TODO Not sure how to write a validation for this.
+            "DateTime",
             "Software",
             "ImageWidth",
             "ImageLength",
@@ -101,8 +106,10 @@ def recursion(
         ]
         for tagid in exifData:
             tagname = TAGS.get(tagid, tagid)
+
             if tagname in f:
                 value = exifData.get(tagid)
+
                 if value == "" or value is None:
                     new_row[tagname] = str(value)
                     continue
@@ -135,29 +142,54 @@ def recursion(
         for x1 in f:
             if x1 not in list(new_row.keys()):
                 new_row[x1] = ""
-        logger.info('new_row '+str(new_row))
+        img = PIL.Image.open(file_or_folder_path)
+        logger.info(img.size)
+        if new_row["ImageWidth"] == "":
+            new_row["Resolution"] = str(img.size[0]) + "X" + str(img.size[1])
+
+        for ifd_id in IFD:
+            logger.info(">>>>>>>>>" + ifd_id.name + "<<<<<<<<<<")
+            try:
+                ifd = exifData.get_ifd(ifd_id)
+                logger.info(ifd)
+                if ifd_id == IFD.GPSInfo:
+                    resolve = GPSTAGS
+                else:
+                    resolve = TAGS
+
+                for k, v in ifd.items():
+                    tag = resolve.get(k, k)
+                    logger.info("DEEPER INFO:" + str(tag) + str(v))
+            except KeyError:
+                logger.info("KeyError")
+                pass
+        # logger.info('new_row '+str(new_row))
+        columns_to_select = [
+            "MorphoID",
+            "CatalogID",
+            "FileName",
+            "FilePath",
+            "FileSizeBytes",
+            "FileFormat",
+            # "ProjectName",
+            "PhotographerID",
+            "ImagingDate",
+            "ImageEditingTool",
+            "Make",
+            "Model",
+            "Description",
+        ]
+        if "Resolution" not in new_row.keys():
+            columns_to_select.extend(["ImageWidth", "ImageLength"])
+        else:
+            columns_to_select.extend(["Resolution"])
         new_row = (
             pl.DataFrame(new_row)
             .rename({"Software": "ImageEditingTool"})
             .rename({"DateTime": "ImagingDate"})
-            .select(
-                "MorphoID",
-                "CatalogID",
-                "FileName",
-                "FilePath",
-                "FileSizeBytes",
-                "FileFormat",
-                # "ProjectName",
-                "PhotographerID",
-                "ImagingDate",
-                "ImageEditingTool",
-                "ImageWidth",
-                "ImageLength",
-                "Make",
-                "Model",
-                "Description",
-            )
+            .select(columns_to_select)
         )
+
         logging.info(str(new_row.transpose(include_header=True)))
         output.append(new_row)
 
@@ -165,8 +197,7 @@ def recursion(
 
 
 def main():
-    now = datetime.now().isoformat().replace(".", "-").replace(":", "-")
-    logging.basicConfig(filename="pipeline-" + now + ".log", level=logging.INFO)
+
     pl.Config.set_tbl_rows(100)
     pl.Config.set_tbl_cols(100)
     start = timer()
@@ -225,7 +256,8 @@ def main():
     )
     dirStringVar = StringVar(value=dir)
 
-    logger.info('dir'+dirStringVar.get())
+    logger.info("dir" + dirStringVar.get())
+
     def browseFiles():
         filename = filedialog.askdirectory(
             initialdir="/",
@@ -262,36 +294,37 @@ def main():
             wraplength=1500,
             justify="center",
         )
-        buttonQuit2 = Button(w,text="quit",command=lambda: exit(),font=font)
-        label.grid(column=1,row=1)
-        buttonQuit2.grid(column=1,row=2)
+        buttonQuit2 = Button(w, text="quit", command=lambda: exit(), font=font)
+        label.grid(column=1, row=1)
+        buttonQuit2.grid(column=1, row=2)
         w.update()
         recursion(
-                path=dir,
-                output=output,
-                photographerID=photographerID,
-                # projectID = f3.split("/")[-1]
-                window_pending=windowPending,
-            )
+            path=dir,
+            output=output,
+            photographerID=photographerID,
+            # projectID = f3.split("/")[-1]
+            window_pending=windowPending,
+            logger=logger,
+        )
 
         stop = timer()
         logger.info("estimated time taken " + str(timedelta(seconds=stop - start)))
 
-        df = (
-            pl.concat(output)
-            .with_columns(
-                Resolution=when((col("ImageLength") != "") | (col("ImageWidth") != ""))
-                .then(pl.concat_str(col("ImageLength"), lit("x"), col("ImageWidth")))
-                .otherwise(lit("")),
-                ImagingDate=col("ImagingDate").str.to_datetime(
-                    "%Y:%m:%d", ambiguous="null", strict=False
-                ),
-                imagingPlatform=when((col("Make") != "") | (col("Model") != ""))
-                .then(pl.concat_str(col("Make"), lit(" "), col("Model")))
-                .otherwise(lit("")),
-            )
-            .select(pl.exclude("ImageWidth", "ImageLength", "Make", "Model"))
-        )
+        df = pl.concat(output)
+        df =df.with_columns(
+            Resolution=when((col("ImageLength") != "") | (col("ImageWidth") != ""))
+            .then(pl.concat_str(col("ImageLength"), lit("x"), col("ImageWidth")))
+            .otherwise(lit(""))
+        ) if "Resolution" not in df.columns else df
+        df = df.with_columns(
+            ImagingDate=col("ImagingDate").str.to_datetime(
+                "%Y:%m:%d", ambiguous="null", strict=False
+            ),
+            imagingPlatform=when((col("Make") != "") | (col("Model") != ""))
+            .then(pl.concat_str(col("Make"), lit(" "), col("Model")))
+            .otherwise(lit("")),
+        ).select(pl.exclude("ImageWidth", "ImageLength", "Make", "Model"))
+
         fileName = "metadata_for_photographer_ID_" + str(photographerID) + ".csv"
         df.write_csv(fileName)
         windowPending.quit()
@@ -306,9 +339,7 @@ def main():
             wraplength=1000,
         )
         label.pack()
-        exit_button = Button(
-            w, text="Exit", command=lambda: w.quit(), font=font
-        )
+        exit_button = Button(w, text="Exit", command=lambda: w.quit(), font=font)
         exit_button.pack(ipadx=5, ipady=5, expand=True)
         w.mainloop()
 
@@ -328,21 +359,6 @@ def main():
     buttonStart.grid(column=1, row=5)
     buttonQuit.grid(column=2, row=5)
     windowPending.mainloop()
-
-    # I don't know how to make a working close button TODO
-    # global isRunning
-    # isRunning = True
-
-    # def close_window_pending():
-    #     global isRunning
-    #     isRunning = False
-    #     windowPending.destroy()
-    #     exit()
-
-    # window_pending.protocol("WM_DELETE_WINDOW", close_window_pending)
-    # window_pending.bind("<Escape>", close_window_pending)
-    # window_pending.update()
-
 
 if __name__ == "__main__":
     main()
