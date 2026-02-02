@@ -145,7 +145,7 @@ def recursion(
         img = PIL.Image.open(file_or_folder_path)
         logger.info(img.size)
         if new_row["ImageWidth"] == "":
-            new_row["Resolution"] = str(img.size[0]) + "X" + str(img.size[1])
+            new_row["Resolution"] = str(img.size[0]) + "x" + str(img.size[1])
 
         for ifd_id in IFD:
             logger.info(">>>>>>>>>" + ifd_id.name + "<<<<<<<<<<")
