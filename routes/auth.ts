@@ -191,8 +191,7 @@ router.post("/register", async (req: Request, res: Response) => {
 
   await db.query(insertUserQuery, params)
   console.log(`✅ User Registered Successfully: ${email}`);
-  // 🚀 Redirect from the backend itself
-  res.redirect("/login");
+  return res.status(200).json({success:true,message:"User successfully registration",redirect:"/login",});
 
 });
 
