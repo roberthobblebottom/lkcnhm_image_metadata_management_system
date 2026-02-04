@@ -52,7 +52,7 @@ router.get(
       projectTypes: req.session.projectTypes,
       imagingPlatforms: req.session.imagingPlatforms,
       title: "Project Form",
-       isUserRegistrationEnabled
+      isUserRegistrationEnabled
     });
   }
 );
@@ -64,6 +64,10 @@ router.post(
   isAdminOrProjectOwner,
   async (req: Request, res: Response) => {
     try {
+
+      const isUserRegistrationEnabledQuery = 'SELECT IsEnabled FROM IsUserRegistrationEnabled'
+      const isUserRegistrationEnabled = (await db.query(isUserRegistrationEnabledQuery))[0][0].IsEnabled
+
       const requiredFields = [
         "projectOwner",
         "projectName",
@@ -135,67 +139,71 @@ router.post(
           });
         }
       }
-      //creation of new photographers
-      const newlyCreatedPhotographers: { email: string; password: string }[] =
-        [];
+
       const selectedPhotographers = req.body.selectedPhotographers;
-      for (const x of req.body.toBeCreatedPhotographers) {
-        const fullName = x[0];
-        const email = x[1];
-        const newPasswordSalt = crypto.randomBytes(16).toString();
-        // const newPassword = crypto.randomBytes(8).toString() // TODO: switch to this in production
-        const newPassword = "1"; // For testing only
-        const saltedPassword = crypto.pbkdf2Sync(
-          newPassword,
-          newPasswordSalt,
-          310000,
-          32,
-          "sha256"
-        );
-        var insertedId = "";
-        const insertUserQuery = `
+
+      //creation of new photographers
+      if (isUserRegistrationEnabled) {
+        const newlyCreatedPhotographers: { email: string; password: string }[] =
+          [];
+        for (const x of req.body.toBeCreatedPhotographers) {
+          const fullName = x[0];
+          const email = x[1];
+          const newPasswordSalt = crypto.randomBytes(16).toString();
+          // const newPassword = crypto.randomBytes(8).toString() // TODO: switch to this in production
+          const newPassword = "1"; // For testing only
+          const saltedPassword = crypto.pbkdf2Sync(
+            newPassword,
+            newPasswordSalt,
+            310000,
+            32,
+            "sha256"
+          );
+          var insertedId = "";
+          const insertUserQuery = `
             INSERT INTO User 
             (Email, SaltedPassword,PasswordSalt,  UserType, RegisteredDate,
               UpdatedDate,FullName,ContactNumber,Comments)
             VALUES (?, ?,?,  ?, NOW(),NOW(),  ?, ?,?)`;
-        const params = [
-          email,
-          saltedPassword,
-          newPasswordSalt,
-          userTypesEnumeration().photographerOnly,
-          fullName,
-          "",
-          "Created during the creation of a project this user is in by project owner of user id." +
-          userID,
-        ];
-        try {
-          const result = (await db.query(insertUserQuery, params))[0];
-          const o: any = result;
-          insertedId = Object.values(o)[2].toString(); //the weird way of getting insertedId
-          console.log("newly created user id:", insertedId);
-          newlyCreatedPhotographers.push({
-            email: email,
-            password: newPassword,
-          });
-          for (let x = 0; x < selectedPhotographers.length; x++) {
-            if (emailRegex.test(selectedPhotographers[x])) {
-              selectedPhotographers[x] = insertedId;
-              break;
+          const params = [
+            email,
+            saltedPassword,
+            newPasswordSalt,
+            userTypesEnumeration().photographerOnly,
+            fullName,
+            "",
+            "Created during the creation of a project this user is in by project owner of user id." +
+            userID,
+          ];
+          try {
+            const result = (await db.query(insertUserQuery, params))[0];
+            const o: any = result;
+            insertedId = Object.values(o)[2].toString(); //the weird way of getting insertedId
+            console.log("newly created user id:", insertedId);
+            newlyCreatedPhotographers.push({
+              email: email,
+              password: newPassword,
+            });
+            for (let x = 0; x < selectedPhotographers.length; x++) {
+              if (emailRegex.test(selectedPhotographers[x])) {
+                selectedPhotographers[x] = insertedId;
+                break;
+              }
             }
+          } catch (err: any) {
+            const msg =
+              err.toString().toLowerCase().includes("duplicate") &&
+                err.toString().toLowerCase().includes("email")
+                ? "email already existed in the database."
+                : err;
+            console.log(msg);
+            res.status(400).json({ success: false, message: msg });
           }
-        } catch (err: any) {
-          const msg =
-            err.toString().toLowerCase().includes("duplicate") &&
-              err.toString().toLowerCase().includes("email")
-              ? "email already existed in the database."
-              : err;
-          console.log(msg);
-          res.status(400).json({ success: false, message: msg });
         }
-      }
-      req.session["newlyCreatedPhotographers"] = newlyCreatedPhotographers;
-      req.session.save();
+        req.session["newlyCreatedPhotographers"] = newlyCreatedPhotographers;
+        req.session.save();
 
+      }
       //alter table for Imaging Platform enums if any new values
       // const selectedImagingPlatforms = req.body.selectedImagingPlatforms;
       // var hasNewImagingPlatform = false;
@@ -586,7 +594,7 @@ router.get(
 
         newlyCreatedPhotographers: [],
         projectOwners: projectOwners[0],
-         isUserRegistrationEnabled
+        isUserRegistrationEnabled
       });
     } catch (err) {
       console.error("Error:", err);
@@ -601,6 +609,9 @@ router.post(
   isAdminOrProjectOwner,
   async (req: Request, res: Response) => {
     try {
+      const isUserRegistrationEnabledQuery = 'SELECT IsEnabled FROM IsUserRegistrationEnabled'
+      const isUserRegistrationEnabled = (await db.query(isUserRegistrationEnabledQuery))[0][0].IsEnabled
+
       const userID = req.session.passport.user.UserID;
       if (!req.session.passport.user || !userID) {
         console.error("❌ No user in session");
@@ -688,63 +699,65 @@ router.post(
         }
       }
       //creation of new photographers
-      const newlyCreatedPhotographers: { email: string; password: string }[] =
-        [];
-      console.log('toBeCreatedPhotographers', toBeCreatedPhotographers)
-      for (const x of toBeCreatedPhotographers) {
-        const fullName = x[0];
-        const email = x[1];
-        const newPasswordSalt = crypto.randomBytes(16).toString();
-        // const newPassword = crypto.randomBytes(8).toString() // TODO: switch to this in production
-        const newPassword = "1"; // For testing only
-        var insertedId = "";
-        const saltedPassword = crypto.pbkdf2Sync(
-          newPassword,
-          newPasswordSalt,
-          310000,
-          32,
-          "sha256"
-        );
-        const insertUserQuery = `
+      if (isUserRegistrationEnabled) {
+        const newlyCreatedPhotographers: { email: string; password: string }[] =
+          [];
+        console.log('toBeCreatedPhotographers', toBeCreatedPhotographers)
+        for (const x of toBeCreatedPhotographers) {
+          const fullName = x[0];
+          const email = x[1];
+          const newPasswordSalt = crypto.randomBytes(16).toString();
+          // const newPassword = crypto.randomBytes(8).toString() // TODO: switch to this in production
+          const newPassword = "1"; // For testing only
+          var insertedId = "";
+          const saltedPassword = crypto.pbkdf2Sync(
+            newPassword,
+            newPasswordSalt,
+            310000,
+            32,
+            "sha256"
+          );
+          const insertUserQuery = `
             INSERT INTO User 
             (Email, SaltedPassword,PasswordSalt,  UserType, RegisteredDate,
               UpdatedDate,FullName,ContactNumber,Comments)
             VALUES (?, ?,?,  ?, NOW(),NOW(),  ?,?,?)`;
-        const params = [
-          email,
-          saltedPassword,
-          newPasswordSalt,
-          userTypesEnumeration().photographerOnly,
-          fullName,
-          "",
+          const params = [
+            email,
+            saltedPassword,
+            newPasswordSalt,
+            userTypesEnumeration().photographerOnly,
+            fullName,
+            "",
 
-          "",
-        ];
-        try {
-          const result = (await db.query(insertUserQuery, params))[0];
-          const o: any = result;
-          insertedId = Object.values(o)[2].toString(); //the weird way of getting insertedId
-          newlyCreatedPhotographers.push({
-            email: email,
-            password: newPassword,
-          });
-          for (let x = 0; x < selectedPhotographers.length; x++) {
-            if (emailRegex.test(selectedPhotographers[x])) {
-              selectedPhotographers[x] = insertedId;
-              break;
+            "",
+          ];
+          try {
+            const result = (await db.query(insertUserQuery, params))[0];
+            const o: any = result;
+            insertedId = Object.values(o)[2].toString(); //the weird way of getting insertedId
+            newlyCreatedPhotographers.push({
+              email: email,
+              password: newPassword,
+            });
+            for (let x = 0; x < selectedPhotographers.length; x++) {
+              if (emailRegex.test(selectedPhotographers[x])) {
+                selectedPhotographers[x] = insertedId;
+                break;
+              }
             }
+          } catch (err: any) {
+            const msg =
+              err.toString().toLowerCase().includes("duplicate") &&
+                err.toString().toLowerCase().includes("email")
+                ? "email already existed in the database."
+                : err;
+            res.status(400).json({ success: false, message: msg });
           }
-        } catch (err: any) {
-          const msg =
-            err.toString().toLowerCase().includes("duplicate") &&
-              err.toString().toLowerCase().includes("email")
-              ? "email already existed in the database."
-              : err;
-          res.status(400).json({ success: false, message: msg });
         }
+        req.session["newlyCreatedPhotographers"] = newlyCreatedPhotographers;
+        req.session.save();
       }
-      req.session["newlyCreatedPhotographers"] = newlyCreatedPhotographers;
-      req.session.save();
       // imaging Platforms operations for updating enum if any
       // var hasNewImagingPlatform = false;
       // for (const i of selectedImagingPlatforms) {

@@ -66,7 +66,7 @@ passport.use(
 passport.serializeUser(
   (user: any, done: (arg0: any, user: User | null) => any) => {
     process.nextTick(function () {
-      
+
       return done(null, {
         UserID: user.UserID,
         FullName: user.FullName,
@@ -86,9 +86,9 @@ passport.deserializeUser((user: User, cb: (arg0: null, arg1: any) => any) => {
 router.get("/register", async (req: Request, res, Response) => {
   const isEnabled = (await db.query('SELECT IsEnabled FROM IsUserRegistrationEnabled'))[0][0].IsEnabled
   console.log(isEnabled)
-  if (!isEnabled){
+  if (!isEnabled) {
     return res.status(400).json({
-      sucess:false,
+      sucess: false,
       message: "User Registration is not enabled"
     })
   }
@@ -100,8 +100,12 @@ router.get("/register", async (req: Request, res, Response) => {
     ]
   })
 })
-router.post("/register", (req: Request, res: Response) => {
-  console.log("register req.body", req.body);
+router.post("/register", async (req: Request, res: Response) => {
+  const isUserRegistrationEnabledQuery = 'SELECT IsEnabled FROM IsUserRegistrationEnabled'
+  const isUserRegistrationEnabled = (await db.query(isUserRegistrationEnabledQuery))[0][0].IsEnabled
+  if (!isUserRegistrationEnabled)
+    res.status(400).json({ success: false, message: "User Registration is disabled." })
+
   const {
     email,
     password,
@@ -153,55 +157,43 @@ router.post("/register", (req: Request, res: Response) => {
   }
   console.log(`🔹 Register Attempt: ${email}`);
 
-  const checkEmailQuery = "SELECT * FROM User WHERE Email = ?";
-  db.query(checkEmailQuery, [email], (err: any, result: any, field: any) => {
-    if (err) {
-      console.error("❌ Database Error:", err);
-      return res.status(500).send("Database Error");
-    }
+  const checkEmailQuery = "SELECT Email FROM User WHERE Email = ? LIMIT 1";
+  const isThereExistingEmail =  (await db.query(checkEmailQuery, [email]))[0][0]
 
-    if (result.length > 0) {
-      console.warn("⚠️ Email already exists:", email);
-      return res
-        .status(400)
-        .send("Email already exists. Please enter a new email.");
-    }
-    const newPasswordSalt = crypto.randomBytes(16).toString("hex");
-    crypto.pbkdf2(
-      password,
-      newPasswordSalt,
-      310000,
-      32,
-      "sha256",
-      async function (err, hashedPassword) {
-        const insertUserQuery = `
+
+  console.log(isThereExistingEmail)
+  if (isThereExistingEmail)
+    return res.status(400).json({message:"Email already exist"})
+
+
+  const newPasswordSalt = crypto.randomBytes(16).toString("hex");
+  const saltedPassword = crypto.pbkdf2Sync(
+    password,
+    newPasswordSalt,
+    310000,
+    32,
+    "sha256")
+  const insertUserQuery = `
             INSERT INTO User 
             (Email, SaltedPassword,PasswordSalt,  UserType, RegisteredDate,
               UpdatedDate,FullName,ContactNumber,StaffType,Comments)
             VALUES (?, ?,?,  ?, NOW(),NOW(),  ?, ?,?,?)`;
-        const params = [
-          email,
-          hashedPassword,
-          newPasswordSalt,
-          userType,
-          fullName,
-          contactNumber,
-          staffType,
-          comments
-        ];
+  const params = [
+    email,
+    saltedPassword,
+    newPasswordSalt,
+    userType,
+    fullName,
+    contactNumber,
+    staffType,
+    comments
+  ];
 
-        db.query(insertUserQuery, params, (err: any) => {
-          if (err) {
-            console.error("❌ Error Registering User:", err);
-            return res.status(500).send("Error Registering User");
-          }
-          console.log(`✅ User Registered Successfully: ${email}`);
-          // 🚀 Redirect from the backend itself
-          res.redirect("/login");
-        });
-      }
-    );
-  });
+  await db.query(insertUserQuery, params)
+  console.log(`✅ User Registered Successfully: ${email}`);
+  // 🚀 Redirect from the backend itself
+  res.redirect("/login");
+
 });
 
 // Login User
@@ -256,7 +248,7 @@ router.post("/login", (req: Request, res: Response, next: NextFunction) => {
           projectTypes.at(-1).replace(")", "")
         );
         req.session.projectTypes = projectTypes;
-        console.log('user session before save',req.session.passport.user)
+        console.log('user session before save', req.session.passport.user)
         req.session.save((err: any) => {
           if (err) {
             console.error("❌ Session Save Error:", err);
