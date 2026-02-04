@@ -34,11 +34,14 @@ router.get(
   "/other-admin-settings",
   isAuthenticated,
   isAdmin,
-  (req: Request, res: Response) => {
+  async (req: Request, res: Response) => {
+    const IsUserRegistrationEnabled = (await db.query('SELECT IsEnabled FROM IsUserRegistrationEnabled LIMIT 1'))[0][0].IsEnabled;
+    console.log(IsUserRegistrationEnabled)
     res.render("admin/other-admin-settings", {
       projectTypes: req.session.projectTypes,
       imagingPlatforms: req.session.imagingPlatforms,
       imageEditingTools: req.session.imageEditingTools,
+IsUserRegistrationEnabled
     });
   }
 );
@@ -687,4 +690,15 @@ router.post(
     });
   }
 );
+
+router.post('/enable-or-disable-user-registration',
+  isAuthenticated,isAdmin ,async (req: Request,res:Response)=>{
+    const isEnabled = req.body.IsEnabled
+    console.log('req.body.IsEnabled',isEnabled)
+    const txt = isEnabled == 1? 'enabled':'disabled';
+    await db.query('UPDATE IsUserRegistrationEnabled SET IsEnabled = ?',[isEnabled])
+    return res.json({success:true, message:'User Registration Is now '+txt})
+  }
+)
+
 module.exports = router;

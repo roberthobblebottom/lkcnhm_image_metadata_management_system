@@ -97,6 +97,14 @@ CREATE TABLE Media (
 
 );
 
+CREATE TABLE IsUserRegistrationEnabled (
+        ID INT PRIMARY Key,
+        IsEnabled BOOL DEFAULT 0
+);
+INSERT INTO IsUserRegistrationEnabled () VALUES(
+        1,1
+);
+
 -- Test Data, do not use them for production
 INSERT INTO User (Email,SaltedPassword,PasswordSalt,UserType,FullName,
 CreatedByID,UpdatedByID,StaffType) 

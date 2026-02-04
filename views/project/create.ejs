@@ -18,135 +18,137 @@
   <div class="main-con">
     <%- include(currentUser.UserType==='admin' ? '../sidenavs/admin.ejs' : '../sidenavs/user.ejs' ) %>
 
-    <form id="main-form">
-      <div class="horizontal-panel">
-        <a href="/project/view-all" class="btn btn-primary">
-          <i class="fas fa-arrow-left"></i> Back to all Image Metadata
-        </a>
-        <h2>Create a New Project </h2>
-      </div>
+      <form id="main-form">
+        <div class="horizontal-panel">
+          <a href="/project/view-all" class="btn btn-primary">
+            <i class="fas fa-arrow-left"></i> Back to all Image Metadata
+          </a>
+          <h2>Create a New Project </h2>
+        </div>
         <p class="requirement-of-field">* = required</p>
-      <div class="form-group">
+        <div class="form-group">
 
-        <label for="projectName">Project Name*</label>
-        <input type="text" id="projectName" name="projectName" required value="">
-      </div>
-
-      <div class="form-group">
-        <label for="projectOwner">Project Owner Full Name* </label>
-        <select id="projectOwner" name="projectOwner" <%=currentUser.UserType=='admin' ? '' : 'disabled'%> required>
-          <option value="">Select Project Owner </option>
-          <% projectOwners.forEach(user=> { %>
-          <option value="<%=user.UserID %>" <%=user.UserID == currentUser.UserID ? 'selected':''%>>
-            <%=user.FullName%>
-          </option>
-          <% }) %>
-        </select>
-        <div id="projectOwner-error" class="error-message">Please select a projectOwner</div>
-      </div>
-      <%if(currentUser.UserType=='admin'){%>
-      <div class="form-group">
-        <div class="horizontal-panel2">
-          <label class="label2">Project Type</label>
-          <!-- <button class="addButton" id="addProjectTypeButton">Add Project Type</button> -->
+          <label for="projectName">Project Name*</label>
+          <input type="text" id="projectName" name="projectName" required value="">
         </div>
 
-        <select name="projectType" id="projectType" class="form-control">
-          <option value="">-- Select Project Type --</option>
-          <% projectTypes.forEach(projectType=> { %>
-          <option value="<%= projectType %>" >
-            <%= projectType %>
-          </option>
-          <% }) %>
-        </select>
-
-      </div>
-      <%}%>
-      <div class="form-group">
-        <div class="horizontal-panel2">
-          <label for="newSelectedPhotographers">Photographer(s)*</label>
-
-          <button class="addButton" id="addPhotographerButton">Add Photographer</button>
+        <div class="form-group">
+          <label for="projectOwner">Project Owner Full Name* </label>
+          <select id="projectOwner" name="projectOwner" <%=currentUser.UserType=='admin' ? '' : 'disabled' %> required>
+            <option value="">Select Project Owner </option>
+            <% projectOwners.forEach(user=> { %>
+              <option value="<%=user.UserID %>" <%=user.UserID==currentUser.UserID ? 'selected' :''%>>
+                <%=user.FullName%>
+              </option>
+              <% }) %>
+          </select>
+          <div id="projectOwner-error" class="error-message">Please select a projectOwner</div>
         </div>
-        <select multiple id="newSelectedPhotographers">
-          <option value="">Select Photographers</span>
-            <% photographers.forEach(photographer=>{ %>
-      <option class="dropdown-item" value="<%=photographer.UserID%>" 
-        <%=photographer.UserID == currentUser.UserID && currentUser.UserType != 'admin' ? 'selected':''%>>
-        <%=photographer.FullName%> 
-      </option>
-      <%})%>
-      </select>
-      <div id="photographer-error" class="error-message">Please select a photographer</div>
-  </div>
+        <%if(currentUser.UserType=='admin'){%>
+          <div class="form-group">
+            <div class="horizontal-panel2">
+              <label class="label2">Project Type</label>
+              <!-- <button class="addButton" id="addProjectTypeButton">Add Project Type</button> -->
+            </div>
+
+            <select name="projectType" id="projectType" class="form-control">
+              <option value="">-- Select Project Type --</option>
+              <% projectTypes.forEach(projectType=> { %>
+                <option value="<%= projectType %>">
+                  <%= projectType %>
+                </option>
+                <% }) %>
+            </select>
+
+          </div>
+          <%}%>
+            <div class="form-group">
+              <div class="horizontal-panel2">
+                <label for="newSelectedPhotographers">Photographer(s)*</label>
+                <% if(isUserRegistrationEnabled){%>
+                  <button class="addButton" id="addPhotographerButton">Add Photographer</button>
+                  <%}%>
+              </div>
+              <select multiple id="newSelectedPhotographers">
+                <option value="">Select Photographers</span>
+                  <% photographers.forEach(photographer=>{ %>
+                <option class="dropdown-item" value="<%=photographer.UserID%>"
+                  <%=photographer.UserID==currentUser.UserID && currentUser.UserType !='admin' ? 'selected' :''%>>
+                  <%=photographer.FullName%>
+                </option>
+                <%})%>
+              </select>
+              <div id="photographer-error" class="error-message">Please select a photographer</div>
+            </div>
 
 
-  <div class="form-group">
-    <label for="startDate">Imaging Start Date*</label>
-    <input type="date" id="startDate" name="startDate" required>
-    <div id="startDate-error" class="error-message">Start date must be after request date</div>
-  </div>
+            <div class="form-group">
+              <label for="startDate">Imaging Start Date*</label>
+              <input type="date" id="startDate" name="startDate" required>
+              <div id="startDate-error" class="error-message">Start date must be after request date</div>
+            </div>
 
-  <div class="form-group">
-    <label for="endDate">Imaging End Date*</label>
-    <input type="date" id="endDate" name="endDate" required>
-    <div id="endDate-error" class="error-message">End date must be after start date</div>
-  </div>
+            <div class="form-group">
+              <label for="endDate">Imaging End Date*</label>
+              <input type="date" id="endDate" name="endDate" required>
+              <div id="endDate-error" class="error-message">End date must be after start date</div>
+            </div>
 
-  <div class="form-group">
-    <label for="summary">Summary of Project*</label>
-    <textarea id="summary" name="summary" required></textarea>
-    <div id="summary-error" class="error-message">Please provide a project summary</div>
-  </div>
+            <div class="form-group">
+              <label for="summary">Summary of Project*</label>
+              <textarea id="summary" name="summary" required></textarea>
+              <div id="summary-error" class="error-message">Please provide a project summary</div>
+            </div>
 
-  <div class="form-group">
-    <label for="specimenDetails">Specimen Details*</label>
-    <textarea id="specimenDetails" name="specimenDetails" required></textarea>
-    <div id="specimenDetails-error" class="error-message">Please provide specimen details</div>
-  </div>
+            <div class="form-group">
+              <label for="specimenDetails">Specimen Details*</label>
+              <textarea id="specimenDetails" name="specimenDetails" required></textarea>
+              <div id="specimenDetails-error" class="error-message">Please provide specimen details</div>
+            </div>
 
 
 
-  <div class="form-group">
-    <div class="horizontal-panel2">
-      <label class="label2" for="platform">Imaging Platform*</label>
-      <!-- <button class='addButton' id="addImagingPlatformButton">Add Imaging Platform</button> -->
-    </div>
-    <select multiple id="newSelectedImagingPlatforms">
-      <option value="">Select Imaging Platforms</span>
-        <% imagingPlatforms.forEach(i=>{ %>
-      <option value="<%=i%>" >
-        <%=i%>
-      </option>
-      <%})%>
-    </select>
-  </div>
+            <div class="form-group">
+              <div class="horizontal-panel2">
+                <label class="label2" for="platform">Imaging Platform*</label>
+                <!-- <button class='addButton' id="addImagingPlatformButton">Add Imaging Platform</button> -->
+              </div>
+              <select multiple id="newSelectedImagingPlatforms">
+                <option value="">Select Imaging Platforms</span>
+                  <% imagingPlatforms.forEach(i=>{ %>
+                <option value="<%=i%>">
+                  <%=i%>
+                </option>
+                <%})%>
+              </select>
+            </div>
 
-  <div class="form-group">
-    <label for="comments">Comments</label>
-    <textarea id="comments" name="comments"></textarea>
-  </div>
+            <div class="form-group">
+              <label for="comments">Comments</label>
+              <textarea id="comments" name="comments"></textarea>
+            </div>
 
-  <div class="buttons">
-    <button type="submit" class="new"><i class="fas fa-paper-plane"></i> Create Project</button>
-  </div>
-  <p class="note">
-    💡 New project types, imaging platform and/or photographers will only be in the system if said changes are submitted
-    Only one enum value of either features can be added at a single time of creation of a project.
-  </p>
-  </form>
+            <div class="buttons">
+              <button type="submit" class="new"><i class="fas fa-paper-plane"></i> Create Project</button>
+            </div>
+            <p class="note">
+              💡 New project types, imaging platform and/or photographers will only be in the system if said changes are
+              submitted
+              Only one enum value of either features can be added at a single time of creation of a project.
+            </p>
+      </form>
   </div>
 </body>
 
 <script>
   const element = document.getElementById('newSelectedPhotographers');
-    const newSelectedPhotographers = new Choices(element, {
+  const newSelectedPhotographers = new Choices(element, {
     allowHTML: true,
     removeItemButton: true,
-    callbackOnInit: async function() {
+    callbackOnInit: async function () {
       //for admins only to select project Owner
       const projectOwnerSelect = document.getElementById('projectOwner')
-      projectOwnerSelect.addEventListener('change', function(e) {
+      projectOwnerSelect.addEventListener('change', function (e) {
         e.preventDefault()
         const temp = (projectOwnerSelect.value).toString()
         if (temp == "") return
@@ -233,13 +235,14 @@
   //     }
   //   })
   // })
-  document.getElementById('addPhotographerButton').addEventListener('click', async function(e) {
-    e.preventDefault()
-    Swal.fire({
-      title: "Add new Photographer",
-      text: "Add new Photographer",
-      width: '700px',
-      html: `
+  if ('<%isUserRegistrationEnabled%>')
+    document.getElementById('addPhotographerButton').addEventListener('click', async function (e) {
+      e.preventDefault()
+      Swal.fire({
+        title: "Add new Photographer",
+        text: "Add new Photographer",
+        width: '700px',
+        html: `
         <input 
           id="newPhotographerEmail" 
           placeholder="Enter Email"
@@ -253,29 +256,30 @@
           required">`,
 
 
-      showCancelButton: true,
-    }).then((result) => {
-      const email = document.getElementById('newPhotographerEmail').value
+        showCancelButton: true,
+      }).then((result) => {
+        const email = document.getElementById('newPhotographerEmail').value
 
-      const emailRegex = /^[a-zA-Z0-9](\.?[a-zA-Z0-9_-])*[a-zA-Z0-9]@[a-zA-Z0-9-]+\.[a-zA-Z]{2,}$/
+        const emailRegex = /^[a-zA-Z0-9](\.?[a-zA-Z0-9_-])*[a-zA-Z0-9]@[a-zA-Z0-9-]+\.[a-zA-Z]{2,}$/
 
-      const fullName = document.getElementById('newPhotographerFullName').value
-      if (email && fullName) {
-        if (!emailRegex.test(email)) {
-          alert("you entered an email with an invalid format")
-          return
+        const fullName = document.getElementById('newPhotographerFullName').value
+        if (email && fullName) {
+          if (!emailRegex.test(email)) {
+            alert("you entered an email with an invalid format")
+            return
+          }
+          newSelectedPhotographers.setChoices([{
+            value: email,
+            label: fullName,
+            selected: true
+          }])
+          toBeCreatedPhotographers.push([fullName, email])
+          // console.log('toBeCreatedPhotographers', toBeCreatedPhotographers)
         }
-        newSelectedPhotographers.setChoices([{
-          value: email,
-          label: fullName,
-          selected: true
-        }])
-        toBeCreatedPhotographers.push([fullName, email])
-        // console.log('toBeCreatedPhotographers', toBeCreatedPhotographers)
-      }
-    });
-  })
-  document.addEventListener('load', function() {
+      });
+    })
+
+  document.addEventListener('load', function () {
     // grey out and disable this option
     //The repeated block for greying out is required for both load and DOMContentLoaded event
     if ('<%=currentUser.UserType%>' == 'admin')
@@ -287,7 +291,7 @@
     x.style.padding = "12px"
     x.style.backgroundColor = "gray"
   })
-  document.addEventListener('DOMContentLoaded', function() {
+  document.addEventListener('DOMContentLoaded', function () {
     // grey out and disable this option
     //The repeated block for greying out is required for both load and DOMContentLoaded event
     if ('<%=currentUser.UserType%>' != 'admin') {
@@ -300,7 +304,7 @@
     }
 
 
-    newSelectedPhotographers.passedElement.element.addEventListener('removeItem', function(e) {
+    newSelectedPhotographers.passedElement.element.addEventListener('removeItem', function (e) {
       toBeRemoved = [e.detail.label, e.detail.value]
       for (let x1 = 0; x1 < toBeCreatedPhotographers.length; x1++) {
         const o = toBeCreatedPhotographers[x1]
@@ -316,14 +320,14 @@
 
     const form = document.getElementById('main-form');
 
-    document.getElementById('startDate').addEventListener('change', function() {
+    document.getElementById('startDate').addEventListener('change', function () {
       const startDate = document.getElementById('startDate').value;
       if (startDate)
         document.getElementById('endDate').min = startDate;
     });
 
     // Validate on submit
-    form.addEventListener('submit', async function(e) {
+    form.addEventListener('submit', async function (e) {
       e.preventDefault();
       console.log("add event listner for submit")
 

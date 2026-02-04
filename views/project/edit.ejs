@@ -15,135 +15,140 @@
 
 <body>
   <div class="main-con">
-    <%- include(currentUser.UserType=='admin' 
-  ? '../sidenavs/admin.ejs' 
-  : '../sidenavs/user.ejs' ) %>
+    <%- include(currentUser.UserType=='admin' ? '../sidenavs/admin.ejs' : '../sidenavs/user.ejs' ) %>
 
-    <form id='main-form'>
-      <div class="horizontal-panel">
-        <a href="/project/view-all" class="btn btn-primary">
-          <i class="fas fa-arrow-left"></i>
-          Back to All Projects
-        </a>
-        <h2>Edit Project</h2>
-      </div>
+      <form id='main-form'>
+        <div class="horizontal-panel">
+          <a href="/project/view-all" class="btn btn-primary">
+            <i class="fas fa-arrow-left"></i>
+            Back to All Projects
+          </a>
+          <h2>Edit Project</h2>
+        </div>
         <p class="requirement-of-field">* = required</p>
-      <div class="form-group">
-        <label>Project ID: <%=project.ProjectID%></label>
-      </div>
-      <div class="form-group">
-        <label>Project Name*</label>
-        <input type="text" id="projectName" name="projectName" value="<%= project.ProjectName %>" class="form-control" required>
-      </div>
-
-      <div class="form-group">
-        <label for="projectOwner">Project Owner Full Name* </label>
-        <select id="projectOwner" name="projectOwner" "<%=currentUser.UserType==='admin' ? '' : 'disabled'%>" required>
-          <option value="">Select Project Owner</option>
-          <%=projectOwners%>
-          <% projectOwners.forEach(user=> { %>
-          <option value="<%=user.UserID %>" <%=project.ProjectOwnerID==user.UserID ? 'selected' : '' %>>
-            <%=user.FullName%>
-          </option>
-          <% }) %>
-        </select>
-        <div id="projectOwner-error" class="error-message">Please select a projectOwner</div>
-      </div>
-      <%if(currentUser.UserType=='admin'){%>
-      <div class="form-group">
-        <div class="horizontal-panel2">
-          <label id="label2">Project Type</label>
+        <div class="form-group">
+          <label>Project ID: <%=project.ProjectID%></label>
         </div>
-        <select name="projectType" id="projectType" class="form-control">
-          <option value="">-- Select Project Type --</option>
-          <% projectTypes.forEach(projectType=> { %>
-          <option value="<%= projectType %>" <%=project.ProjectType==projectType ? 'selected' : ''%>>
-            <%= projectType %>
-          </option>
-          <% }) %>
-        </select>
-      </div>
-
-      <%}%>
-      <div class="form-group">
-        <div class="horizontal-panel2">
-          <label for="newSelectedImagingPlatforms">Photographer(s)*</label>
-          <button class="addButton" id="addPhotographerButton">Add Photographer</button>
+        <div class="form-group">
+          <label>Project Name*</label>
+          <input type="text" id="projectName" name="projectName" value="<%= project.ProjectName %>" class="form-control"
+            required>
         </div>
-        <select multiple id="newSelectedPhotographers">
-          <option value="">---Select Photographers---</option>
-          <% allPhotographers.forEach(photographer=>{ %>
-      <option value="<%=photographer.UserID%>" id="<%=photographer.UserID%>ID" %>
-        <%=selectedPhotographers.includes(photographer.UserID) ? "selected":""%>>
-        <%=photographer.FullName%>
-      </option>
-      <%})%>
-      </select>
-  </div>
 
-  <div class="form-group">
-    <label for="ImagingStartDate">Imaging Start Date*</label>
-    <input type="date" id="imagingStartDate" name="imagingStartDate" value="<%= project.ImagingStartDate %>" class="form-control" required>
-    <div id="startDate-error" class="error-message">Start date must be after request date</div>
-  </div>
+        <div class="form-group">
+          <label for="projectOwner">Project Owner Full Name* </label>
+          <select id="projectOwner" name="projectOwner" "<%=currentUser.UserType==='admin' ? '' : 'disabled'%>"
+            required>
+            <option value="">Select Project Owner</option>
+            <%=projectOwners%>
+              <% projectOwners.forEach(user=> { %>
+                <option value="<%=user.UserID %>" <%=project.ProjectOwnerID==user.UserID ? 'selected' : '' %>>
+                  <%=user.FullName%>
+                </option>
+                <% }) %>
+          </select>
+          <div id="projectOwner-error" class="error-message">Please select a projectOwner</div>
+        </div>
+        <%if(currentUser.UserType=='admin'){%>
+          <div class="form-group">
+            <div class="horizontal-panel2">
+              <label id="label2">Project Type</label>
+            </div>
+            <select name="projectType" id="projectType" class="form-control">
+              <option value="">-- Select Project Type --</option>
+              <% projectTypes.forEach(projectType=> { %>
+                <option value="<%= projectType %>" <%=project.ProjectType==projectType ? 'selected' : '' %>>
+                  <%= projectType %>
+                </option>
+                <% }) %>
+            </select>
+          </div>
 
-  <div class="form-group">
-    <label for="ImagingEndDate">Imaging End Date*</label>
-    <input type="date" id="imagingEndDate" name="imagingEndDate" value="<%= project.ImagingEndDate %>" class="form-control" required>
-    <div id="endDate-error" class="error-message">End date must be after start date</div>
-  </div>
+          <%}%>
+            <div class="form-group">
+              <div class="horizontal-panel2">
+                <label for="newSelectedImagingPlatforms">Photographer(s)*</label>
 
-  <div class="form-group">
-    <label for="SummaryOfProject">Summary of Project*</label>
-    <textarea id="summaryOfProject" name="summaryOfProject" class="form-control" required>
+                <% if(isUserRegistrationEnabled){%>
+                  <button class="addButton" id="addPhotographerButton">Add Photographer</button>
+                  <%}%>
+              </div>
+              <select multiple id="newSelectedPhotographers">
+                <option value="">---Select Photographers---</option>
+                <% allPhotographers.forEach(photographer=>{ %>
+                  <option value="<%=photographer.UserID%>" id="<%=photographer.UserID%>ID" %>
+                    <%=selectedPhotographers.includes(photographer.UserID) ? "selected" :""%>>
+                      <%=photographer.FullName%>
+                  </option>
+                  <%})%>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label for="ImagingStartDate">Imaging Start Date*</label>
+              <input type="date" id="imagingStartDate" name="imagingStartDate" value="<%= project.ImagingStartDate %>"
+                class="form-control" required>
+              <div id="startDate-error" class="error-message">Start date must be after request date</div>
+            </div>
+
+            <div class="form-group">
+              <label for="ImagingEndDate">Imaging End Date*</label>
+              <input type="date" id="imagingEndDate" name="imagingEndDate" value="<%= project.ImagingEndDate %>"
+                class="form-control" required>
+              <div id="endDate-error" class="error-message">End date must be after start date</div>
+            </div>
+
+            <div class="form-group">
+              <label for="SummaryOfProject">Summary of Project*</label>
+              <textarea id="summaryOfProject" name="summaryOfProject" class="form-control" required>
             <%= project.SummaryOfProject %>
         </textarea>
-  </div>
+            </div>
 
-  <div class="form-group">
-    <label for="DetailsOfSpecimens">Details Of Specimens*</label>
-    <textarea id="detailsOfSpecimens" name="detailsOfSpecimens" class="form-control" required>
+            <div class="form-group">
+              <label for="DetailsOfSpecimens">Details Of Specimens*</label>
+              <textarea id="detailsOfSpecimens" name="detailsOfSpecimens" class="form-control" required>
             <%= project.DetailsOfSpecimens %>
         </textarea>
-  </div>
-  <div class="form-group">
+            </div>
+            <div class="form-group">
 
-    <div class="horizontal-panel2">
-      <label id="label2" for="imagingPlatform">Imaging Platform*</label>
-    </div>
-    <select multiple id="newSelectedImagingPlatforms">
-      <option value="">Select Imaging Platforms</option>
-      <% imagingPlatforms.forEach(i=>{ %>
-      <option value="<%=i%>" <%=selectedImagingPlatforms.includes(i) ? "selected":""%>>
-        <%=i%>
-      </option>
-      <%})%>
-    </select>
-  </div>
+              <div class="horizontal-panel2">
+                <label id="label2" for="imagingPlatform">Imaging Platform*</label>
+              </div>
+              <select multiple id="newSelectedImagingPlatforms">
+                <option value="">Select Imaging Platforms</option>
+                <% imagingPlatforms.forEach(i=>{ %>
+                  <option value="<%=i%>" <%=selectedImagingPlatforms.includes(i) ? "selected" :""%>>
+                    <%=i%>
+                  </option>
+                  <%})%>
+              </select>
+            </div>
 
-  <div class=" form-group">
-    <label for="ProjectStatus">Status*</label>
-    <select name="projectStatus" id="projectStatus" class="form-control" required>
-      <option value="">-- Select Type --</option>
-      <% statuses.forEach(status=> { %>
-      <option value="<%= status %>" <%=project.ProjectStatus==status ? ' selected' : '' %>>
-        <%= status%>
-      </option>
-      <% }) %>
-    </select>
-  </div>
-  <div class='buttons'>
-    <button type="submit" class="btn btn-primary">
-      <i class="fas fa-paper-plane"></i>
-      Edit Project
-    </button>
-  </div>
-  <p class="note">
-    💡 New project types and/or imaging platform will only be in the system if said changes are submitted
-  </p>
-  </form>
+            <div class=" form-group">
+              <label for="ProjectStatus">Status*</label>
+              <select name="projectStatus" id="projectStatus" class="form-control" required>
+                <option value="">-- Select Type --</option>
+                <% statuses.forEach(status=> { %>
+                  <option value="<%= status %>" <%=project.ProjectStatus==status ? ' selected' : '' %>>
+                    <%= status%>
+                  </option>
+                  <% }) %>
+              </select>
+            </div>
+            <div class='buttons'>
+              <button type="submit" class="btn btn-primary">
+                <i class="fas fa-paper-plane"></i>
+                Edit Project
+              </button>
+            </div>
+            <p class="note">
+              💡 New project types and/or imaging platform will only be in the system if said changes are submitted
+            </p>
+      </form>
 
-  <br>
+      <br>
 
 
   </div>
@@ -154,9 +159,9 @@
   const newSelectedPhotographers = new Choices(newSelectedPhotographersElement, {
     allowHTML: true,
     removeItemButton: true,
-    callbackOnInit: async function() {
+    callbackOnInit: async function () {
       const projectOwnerSelect = document.getElementById('projectOwner')
-      projectOwnerSelect.addEventListener('change', function(e) {
+      projectOwnerSelect.addEventListener('change', function (e) {
         e.preventDefault()
 
         const temp = (projectOwnerSelect.value).toString()
@@ -164,7 +169,6 @@
         newSelectedPhotographers.removeActiveItems(); //clearChoices() doesn't work
         newSelectedPhotographers.setChoiceByValue(temp)
         const x = document.querySelector("[data-value='" + temp + "']")
-        console.log(x)
         x.removeChild(x.childNodes[1])
         x.style.padding = "12px"
         x.style.backgroundColor = "gray"
@@ -201,7 +205,6 @@
   //   })
   // })
   // document.getElementById('addImagingPlatformButton').addEventListener('click', async function(e) {
-  //   console.log("add Imaging Platform button")
   //   e.preventDefault()
   //   Swal.fire({
   //     title: "Add new Imaging Platform",
@@ -225,13 +228,14 @@
   //     }
   //   })
   // })
-  document.getElementById('addPhotographerButton').addEventListener('click', async function(e) {
-    e.preventDefault()
-    Swal.fire({
-      title: "Add new Photographer",
-      text: "Add new Photographer",
-      width: '700px',
-      html: `
+  if ("<%isUserRegistrationEnabled%>")
+    document.getElementById('addPhotographerButton').addEventListener('click', async function (e) {
+      e.preventDefault()
+      Swal.fire({
+        title: "Add new Photographer",
+        text: "Add new Photographer",
+        width: '700px',
+        html: `
         <input 
           id="newPhotographerEmail" 
           placeholder="Enter Email"
@@ -243,26 +247,26 @@
           placeholder="Enter Full Name" 
           style="width:95%;height:40%;font-size:30px;" 
           required">`,
-      showCancelButton: true,
-    }).then((result) => {
-      const email = document.getElementById('newPhotographerEmail').value
-      const emailRegex = /^[a-zA-Z0-9](\.?[a-zA-Z0-9_-])*[a-zA-Z0-9]@[a-zA-Z0-9-]+\.[a-zA-Z]{2,}$/
-      const fullName = document.getElementById('newPhotographerFullName').value
-      if (email && fullName) {
-        if (!emailRegex.test(email)) {
-          alert("you entered an email with an invalid format")
-          return
+        showCancelButton: true,
+      }).then((result) => {
+        const email = document.getElementById('newPhotographerEmail').value
+        const emailRegex = /^[a-zA-Z0-9](\.?[a-zA-Z0-9_-])*[a-zA-Z0-9]@[a-zA-Z0-9-]+\.[a-zA-Z]{2,}$/
+        const fullName = document.getElementById('newPhotographerFullName').value
+        if (email && fullName) {
+          if (!emailRegex.test(email)) {
+            alert("you entered an email with an invalid format")
+            return
+          }
+          newSelectedPhotographers.setChoices([{
+            value: email,
+            label: fullName,
+            selected: true
+          }])
+          toBeCreatedPhotographers.push([fullName, email])
         }
-        newSelectedPhotographers.setChoices([{
-          value: email,
-          label: fullName,
-          selected: true
-        }])
-        toBeCreatedPhotographers.push([fullName, email])
-      }
-    });
-  })
-  newSelectedPhotographers.passedElement.element.addEventListener('removeItem', function(e) {
+      });
+    })
+  newSelectedPhotographers.passedElement.element.addEventListener('removeItem', function (e) {
     toBeRemoved = [e.detail.label, e.detail.value]
     for (x = 0; x < toBeCreatedPhotographers.length; x++) {
       const o = toBeCreatedPhotographers[x]
@@ -273,24 +277,22 @@
   }, false)
 
   const toBeCreatedPhotographers = []
-  document.addEventListener('load', function() {
+  document.addEventListener('load', function () {
     // grey out and disable this option
     //The repeated block for greying out is required for both load and DOMContentLoaded event
     const x = document.querySelector("[data-value='<%=project.ProjectOwnerID%>']")
     x.removeChild(x.childNodes[1])
     x.style.padding = "12px"
     x.style.backgroundColor = "gray"
-    console.log(x)
   })
 
-  document.addEventListener('DOMContentLoaded', function() {
+  document.addEventListener('DOMContentLoaded', function () {
     // grey out and disable this option
     //The repeated block for greying out is required for both load and DOMContentLoaded event
     const x = document.querySelector("[data-value='<%=project.ProjectOwnerID%>']")
     x.removeChild(x.childNodes[1])
     x.style.padding = "12px"
     x.style.backgroundColor = "gray"
-    console.log(x)
 
     const form = document.getElementById('main-form')
     const startDateInput = document.getElementById('imagingStartDate');
@@ -303,9 +305,8 @@
     })
 
     // Form submission handler
-    form.addEventListener('submit', async function(e) {
+    form.addEventListener('submit', async function (e) {
       e.preventDefault();
-      console.log('ssubmit')
       // Validation
       const startDate = new Date(startDateInput.value);
       const endDate = new Date(endDateInput.value);
@@ -344,7 +345,6 @@
           selectedPhotographers: newSelectedPhotographers.getValue(true),
           toBeCreatedPhotographers: toBeCreatedPhotographers
         };
-        console.log(formData)
         const response = await fetch(form.action, {
           method: 'POST',
           headers: {
@@ -373,7 +373,6 @@
           });
         }
       } catch (error) {
-        console.error('Error:', error);
         Swal.fire({
           icon: 'error',
           title: 'Error',

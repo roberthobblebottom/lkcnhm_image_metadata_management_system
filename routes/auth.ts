@@ -66,7 +66,6 @@ passport.use(
 passport.serializeUser(
   (user: any, done: (arg0: any, user: User | null) => any) => {
     process.nextTick(function () {
-      // console.log('serialise user',user)
       
       return done(null, {
         UserID: user.UserID,
@@ -81,12 +80,18 @@ passport.serializeUser(
 // retrieving session data
 passport.deserializeUser((user: User, cb: (arg0: null, arg1: any) => any) => {
   process.nextTick(function () {
-// console.log('deserialise user',user)
-
     return cb(null, user);
   });
 });
 router.get("/register", async (req: Request, res, Response) => {
+  const isEnabled = (await db.query('SELECT IsEnabled FROM IsUserRegistrationEnabled'))[0][0].IsEnabled
+  console.log(isEnabled)
+  if (!isEnabled){
+    return res.status(400).json({
+      sucess:false,
+      message: "User Registration is not enabled"
+    })
+  }
   return res.render('register', {
     staffTypes: Object.values(staffTypesEnumeration()),
     userTypes: [
@@ -298,10 +303,7 @@ router.get("/logout", (req: Request, res: Response) => {
 });
 
 router.get("/current-user", (req: Request, res: Response) => {
-  // console.log('/current user')
-  // console.log('current user', req.session.passport.user)
   if (req.session && req.session.passport.user) {
-
     res.json({
       Email: req.session.passport.user.Email,
       FullName: req.session.passport.user.FullName,

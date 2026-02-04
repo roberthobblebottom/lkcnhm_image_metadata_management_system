@@ -8,6 +8,7 @@ import { emailRegex, userTypesEnumeration } from "../middleware/utils";
 
 import crypto from "crypto";
 import { param, validationResult } from "express-validator";
+import { all } from "nodejs-polars";
 const {
   isAuthenticated,
   isAdminOrProjectOwner,
@@ -35,13 +36,15 @@ router.get(
     FROM User u
     WHERE u.UserType != 'admin' AND u.IsDeleted = 0
     `;
+    const isUserRegistrationEnabledQuery = 'SELECT IsEnabled FROM IsUserRegistrationEnabled'
 
-    const [projectOwners, photographers] = await Promise.all([
+    const [projectOwners, photographers, isUserRegistrationEnabledResults] = await Promise.all([
       db.query(getProjectOwners),
       db.query(getPhotographers),
+      db.query(isUserRegistrationEnabledQuery)
     ]);
 
-    console.log('photographers', photographers)
+    const isUserRegistrationEnabled = (isUserRegistrationEnabledResults)[0][0].IsEnabled
     res.render("project/create", {
       currentUser: req.session.passport.user,
       projectOwners: projectOwners[0],
@@ -49,6 +52,7 @@ router.get(
       projectTypes: req.session.projectTypes,
       imagingPlatforms: req.session.imagingPlatforms,
       title: "Project Form",
+       isUserRegistrationEnabled
     });
   }
 );
@@ -525,6 +529,10 @@ router.get(
     WHERE u.UserType ='projectOwner'
     AND u.IsDeleted = 0
     `;
+      const getImagingPlatformsQuery = "SELECT ImagingPlatform FROM ImagingPlatformInstance WHERE ProjectID = ? ORDER BY ImagingPlatform"
+      const getSelectedPhotographersQuery = "SELECT user.UserID  FROM ProjectUserPhotographyLink p JOIN User user on user.UserID = p.PhotographerID WHERE p.ProjectID = ? AND user.IsDeleted = 0"
+      const isUserRegistrationEnabledQuery = 'SELECT IsEnabled FROM IsUserRegistrationEnabled'
+      const allPhotographersQuery = "SELECT UserID,FullName FROM User WHERE UserType!= 'admin' AND IsDeleted = 0"
       // Get all needed data in parallel for better performance
       const [
         requestResults,
@@ -532,23 +540,16 @@ router.get(
         selectedPhotographersTemp,
         allPhotographers,
         projectOwners,
-      ]: [any, any, any, any, any] = await Promise.all([
+        isUserRegistrationEnabledResults
+      ]: [any, any, any, any, any, any] = await Promise.all([
         db.query(requestQuery, [projectID]),
-        db
-
-          .query(
-            "SELECT ImagingPlatform FROM ImagingPlatformInstance WHERE ProjectID = ? ORDER BY ImagingPlatform",
-            [projectID]
-          ),
-        db
-
-          .query(
-            "SELECT user.UserID  FROM ProjectUserPhotographyLink p JOIN User user on user.UserID = p.PhotographerID WHERE p.ProjectID = ? ",
-            [projectID]
-          ),
-        db.query("SELECT UserID,FullName FROM User WHERE UserType!= 'admin' "),
+        db.query(getImagingPlatformsQuery, [projectID]),
+        db.query(getSelectedPhotographersQuery, [projectID]),
+        db.query(allPhotographersQuery),
         db.query(getProjectOwners),
+        db.query(isUserRegistrationEnabledQuery)
       ]);
+      const isUserRegistrationEnabled = (isUserRegistrationEnabledResults)[0][0].IsEnabled
       if (requestResults[0].length === 0) {
         return res
           .status(404)
@@ -585,6 +586,7 @@ router.get(
 
         newlyCreatedPhotographers: [],
         projectOwners: projectOwners[0],
+         isUserRegistrationEnabled
       });
     } catch (err) {
       console.error("Error:", err);
