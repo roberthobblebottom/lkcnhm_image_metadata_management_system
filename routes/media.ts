@@ -510,7 +510,7 @@ router.post(
       return res.status(400).json({ errors: errors.array() })
     }
     const mediaID = req.params.mediaID;
-    const userId = req.session.passport.user.UserID;
+    const userID = req.session.passport.user.UserID;
 
     // First verify the media exists and isn't already deleted
     // this could be replace with catching the error but just using what works from the previous developers
@@ -534,7 +534,7 @@ router.post(
                 WHERE MediaID = ?
         `;
 
-        return db.query(updateQuery, [userId, mediaID]);
+        return db.query(updateQuery, [userID, mediaID]);
       })
       .then(() => res.redirect("/media/view-all"))
       .catch((error: any) => {
@@ -556,7 +556,7 @@ router.post(
       return res.status(400).json({ errors: errors.array() })
     }
     const mediaID = req.params.mediaID;
-    const userId = req.session.passport.user.UserID;
+    const userID = req.session.passport.user.UserID;
 
     // First verify the media exists and isn't already restored
     // this could be replace with catching the error but just using what works from the previous developers
@@ -580,7 +580,7 @@ router.post(
                 WHERE MediaID = ?
             `;
 
-        return db.query(updateQuery, [userId, mediaID]);
+        return db.query(updateQuery, [userID, mediaID]);
       })
       .then(() => {
         res.redirect("/media/view-all");
@@ -595,6 +595,54 @@ router.post(
   }
 );
 
+router.post("/bulk-delete", isAuthenticated, async (req: Request, res: Response) => {
+  if (!Array.isArray(req.body))
+    return res.status(400).json({ success: false, message: "request body is not an array" })
+  if (req.body.length == 0)
+    return res.status(400).json({ success: false, message: "request body array is empty" })
+  for (const x of req.body) {
+    if (isNaN(parseInt(x)))
+      return res.status(400).json({ success: false, message: "request body contains non integers" })
+    if (x <= 0)
+      return res.status(400).json({ success: false, message: "request body contains  non positive integers" })
+  }
+
+  const userID = req.session.passport.user.UserID;
+  const updateQuery = `
+                UPDATE Media 
+                SET IsDeleted = 1,
+                    UpdatedByID = ?,
+                    UpdatedDate = NOW() 
+                WHERE MediaID in (?)
+        `;
+
+  await db.query(updateQuery, [userID, req.body]);
+  return res.status(200).json({ success: true, message: "successfully soft deleted selected metadata" })
+})
+router.post("/bulk-restore", isAuthenticated, async (req: Request, res: Response) => {
+  if (!Array.isArray(req.body))
+    return res.status(400).json({ success: false, message: "request body is not an array" })
+  if (req.body.length == 0)
+    return res.status(400).json({ success: false, message: "request body array is empty" })
+  for (const x of req.body) {
+    if (isNaN(parseInt(x)))
+      return res.status(400).json({ success: false, message: "request body contains non integers" })
+    if (x <= 0)
+      return res.status(400).json({ success: false, message: "request body contains  non positive integers" })
+  }
+
+  const userID = req.session.passport.user.UserID;
+  const updateQuery = `
+                UPDATE Media 
+                SET IsDeleted = 0,
+                    UpdatedByID = ?,
+                    UpdatedDate = NOW() 
+                WHERE MediaID in (?)
+        `;
+
+  await db.query(updateQuery, [userID, req.body]);
+  return res.status(200).json({ success: true, message: "successfully restored selected metadata" })
+})
 router.get(
   "/upload-bulk-metadata",
   isAuthenticated,

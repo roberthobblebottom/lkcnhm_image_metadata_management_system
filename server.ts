@@ -95,16 +95,16 @@ app.listen(PORT,'0.0.0.0', () => {
 
 // Handle forgot password
 // app.post("/forgot-password", (req: Request, res: Response) => {
-//   const { userId, Password, newPassword } = req.body;
+//   const { userID, Password, newPassword } = req.body;
 
 //   console.log("🟢 Forgot Password Request:", req.body);
 
-//   // Step 1: Verify userId and Password
+//   // Step 1: Verify userID and Password
 //   const selectQuery =
 //     "SELECT * FROM User WHERE Email = ? AND TemporaryPassword = ?";
 //   db.query(
 //     selectQuery,
-//     [userId, Password],
+//     [userID, Password],
 //     (err: any, results: string | any[]) => {
 //       if (err) {
 //         console.error("DB error:", err);
@@ -121,7 +121,7 @@ app.listen(PORT,'0.0.0.0', () => {
 //       // Step 2: Update the password
 //       const updateQuery =
 //         "UPDATE User SET Password = ?, TemporaryPassword = NULL WHERE Email = ?";
-//       db.query(updateQuery, [newPassword, userId], (err2: any, result: any) => {
+//       db.query(updateQuery, [newPassword, userID], (err2: any, result: any) => {
 //         if (err2) {
 //           console.error("DB error:", err2);
 //           return res
