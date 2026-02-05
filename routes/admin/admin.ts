@@ -488,7 +488,6 @@ router.post(
   reconfirmPasswordFunctionForAdmin,
   async (req: Request, res: Response) => {
     const result: any = await db
-      
       .query(`SELECT * FROM User WHERE IsDeleted = 1;`);
 
     const userData: Array<Object> = Array.from(result[0]);

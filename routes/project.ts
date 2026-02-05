@@ -390,7 +390,6 @@ router.get(
     // }
 
     console.log(`📄 Fetched ${result.length} projects`);
-    // console.log(results)
 
     if (result.length === 0) {
       return res.render("project/view-all", {
@@ -507,8 +506,6 @@ router.get(
   }
 );
 
-// Edit Project (GET)
-// Define queries at the top of your file for better maintainability
 router.get(
   "/edit/:projectID",
   param('projectID').isInt({ min: 1 }).withMessage('unknown id'),
@@ -521,36 +518,38 @@ router.get(
     }
     try {
       const projectID = req.params.projectID;
-      const requestQuery = `
-            SELECT
-            p.*,
-            projectOwner.FullName ,
-            projectOwner.Email 
-            FROM Project p
-            JOIN User projectOwner ON p.ProjectOwnerID = projectOwner.UserID
-            WHERE p.ProjectID = ?;
+      const projectAndOwnerQuery = `
+            SELECT p.*, projectOwner.FullName, projectOwner.Email            
+            FROM Project p        
+            LEFT JOIN User projectOwner ON p.ProjectOwnerID = projectOwner.UserID  
+            WHERE p.ProjectID = 1 AND (projectOwner.IsDeleted = 0 OR  projectOwner.UserID IS NULL);
+      
     `;
 
       const getProjectOwners = `
-    SELECT u.UserID,u.FullName, u.Email, u.UserType 
-    FROM User u
-    WHERE u.UserType ='projectOwner'
-    AND u.IsDeleted = 0
+            SELECT u.UserID,u.FullName, u.Email, u.UserType 
+            FROM User u
+            WHERE u.UserType ='projectOwner' AND (u.IsDeleted = 0 OR u.UserID = NULL)
     `;
-      const getImagingPlatformsQuery = "SELECT ImagingPlatform FROM ImagingPlatformInstance WHERE ProjectID = ? ORDER BY ImagingPlatform"
-      const getSelectedPhotographersQuery = "SELECT user.UserID  FROM ProjectUserPhotographyLink p JOIN User user on user.UserID = p.PhotographerID WHERE p.ProjectID = ? AND user.IsDeleted = 0"
+      const getImagingPlatformsQuery = `SELECT ImagingPlatform FROM ImagingPlatformInstance 
+                                        WHERE ProjectID = ? ORDER BY ImagingPlatform`
+      const getSelectedPhotographersQuery = `SELECT user.UserID  FROM ProjectUserPhotographyLink p 
+                                              LEFT JOIN User user on user.UserID = p.PhotographerID 
+                                              WHERE p.ProjectID = ? AND user.IsDeleted = 0`
       const isUserRegistrationEnabledQuery = 'SELECT IsEnabled FROM IsUserRegistrationEnabled'
-      const allPhotographersQuery = "SELECT UserID,FullName FROM User WHERE UserType!= 'admin' AND IsDeleted = 0"
+      const allPhotographersQuery = `SELECT UserID,FullName FROM User 
+                                    WHERE UserType!= 'admin' AND IsDeleted = 0`
+
       // Get all needed data in parallel for better performance
       const [
-        requestResults,
+        projectAndOwnerResults,
         imagingPlatformTemp,
         selectedPhotographersTemp,
         allPhotographers,
         projectOwners,
         isUserRegistrationEnabledResults
       ]: [any, any, any, any, any, any] = await Promise.all([
-        db.query(requestQuery, [projectID]),
+        db.query(projectAndOwnerQuery, [projectID]),
         db.query(getImagingPlatformsQuery, [projectID]),
         db.query(getSelectedPhotographersQuery, [projectID]),
         db.query(allPhotographersQuery),
@@ -558,29 +557,29 @@ router.get(
         db.query(isUserRegistrationEnabledQuery)
       ]);
       const isUserRegistrationEnabled = (isUserRegistrationEnabledResults)[0][0].IsEnabled
-      if (requestResults[0].length === 0) {
+      if (projectAndOwnerResults[0].length == 0) {
         return res
-          .status(404)
-          .render("error", { message: "Request not found" });
+          .status(400)
+          .json({message: "no projects and their owners not found" });
       }
       const currentlySelectedPhotographers: string[] = [];
-      for (var i of selectedPhotographersTemp[0]) {
+      for (var i of selectedPhotographersTemp[0]) 
         currentlySelectedPhotographers.push(i.UserID);
-      }
-
+      
       const imagingPlatforms: any[] = [];
-      for (const i of imagingPlatformTemp[0]) {
+      for (const i of imagingPlatformTemp[0]) 
         imagingPlatforms.push(Object.values(i)[0]);
-      }
+      
       // Format dates for display
       const project = {
-        ...requestResults[0][0],
-        CreatedDate: formatDisplayDate(requestResults[0][0].CreatedDate),
+        ...projectAndOwnerResults[0][0],
+        CreatedDate: formatDisplayDate(projectAndOwnerResults[0][0].CreatedDate),
         ImagingStartDate: formatDisplayDate(
-          requestResults[0][0].ImagingStartDate
+          projectAndOwnerResults[0][0].ImagingStartDate
         ),
-        ImagingEndDate: formatDisplayDate(requestResults[0][0].ImagingEndDate),
+        ImagingEndDate: formatDisplayDate(projectAndOwnerResults[0][0].ImagingEndDate),
       };
+      console.log('project owners',projectOwners[0])
       res.render(`project/edit`, {
         project: project,
         allPhotographers: allPhotographers[0],
@@ -591,7 +590,6 @@ router.get(
         selectedImagingPlatforms: imagingPlatforms,
         currentUser: req.session.passport.user,
         title: "Edit Project", // Add title here
-
         newlyCreatedPhotographers: [],
         projectOwners: projectOwners[0],
         isUserRegistrationEnabled

@@ -66,7 +66,6 @@ passport.use(
 passport.serializeUser(
   (user: any, done: (arg0: any, user: User | null) => any) => {
     process.nextTick(function () {
-
       return done(null, {
         UserID: user.UserID,
         FullName: user.FullName,
@@ -160,11 +159,8 @@ router.post("/register", async (req: Request, res: Response) => {
   const checkEmailQuery = "SELECT Email FROM User WHERE Email = ? LIMIT 1";
   const isThereExistingEmail =  (await db.query(checkEmailQuery, [email]))[0][0]
 
-
-  console.log(isThereExistingEmail)
   if (isThereExistingEmail)
     return res.status(400).json({message:"Email already exist"})
-
 
   const newPasswordSalt = crypto.randomBytes(16).toString("hex");
   const saltedPassword = crypto.pbkdf2Sync(
@@ -216,8 +212,6 @@ router.post("/login", (req: Request, res: Response, next: NextFunction) => {
         const updateQuery =
           "UPDATE User SET LastLoginDate = NOW() WHERE UserID = ? ";
         await db.query(updateQuery, [user.UserID])
-
-
 
         // these codes feels redundant now, may needed to be removed
         const x1: any[] = await db

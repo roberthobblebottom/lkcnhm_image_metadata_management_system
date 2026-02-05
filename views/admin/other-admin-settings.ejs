@@ -215,7 +215,7 @@
     'Are you sure you want to PERNAMANTLY purge user data?')" class="btn btn-primary">
         <i class="fas fa-arrow-down"></i> Purge User Data
       </button>
-      <button onclick="reconfirmPassword('project','Are you sure you want to PERNAMANTLY purge project data?')"
+      <button onclick="reconfirmPassword('project','Are you sure you want to PERNAMANTLY purge project data? WARNING: This will PERNAMENTLY delete image metadatas too.')"
         class="btn btn-primary">
         <i class="fas fa-arrow-down"></i> Purge Project Data
       </button>
@@ -259,9 +259,9 @@
     Swal.fire({
       title: "Confirm Your password",
       html: `
-      <div style="height: 100px">
-      <label>${message} If so please reenter your password</label>
-      <input type="password" id="reconfirmPasswordInput" placeholder="Password" style="width:98%;height:30%">
+      <div style="min-height: 100px; max-height:120px ">
+      <label >${message} <br>If so please reenter your password</label>
+      <input type="password" id="reconfirmPasswordInput" placeholder="Password" style="width:98%;height:30px;margin-top: 20px">
       </div>
       `,
       confirmButtonText: 'confirm',
@@ -368,10 +368,10 @@
       title: "Editing Value, " + value + " of the feature " + feature,
       showCancelButton: true,
       html: `
-      <div style="height: 200px">
+      <div style="height: 120px">
       <label> please reenter your password if you are sure to edit the value</label>
-      <input type="text" id="editedValueInput" value='${value}' style="width:98%;height:20%" >
-      <input type="password" id="reconfirmPasswordInput" placeholder="Password" style="width:98%;height:20%">
+      <input type="text" id="editedValueInput" value='${value}' style="width:98%;height:30px;margin-top:20px" >
+      <input type="password" id="reconfirmPasswordInput" placeholder="Password" style="width:98%;height:30px">
       </div>
       `,
       preConfirm: () => {
