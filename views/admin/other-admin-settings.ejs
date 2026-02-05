@@ -124,7 +124,7 @@
                       Edit</button>
                     <button onclick="reconfirmPassword(
                   entity='projectType',
-                message='Are you sure you want to delete this enumeration value <%=element%> for project type?',
+                message='Are you sure you want to delete this enumeration value <%=element%> for project type?<br> The delete of any of these attributes will remove existing table datas\' respective values. ',
                 value= '<%=element%>',
                 enumAction='delete')" class="btn btn-delete">
                       Delete</button>
@@ -162,7 +162,7 @@
                 value='<%=element%>')" class="btn btn-edit">
                       Edit</button>
                     <button onclick="reconfirmPassword(entity='imagingPlatform',
-                message='Are you sure you want to delete this enumeration value <%=element%> for imaging platform?',
+                message='Are you sure you want to delete this enumeration value <%=element%> for imaging platform? <br> The delete  of any of these attributes will remove existing table datas\' respective values. ',
                 value='<%=element%>',enumAction='delete')"" class=" btn btn-delete">
                       Delete</button>
                   </div>
@@ -199,7 +199,7 @@
                 value='<%=element%>')" class="btn btn-edit">
                       Edit</button>
                     <button onclick="reconfirmPassword(entity='imageEditingTool',
-                message='Are you sure you want to delete this enumeration value <%=element%> for image editing tool?',
+                message='Are you sure you want to delete this enumeration value <%=element%> for image editing tool?<br>  The delete of any of these attributes will remove existing table datas\' respective values. ',
                 value='<%=element%>',enumAction='delete')" class="btn btn-delete">
                       Delete</button>
                   </div>
@@ -259,7 +259,7 @@
     Swal.fire({
       title: "Confirm Your password",
       html: `
-      <div style="min-height: 100px; max-height:120px ">
+      <div style="min-height: 100px; max-height:140px ">
       <label >${message} <br>If so please reenter your password</label>
       <input type="password" id="reconfirmPasswordInput" placeholder="Password" style="width:98%;height:30px;margin-top: 20px">
       </div>
@@ -369,7 +369,7 @@
       showCancelButton: true,
       html: `
       <div style="height: 120px">
-      <label> please reenter your password if you are sure to edit the value</label>
+      <label> The edit of any of these attributes will edit existing table datas' respective values.  <br>Please reenter your password if you are sure to edit the value</label>
       <input type="text" id="editedValueInput" value='${value}' style="width:98%;height:30px;margin-top:20px" >
       <input type="password" id="reconfirmPasswordInput" placeholder="Password" style="width:98%;height:30px">
       </div>
