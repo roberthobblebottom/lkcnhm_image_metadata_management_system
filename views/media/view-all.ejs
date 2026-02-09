@@ -50,14 +50,14 @@
             <th>Project ID</th>
             <th>Project Name</th>
             <th>Photographer</th>
-            <th class="fileName">Morpho ID</th>
+            <th >Morpho ID</th>
             <!-- <th id="forthColumn">File Path</th> -->
             <th>Catalog ID</th>
             <th>Resolution</th>
             <th>Imaging Date</th>
-            <%if (currentUser.UserType=='admin' ){%>
+            <!-- <%if (currentUser.UserType=='admin' ){%> -->
             <th>Is Deleted?</th>
-            <%}%>
+            <!-- <%}%> -->
           <th >Actions</th>
         </tr>
       </thead>
@@ -68,17 +68,17 @@
             <td> <%= media.ProjectID || 'Not Specified'%></td>
             <td> <%= media.ProjectName || 'Not Specified'%></td>
             <td> <%= media.photographerName || 'Not Specified'%></td>
-            <td class="fileName"><%= media.MorphoID%></td>
+            <td ><%= media.MorphoID%></td>
             <!-- <td><%= media.FilePath %></td> -->
             <td> <%= media.CatalogID  %></td>
             <td><%= media.Resolution || 'Not Specified'%></td>
             <td> <%= media.ImagingDate?.toISOString().slice(0, 10) || 'Not Specified' %></td>
 
-            <%if (currentUser.UserType=='admin' ){%>
+            <!-- <%if (currentUser.UserType=='admin' ){%> -->
             <td class="<%= !media.IsDeleted  ? 'status-approved' :  'status-rejected'  %>">
               <%=!media.IsDeleted? 'No' : 'Yes' %>
             </td>
-            <%}%>
+            <!-- <%}%> -->
             <td class="horizontal-panel2">
               <a href="/media/view/<%= media.MediaID %>"class="btn-view">View</a>
             <a href="/media/edit/<%=media.MediaID%>" class="<%=media.IsDeleted?'disabled':'btn-edit'%>">
@@ -103,7 +103,8 @@
 </body>
 
 <script>
-  new DataTable('#dataTable',{pageLength:50, autoWidth: false, columnDefs:[{width:'100%',targets:"_all"}]})
+  new DataTable('#dataTable',{pageLength:10, autoWidth: false, columnDefs:[{width:'100%',targets:"_all"}],
+  serverSide:true,ajax:{url:'/media/view-all-processing',type:'POST'}})
 
 
 </script>

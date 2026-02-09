@@ -212,6 +212,7 @@ router.get(
   "/view-all",
   isAuthenticated,
   async (req: Request, res: Response) => {
+    console.log('view-all')
     const baseQuery = `
       SELECT 
         m.MediaID,
@@ -273,6 +274,78 @@ router.get(
     });
   }
 );
+
+router.post("/view-all-processing", isAuthenticated, async (req: Request,res:Response)=>{
+console.log(req.body)
+const baseQuery = `
+      SELECT 
+        m.MediaID,
+        m.MorphoID,
+        m.CatalogID,
+        m.ImagingDate,
+        m.IsDeleted,
+        m.Resolution,
+        p.ProjectID,
+        p.ProjectName,
+        photographer.FullName As photographerName
+      FROM Media m
+      LEFT JOIN Project p ON m.ProjectID = p.ProjectID
+      LEFT JOIN User photographer ON m.PhotographerID = photographer.UserID  
+    `;
+    const columns = ['MediaID','ProjectID','ProjectName','photographerName','MorphoID','CatalogID','Resolution','ImagingDate','IsDeleted']
+    const user = req.session.passport.user;
+    var query: string = "";
+    /**
+     * retrieve table data based on what user type
+     * to show only relevant data and enforce authentication
+     */
+    switch (user.UserType) {
+      case userTypesEnumeration().admin:
+        query = baseQuery 
+        break;
+      case userTypesEnumeration().projectOwner:
+        query =
+          baseQuery +
+          "\nWHERE m.IsDeleted = 0 AND (p.ProjectOwnerID =? )  ";
+        break;
+      case userTypesEnumeration().photographerOnly:
+        query =
+          baseQuery +
+          "\nWHERE m.IsDeleted = 0 AND (m.PhotographerID =? )  ";
+        break;
+    }
+    query = query + "ORDER BY "+ columns[req.body.order[0].column] +" "+ req.body.order[0].dir;
+    console.log('query',query)
+    const anyLinks = (
+      await db.query(
+        `
+        SELECT * 
+        FROM ProjectUserPhotographyLink pupl 
+        RIGHT JOIN Project p ON p.ProjectID = pupl.ProjectID
+        WHERE pupl.PhotographerID = ? OR p.ProjectOwnerID = ? LIMIT 1`,
+        [user.UserID, user.UserID]
+      )
+    )[0];
+
+    const results = (await db.query(query, [user.UserID]))[0];
+
+
+    console.log('results',results,results.length)
+    res.json({
+      draw:req.body.draw,
+      recordsTotal: results.length,
+      recordsFiltered: results.length,
+      data: results,
+      error: ""
+    })
+    // res.render("media/view-all", {
+    //   title: "Media Management",
+    //   medias: results[0],
+    //   currentUser: user,
+    //   disableCreateMedia:
+    //     anyLinks.length == 0 && user.UserType != userTypesEnumeration().admin,
+    // });
+})
 
 router.get("/view/:mediaID", param('mediaID').isInt({ min: 1 }).withMessage("unknown ID"), isAuthenticated, async (req: Request, res: Response) => {
   const errors = validationResult(req)
