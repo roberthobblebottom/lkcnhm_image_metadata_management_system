@@ -38,18 +38,18 @@
 </style>
 <div class="dashboard-container">
   <div class="welcome-section">
-    <h1 class="welcome-title">Welcome to Image Metadata Management System System</h1>
+    <h1 class="welcome-title">Welcome to Image Metadata Management System</h1>
     <h2>Help Guide:</h2>
+    <p>The Image Metadata Management System is a one-stop portal for handling imaging project metadata for tracking of projects and safekeeping of important image-related information. You can navigate the system through the panel on the left. 
+    </p>
     <% if(currentUser.UserType == 'photographerOnly'){%>
     <p>If you are using a newly created photographer account made by your project\'s owner, please change your password as soon as possible</p>
       <%}else{%>
-        
-    <p>If you have created newly created photographer account(s) made during the creation of editing of project(s), please change tell your photographers in your password as soon as possible</p>
+    <p>You can create “photographer” accounts for your staff during the creation or editing of any projects. Please remember to remind them to change their passwords as soon as possible for account security. </p>
         <%}%>
-    <p> Do make sure to create a project before creating or uploading metadatas.  
-        
+    <p>To start uploading image metadata or registering an imaging project, please click on "Image Metadata Management" or "Project Management" repectively on the sidebar to the left. 
     </p>
-    <p>You may also create new photographers within the Project's create or edit functionality.</p>
+    <a href="/media/upload-bulk-metadata/">Pipeline program is downloadable here.</a> They are the buttons on the lowest panel of buttons.
   </div>
 
 

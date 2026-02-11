@@ -127,7 +127,8 @@
   <div class="login-container">
     <div class="form-group">
       <h1>Sign Up</h1>
-      * means mandatory
+      * means mandatory<br><br>
+      If you are a project owner and want to create photographer account(s), please create the account(s) via the project creation or project edit pages in the system.
 
     </div>
 
@@ -182,8 +183,8 @@
         <input type="text" id="contactNumber" ">
       </div>
       <div class=" form-group">
-        <label for="staffType">StaffType </label>
-         <select name="staffType" id="staffType">
+        <label for="staffType">StaffType* </label>
+         <select name="staffType" id="staffType" required>
 
           <option value="">-- Select a staff type--</option>
           <%staffTypes.forEach( staffType=>{%>
@@ -259,11 +260,9 @@
             comments: registerForm.comments.value,
           })
         })
-        .then(res => {
+        .then(async res => {
           if (!res.ok) {
-            return res.text().then(text => {
-              throw new Error(text);
-            });
+              throw new Error((await res.json()).message);
           }
           return res.text();
         })
@@ -284,10 +283,10 @@
           Swal.fire({
             icon: 'error',
             title: 'Registration Failed',
-            text: err.message
+            text: err
           });
           messageEl.innerText = "";
-          console.error("❌ Registration failed:", err.message);
+          console.error("❌ Registration failed:", err);
         });
     });
 

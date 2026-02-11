@@ -241,12 +241,11 @@ router.get(
       return res.status(400).json({ errors: errors.array() })
     }
     const userID = req.params.userID;
-    const userId = req.params.userID;
     const query =
       "SELECT UserID,Email,UserType,FullName,RegisteredDate,ContactNumber,StaffType,Comments,IsDeleted FROM User WHERE UserID = ?";
 
     const result = (
-      await db.query(query, [userId])
+      await db.query(query, [userID])
     )[0];
     if (result.length === 0) {
       return res.render("admin/edit", {

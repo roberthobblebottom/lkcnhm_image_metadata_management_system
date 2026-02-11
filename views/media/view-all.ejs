@@ -9,7 +9,9 @@
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
   <link rel="stylesheet" href="https://cdn.datatables.net/2.3.5/css/dataTables.dataTables.css" />
   <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
-  <script src="https://cdn.datatables.net/2.3.5/js/dataTables.js"></script>
+  <script src="https://cdn.datatables.net/2.3.7/js/dataTables.js"></script>
+  <script src="https://cdn.datatables.net/select/3.1.3/js/dataTables.select.js"></script>
+  <script src="https://cdn.datatables.net/select/3.1.3/js/select.dataTables.js"></script>
   <style>
     .horizontal-panel2 {
       display: flex;
@@ -17,96 +19,255 @@
       width: 250px;
     }
 
-/* 
-    .fileName {
-      max-width: 400px;
-      text-overflow: ellipsis;
-      overflow: hidden;
-      white-space: nowrap;
-    } */
+    .hidden {
+      display: none;
+    }
   </style>
 </head>
 
 <body>
   <div class="main-con">
     <%- currentUser.UserType=='admin' ? include('../sidenavs/admin'): include('../sidenavs/user') %>
-    <div class="horizontal-panel">
-      <h2><%= currentUser.UserType=='admin'? "All": "Your"%> Image Metadata Records</h2>
-      <% if (disableCreateMedia){ %>
-      You do not have any projects you can add media to.
-      <% }else{ %>
-      <a href="/media/create/" class="btn">Add Media(s)</a>
-      <a href="/media/upload-bulk-metadata/" class="btn"> Upload Bulk MetaData</a>
-      <%}%>
-    </div>
+      <div class="horizontal-panel">
+        <h2>
+          <%= currentUser.UserType=='admin' ? "All" : "Your" %> Image Metadata Records
+        </h2>
+        <% if (disableCreateMedia){ %>
+          You do not have any projects you can add media to.
+          <% }else{ %>
+            <a href="/media/create/" class="btn">Add Media(s)</a>
+            <a href="/media/upload-bulk-metadata/" class="btn"> Upload Bulk MetaData</a>
+            <a class="btn-delete hidden" id="delete-selected"> Delete Selected</a>
+            <a class="btn-restore hidden" id="restore-selected"> Restore Selected</a>
+            <%}%>
+      </div>
 
-    <% if (medias.length===0) { %>
-      <p class="no-data">No media records found.</p>
-      <% } else { %>
       <table id="dataTable" class="dataTable">
         <thead>
           <tr>
-            <th>Media ID</th>
-            <th>Project ID</th>
+            <th></th>
+            <th>ID</th>
             <th>Project Name</th>
             <th>Photographer</th>
-            <th >Morpho ID</th>
-            <!-- <th id="forthColumn">File Path</th> -->
+            <th class="fileName">Morpho ID</th>
             <th>Catalog ID</th>
             <th>Resolution</th>
             <th>Imaging Date</th>
-            <!-- <%if (currentUser.UserType=='admin' ){%> -->
             <th>Is Deleted?</th>
-            <!-- <%}%> -->
-          <th >Actions</th>
-        </tr>
-      </thead>
-    <tbody>
-      <% medias.forEach(media=> { %>
-          <tr>
-            <td> <%= media.MediaID %></td>
-            <td> <%= media.ProjectID || 'Not Specified'%></td>
-            <td> <%= media.ProjectName || 'Not Specified'%></td>
-            <td> <%= media.photographerName || 'Not Specified'%></td>
-            <td ><%= media.MorphoID%></td>
-            <!-- <td><%= media.FilePath %></td> -->
-            <td> <%= media.CatalogID  %></td>
-            <td><%= media.Resolution || 'Not Specified'%></td>
-            <td> <%= media.ImagingDate?.toISOString().slice(0, 10) || 'Not Specified' %></td>
-
-            <!-- <%if (currentUser.UserType=='admin' ){%> -->
-            <td class="<%= !media.IsDeleted  ? 'status-approved' :  'status-rejected'  %>">
-              <%=!media.IsDeleted? 'No' : 'Yes' %>
-            </td>
-            <!-- <%}%> -->
-            <td class="horizontal-panel2">
-              <a href="/media/view/<%= media.MediaID %>"class="btn-view">View</a>
-            <a href="/media/edit/<%=media.MediaID%>" class="<%=media.IsDeleted?'disabled':'btn-edit'%>">
-              Edit</a>
-
-            <%if (!media.IsDeleted ){%>
-            <form action="/media/delete/<%= media.MediaID %>" method="POST" onsubmit="return confirm('Are you sure you want to delete this image metadata record ?');">
-              <button type="submit" class="btn-delete">Delete</button>
-            </form>
-            <%} else {%>
-            <form action="/media/restore/<%= media.MediaID %>" method="POST" onsubmit="return confirm('Are you sure you want to restore this image metadata record ?');">
-              <button type="submit" class="btn-restore">restore</button>
-            </form>
-            <%}%>
-          </td>
-        </tr>
-      <%})%>
-            </tbody>
+          </tr>
+        </thead>
+        <tbody>
+        </tbody>
       </table>
-      <%}%>
+      <label id="numberOfSelected"></label>
   </div>
 </body>
 
 <script>
-  new DataTable('#dataTable',{pageLength:10, autoWidth: false, columnDefs:[{width:'100%',targets:"_all"}],
-  serverSide:true,ajax:{url:'/media/view-all-processing',type:'POST'}})
+  const pageLength = 10
+  const dt = new DataTable('#dataTable', {
+    // select: { style: 'multi', selector: 'td:first-child' },
+    columnDefs: [
+      {
+        orderable: true,
+        render: (data, type, full) => `
+          <input type="checkbox" id="checkbox_${full.MediaID}" onclick="checkboxClick(${full.MediaID})"></input>
+          <label id ="label_${full.MediaID}"></label>`,
+        orderData: [],
+        targets: 0
+      }
+      ,
+      {
+        orderable: false,
+        targets: 9
+      }
+    ],
+    columns: [
+      { data: "s", name: "s" },
+      { data: 'MediaID', name: 'MediaID' },
+      { data: 'ProjectName', name: "ProjectName" },
+      { data: 'photographerName', name: "photographerName" },
+      { data: 'MorphoID', name: "MorphoID" },
+      { data: 'CatalogID', name: "CatalogID" },
+      {
+        data: 'Resolution', name: "Resolution", mRender: (data, type, full) =>
+          full.Resolution ? full.Resolution : "Not Specified"
+      },
+      {
+        data: 'ImagingDate', name: "ImagingDate", mRender: (data, type, full) =>
+          full.ImagingDate ? full.ImagingDate.split("T")[0] : "Not Specified"
+      },
+      {
+        data: 'IsDeleted', name: "IsDeleted", mRender: (data, type, full) =>
+          full.IsDeleted
+            ? `<label class='status-rejected'>Yes</label> `
+            : `<label class='status-approved' >No</label>`
+      },
+      {
+        data: 'Actions', title: 'Actions', mRender: (data, type, full) => {
+          var html = `
+        <div class="horizontal-panel2">
+            <a href="/media/view/${full.MediaID}" class="btn-view">View</a>
+      `
+          return full.IsDeleted
+            ? html + `
+          <a href="/media/edit/${full.MediaID}" class='disabled' >Edit</a>
+              <form action="/media/restore/${full.MediaID}" method="POST"
+                          onsubmit="return confirm('Are you sure you want to restore this image metadata?');">
+                          <button type="submit" class="btn-restore">restore</button>
+              </form>
+            </td>
+              `
+            : html + `
+          <a href="/media/edit/${full.MediaID}" class='btn-edit' >Edit</a>
+              <form action="/media/delete/${full.MediaID}" method="POST"
+                          onsubmit="return confirm('Are you sure you want to delete this image metadata?');">
+                          <button type="submit" class="btn-delete">Delete</button>
+              </form>
+          </div>
+           `
+        }
+      }],
+    deferloading: 10,
+    pageLength: pageLength,
+    processing: true,
+    autoWidth: false,
+    serverSide: true,
+    ajax: {
+      url: "/media/view-all-processing/",
+      type: "POST"
+    },
+
+  })
+  var selectedMediaIDs = []
+  var selectedIndexes = []
+  function checkboxClick(mediaID) {
+    if (document.getElementById("checkbox_" + mediaID).checked) {
+      selectedMediaIDs.push(mediaID)
+      document.getElementById('numberOfSelected').textContent = "Number of Selected " + selectedMediaIDs.length
+    } else {
+      selectedMediaIDs.pop(mediaID)
+      document.getElementById('numberOfSelected').textContent = ""
+    }
+
+    if (selectedMediaIDs.length == 0) {
+      document.getElementsByClassName("btn-delete hidden")[0].style.display = 'none'
+      document.getElementsByClassName("btn-restore hidden")[0].style.display = 'none'
+    } else {
+      document.getElementById("delete-selected").style.display = 'inline '
+      document.getElementById("restore-selected").style.display = 'inline'
+    }
+
+  }
+  dt.on('draw', (e, settings) => {
+    for (id of selectedMediaIDs) {
+      const checkbox = document.getElementById('checkbox_' + id)
+      if (checkbox != null)
+        checkbox.checked = true
+    }
+
+    document.getElementById('delete-selected').addEventListener('click', async (e) => {
+      await Swal.fire({
+        title: 'Confirmation',
+        text: 'Are you sure you want to delete the selected rows? Rows that are already deleted will be ignored',
+        confirmButtonText: 'OK',
+        confirmButtonColor: '#28a745'
+      }).then(async (result) => {
+        if (!result['isConfirmed'])
+          return
+        const response = await fetch('/media/bulk-delete', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(selectedMediaIDs)
+        })
+        try {
+          if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.message || "Submission failed with status " + response.status);
+          }
+
+          const data = await response.json();
+          if (!data.success) {
+            throw new Error(data.message || "Submission failed");
+          }
 
 
+          await Swal.fire({
+            title: 'Success!',
+            text: 'metadata deleted successfully!',
+            icon: 'success',
+            confirmButtonText: 'OK',
+            confirmButtonColor: '#28a745',
+            timer: 1000,
+            timerProgressBar: true
+          });
+
+          window.location.href = '/media/view-all';
+          return;
+        } catch (error) {
+          await Swal.fire({
+            title: 'Error!',
+            text: error.message,
+            icon: 'error',
+            confirmButtonText: 'OK',
+            confirmButtonColor: '#dc3545'
+          });
+        }
+      });
+    })
+    document.getElementById('restore-selected').addEventListener('click', async (e) => {
+      await Swal.fire({
+        title: 'Confirmation',
+        text: 'Are you sure you want to restore the selected rows? Rows that are already restored will be ignored',
+        confirmButtonText: 'OK',
+        confirmButtonColor: '#28a745'
+      }).then(async (result) => {
+        if (!result['isConfirmed'])
+          return
+        const response = await fetch('/media/bulk-restore', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(selectedMediaIDs)
+        })
+        try {
+          if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.message || "Submission failed with status " + response.status);
+          }
+
+          const data = await response.json();
+          if (!data.success) {
+            throw new Error(data.message || "Submission failed");
+          }
+
+          await Swal.fire({
+            title: 'Success!',
+            text: 'metadata restored successfully!',
+            icon: 'success',
+            confirmButtonText: 'OK',
+            confirmButtonColor: '#28a745',
+            timer: 1000,
+            timerProgressBar: true
+          });
+
+          window.location.href = '/media/view-all';
+          return;
+        } catch (error) {
+          await Swal.fire({
+            title: 'Error!',
+            text: error.message,
+            icon: 'error',
+            confirmButtonText: 'OK',
+            confirmButtonColor: '#dc3545'
+          });
+        }
+      });
+    })
+  })
 </script>
 
 </html>

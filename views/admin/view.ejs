@@ -29,7 +29,7 @@
       <div class="container request-container">
         <div class="request-header">
 
-          <h1>View Login Details</h1>
+          <h1>View User Details</h1>
           <p class="text-muted mb-0">Registered on <%= registeredDate %>
           </p>
           <% if(user.IsDeleted){%>
@@ -91,10 +91,10 @@
     </div>
     <div class="mt-4 d-flex justify-content-between">
       <a href="/admin/user-management/view-all" class="btn btn-primary">
-        <i class="fas fa-arrow-left"></i> Back to view all media
+        <i class="fas fa-arrow-left"></i> Back to all Users
       </a>
       <a href="/admin/user-management/edit/<%= user.UserID%>/" class="<%=user.IsDeleted?'disabled':'btn btn-warning'%>">
-        <i class="fas fa-edit"></i> Edit Request
+        <i class="fas fa-edit"></i> Edit User Details
       </a>
     </div>
     </div>

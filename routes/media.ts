@@ -15,7 +15,7 @@ import { Response, Request } from "express";
 const path = require("path");
 const upload = multer({ dest: "upload-bulk-metadata/" });
 
-import pl from "nodejs-polars";
+import pl, { Bool, Null } from "nodejs-polars";
 //OLD
 // router.get('/select-user-for/:mediaID/:projectID', isAuthenticated, async (req, res) => {
 //     const mediaID = req.params.mediaID;
@@ -212,51 +212,10 @@ router.get(
   "/view-all",
   isAuthenticated,
   async (req: Request, res: Response) => {
-    console.log('view-all')
-    const baseQuery = `
-      SELECT 
-        m.MediaID,
-        m.MorphoID,
-        m.FilePath,
-        m.CatalogID,
-        m.ImagingDate,
-        m.Description,
-        m.FileFormat,
-        m.CreatedDate,
-        m.IsDeleted,
-        m.Resolution,
-        p.ProjectID,
-        p.ProjectName,
-        photographer.FullName As photographerName
-      FROM Media m
-      LEFT JOIN Project p ON m.ProjectID = p.ProjectID
-      LEFT JOIN User photographer ON m.PhotographerID = photographer.UserID  
-    `;
     const user = req.session.passport.user;
-    var query: string = "";
-    /**
-     * retrieve table data based on what user type
-     * to show only relevant data and enforce authentication
-     */
-    switch (user.UserType) {
-      case userTypesEnumeration().admin:
-        query = baseQuery + "\nORDER BY m.CreatedDate DESC";
-        break;
-      case userTypesEnumeration().projectOwner:
-        query =
-          baseQuery +
-          "\nWHERE m.IsDeleted = 0 AND (p.ProjectOwnerID =? )  ORDER BY m.CreatedDate DESC";
-        break;
-      case userTypesEnumeration().photographerOnly:
-        query =
-          baseQuery +
-          "\nWHERE m.IsDeleted = 0 AND (m.PhotographerID =? )  ORDER BY m.CreatedDate DESC";
-        break;
-    }
     const anyLinks = (
       await db.query(
-        `
-        SELECT * 
+        `SELECT * 
         FROM ProjectUserPhotographyLink pupl 
         RIGHT JOIN Project p ON p.ProjectID = pupl.ProjectID
         WHERE pupl.PhotographerID = ? OR p.ProjectOwnerID = ? LIMIT 1`,
@@ -264,10 +223,8 @@ router.get(
       )
     )[0];
 
-    const results = await db.query(query, [user.UserID]);
     res.render("media/view-all", {
       title: "Media Management",
-      medias: results[0],
       currentUser: user,
       disableCreateMedia:
         anyLinks.length == 0 && user.UserType != userTypesEnumeration().admin,
@@ -275,9 +232,10 @@ router.get(
   }
 );
 
-router.post("/view-all-processing", isAuthenticated, async (req: Request,res:Response)=>{
-console.log(req.body)
-const baseQuery = `
+router.post("/view-all-processing", isAuthenticated, async (req: Request, res: Response) => {
+  // console.log(req.body)
+  // console.log('view all processing')
+  const baseQuery = `
       SELECT 
         m.MediaID,
         m.MorphoID,
@@ -285,75 +243,128 @@ const baseQuery = `
         m.ImagingDate,
         m.IsDeleted,
         m.Resolution,
-        p.ProjectID,
         p.ProjectName,
         photographer.FullName As photographerName
       FROM Media m
       LEFT JOIN Project p ON m.ProjectID = p.ProjectID
       LEFT JOIN User photographer ON m.PhotographerID = photographer.UserID  
     `;
-    const columns = ['MediaID','ProjectID','ProjectName','photographerName','MorphoID','CatalogID','Resolution','ImagingDate','IsDeleted']
-    const user = req.session.passport.user;
-    var query: string = "";
-    /**
-     * retrieve table data based on what user type
-     * to show only relevant data and enforce authentication
-     */
-    switch (user.UserType) {
-      case userTypesEnumeration().admin:
-        query = baseQuery 
-        break;
-      case userTypesEnumeration().projectOwner:
-        query =
-          baseQuery +
-          "\nWHERE m.IsDeleted = 0 AND (p.ProjectOwnerID =? )  ";
-        break;
-      case userTypesEnumeration().photographerOnly:
-        query =
-          baseQuery +
-          "\nWHERE m.IsDeleted = 0 AND (m.PhotographerID =? )  ";
-        break;
+  var totalCountQuery = `
+      SELECT 
+      COUNT(*)
+      FROM Media m
+      LEFT JOIN Project p ON m.ProjectID = p.ProjectID
+      LEFT JOIN User photographer ON m.PhotographerID = photographer.UserID  
+  `
+  var filteredCountQuery =  totalCountQuery
+  const user = req.session.passport.user;
+  var query: string = "";
+  var filteredQuery = ""
+  var results = Null
+  var filteredResults = Null
+  var filteredCount = -1
+  var params = user.UserType == userTypesEnumeration().admin ? [] : [user.UserID]
+  const isSearchTermEmpty = req.body.search.value == ''
+  var searchTerm = req.body.search.value.toLowerCase().trim()
+  searchTerm = ['yes', 'ye', 'y', '1', 'true', 'tru', 'tr', 't'].includes(searchTerm)
+    ? true : ['no', 'n', '0', 'false', 'fals', 'fal', 'fa', 'f'].includes(searchTerm) ? false : searchTerm
+
+  //LOGIC
+  switch (user.UserType) {
+    case userTypesEnumeration().admin:
+      query = baseQuery
+      break;
+    case userTypesEnumeration().projectOwner:
+      const constraint1 = "\nWHERE   (p.ProjectOwnerID =? )  ";
+      query = baseQuery + constraint1
+      totalCountQuery = totalCountQuery + constraint1;
+      filteredCountQuery = filteredCountQuery + constraint1
+      break;
+    case userTypesEnumeration().photographerOnly:
+      const constraint2 = "\nWHERE m.IsDeleted = 0 AND (m.PhotographerID =? )  ";
+      query = baseQuery + constraint2
+      totalCountQuery = totalCountQuery + constraint2
+      filteredCountQuery = filteredCountQuery + constraint2
+      break;
+  }
+
+  if (!isSearchTermEmpty) {
+    filteredQuery = user.UserType == userTypesEnumeration().admin ? query + ' \nWHERE' : query + "\n AND "
+    filteredCountQuery = user.UserType == userTypesEnumeration().admin ? filteredCountQuery + ' \nWHERE' : filteredCountQuery + "\n AND "
+    if ("not specified".includes(searchTerm.toString())) {
+      var constraint1 = `
+        m.MediaID  IS NULL OR
+        m.MorphoID  IS NULL OR
+        m.CatalogID  IS NULL OR
+        m.ImagingDate  IS NULL OR
+        m.IsDeleted  IS NULL OR
+        m.Resolution  IS NULL OR
+        p.ProjectName  IS NULL OR
+        photographer.FullName  IS NULL `
+      filteredQuery = filteredQuery + constraint1;
+      filteredCountQuery = filteredCountQuery + constraint1;
     }
-    query = query + "ORDER BY "+ columns[req.body.order[0].column] +" "+ req.body.order[0].dir;
-    console.log('query',query)
-    const anyLinks = (
-      await db.query(
-        `
-        SELECT * 
-        FROM ProjectUserPhotographyLink pupl 
-        RIGHT JOIN Project p ON p.ProjectID = pupl.ProjectID
-        WHERE pupl.PhotographerID = ? OR p.ProjectOwnerID = ? LIMIT 1`,
-        [user.UserID, user.UserID]
-      )
-    )[0];
+    else if (typeof searchTerm == 'boolean') {// if it is boolean
+      filteredQuery = filteredQuery + ` m.IsDeleted = ? `
+      filteredCountQuery = filteredCountQuery + ` m.IsDeleted = ?`;
+    }
+    else {
+      var constraint2 = `
+        m.MediaID LIKE ? OR
+        m.MorphoID LIKE ? OR
+        m.CatalogID LIKE ? OR
+        m.ImagingDate LIKE ? OR
+        m.IsDeleted LIKE ? OR
+        m.Resolution LIKE ? OR
+        p.ProjectName LIKE ? OR
+        photographer.FullName LIKE ? `
+      filteredQuery = filteredQuery + constraint2
+      filteredCountQuery = filteredCountQuery + constraint2
+    }
+    for (let i = 0; i < 8; i++)
+      if (searchTerm == false || searchTerm == true)
+        params.push(searchTerm)
+      else
+        params.push("%" + searchTerm + "%")
 
-    const results = (await db.query(query, [user.UserID]))[0];
+    console.log('params', params)
 
+    if (req.body.order && req.body.order[0].name != 's')
+      filteredQuery = filteredQuery + "\nORDER BY " + req.body.order[0].name + " " + req.body.order[0].dir;
+    filteredQuery = req.body.length
+      ? filteredQuery + "\nLIMIT " + req.body.length + " OFFSET " + req.body.start
+      : filteredQuery + "\nLIMIT 10"
+    filteredResults = (await db.query(filteredQuery, params))
+    // console.log('filteredQuery', filteredQuery)
+    // console.log('filteredResults', filteredResults)
+    filteredCount = (await db.query(filteredCountQuery, params))[0][0]['COUNT(*)']
+  } else {
+    if (req.body.order && req.body.order[0].name != 's')
+      query = query + "\nORDER BY " + req.body.order[0].name + " " + req.body.order[0].dir;
+    query = req.body.length
+      ? query + "\nLIMIT " + req.body.length + " OFFSET " + req.body.start
+      : query + "\nLIMIT 10"
+    results = (await db.query(query, params));
+    for (const x of results[0])
+      x['s'] = ""
+  }
+  const totalCount = (await db.query(totalCountQuery, [user.UserID]))[0][0]["COUNT(*)"]
 
-    console.log('results',results,results.length)
-    res.json({
-      draw:req.body.draw,
-      recordsTotal: results.length,
-      recordsFiltered: results.length,
-      data: results,
-      error: ""
-    })
-    // res.render("media/view-all", {
-    //   title: "Media Management",
-    //   medias: results[0],
-    //   currentUser: user,
-    //   disableCreateMedia:
-    //     anyLinks.length == 0 && user.UserType != userTypesEnumeration().admin,
-    // });
+  res.json({
+    draw: req.body.draw,
+    recordsTotal: totalCount,
+    recordsFiltered: isSearchTermEmpty ? totalCount : filteredCount,
+    data: isSearchTermEmpty ? results[0] : filteredResults[0],
+    error: "" 
+  })
+
 })
 
 router.get("/view/:mediaID", param('mediaID').isInt({ min: 1 }).withMessage("unknown ID"), isAuthenticated, async (req: Request, res: Response) => {
   const errors = validationResult(req)
-  if (!errors.isEmpty()) {
+  if (!errors.isEmpty())
     return res.status(400).json({ errors: errors.array() })
-  }
   const mediaID = req.params.mediaID;
-
   const query = `
     SELECT
         m.*,
@@ -562,18 +573,12 @@ router.post("/edit", isAuthenticated, async (req: Request, res: Response) => {
   //   }
   //   req.session.save();
 
-  db.query(query, params, (err: any) => {
-    if (err) {
-      console.error("❌ Error updating media:", err);
-      return res
-        .status(500)
-        .json({ success: false, message: "Error updating media" });
-    }
-    res.json({
-      success: true,
-      message: "sucessfully edited media",
-      redirectUrl: "/media/view/" + mediaData.MediaID,
-    });
+  await db.query(query, params)
+
+  res.json({
+    success: true,
+    message: "sucessfully edited media",
+    redirectUrl: "/media/view/" + mediaData.MediaID,
   });
 });
 
@@ -588,7 +593,7 @@ router.post(
       return res.status(400).json({ errors: errors.array() })
     }
     const mediaID = req.params.mediaID;
-    const userId = req.session.passport.user.UserID;
+    const userID = req.session.passport.user.UserID;
 
     // First verify the media exists and isn't already deleted
     // this could be replace with catching the error but just using what works from the previous developers
@@ -612,7 +617,7 @@ router.post(
                 WHERE MediaID = ?
         `;
 
-        return db.query(updateQuery, [userId, mediaID]);
+        return db.query(updateQuery, [userID, mediaID]);
       })
       .then(() => res.redirect("/media/view-all"))
       .catch((error: any) => {
@@ -634,7 +639,7 @@ router.post(
       return res.status(400).json({ errors: errors.array() })
     }
     const mediaID = req.params.mediaID;
-    const userId = req.session.passport.user.UserID;
+    const userID = req.session.passport.user.UserID;
 
     // First verify the media exists and isn't already restored
     // this could be replace with catching the error but just using what works from the previous developers
@@ -658,7 +663,7 @@ router.post(
                 WHERE MediaID = ?
             `;
 
-        return db.query(updateQuery, [userId, mediaID]);
+        return db.query(updateQuery, [userID, mediaID]);
       })
       .then(() => {
         res.redirect("/media/view-all");
@@ -673,6 +678,54 @@ router.post(
   }
 );
 
+router.post("/bulk-delete", isAuthenticated, async (req: Request, res: Response) => {
+  if (!Array.isArray(req.body))
+    return res.status(400).json({ success: false, message: "request body is not an array" })
+  if (req.body.length == 0)
+    return res.status(400).json({ success: false, message: "request body array is empty" })
+  for (const x of req.body) {
+    if (isNaN(parseInt(x)))
+      return res.status(400).json({ success: false, message: "request body contains non integers" })
+    if (x <= 0)
+      return res.status(400).json({ success: false, message: "request body contains  non positive integers" })
+  }
+
+  const userID = req.session.passport.user.UserID;
+  const updateQuery = `
+                UPDATE Media 
+                SET IsDeleted = 1,
+                    UpdatedByID = ?,
+                    UpdatedDate = NOW() 
+                WHERE MediaID in (?)
+        `;
+
+  await db.query(updateQuery, [userID, req.body]);
+  return res.status(200).json({ success: true, message: "successfully soft deleted selected metadata" })
+})
+router.post("/bulk-restore", isAuthenticated, async (req: Request, res: Response) => {
+  if (!Array.isArray(req.body))
+    return res.status(400).json({ success: false, message: "request body is not an array" })
+  if (req.body.length == 0)
+    return res.status(400).json({ success: false, message: "request body array is empty" })
+  for (const x of req.body) {
+    if (isNaN(parseInt(x)))
+      return res.status(400).json({ success: false, message: "request body contains non integers" })
+    if (x <= 0)
+      return res.status(400).json({ success: false, message: "request body contains  non positive integers" })
+  }
+
+  const userID = req.session.passport.user.UserID;
+  const updateQuery = `
+                UPDATE Media 
+                SET IsDeleted = 0,
+                    UpdatedByID = ?,
+                    UpdatedDate = NOW() 
+                WHERE MediaID in (?)
+        `;
+
+  await db.query(updateQuery, [userID, req.body]);
+  return res.status(200).json({ success: true, message: "successfully restored selected metadata" })
+})
 router.get(
   "/upload-bulk-metadata",
   isAuthenticated,

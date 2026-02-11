@@ -8,6 +8,7 @@ import { emailRegex, userTypesEnumeration } from "../middleware/utils";
 
 import crypto from "crypto";
 import { param, validationResult } from "express-validator";
+import { all } from "nodejs-polars";
 const {
   isAuthenticated,
   isAdminOrProjectOwner,
@@ -35,13 +36,15 @@ router.get(
     FROM User u
     WHERE u.UserType != 'admin' AND u.IsDeleted = 0
     `;
+    const isUserRegistrationEnabledQuery = 'SELECT IsEnabled FROM IsUserRegistrationEnabled'
 
-    const [projectOwners, photographers] = await Promise.all([
+    const [projectOwners, photographers, isUserRegistrationEnabledResults] = await Promise.all([
       db.query(getProjectOwners),
       db.query(getPhotographers),
+      db.query(isUserRegistrationEnabledQuery)
     ]);
 
-    console.log('photographers', photographers)
+    const isUserRegistrationEnabled = (isUserRegistrationEnabledResults)[0][0].IsEnabled
     res.render("project/create", {
       currentUser: req.session.passport.user,
       projectOwners: projectOwners[0],
@@ -49,6 +52,7 @@ router.get(
       projectTypes: req.session.projectTypes,
       imagingPlatforms: req.session.imagingPlatforms,
       title: "Project Form",
+      isUserRegistrationEnabled
     });
   }
 );
@@ -60,6 +64,10 @@ router.post(
   isAdminOrProjectOwner,
   async (req: Request, res: Response) => {
     try {
+
+      const isUserRegistrationEnabledQuery = 'SELECT IsEnabled FROM IsUserRegistrationEnabled'
+      const isUserRegistrationEnabled = (await db.query(isUserRegistrationEnabledQuery))[0][0].IsEnabled
+
       const requiredFields = [
         "projectOwner",
         "projectName",
@@ -131,67 +139,71 @@ router.post(
           });
         }
       }
-      //creation of new photographers
-      const newlyCreatedPhotographers: { email: string; password: string }[] =
-        [];
+
       const selectedPhotographers = req.body.selectedPhotographers;
-      for (const x of req.body.toBeCreatedPhotographers) {
-        const fullName = x[0];
-        const email = x[1];
-        const newPasswordSalt = crypto.randomBytes(16).toString();
-        // const newPassword = crypto.randomBytes(8).toString() // TODO: switch to this in production
-        const newPassword = "1"; // For testing only
-        const saltedPassword = crypto.pbkdf2Sync(
-          newPassword,
-          newPasswordSalt,
-          310000,
-          32,
-          "sha256"
-        );
-        var insertedId = "";
-        const insertUserQuery = `
+
+      //creation of new photographers
+      if (isUserRegistrationEnabled) {
+        const newlyCreatedPhotographers: { email: string; password: string }[] =
+          [];
+        for (const x of req.body.toBeCreatedPhotographers) {
+          const fullName = x[0];
+          const email = x[1];
+          const newPasswordSalt = crypto.randomBytes(16).toString();
+          // const newPassword = crypto.randomBytes(8).toString() // TODO: switch to this in production
+          const newPassword = "1"; // For testing only
+          const saltedPassword = crypto.pbkdf2Sync(
+            newPassword,
+            newPasswordSalt,
+            310000,
+            32,
+            "sha256"
+          );
+          var insertedId = "";
+          const insertUserQuery = `
             INSERT INTO User 
             (Email, SaltedPassword,PasswordSalt,  UserType, RegisteredDate,
               UpdatedDate,FullName,ContactNumber,Comments)
             VALUES (?, ?,?,  ?, NOW(),NOW(),  ?, ?,?)`;
-        const params = [
-          email,
-          saltedPassword,
-          newPasswordSalt,
-          userTypesEnumeration().photographerOnly,
-          fullName,
-          "",
-          "Created during the creation of a project this user is in by project owner of user id." +
-          userID,
-        ];
-        try {
-          const result = (await db.query(insertUserQuery, params))[0];
-          const o: any = result;
-          insertedId = Object.values(o)[2].toString(); //the weird way of getting insertedId
-          console.log("newly created user id:", insertedId);
-          newlyCreatedPhotographers.push({
-            email: email,
-            password: newPassword,
-          });
-          for (let x = 0; x < selectedPhotographers.length; x++) {
-            if (emailRegex.test(selectedPhotographers[x])) {
-              selectedPhotographers[x] = insertedId;
-              break;
+          const params = [
+            email,
+            saltedPassword,
+            newPasswordSalt,
+            userTypesEnumeration().photographerOnly,
+            fullName,
+            "",
+            "Created during the creation of a project this user is in by project owner of user id." +
+            userID,
+          ];
+          try {
+            const result = (await db.query(insertUserQuery, params))[0];
+            const o: any = result;
+            insertedId = Object.values(o)[2].toString(); //the weird way of getting insertedId
+            console.log("newly created user id:", insertedId);
+            newlyCreatedPhotographers.push({
+              email: email,
+              password: newPassword,
+            });
+            for (let x = 0; x < selectedPhotographers.length; x++) {
+              if (emailRegex.test(selectedPhotographers[x])) {
+                selectedPhotographers[x] = insertedId;
+                break;
+              }
             }
+          } catch (err: any) {
+            const msg =
+              err.toString().toLowerCase().includes("duplicate") &&
+                err.toString().toLowerCase().includes("email")
+                ? "email already existed in the database."
+                : err;
+            console.log(msg);
+            res.status(400).json({ success: false, message: msg });
           }
-        } catch (err: any) {
-          const msg =
-            err.toString().toLowerCase().includes("duplicate") &&
-              err.toString().toLowerCase().includes("email")
-              ? "email already existed in the database."
-              : err;
-          console.log(msg);
-          res.status(400).json({ success: false, message: msg });
         }
-      }
-      req.session["newlyCreatedPhotographers"] = newlyCreatedPhotographers;
-      req.session.save();
+        req.session["newlyCreatedPhotographers"] = newlyCreatedPhotographers;
+        req.session.save();
 
+      }
       //alter table for Imaging Platform enums if any new values
       // const selectedImagingPlatforms = req.body.selectedImagingPlatforms;
       // var hasNewImagingPlatform = false;
@@ -378,7 +390,6 @@ router.get(
     // }
 
     console.log(`📄 Fetched ${result.length} projects`);
-    // console.log(results)
 
     if (result.length === 0) {
       return res.render("project/view-all", {
@@ -495,8 +506,6 @@ router.get(
   }
 );
 
-// Edit Project (GET)
-// Define queries at the top of your file for better maintainability
 router.get(
   "/edit/:projectID",
   param('projectID').isInt({ min: 1 }).withMessage('unknown id'),
@@ -509,69 +518,68 @@ router.get(
     }
     try {
       const projectID = req.params.projectID;
-      const requestQuery = `
-            SELECT
-            p.*,
-            projectOwner.FullName ,
-            projectOwner.Email 
-            FROM Project p
-            JOIN User projectOwner ON p.ProjectOwnerID = projectOwner.UserID
-            WHERE p.ProjectID = ?;
+      const projectAndOwnerQuery = `
+            SELECT p.*, projectOwner.FullName, projectOwner.Email            
+            FROM Project p        
+            LEFT JOIN User projectOwner ON p.ProjectOwnerID = projectOwner.UserID  
+            WHERE p.ProjectID = 1 AND (projectOwner.IsDeleted = 0 OR  projectOwner.UserID IS NULL);
+      
     `;
 
       const getProjectOwners = `
-    SELECT u.UserID,u.FullName, u.Email, u.UserType 
-    FROM User u
-    WHERE u.UserType ='projectOwner'
-    AND u.IsDeleted = 0
+            SELECT u.UserID,u.FullName, u.Email, u.UserType 
+            FROM User u
+            WHERE u.UserType ='projectOwner' AND (u.IsDeleted = 0 OR u.UserID = NULL)
     `;
+      const getImagingPlatformsQuery = `SELECT ImagingPlatform FROM ImagingPlatformInstance 
+                                        WHERE ProjectID = ? ORDER BY ImagingPlatform`
+      const getSelectedPhotographersQuery = `SELECT user.UserID  FROM ProjectUserPhotographyLink p 
+                                              LEFT JOIN User user on user.UserID = p.PhotographerID 
+                                              WHERE p.ProjectID = ? AND user.IsDeleted = 0`
+      const isUserRegistrationEnabledQuery = 'SELECT IsEnabled FROM IsUserRegistrationEnabled'
+      const allPhotographersQuery = `SELECT UserID,FullName FROM User 
+                                    WHERE UserType!= 'admin' AND IsDeleted = 0`
+
       // Get all needed data in parallel for better performance
       const [
-        requestResults,
+        projectAndOwnerResults,
         imagingPlatformTemp,
         selectedPhotographersTemp,
         allPhotographers,
         projectOwners,
-      ]: [any, any, any, any, any] = await Promise.all([
-        db.query(requestQuery, [projectID]),
-        db
-
-          .query(
-            "SELECT ImagingPlatform FROM ImagingPlatformInstance WHERE ProjectID = ? ORDER BY ImagingPlatform",
-            [projectID]
-          ),
-        db
-
-          .query(
-            "SELECT user.UserID  FROM ProjectUserPhotographyLink p JOIN User user on user.UserID = p.PhotographerID WHERE p.ProjectID = ? ",
-            [projectID]
-          ),
-        db.query("SELECT UserID,FullName FROM User WHERE UserType!= 'admin' "),
+        isUserRegistrationEnabledResults
+      ]: [any, any, any, any, any, any] = await Promise.all([
+        db.query(projectAndOwnerQuery, [projectID]),
+        db.query(getImagingPlatformsQuery, [projectID]),
+        db.query(getSelectedPhotographersQuery, [projectID]),
+        db.query(allPhotographersQuery),
         db.query(getProjectOwners),
+        db.query(isUserRegistrationEnabledQuery)
       ]);
-      if (requestResults[0].length === 0) {
+      const isUserRegistrationEnabled = (isUserRegistrationEnabledResults)[0][0].IsEnabled
+      if (projectAndOwnerResults[0].length == 0) {
         return res
-          .status(404)
-          .render("error", { message: "Request not found" });
+          .status(400)
+          .json({message: "no projects and their owners not found" });
       }
       const currentlySelectedPhotographers: string[] = [];
-      for (var i of selectedPhotographersTemp[0]) {
+      for (var i of selectedPhotographersTemp[0]) 
         currentlySelectedPhotographers.push(i.UserID);
-      }
-
+      
       const imagingPlatforms: any[] = [];
-      for (const i of imagingPlatformTemp[0]) {
+      for (const i of imagingPlatformTemp[0]) 
         imagingPlatforms.push(Object.values(i)[0]);
-      }
+      
       // Format dates for display
       const project = {
-        ...requestResults[0][0],
-        CreatedDate: formatDisplayDate(requestResults[0][0].CreatedDate),
+        ...projectAndOwnerResults[0][0],
+        CreatedDate: formatDisplayDate(projectAndOwnerResults[0][0].CreatedDate),
         ImagingStartDate: formatDisplayDate(
-          requestResults[0][0].ImagingStartDate
+          projectAndOwnerResults[0][0].ImagingStartDate
         ),
-        ImagingEndDate: formatDisplayDate(requestResults[0][0].ImagingEndDate),
+        ImagingEndDate: formatDisplayDate(projectAndOwnerResults[0][0].ImagingEndDate),
       };
+      console.log('project owners',projectOwners[0])
       res.render(`project/edit`, {
         project: project,
         allPhotographers: allPhotographers[0],
@@ -582,9 +590,9 @@ router.get(
         selectedImagingPlatforms: imagingPlatforms,
         currentUser: req.session.passport.user,
         title: "Edit Project", // Add title here
-
         newlyCreatedPhotographers: [],
         projectOwners: projectOwners[0],
+        isUserRegistrationEnabled
       });
     } catch (err) {
       console.error("Error:", err);
@@ -599,6 +607,9 @@ router.post(
   isAdminOrProjectOwner,
   async (req: Request, res: Response) => {
     try {
+      const isUserRegistrationEnabledQuery = 'SELECT IsEnabled FROM IsUserRegistrationEnabled'
+      const isUserRegistrationEnabled = (await db.query(isUserRegistrationEnabledQuery))[0][0].IsEnabled
+
       const userID = req.session.passport.user.UserID;
       if (!req.session.passport.user || !userID) {
         console.error("❌ No user in session");
@@ -686,69 +697,65 @@ router.post(
         }
       }
       //creation of new photographers
-      const newlyCreatedPhotographers: { email: string; password: string }[] =
-        [];
-      console.log('toBeCreatedPhotographers', toBeCreatedPhotographers)
-      for (const x of toBeCreatedPhotographers) {
-        const fullName = x[0];
-        const email = x[1];
-        const newPasswordSalt = crypto.randomBytes(16).toString();
-        // const newPassword = crypto.randomBytes(8).toString() // TODO: switch to this in production
-        const newPassword = "1"; // For testing only
-        var insertedId = "";
-        const saltedPassword = crypto.pbkdf2Sync(
-          newPassword,
-          newPasswordSalt,
-          310000,
-          32,
-          "sha256"
-        );
-        const insertUserQuery = `
+      if (isUserRegistrationEnabled) {
+        const newlyCreatedPhotographers: { email: string; password: string }[] =
+          [];
+        console.log('toBeCreatedPhotographers', toBeCreatedPhotographers)
+        for (const x of toBeCreatedPhotographers) {
+          const fullName = x[0];
+          const email = x[1];
+          const newPasswordSalt = crypto.randomBytes(16).toString();
+          // const newPassword = crypto.randomBytes(8).toString() // TODO: switch to this in production
+          const newPassword = "1"; // For testing only
+          var insertedId = "";
+          const saltedPassword = crypto.pbkdf2Sync(
+            newPassword,
+            newPasswordSalt,
+            310000,
+            32,
+            "sha256"
+          );
+          const insertUserQuery = `
             INSERT INTO User 
             (Email, SaltedPassword,PasswordSalt,  UserType, RegisteredDate,
               UpdatedDate,FullName,ContactNumber,Comments)
             VALUES (?, ?,?,  ?, NOW(),NOW(),  ?,?,?)`;
-        const params = [
-          email,
-          saltedPassword,
-          newPasswordSalt,
-          userTypesEnumeration().photographerOnly,
-          fullName,
-          "",
+          const params = [
+            email,
+            saltedPassword,
+            newPasswordSalt,
+            userTypesEnumeration().photographerOnly,
+            fullName,
+            "",
 
-          "",
-        ];
-        try {
-          console.log('a')
-          const result = (await db.query(insertUserQuery, params))[0];
-          console.log('b')
-          const o: any = result;
-          console.log('c')
-          insertedId = Object.values(o)[2].toString(); //the weird way of getting insertedId
-          newlyCreatedPhotographers.push({
-            email: email,
-            password: newPassword,
-          });
-          console.log('insertedId', insertedId)
-          for (let x = 0; x < selectedPhotographers.length; x++) {
-            console.log(selectedPhotographers[x])
-            if (emailRegex.test(selectedPhotographers[x])) {
-              selectedPhotographers[x] = insertedId;
-              console.log('here')
-              break;
+            "",
+          ];
+          try {
+            const result = (await db.query(insertUserQuery, params))[0];
+            const o: any = result;
+            insertedId = Object.values(o)[2].toString(); //the weird way of getting insertedId
+            newlyCreatedPhotographers.push({
+              email: email,
+              password: newPassword,
+            });
+            for (let x = 0; x < selectedPhotographers.length; x++) {
+              if (emailRegex.test(selectedPhotographers[x])) {
+                selectedPhotographers[x] = insertedId;
+                break;
+              }
             }
+          } catch (err: any) {
+            const msg =
+              err.toString().toLowerCase().includes("duplicate") &&
+                err.toString().toLowerCase().includes("email")
+                ? "email already existed in the database."
+                : err;
+            res.status(400).json({ success: false, message: msg });
           }
-        } catch (err: any) {
-          const msg =
-            err.toString().toLowerCase().includes("duplicate") &&
-              err.toString().toLowerCase().includes("email")
-              ? "email already existed in the database."
-              : err;
-          res.status(400).json({ success: false, message: msg });
         }
+        req.session["newlyCreatedPhotographers"] = newlyCreatedPhotographers;
+        req.session.save();
       }
-      req.session["newlyCreatedPhotographers"] = newlyCreatedPhotographers;
-      req.session.save();
       // imaging Platforms operations for updating enum if any
       // var hasNewImagingPlatform = false;
       // for (const i of selectedImagingPlatforms) {
