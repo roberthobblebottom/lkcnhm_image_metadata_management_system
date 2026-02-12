@@ -222,9 +222,7 @@
       const fileNameInput = document.getElementById("mediaFileName");
       const fileFormat = document.getElementById("fileFormat");
       const validExtensions = "<%=fileFormats%>".split(",");
-      const now = new Date()
-      now.setDate(new Date().getDate())
-      document.getElementById('imagingDate').value = now.toISOString().slice(0, 16).split('T')[0]
+
       fileFormatOnChange()
       // Check for a valid file extension
       

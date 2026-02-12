@@ -458,30 +458,17 @@ router.get(
       imagingPlatforms.push(x.ImagingPlatform);
     }
     const results = await db.query(query, [projectID])
-    // if (err) {
-    //   console.error("Error fetching project:", err);
-    //   return res.status(500).render("error", {
-    //     message: "Error loading project",
-    //     error: process.env.NODE_ENV === "development" ? err : null,
-    //   });
-    // }
 
-    // if (results.length === 0) {
-    //   return res.status(404).render("error", {
-    //     message: "project not found",
-    //   });
-    // }
     // Format dates for display
-    console.log(results[0][0])
+    console.log('---------------',results[0][0].ImagingStartDate,formatDisplayDate(results[0][0].ImagingStartDate))
     const project = {
       ...results[0][0],
-      CreatedDate: formatDate(results[0].CreatedDate),
-      ImagingStartDate: formatDate(results[0].ImagingStartDate),
-      ImagingEndDate: formatDate(results[0].ImagingEndDate),
-      UpdatedDate: results[0].UpdatedDate
-        ? formatDate(results[0].UpdatedDate)
+      CreatedDate: formatDisplayDate(results[0][0].CreatedDate),
+      ImagingStartDate: formatDisplayDate(results[0][0].ImagingStartDate),
+      ImagingEndDate: formatDisplayDate(results[0][0].ImagingEndDate),
+      UpdatedDate: results[0][0].UpdatedDate
+        ? formatDisplayDate(results[0][0].UpdatedDate)
         : null,
-      IsDeleted: results[0].IsDeleted,
       photographers:
         photographers.length != 0
           ? photographers.toString().replace(",", ", ")
