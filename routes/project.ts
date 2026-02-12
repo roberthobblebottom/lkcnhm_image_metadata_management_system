@@ -460,7 +460,6 @@ router.get(
     const results = await db.query(query, [projectID])
 
     // Format dates for display
-    console.log('---------------',results[0][0].ImagingStartDate,formatDisplayDate(results[0][0].ImagingStartDate))
     const project = {
       ...results[0][0],
       CreatedDate: formatDisplayDate(results[0][0].CreatedDate),
@@ -505,12 +504,12 @@ router.get(
     }
     try {
       const projectID = req.params.projectID;
+      console.log('projectID',projectID)
       const projectAndOwnerQuery = `
             SELECT p.*, projectOwner.FullName, projectOwner.Email            
             FROM Project p        
             LEFT JOIN User projectOwner ON p.ProjectOwnerID = projectOwner.UserID  
-            WHERE p.ProjectID = 1 AND (projectOwner.IsDeleted = 0 OR  projectOwner.UserID IS NULL);
-      
+            WHERE p.ProjectID = ? AND (projectOwner.IsDeleted = 0 OR  projectOwner.UserID IS NULL);
     `;
 
       const getProjectOwners = `
@@ -566,6 +565,8 @@ router.get(
         ),
         ImagingEndDate: formatDisplayDate(projectAndOwnerResults[0][0].ImagingEndDate),
       };
+    console.log('---------------',projectAndOwnerResults[0][0].ImagingStartDate,formatDisplayDate(projectAndOwnerResults[0][0].ImagingStartDate))
+    console.log(project.CreatedDate)
       console.log('project owners',projectOwners[0])
       res.render(`project/edit`, {
         project: project,

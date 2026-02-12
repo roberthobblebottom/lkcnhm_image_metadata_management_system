@@ -12,7 +12,7 @@ const { Passport } = require("passport");
 
 // };
 const formatDisplayDate = (date: string) => {
-  const d = date ? new Date(date).toISOString().split("T")[0] : null;
+  const d = new Date(date) ? new Date(date).toISOString().split("T")[0] : null;
   return d;
 };
 
