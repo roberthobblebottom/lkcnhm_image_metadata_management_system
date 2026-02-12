@@ -10,171 +10,146 @@
 
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
   <link rel="stylesheet" href="/css/view.css">
-    <style>
+  <style>
     .request-container {
       height: 1000px;
     }
-.sidebar {
-
-}
   </style>
 </head>
 
 <body>
   <main>
-  <div class="main-con">
-    <%- currentUser.UserType=='admin' 
-    ? include('../sidenavs/admin')
-    : include('../sidenavs/user') %>
-    <div class="container request-container">
-      <div class="request-header">
-        <h1>
-          📸 Image Metadata File Details - ID: <%= mediaID %>
-        </h1>
-        <p class="text-muted mb-0">Created on <%= media.CreatedDate?.toISOString().slice(0, 10) %> by <%= media.CreatedByName%>
-        </p>
-        <p class="text-muted">Last updated on <%=  media.UpdatedDate?.toISOString().slice(0, 10)%> by <%= media.UpdatedByName %>
-        </p>
-        <% if(media.IsDeleted){%>
-        <span class="status-badge bg-danger">
-          Deleted
-        </span>
-        <%}%>
-      </div>
-<div class="row">
-  <div class="col-md-6">
-        <div class="detail-row">
-          <div class="detail-label">Photographer's Name:</div>
-          <div class="detail-value">
-            <%= media.photographerName || 'Not Specified'%>
-      </div>
+    <div class="main-con">
+      <%- currentUser.UserType=='admin' ? include('../sidenavs/admin') : include('../sidenavs/user') %>
+        <div class="container request-container">
+          <div class="request-header">
+            <h1>
+              📸 Image Metadata File Details - ID: <%= mediaID %>
+            </h1>
+            <p class="text-muted mb-0">Created on <%= media.CreatedDate?.toISOString().slice(0, 10) %> by <%=
+                  media.CreatedByName%>
+            </p>
+            <p class="text-muted">Last updated on <%= media.UpdatedDate?.toISOString().slice(0, 10)%> by <%=
+                  media.UpdatedByName %>
+            </p>
+            <% if(media.IsDeleted){%>
+              <span class="status-badge bg-danger"> Deleted</span>
+              <%}%>
+          </div>
+          <div class="row">
+            <div class="col-md-6">
+              <div class="detail-row">
+                <div class="detail-label">Photographer's Name:</div>
+                <div class="detail-value">
+                  <%= media.photographerName || 'Not Specified' %>
+                </div>
+              </div>
+              <div class="detail-row">
+                <div class="detail-label">File Name:</div>
+                <div class="detail-value">
+                  <%= media.FileName %>
+                </div>
+              </div>
+              <div class="detail-row">
+                <div class="detail-label">File Format:</div>
+                <div class="detail-value">
+                  <%= media.FileFormat %>
+                </div>
+              </div>
+              <div class="detail-row">
+                <div class="detail-label">File Path:</div>
+                <div class="detail-value">
+                  <%= media.FilePath %>
+                </div>
+              </div>
+              <div class="detail-row">
+                <div class="detail-label">Resolution:</div>
+                <div class="detail-value">
+                  <%= media.Resolution %>
+                </div>
+              </div>
+              <div class="detail-row">
+                <div class="detail-label">Project Name:</div>
+                <div class="detail-value">
+                  <%= media.projectName || 'Not Specified' %>
+                </div>
+              </div>
+              <div class="detail-row">
+                <div class="detail-label">Project ID:</div>
+                <div class="detail-value">
+                  <%= media.ProjectID || 'Not Specified' %>
+                </div>
+              </div>
+            </div>
+            <div class="col-md-6">
+              <div class="detail-row">
+                <div class="detail-label">Catalog ID:</div>
+                <div class="detail-value">
+                  <%= media.CatalogID %>
+                </div>
+              </div>
+              <div class="detail-row">
+                <div class="detail-label">Cluster ID:</div>
+                <div class="detail-value">
+                  <%= media.ClusterID %>
+                </div>
+              </div>
+              <div class="detail-row">
+                <div class="detail-label">Morpho ID:</div>
+                <div class="detail-value">
+                  <%= media.MorphoID %>
+                </div>
+              </div>
+              <div class="detail-row">
+                <div class="detail-label">Imaging Date:</div>
+                <div class="detail-value">
+                  <%= media.ImagingDate?.toISOString().split('T')[0]%>
+                </div>
+              </div>
+              <div class="detail-row">
+                <div class="detail-label">File Size:</div>
+                <div class="detail-value">
+                  <%= media.FileSizeBytes %> Bytes
+                </div>
+              </div>
+              <div class="detail-row">
+                <div class="detail-label">Imaging Platform:</div>
+                <div class="detail-value">
+                  <%= media.ImagingPlatform %>
+                </div>
+              </div>
+              <div class="detail-row">
+                <div class="detail-label">Image Editing Tool:</div>
+                <div class="detail-value">
+                  <%= media.ImageEditingTool %>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="detail-row">
+            <div class="detail-label">Description:</div>
+            <div class="detail-value text-area-value">
+              <%= media.Description %>
+            </div>
+          </div>
+          <div class="detail-row">
+            <div class="detail-label">Comments:</div>
+            <div class="detail-value text-area-value">
+              <%= media.Comments %>
+            </div>
+          </div>
+          <div class="mt-4 d-flex justify-content-between">
+            <a href="/media/view-all" class="btn btn-primary">
+              <i class="fas fa-arrow-left"></i> Back to view all Image Metadata
+            </a>
+            <a href="/media/edit/<%= mediaID%>/" class="<%=media.IsDeleted?'disabled':'btn btn-warning'%>">
+              <i class="fas fa-edit"></i> Edit Image Metadata
+            </a>
+          </div>
+
+        </div>
     </div>
-
-    <div class="detail-row">
-      <div class="detail-label">File Name:</div>
-      <div class="detail-value">
-        <%= media.FileName %>
-      </div>
-    </div>
- <div class="detail-row">
-      <div class="detail-label">File Format:</div>
-      <div class="detail-value">
-        <%= media.FileFormat %>
-      </div>
-    </div>
-    <div class="detail-row">
-      <div class="detail-label">File Path:</div>
-      <div class="detail-value">
-        <%= media.FilePath %>
-      </div>
-    </div>
-    <div class="detail-row">
-      <div class="detail-label">Resolution:</div>
-      <div class="detail-value">
-        <%= media.Resolution %>
-      </div>
-    </div>
-   <div class="detail-row">
-      <div class="detail-label">Project Name:</div>
-      <div class="detail-value">
-        <%= media.projectName || 'Not Specified'%>
-      </div>
-    </div>
-    <div class="detail-row">
-      <div class="detail-label">Project ID:</div>
-      <div class="detail-value">
-        <%= media.ProjectID || 'Not Specified'%>
-      </div>
-    </div>
-  
-  </div>
-  <div class="col-md-6">
- 
-
-    <div class="detail-row">
-      <div class="detail-label">Catalog ID:</div>
-      <div class="detail-value">
-        <%= media.CatalogID %>
-      </div>
-    </div>
-<div class="detail-row">
-      <div class="detail-label">Cluster ID:</div>
-      <div class="detail-value">
-        <%= media.ClusterID %>
-      </div>
-    </div>
-<div class="detail-row">
-      <div class="detail-label">Morpho ID:</div>
-      <div class="detail-value">
-        <%= media.MorphoID %>
-      </div>
-    </div>
-    <div class="detail-row">
-      <div class="detail-label">Imaging Date:</div>
-      <div class="detail-value">
-        <%= media.ImagingDate?.toISOString().split('T')[0]%>
-      </div>
-    </div>
-
-
-
-    <div class="detail-row">
-      <div class="detail-label">File Size:</div>
-      <div class="detail-value">
-        <%= media.FileSizeBytes %> Bytes
-      </div>
-    </div>
-
-     <div class="detail-row">
-      <div class="detail-label">Imaging Platform:</div>
-      <div class="detail-value">
-        <%= media.ImagingPlatform %>
-      </div>
-    </div>
-    <div class="detail-row">
-      <div class="detail-label">Image Editing Tool:</div>
-      <div class="detail-value">
-        <%= media.ImageEditingTool %>
-      </div>
-    </div>
-  </div>
-
-  </div>
-
-
-
-
-  <div class="detail-row">
-    <div class="detail-label">Description:</div>
-    <div class="detail-value text-area-value">
-      <%= media.Description %>
-    </div>
-  </div>
-
-
-  <div class="detail-row">
-    <div class="detail-label">Comments:</div>
-    <div class="detail-value text-area-value">
-      <%= media.Comments %>
-    </div>
-  </div>
-
-
-
-
-
-  <div class="mt-4 d-flex justify-content-between">
-    <a href="/media/view-all" class="btn btn-primary">
-      <i class="fas fa-arrow-left"></i> Back to view all Image Metadata
-    </a>
-    <a href="/media/edit/<%= mediaID%>/" class="<%=media.IsDeleted?'disabled':'btn btn-warning'%>">
-      <i class="fas fa-edit"></i> Edit Image Metadata
-    </a>
-  </div>
-
-  </div>
-  </div>
-</main>
+  </main>
 </body>
 
 </html>

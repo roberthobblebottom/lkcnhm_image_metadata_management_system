@@ -6,7 +6,6 @@
   <title>📸 Upload Bulk Meta Data</title>
   <link rel="stylesheet" href="/css/form.css" />
   <style>
-
     /* Input Fields */
     input[type="file"] {
       width: 95%;
@@ -30,55 +29,54 @@
 
 <body>
   <div class="main-con">
-    <%- currentUser.UserType=='admin' 
-        ? include('../sidenavs/admin')
-        : include('../sidenavs/user') %>
-    </br>
-    <form id='fileUploadForm'>
-      <div class="form-group">
-        <h2>📸 Upload Image Metadata in Bulk</h2></br>
-      </div>
-      <div class="form-group">
-        <label>Select Project</label>
-        <select id="selectProjects" required>
-          <% allProjects.forEach( project => {%>
-          <option id="option<%=project.ProjectID%>" value="<%=project.ProjectID%>">
-            <%=project.ProjectName%>
-          </option>
-          <%})%>
-        </select>
-      </div>
-      <div class="form-group">
-        <label>File (CSV only):</label>
-        <input id="fileInput" type="file" name="bulk-metadata" accept=".csv" required />
-      </div>
+    <%- currentUser.UserType=='admin' ? include('../sidenavs/admin') : include('../sidenavs/user') %>
+      </br>
+      <form id='fileUploadForm'>
+        <div class="form-group">
+          <h2>📸 Upload Image Metadata in Bulk</h2></br>
+        </div>
+        <div class="form-group">
+          <label>Select Project</label>
+          <select id="selectProjects" required>
+            <% allProjects.forEach( project=> {%>
+              <option id="option<%=project.ProjectID%>" value="<%=project.ProjectID%>">
+                <%=project.ProjectName%>
+              </option>
+              <%})%>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>File (CSV only):</label>
+          <input id="fileInput" type="file" name="bulk-metadata" accept=".csv" required />
+        </div>
 
-      <a href="/media/view-all" class="btn ">
-        <i class="fas fa-arrow-left"></i> Back to all media
-      </a>
-      <a href="/media/download-template" class="btn ">
-        <i class="fas fa-arrow-down"></i> Download Template
-      </a>
-      <a href="/media/download-pipeline-script" class="btn ">
-        <i class="fas fa-arrow-down"></i> Download Pipeline Script
-      </a>
-      <input type="submit" class="btn" id="submitButton" value="Upload" />
-<p class="note"> You may even do bulk editing of metadata of the csv file you have processed in Office Excel or other programs.
-    </p>
-    </form>
+        <a href="/media/view-all" class="btn ">
+          <i class="fas fa-arrow-left"></i> Back to all media
+        </a>
+        <a href="/media/download-template" class="btn ">
+          <i class="fas fa-arrow-down"></i> Download Template
+        </a>
+        <a href="/media/download-pipeline-script" class="btn ">
+          <i class="fas fa-arrow-down"></i> Download Pipeline Script
+        </a>
 
+        <input type="submit" class="btn" id="submitButton" value="Upload" />
+
+        <p class="note"> You may even do bulk editing of metadata of the csv file you have processed in Office Excel or
+          other programs.
+        </p>
+      </form>
   </div>
+
   <script>
     document.addEventListener("DOMContentLoaded", () => {
       const form = document.getElementById('fileUploadForm');
       form.addEventListener('submit', async (e) => {
-        // const formdata = new FormData(form);
         e.preventDefault()
         const submitBtn = document.getElementById('submitButton');
         var data = null
         try {
           const formData = new FormData(form)
-
           const response = await fetch('/media/upload-bulk-metadata/' + form.selectProjects.value, {
             method: 'POST',
             enctype: "multipart/form-data",
@@ -91,13 +89,10 @@
             throw new Error(errorData.message || "Submission failed with status " + response.status);
           }
           data = await response.json();
-          console.log(data)
 
           if (!data.success) {
             var bytes = new Uint8Array(data.buffer.data);
-            var blob = new Blob([bytes], {
-              type: "application/csv"
-            }); // change resultByte to bytes
+            var blob = new Blob([bytes], { type: "application/csv" }); // change resultByte to bytes
             await Swal.fire({
               title: 'Error!',
               text: data.message,
@@ -145,12 +140,9 @@
           submitBtn.disabled = false;
           submitBtn.innerHTML = "Upload"
         }
-
       });
     });
   </script>
-
-
 </body>
 
 </html>

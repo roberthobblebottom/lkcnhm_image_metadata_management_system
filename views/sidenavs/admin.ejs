@@ -8,37 +8,64 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
   <style>
 
-    </style>
+  </style>
 </head>
 
 <body>
   <div class="sidebar">
     <div class="logo">
-      <img src="/images/Group-1.svg" alt="LKCNHM Logo" 
-      />
+      <img src="/images/Group-1.svg" alt="LKCNHM Logo" />
     </div>
     <ul class="nav-links">
       <li>
-        <div id="fullName" class="loginDetails" ></div>
+        <div id="fullName" class="loginDetails"></div>
         <div id="email" class="loginDetails"></div>
         <div id="userType" class="loginDetails"></div>
         <div id="userID" class="loginDetails"></div>
       </li>
-      <li><a href="/admin/login-landing-page"><i class="fas fa-globe"></i><span>Home page</span></a></li>
-      <li><a href="/settings/profile"><i class="fas fa-key"></i><span>Profile</span></a></li>
-      <li><a href="/admin/user-management/view-all"><i class="fas fa-users"></i><span>User Base Management</span></a></li>
-      <!-- <li><a href="/admin/UserRequest"><i class="fas fa-file-alt"></i><span>Imaging User Management</span></a></li> -->
-      <li><a href="/project/view-all"><i class="fas fa-file-medical"></i><span>Project
-            Management</span></a></li>
-      <li><a href="/media/view-all"><i class="fas fa-image"></i><span>Image Metadata Management</span></a></li>
-      <li><a href="/settings/change-password"><i class="fas fa-key"></i><span>Change Password</span></a></li>
-      <li><a href="/admin/other-admin-settings"><i class="fas fa-key"></i><span>Other Admin Settings</span></a></li>
-      <li><a href="/auth/logout"><i class="fas fa-sign-out-alt"></i><span>Logout</span></a></li>
+      <li>
+        <a href="/admin/login-landing-page">
+          <i class="fas fa-globe"></i><span>Home page</span>
+        </a>
+      </li>
+      <li>
+        <a href="/settings/profile"><i class="fas fa-key"></i><span>Profile</span></a>
+      </li>
+      <li>
+        <a href="/admin/user-management/view-all">
+          <i class="fas fa-users"></i><span>User Base Management</span>
+        </a>
+      </li>
+      <li>
+        <a href="/project/view-all">
+          <i class="fas fa-file-medical"></i><span>Project Management</span>
+        </a>
+      </li>
+      <li>
+        <a href="/media/view-all">
+          <i class="fas fa-image"></i><span>Image Metadata Management</span>
+        </a>
+      </li>
+      <li>
+        <a href="/settings/change-password">
+          <i class="fas fa-key"></i><span>Change Password</span>
+        </a>
+      </li>
+      <li>
+        <a href="/admin/other-admin-settings">
+          <i class="fas fa-key"></i><span>Other Admin Settings</span>
+        </a>
+      </li>
+      <li>
+        <a href="/auth/logout">
+          <i class="fas fa-sign-out-alt"></i><span>Logout</span>
+        </a>
+      </li>
     </ul>
   </div>
   <script>
     document.addEventListener("DOMContentLoaded", function () {
-      fetch("/auth/current-user",{caches:'reload',method:'GET'})
+      fetch("/auth/current-user", { caches: 'reload', method: 'GET' })
         .then(res => res.json())
         .then(data => {
           const email = data.Email; // trim after @
@@ -46,9 +73,9 @@
           const userType = data.UserType;
           const userID = data.UserID;
           document.getElementById("fullName").textContent = `Logged in as: ${fullName}`;
-          document.getElementById("email").textContent=`Email: ${email}`;
-          document.getElementById("userType").textContent=`Role: ${userType}`;
-          document.getElementById("userID").textContent=`UserID: ${userID}`;
+          document.getElementById("email").textContent = `Email: ${email}`;
+          document.getElementById("userType").textContent = `Role: ${userType}`;
+          document.getElementById("userID").textContent = `UserID: ${userID}`;
         })
         .catch(() => {
           document.getElementById("fullName").textContent = "Welcome";

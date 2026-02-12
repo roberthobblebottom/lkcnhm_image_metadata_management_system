@@ -9,9 +9,7 @@
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
   <link rel="stylesheet" href="/css/form.css">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/choices.js@11.1.0/public/assets/styles/choices.min.css" />
-  <!-- <link ref="stylesheet" href="/css/choiceJS.css"> -->
   <script src="https://cdn.jsdelivr.net/npm/choices.js/public/assets/scripts/choices.min.js"></script>
-
 </head>
 
 <body>
@@ -42,15 +40,14 @@
               </option>
               <% }) %>
           </select>
-          <div id="projectOwner-error" class="error-message">Please select a projectOwner</div>
+          <div id="projectOwnerError" class="error-message">Please select a projectOwner</div>
         </div>
+
         <%if(currentUser.UserType=='admin'){%>
           <div class="form-group">
             <div class="horizontal-panel2">
               <label class="label2">Project Type</label>
-              <!-- <button class="addButton" id="addProjectTypeButton">Add Project Type</button> -->
             </div>
-
             <select name="projectType" id="projectType" class="form-control">
               <option value="">-- Select Project Type --</option>
               <% projectTypes.forEach(projectType=> { %>
@@ -59,9 +56,9 @@
                 </option>
                 <% }) %>
             </select>
-
           </div>
           <%}%>
+
             <div class="form-group">
               <div class="horizontal-panel2">
                 <label for="newSelectedPhotographers">Photographer(s)*</label>
@@ -80,7 +77,6 @@
               </select>
               <div id="photographer-error" class="error-message">Please select a photographer</div>
             </div>
-
 
             <div class="form-group">
               <label for="startDate">Imaging Start Date*</label>
@@ -106,12 +102,9 @@
               <div id="specimenDetails-error" class="error-message">Please provide specimen details</div>
             </div>
 
-
-
             <div class="form-group">
               <div class="horizontal-panel2">
                 <label class="label2" for="platform">Imaging Platform*</label>
-                <!-- <button class='addButton' id="addImagingPlatformButton">Add Imaging Platform</button> -->
               </div>
               <select multiple id="newSelectedImagingPlatforms">
                 <option value="">Select Imaging Platforms</span>
@@ -131,6 +124,7 @@
             <div class="buttons">
               <button type="submit" class="new"><i class="fas fa-paper-plane"></i> Create Project</button>
             </div>
+
             <p class="note">
               💡 New project types, imaging platform and/or photographers will only be in the system if said changes are
               submitted
@@ -141,6 +135,7 @@
 </body>
 
 <script>
+  const form = document.getElementById('main-form');
   const element = document.getElementById('newSelectedPhotographers');
   const newSelectedPhotographers = new Choices(element, {
     allowHTML: true,
@@ -153,12 +148,9 @@
         const temp = (projectOwnerSelect.value).toString()
         if (temp == "") return
         previouslySelected = newSelectedPhotographers.getValue(true)
-        console.log(newSelectedPhotographers.getValue(true))
         // if (!previouslySelected.includes(temp)) {
-        // console.log("in here")
         newSelectedPhotographers.removeActiveItems(); //clearChoices() doesn't work
         newSelectedPhotographers.setChoiceByValue(temp)
-
         // } else {
         //not working
         // newSelectedPhotographers.removeActiveItems(); //clearChoices() doesn't work
@@ -173,7 +165,6 @@
         // }
 
         const x = document.querySelector("[data-value='" + temp + "']")
-        // x.removeChild(x.childNodes[1])
         x.childNodes[1].style.display = 'none'
         x.style.padding = "12px"
         x.style.backgroundColor = "gray"
@@ -186,55 +177,7 @@
     removeItemButton: true
   });
   const toBeCreatedPhotographers = []
-  // Initialize form with current datetime
-  // document.getElementById('addProjectTypeButton').addEventListener('click', async function(e) {
-  //   e.preventDefault()
-  //   Swal.fire({
-  //     title: "Add new Project Type",
-  //     text: "Add new Project Type",
-  //     input: 'text',
-  //     showCancelButton: true,
-  //     inputPlaceholder: "Enter it here.",
-  //     preConfirm: (value) => {
-  //       if (value) {
-  //         if ("<%=projectTypes%>".includes(value))
-  //           Swal.showValidationMessage('This Project Type value already exist')
-  //         const select = document.getElementById("projectType")
-  //         var option = document.createElement('option')
-  //         option.text = option.value = value
-  //         select.add(option, 1)
-  //         select.value = option.text
-  //       } else {
-  //         Swal.showValidationMessage('Value is required')
-  //       }
-  //     }
-  //   })
-  // });
-  // document.getElementById('addImagingPlatformButton').addEventListener('click', async function(e) {
-  //   console.log("add Imaging Platform button")
-  //   e.preventDefault()
-  //   Swal.fire({
-  //     title: "Add new Imaging Platform",
-  //     text: "Add new Imaging Platform",
-  //     input: 'text',
-  //     showCancelButton: true,
-  //     inputPlaceholder: "Enter it here.",
-  //     preConfirm: (value) => {
-  //       if (value) {
-  //         if ("<%=imagingPlatforms%>".includes(value))
-  //           Swal.showValidationMessage('This Imaging Platform value already exist')
-  //         const select = document.getElementById("newSelectedImagingPlatforms")
-  //         newSelectedImagingPlatforms.setChoices([{
-  //           value: value,
-  //           label: value,
-  //           selected: true
-  //         }])
-  //       } else {
-  //         Swal.showValidationMessage('Value is required')
-  //       }
-  //     }
-  //   })
-  // })
+
   if ('<%=isUserRegistrationEnabled%>')
     document.getElementById('addPhotographerButton').addEventListener('click', async function (e) {
       e.preventDefault()
@@ -254,14 +197,10 @@
           placeholder="Enter Full Name" 
           style="width:95%;height:40%;font-size:30px;" 
           required">`,
-
-
         showCancelButton: true,
       }).then((result) => {
         const email = document.getElementById('newPhotographerEmail').value
-
         const emailRegex = /^[a-zA-Z0-9](\.?[a-zA-Z0-9_-])*[a-zA-Z0-9]@[a-zA-Z0-9-]+\.[a-zA-Z]{2,}$/
-
         const fullName = document.getElementById('newPhotographerFullName').value
         if (email && fullName) {
           if (!emailRegex.test(email)) {
@@ -274,7 +213,6 @@
             selected: true
           }])
           toBeCreatedPhotographers.push([fullName, email])
-          // console.log('toBeCreatedPhotographers', toBeCreatedPhotographers)
         }
       });
     })
@@ -285,40 +223,35 @@
     if ('<%=currentUser.UserType%>' == 'admin')
       return
     const x = document.querySelector("[data-value='<%=currentUser.UserID%>']")
-    // x.removeChild(x.childNodes[1])
-
     x.childNodes[1].style.display = 'none'
     x.style.padding = "12px"
     x.style.backgroundColor = "gray"
   })
+
   document.addEventListener('DOMContentLoaded', function () {
+    const submitBtn = form.querySelector('button[type="submit"]');
+    const originalBtnText = submitBtn.innerHTML;
     // grey out and disable this option
     //The repeated block for greying out is required for both load and DOMContentLoaded event
     if ('<%=currentUser.UserType%>' != 'admin') {
       const x = document.querySelector("[data-value='<%=currentUser.UserID%>']")
-      // x.removeChild(x.childNodes[1])
       x.childNodes[1].style.display = 'none'
       x.style.padding = "12px"
       x.style.backgroundColor = "gray"
-
     }
-
 
     newSelectedPhotographers.passedElement.element.addEventListener('removeItem', function (e) {
       toBeRemoved = [e.detail.label, e.detail.value]
       for (let x1 = 0; x1 < toBeCreatedPhotographers.length; x1++) {
         const o = toBeCreatedPhotographers[x1]
-        if (o[0] == toBeRemoved[0] && o[1] == toBeRemoved[1]) {
+        if (o[0] == toBeRemoved[0] && o[1] == toBeRemoved[1])
           toBeCreatedPhotographers.splice(x1, 1)
-        }
       }
     }, false)
     const aDate = new Date()
     document.getElementById('startDate').value = aDate.toISOString().slice(0, 16).split('T')[0]
     aDate.setDate(aDate.getDate() + 4)
     document.getElementById('endDate').value = aDate.toISOString().slice(0, 16).split('T')[0]
-
-    const form = document.getElementById('main-form');
 
     document.getElementById('startDate').addEventListener('change', function () {
       const startDate = document.getElementById('startDate').value;
@@ -329,39 +262,32 @@
     // Validate on submit
     form.addEventListener('submit', async function (e) {
       e.preventDefault();
-      console.log("add event listner for submit")
+      const startDate = document.getElementById('startDate').value;
+      const endDate = new Date(document.getElementById('endDate').value);
+      const startDateError = document.getElementById('startDate-error');
+      const endDateError = document.getElementById('endDate-error');
+      let isValid = true;
 
       // Reset error messages
       document.querySelectorAll('.error-message').forEach(el => {
         el.style.display = 'none';
       });
 
-      // Validate required fields
-      let isValid = true;
-
       // Check dropdowns
       if (!form.projectOwner.value) {
-        document.getElementById('projectOwner-error').style.display = 'block';
+        document.getElementById('projectOwnerError').style.display = 'block';
         isValid = false;
       }
-
-
       // Check text areas
       if (!form.summary.value.trim()) {
         document.getElementById('summary-error').style.display = 'block';
         isValid = false;
       }
-
       if (!form.specimenDetails.value.trim()) {
         document.getElementById('specimenDetails-error').style.display = 'block';
         isValid = false;
       }
 
-
-      const startDate = document.getElementById('startDate').value;
-      const endDate = new Date(document.getElementById('endDate').value);
-      const startDateError = document.getElementById('startDate-error');
-      const endDateError = document.getElementById('endDate-error');
       // Reset displays
       startDateError.style.display = 'none';
       endDateError.style.display = 'none';
@@ -377,7 +303,6 @@
           text: 'End date must be on or after start date'
         });
         document.getElementById('endDate').setCustomValidity('End date must be after start date');
-
       }
 
       if (!form.checkValidity()) {
@@ -387,13 +312,8 @@
           block: 'center'
         });
       }
-
       if (!isValid)
         return;
-
-
-      const submitBtn = form.querySelector('button[type="submit"]');
-      const originalBtnText = submitBtn.innerHTML;
 
       try {
         // Show loading state
@@ -402,7 +322,6 @@
         submitBtn.disabled = true;
 
         const projectType = form.projectType == null ? "" : form.projectType.value
-        // Create a plain object from form data
         const formData = {
           projectName: form.projectName.value,
           projectOwner: form.projectOwner.value,
@@ -429,9 +348,8 @@
         }
 
         const data = await response.json();
-        if (!data.success) {
+        if (!data.success)
           throw new Error(data.message || "Submission failed");
-        }
 
         // Show success message
         await Swal.fire({
@@ -454,7 +372,6 @@
         form.reset();
 
       } catch (error) {
-        console.error("Submission error:", error);
         await Swal.fire({
           title: 'Error!',
           text: error.message,

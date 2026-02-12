@@ -7,81 +7,71 @@
   <link rel="stylesheet" href="/css/form.css">
   <title>View User</title>
   <style>
-    
+    #main-form {}
 
-    #main-form {
+    .requirement-of-field {
+      color: red;
     }
-    .requirement-of-field{
-    color:red;
-   }
   </style>
 </head>
 
 <body>
 
-  <%- currentUser.UserType=='admin' 
-  ? include('../sidenavs/admin')
-  : include('../sidenavs/user' ) %>
-  <div class="main-con">
-    <form id="main-form">
-      <div class="form-group">
-        <h2>View or Edit your Profile</h2>
-        <p class="requirement-of-field">* = required</p>
-      </div>
+  <%- currentUser.UserType=='admin' ? include('../sidenavs/admin') : include('../sidenavs/user' ) %>
+    <div class="main-con">
+      <form id="main-form">
+        <div class="form-group">
+          <h2>View or Edit your Profile</h2>
+          <p class="requirement-of-field">* = required</p>
+        </div>
+
+        <div class="form-group">
+          <label for="userID">User ID</label>
+          <input type="text" id="userID" value="<%=currentUser.UserID%>" readonly>
+        </div>
+        <div class="form-group">
+          <label for="email">Email* </label>
+          <input type="text" name="email" id="email" value="<%=currentUser.Email%>" required>
+        </div>
+        <div class="form-group">
+          <label for="userType">User Type</label>
+          <input type="text" value="<%=currentUser.UserType%>" readonly>
+        </div>
+        <div class="form-group">
+          <label for="fullName">Full Name* </label>
+          <input type="text" name="fullName" id="fullname" value="<%=currentUser.FullName%>" required>
+        </div>
+        <div class="form-group">
+          <label>Registered Date </label>
+          <input type="text" value="<%=registeredDate%>" readonly>
+        </div>
+        <div class="form-group">
+          <label for="contactNumber">Contact Number </label>
+          <input type="text" id="contactNumber" value="<%=currentUser.ContactNumber%>">
+        </div>
+        <div class=" form-group">
+          <label for="staffType">StaffType </label>
+          <select name="staffType" id="staffType">
+            <option value="">-- Select a staff type--</option>
+            <%staffTypes.forEach( staffType=>{%>
+              <option value="<%=staffType%>" <%=currentUser.StaffType==staffType?'selected':''%>>
+                <%=staffType%>
+              </option>
+              <%})%>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="comments">Comments </label>
+          <textarea id="comments"><%=currentUser.Comments%></textarea>
+        </div>
 
 
-      <div class="form-group">
-        <label for="userID">User ID</label>
-        <input type="text" id="userID" value="<%=currentUser.UserID%>" readonly>
-      </div>
-      <div class="form-group">
-        <label for="email">Email* </label>
-        <input type="text" name="email" id="email" value="<%=currentUser.Email%>" required>
-      </div>
-      <div class="form-group">
-        <label for="userType">User Type</label>
-        <input type="text" value="<%=currentUser.UserType%>" readonly>
-      </div>
-      <div class="form-group">
-        <label for="fullName">Full Name* </label>
-        <input type="text" name="fullName" id="fullname" value="<%=currentUser.FullName%>" required>
-      </div>
-      <div class="form-group">
-        <label>Registered Date </label>
-        <input type="text" value="<%=registeredDate%>" readonly>
-      </div>
-      <div class="form-group">
-        <label for="contactNumber">Contact Number </label>
-        <input type="text" id="contactNumber" value="<%=currentUser.ContactNumber%>">
-      </div>
-      <div class=" form-group">
-        <label for="staffType">StaffType </label>
-        <select name="staffType" id="staffType">
+        <div class="buttons">
+          <button type="submit"><i class="fas fa-paper-plane"></i> Edit Profile</button>
+        </div>
 
-          <option value="">-- Select a staff type--</option>
-          <%staffTypes.forEach( staffType=>{%>
-          <option value="<%=staffType%>"
-             <%=currentUser.StaffType == staffType?'selected':''%>>
-            <%=staffType%>
-          </option>
-          <%})%>
-        </select>
-      </div>
-      <div class="form-group">
-        <label for="comments">Comments </label>
-        <textarea id="comments"><%=currentUser.Comments%></textarea>
-      </div>
-     
-
-      <div class="buttons">
-        <button type="submit"><i class="fas fa-paper-plane"></i> Edit Profile</button>
-
-
-      </div>
-
-
-    </form>
-  </div>
+      </form>
+    </div>
 
 </body>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
@@ -97,7 +87,6 @@
         submitBtn.innerHTML = '<i class="fas fa-spinner"></i> Submitting...';
         submitBtn.disabled = true;
         if (!/^[\w\-\.]+@([\w-]+\.)+[\w-]{2,}$/.test(form.email.value)) {
-
           submitBtn.disabled = false;
           submitBtn.innerHTML = 'Edit Profile';
           await Swal.fire({
@@ -134,9 +123,8 @@
           }
 
           const data = await response.json();
-          if (!data.success) {
+          if (!data.success)
             throw new Error(data.message || "Submission failed");
-          }
 
 
           // Show success message
@@ -151,7 +139,6 @@
           });
 
           console.log(data.redirectUrl)
-          // Redirect if URL is provided
           if (data.redirectUrl) {
             window.location.href = data.redirectUrl;
             return; // Stop further execution

@@ -11,18 +11,16 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
   <%- include('../sidenavs/admin') %>
-  <style>
-    form {
-      width: 200%;
-    }
-  </style>
-
+    <style>
+      form {
+        width: 200%;
+      }
+    </style>
 </head>
 
 <body>
   <main>
     <div class="main_con">
-
       <form id="editUserForm">
         <div class="horizontal-panel">
           <a href="/admin/user-management/view-all" class="btn btn-primary">
@@ -53,12 +51,10 @@
           <select name="userType" id="userType" requried>
             <option value="">-- Select a User Type--</option>
             <%userTypes.forEach( u=>{%>
-            <option value="<%=u%>" <%=
-            u== user.UserType  
-          ? 'selected'  : "" %>>
-              <%=u%>
-            </option>
-            <%})%>
+              <option value="<%=u%>" <%=u==user.UserType ? 'selected' : "" %>>
+                <%=u%>
+              </option>
+              <%})%>
           </select>
         </div>
         <div class="form-group">
@@ -74,30 +70,24 @@
           <input type="text" id="contactNumber" value="<%=user.ContactNumber%>">
         </div>
         <div class=" form-group">
-          <label for="staffType">StaffType </label>
- <select name="staffType" id="staffType">
-
-          <option value="">-- Select a staff type--</option>
-          <%staffTypes.forEach( staffType=>{%>
-          <option value="<%=staffType%>"
-             <%=user.StaffType == staffType?'selected':''%>>
-            <%=staffType%>
-          </option>
-          <%})%>
-        </select>
+          <label for="staffType">StaffType* </label>
+          <select name="staffType" id="staffType">
+            <option value="">-- Select a staff type--</option>
+            <%staffTypes.forEach( staffType=>{%>
+              <option value="<%=staffType%>" <%=user.StaffType==staffType?'selected':''%>>
+                <%=staffType%>
+              </option>
+              <%})%>
+          </select>
         </div>
         <div class="form-group">
           <label for="comments">Comments </label>
           <textarea id="comments"><%=user.Comments%></textarea>
         </div>
-
-
         <div class="form-group">
           <label>Is Deleted? </label>
           <%=!user.IsDeleted? 'No' : 'Yes' %>
-
         </div>
-
 
         <div class="buttons">
           <button type="submit">Edit User</button>
@@ -109,15 +99,15 @@
   <script>
     document.addEventListener("DOMContentLoaded", () => {
       const form = document.getElementById("editUserForm");
-      form.addEventListener('submit', async function(e) {
+      form.addEventListener('submit', async function (e) {
         e.preventDefault();
         Swal.fire({
           title: "Confirm Your password",
           html: `
-      <div style="height: 120px">
-      <label>Are you sure you want to edit this user? If so please reenter your password.</label>
-      <input type="password" id="reconfirmPasswordInput" placeholder="Password" style="width:98%;height:10%">
-      </div>
+<div style="height: 120px">
+<label>Are you sure you want to edit this user? If so please reenter your password.</label>
+<input type="password" id="reconfirmPasswordInput" placeholder="Password" style="width:98%;height:10%">
+</div>
       `,
           confirmButtonText: 'confirm',
           preConfirm: (value) => {
@@ -129,12 +119,9 @@
             submit(form, passwordValue)
           }
         });
-
-
       })
 
       async function submit(form, reconfirmPasswordForAdmin) {
-
         // Validate form
         //   const passwordRegex = /^(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{8,}$/;
         const submitBtn = form.querySelector('button[type="submit"]');
@@ -171,12 +158,9 @@
             title: 'Error!',
             text: "wrong confimation of password doesn't match first instance of  password."
           });
-          console.log("mismatched passwords")
           return
         }
         // Prepare form data
-        // const formData = new URLSearchParams(new FormData(form));
-        //   const data = Object.fromEntries(formData.entries());
         const params = JSON.stringify({
           userID: form.userID.value,
           email: form.email.value,
@@ -196,18 +180,13 @@
             title: 'Updating User',
             html: 'Please wait...',
             allowOutsideClick: false,
-            didOpen: () => {
-              Swal.showLoading();
-            }
+            didOpen: () => Swal.showLoading()
           });
 
           // Send AJAX request
-          console.log(params)
           const response = await fetch('/admin/user-management/edit/<%= user.UserID %>', {
             method: 'POST',
-            headers: {
-              'Content-Type': 'application/json'
-            },
+            headers: { 'Content-Type': 'application/json' },
             body: params
           });
 
@@ -224,9 +203,10 @@
               icon: 'success',
               showConfirmButton: true,
               timer: 1000
-            }).then(() => {
-              window.location.href = "/admin/user-management/view/<%=user.UserID%>"; // Redirect to the desired page after success
-            });
+            }).then(() =>
+              // Redirect to the desired page after success
+              window.location.href = "/admin/user-management/view/<%=user.UserID%>"
+            );
           } else {
             // Show error alert
             Swal.fire({

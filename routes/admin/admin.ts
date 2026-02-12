@@ -1,28 +1,18 @@
 const express = require("express");
 import { Response, Request } from "express";
 const router = express.Router();
-const path = require("path");
 import { QueryResult } from "mysql2";
 const db = require("../db");
-const { isAuthenticated, isAdmin,reconfirmPasswordFunctionForAdmin } = require("../../middleware/auth"); // Middleware
+const { isAuthenticated, isAdmin, reconfirmPasswordFunctionForAdmin } = require("../../middleware/auth"); // Middleware
 const fastcsv = require("fast-csv");
-
 import AdmZip from "adm-zip";
-// router.get(
-//   "/admin-users",
-//   isAuthenticated,
-//   isAdmin,
-//   (req: any, res: { sendFile: (arg0: any) => void }) => {
-//     res.sendFile(path.join(__dirname, "../views/admin-users.html"));
-//   }
-// );
+
 
 router.get(
   "/login-landing-page",
   isAuthenticated,
   isAdmin,
   (req: Request, res: Response) => {
-    console.log(req.session.passport.user)
     res.render("admin/login-landing-page", {
       user: req.session.passport.user,
       title: "Admin Login Landing Page",
@@ -35,13 +25,14 @@ router.get(
   isAuthenticated,
   isAdmin,
   async (req: Request, res: Response) => {
-    const IsUserRegistrationEnabled = (await db.query('SELECT IsEnabled FROM IsUserRegistrationEnabled LIMIT 1'))[0][0].IsEnabled;
-    console.log(IsUserRegistrationEnabled)
+    const IsUserRegistrationEnabled = (
+      await db.query('SELECT IsEnabled FROM IsUserRegistrationEnabled LIMIT 1'))[0][0]
+      .IsEnabled;
     res.render("admin/other-admin-settings", {
       projectTypes: req.session.projectTypes,
       imagingPlatforms: req.session.imagingPlatforms,
       imageEditingTools: req.session.imageEditingTools,
-IsUserRegistrationEnabled
+      IsUserRegistrationEnabled
     });
   }
 );
@@ -62,8 +53,8 @@ router.post(
           .query("ALTER TABLE Project MODIFY COLUMN `ProjectType` enum(?)", [
             req.session.projectTypes,
           ]);
-
         break;
+
       case "imagingPlatform":
         req.session.imagingPlatforms.push(value);
         await db
@@ -76,10 +67,10 @@ router.post(
             req.session.imagingPlatforms,
           ]);
         break;
+
       case "imageEditingTool":
         req.session.imageEditingTools.push(value);
         await db
-          
           .query("ALTER TABLE Media MODIFY COLUMN `ImageEditingTool` enum(?)", [
             req.session.imageEditingTools,
           ]);
@@ -108,24 +99,18 @@ router.post(
           projectTypes.splice(projectTypes.indexOf(oldValue), 1);
         projectTypes.push(newValue);
         req.session.save();
-        await db
-          
-          .query("UPDATE Project SET ProjectType =NULL WHERE ProjectType = ?", [
-            oldValue,
-          ]);
-        await db
-          
-          .query("ALTER TABLE Project CHANGE ProjectType ProjectType ENUM(?)", [
-            projectTypes,
-          ]);
-        await db
-          
-          .query(
-            "UPDATE Project SET ProjectType = ? WHERE ProjectType IS NULL",
-            [newValue]
-          );
-
+        await db.query("UPDATE Project SET ProjectType =NULL WHERE ProjectType = ?", [
+          oldValue,
+        ]);
+        await db.query("ALTER TABLE Project CHANGE ProjectType ProjectType ENUM(?)", [
+          projectTypes,
+        ]);
+        await db.query(
+          "UPDATE Project SET ProjectType = ? WHERE ProjectType IS NULL",
+          [newValue]
+        );
         break;
+
       case "imagingPlatform":
         const imagingPlatforms = req.session.imagingPlatforms;
         imagingPlatforms.includes(oldValue) &&
@@ -134,118 +119,82 @@ router.post(
         req.session.save();
         //QUERY IDs
         const temp1: QueryResult = (
-          await db
-            
-            .query(
-              "SELECT ImagingPlatformInstanceID FROM ImagingPlatformInstance WHERE ImagingPlatform = ?",
-              [oldValue]
-            )
+          await db.query(
+            "SELECT ImagingPlatformInstanceID FROM ImagingPlatformInstance WHERE ImagingPlatform = ?",
+            [oldValue]
+          )
         )[0];
         const imagingPlatformIDsResults: any = temp1;
-        console.log("imagingPlatformIDsResults", imagingPlatformIDsResults);
-
         //SET  ImagingPlatform of certain types to null so that data truncated error won't appear
         if (imagingPlatformIDsResults.length != 0)
-          await db
-            
-            .query(
-              "UPDATE ImagingPlatformInstance SET ImagingPlatform =NULL WHERE ImagingPlatform = ?",
-              [oldValue]
-            );
-
-        // update enum
-        await db
-          
-          .query(
-            "ALTER TABLE ImagingPlatformInstance CHANGE ImagingPlatform ImagingPlatform ENUM(?)",
-            [imagingPlatforms]
+          await db.query(
+            "UPDATE ImagingPlatformInstance SET ImagingPlatform =NULL WHERE ImagingPlatform = ?",
+            [oldValue]
           );
-
+        // update enum
+        await db.query(
+          "ALTER TABLE ImagingPlatformInstance CHANGE ImagingPlatform ImagingPlatform ENUM(?)",
+          [imagingPlatforms]
+        );
         if (imagingPlatformIDsResults.length != 0) {
-          console.log("imagingPlatformIDsResults", imagingPlatformIDsResults);
           const imagingPlatformInstanceIDs: string[] = [];
-          for (const r of imagingPlatformIDsResults) {
+          for (const r of imagingPlatformIDsResults)
             imagingPlatformInstanceIDs.push(
               r.ImagingPlatformInstanceID.toString()
             );
-          }
-          await db
-            
-            .query(
-              "UPDATE ImagingPlatformInstance SET ImagingPlatform = ? WHERE ImagingPlatformInstanceID in (?)",
-              [newValue, imagingPlatformInstanceIDs]
-            );
+          await db.query(
+            "UPDATE ImagingPlatformInstance SET ImagingPlatform = ? WHERE ImagingPlatformInstanceID in (?)",
+            [newValue, imagingPlatformInstanceIDs]
+          );
         }
-
-        console.log("oldValue", oldValue);
-
         //QUERY IDs
         const temp = (
-          await db
-            
-            .query("SELECT MediaID FROM Media WHERE ImagingPlatform = ?", [
-              oldValue,
-            ])
+          await db.query("SELECT MediaID FROM Media WHERE ImagingPlatform = ?", [
+            oldValue,
+          ])
         )[0];
         const mediaIDsResults: any = temp;
-        console.log("mediaIDsResults", mediaIDsResults);
         //SET  ImagingPlatform of certain types to null so that data truncated error won't appear
         if (mediaIDsResults.length != 0)
-          await db
-            
-            .query(
-              "UPDATE Media SET ImagingPlatform =NULL WHERE ImagingPlatform = ?",
-              [oldValue]
-            );
-
-        //update enums
-        await db
-          
-          .query(
-            "ALTER TABLE Media CHANGE ImagingPlatform ImagingPlatform ENUM(?)",
-            [imagingPlatforms]
+          await db.query(
+            "UPDATE Media SET ImagingPlatform =NULL WHERE ImagingPlatform = ?",
+            [oldValue]
           );
-
+        //update enums
+        await db.query(
+          "ALTER TABLE Media CHANGE ImagingPlatform ImagingPlatform ENUM(?)",
+          [imagingPlatforms]
+        );
         //update media with said enum
         if (mediaIDsResults.length != 0) {
           const mediaIDs: string[] = [];
-          for (const r of mediaIDsResults) {
+          for (const r of mediaIDsResults)
             mediaIDs.push(r.MediaID.toString());
-          }
-          await db
-            
-            .query(
-              "UPDATE Media SET ImagingPlatform = ? WHERE MediaID in (?)",
-              [newValue, mediaIDs]
-            );
+          await db.query(
+            "UPDATE Media SET ImagingPlatform = ? WHERE MediaID in (?)",
+            [newValue, mediaIDs]
+          );
         }
-        console.log(mediaIDsResults);
-
         break;
+
       case "imageEditingTool":
         const imageEditingTools = req.session.imageEditingTools;
         imageEditingTools.includes(oldValue) &&
           imageEditingTools.splice(imageEditingTools.indexOf(oldValue), 1);
         imageEditingTools.push(newValue);
         req.session.save();
-        await db
-          
-          .query(
-            "UPDATE Media SET ImageEditingTool =NULL WHERE ImageEditingTool = ?",
-            [oldValue]
-          );
-        await db
-          
-          .query(
-            "ALTER TABLE Media CHANGE ImageEditingTool ImageEditingTool ENUM(?)",
-            [imageEditingTools]
-          );
-        await db
-          
-          .query(
-            "UPDATE Media SET ImageEditingTool  = ? WHERE ImageEditingTool IS NULL",
-            [newValue]
-          );
+        await db.query(
+          "UPDATE Media SET ImageEditingTool =NULL WHERE ImageEditingTool = ?",
+          [oldValue]
+        );
+        await db.query(
+          "ALTER TABLE Media CHANGE ImageEditingTool ImageEditingTool ENUM(?)",
+          [imageEditingTools]
+        );
+        await db.query(
+          "UPDATE Media SET ImageEditingTool  = ? WHERE ImageEditingTool IS NULL",
+          [newValue]
+        );
         break;
     }
     return res.json({
@@ -255,6 +204,7 @@ router.post(
     });
   }
 );
+
 router.post(
   "/delete-enumeration-value",
   isAuthenticated,
@@ -269,62 +219,48 @@ router.post(
         projectTypes.includes(value) &&
           projectTypes.splice(projectTypes.indexOf(value), 1);
         await db
-          .query("UPDATE Project SET ProjectType =NULL WHERE ProjectType = ?", [
-            value,
-          ]);
+          .query("UPDATE Project SET ProjectType =NULL WHERE ProjectType = ?",
+            [value]);
         await db
           .query("ALTER TABLE Project CHANGE ProjectType ProjectType ENUM(?)", [
             req.session.projectTypes,
           ]);
         break;
+
       case "imagingPlatform":
         const imagingPlatforms = req.session.imagingPlatforms;
         imagingPlatforms.includes(value) &&
           imagingPlatforms.splice(imagingPlatforms.indexOf(value), 1);
-        await db
-          .query(
-            "DELETE FROM ImagingPlatformInstance  WHERE ImagingPlatform = ?",
-            [value]
-          );
-        console.log(req.session.imagingPlatforms);
-        await db
-          
-          .query(
-            "ALTER TABLE ImagingPlatformInstance CHANGE ImagingPlatform ImagingPlatform enum(?)",
-            [req.session.imagingPlatforms]
-          );
-
-        await db
-          
-          .query(
-            "UPDATE Media SET ImagingPlatform= NULL WHERE ImagingPlatform = ?",
-            [value]
-          );
-
-        await db
-          
-          .query(
-            "ALTER TABLE Media CHANGE  ImagingPlatform ImagingPlatform enum(?)",
-            [req.session.imagingPlatforms]
-          );
+        await db.query(
+          "DELETE FROM ImagingPlatformInstance  WHERE ImagingPlatform = ?",
+          [value]
+        );
+        await db.query(
+          "ALTER TABLE ImagingPlatformInstance CHANGE ImagingPlatform ImagingPlatform enum(?)",
+          [req.session.imagingPlatforms]
+        );
+        await db.query(
+          "UPDATE Media SET ImagingPlatform= NULL WHERE ImagingPlatform = ?",
+          [value]
+        );
+        await db.query(
+          "ALTER TABLE Media CHANGE  ImagingPlatform ImagingPlatform enum(?)",
+          [req.session.imagingPlatforms]
+        );
         break;
+
       case "imageEditingTool":
         const imageEditingTools = req.session.imageEditingTools;
         imageEditingTools.includes(value) &&
           imageEditingTools.splice(imageEditingTools.indexOf(value), 1);
-        await db
-          
-          .query(
-            "UPDATE Media SET ImageEditingTool=NULL WHERE ImageEditingTool = ?",
-            [value]
-          );
-
-        await db
-          
-          .query(
-            "ALTER TABLE Media CHANGE COLUMN ImageEditingTool ImageEditingTool enum(?)",
-            [req.session.imageEditingTools]
-          );
+        await db.query(
+          "UPDATE Media SET ImageEditingTool=NULL WHERE ImageEditingTool = ?",
+          [value]
+        );
+        await db.query(
+          "ALTER TABLE Media CHANGE COLUMN ImageEditingTool ImageEditingTool enum(?)",
+          [req.session.imageEditingTools]
+        );
         break;
     }
     return res.json({
@@ -343,9 +279,7 @@ router.post(
   isAdmin,
   reconfirmPasswordFunctionForAdmin,
   async (req: Request, res: Response) => {
-    console.log('req.body',req.body)
     const result: any = await db
-      
       .query(`SELECT * FROM Media WHERE IsDeleted = 1;`);
     const mediaData: Array<Object> = Array.from(result[0]);
     if (mediaData.length == 0)
@@ -356,9 +290,8 @@ router.post(
       });
 
     const jsonMediaData = JSON.parse(JSON.stringify(mediaData));
-    const bufferMediaData = await fastcsv.writeToBuffer(jsonMediaData, {
-      headers: true,
-    });
+    const bufferMediaData = await fastcsv.writeToBuffer(jsonMediaData,
+      { headers: true });
     const zip = new AdmZip();
     zip.addFile(
       "purged media data " + new Date().toISOString() + ".csv",
@@ -380,8 +313,12 @@ router.post(
   isAdmin,
   reconfirmPasswordFunctionForAdmin,
   async (req: Request, res: Response) => {
+    const ids = [];
+    var imagingPlatformInstances = [];
+    var projectUserPhotographyLinks = [];
+    var medias = [];
+  
     const result: any = await db
-      
       .query(`SELECT * FROM Project WHERE IsDeleted = 1;`);
     const projectData: Array<Object> = Array.from(result[0]);
     if (projectData.length == 0)
@@ -390,73 +327,47 @@ router.post(
         message:
           "There is no project data that is soft deleted or another words, marked for deletion",
       });
-    const ids = [];
-    var imagingPlatformInstances = [];
-    var projectUserPhotographyLinks = [];
-    var medias = [];
+
     for (const x of projectData) {
       const temp: any = x;
       ids.push(temp.ProjectID);
 
       // query Data
       const imagingPlatformInstanceResults = await db.query(
-        `SELECT * 
-        FROM ImagingPlatformInstance
-       WHERE ProjectID = ?`,
+        `SELECT * FROM ImagingPlatformInstance WHERE ProjectID = ?`,
         [temp.ProjectID]
       );
       imagingPlatformInstances = imagingPlatformInstances.concat(
         imagingPlatformInstanceResults[0]
       );
-      // console.log('temp.ProjectID',temp.ProjectID)
-      // console.log('imagingPlatformInstances',imagingPlatformInstances)
       const projectUserPhotographyLinkResults = await db.query(
-        `SELECT * 
-        FROM ProjectUserPhotographyLink
-       WHERE ProjectID = ?`,
-        [temp.ProjectID]
+        `SELECT * FROM ProjectUserPhotographyLink WHERE ProjectID = ?`
+        , [temp.ProjectID]
       );
       projectUserPhotographyLinks = projectUserPhotographyLinks.concat(
         projectUserPhotographyLinkResults[0]
       );
       const mediasResults = await db.query(
-        `SELECT * 
-        FROM Media
-       WHERE ProjectID = ?`,
-        [temp.ProjectID]
-      );
+        `SELECT * FROM MediaWHERE ProjectID = ?`, [temp.ProjectID]);
       medias = medias.concat(mediasResults[0]);
     }
-    //     console.log('imagingPlatformInstances',imagingPlatformInstances)
-    // console.log('projectUserPhotographyLinks',projectUserPhotographyLinks)
-    // console.log('medias',medias)
     //turning into buffer
     const jsonProjectData = JSON.parse(JSON.stringify(projectData));
-    const bufferProjectData = await fastcsv.writeToBuffer(jsonProjectData, {
-      headers: true,
-    });
+    const bufferProjectData = await fastcsv.writeToBuffer(jsonProjectData,
+      { headers: true, });
     const jsonImagingPlatformInstanceData = JSON.parse(
       JSON.stringify(imagingPlatformInstances)
     );
     const bufferImagingPlatformInstanceData = await fastcsv.writeToBuffer(
-      jsonImagingPlatformInstanceData,
-      {
-        headers: true,
-      }
-    );
+      jsonImagingPlatformInstanceData, { headers: true, });
     const jsonProjectUserPhotographyLinkData = JSON.parse(
       JSON.stringify(projectUserPhotographyLinks)
     );
     const bufferProjectUserPhotographyLinkData = await fastcsv.writeToBuffer(
-      jsonProjectUserPhotographyLinkData,
-      {
-        headers: true,
-      }
-    );
+      jsonProjectUserPhotographyLinkData, { headers: true });
     const jsonMediaData = JSON.parse(JSON.stringify(medias));
-    const bufferMediaData = await fastcsv.writeToBuffer(jsonMediaData, {
-      headers: true,
-    });
+    const bufferMediaData = await fastcsv.writeToBuffer(jsonMediaData,
+      { headers: true });
 
     //Zipping
     const zip = new AdmZip();
@@ -482,7 +393,7 @@ router.post(
 );
 
 router.post(
- "/purge-soft-deleted-users",
+  "/purge-soft-deleted-users",
   isAuthenticated,
   isAdmin,
   reconfirmPasswordFunctionForAdmin,
@@ -491,14 +402,13 @@ router.post(
       .query(`SELECT * FROM User WHERE IsDeleted = 1;`);
 
     const userData: Array<Object> = Array.from(result[0]);
-    if (userData.length == 0) {
-      console.log("user data length is 0");
+    if (userData.length == 0)
       return res.status(400).json({
         success: false,
         message:
           "There is no user data that is soft deleted or another words, marked for deletion",
       });
-    }
+
     const ids = [];
     var projectUserPhotographyLinks = [];
     for (const x of userData) {
@@ -509,7 +419,7 @@ router.post(
       const projectUserPhotographyLinkResults = await db.query(
         `SELECT * 
         FROM ProjectUserPhotographyLink
-       WHERE PhotographerID = ?`,
+        WHERE PhotographerID = ?`,
         [temp.UserID]
       );
       projectUserPhotographyLinks = projectUserPhotographyLinks.concat(
@@ -519,17 +429,13 @@ router.post(
 
     // creating buffer
     const jsonUserData = JSON.parse(JSON.stringify(userData));
-    const bufferUserData = await fastcsv.writeToBuffer(jsonUserData, {
-      headers: true,
-    });
+    const bufferUserData = await fastcsv.writeToBuffer(jsonUserData,
+      { headers: true, });
     const jsonProjectUserPhotographyLinkData = JSON.parse(
       JSON.stringify(projectUserPhotographyLinks)
     );
     const bufferProjectUserPhotographyLinkData = await fastcsv.writeToBuffer(
-      jsonProjectUserPhotographyLinkData,
-      {
-        headers: true,
-      }
+      jsonProjectUserPhotographyLinkData, { headers: true, }
     );
 
     //zipping
@@ -543,41 +449,27 @@ router.post(
     //nulling uncascaded values to prevent errors
     for (const id of ids) {
       await db
-        
-        .query("UPDATE Media SET CreatedByID = null WHERE CreatedByID = ?", [
-          id,
-        ]);
+        .query("UPDATE Media SET CreatedByID = null WHERE CreatedByID = ?",
+          [id]);
       await db
-        
-        .query("UPDATE Media SET UpdatedByID = null WHERE UpdatedByID = ?", [
-          id,
-        ]);
+        .query("UPDATE Media SET UpdatedByID = null WHERE UpdatedByID = ?",
+          [id]);
       await db
-        
         .query(
           "UPDATE Project SET ProjectOwnerID = null WHERE ProjectOwnerID = ?",
-          [id]
-        );
+          [id]);
       await db
-        
-        .query("UPDATE Project SET CreatedByID = null WHERE CreatedByID = ?", [
-          id,
-        ]);
+        .query("UPDATE Project SET CreatedByID = null WHERE CreatedByID = ?",
+          [id]);
       await db
-        
-        .query("UPDATE Project SET UpdatedByID = null WHERE UpdatedByID = ?", [
-          id,
-        ]);
+        .query("UPDATE Project SET UpdatedByID = null WHERE UpdatedByID = ?",
+          [id]);
       await db
-        
-        .query("UPDATE User SET CreatedByID = null WHERE CreatedByID = ? ", [
-          id,
-        ]);
+        .query("UPDATE User SET CreatedByID = null WHERE CreatedByID = ? ",
+          [id]);
       await db
-        
-        .query("UPDATE User SET UpdatedByID = null WHERE UpdatedByID = ? ", [
-          id,
-        ]);
+        .query("UPDATE User SET UpdatedByID = null WHERE UpdatedByID = ? ",
+          [id]);
     }
 
     //main purge
@@ -600,9 +492,7 @@ router.post(
   isAdmin,
   async (req: Request, res: Response) => {
     //MEDIA
-    const mediaData: any = (
-      await db.query(`SELECT * FROM Media;`)
-    )[0];
+    const mediaData: any = (await db.query(`SELECT * FROM Media;`))[0];
     const mediaData2: Array<Object> = Array.from(mediaData);
     const jsonMediaData2 = JSON.parse(JSON.stringify(mediaData2));
     const mediaData3 = await fastcsv.writeToBuffer(jsonMediaData2, {
@@ -611,21 +501,16 @@ router.post(
 
     //USER
     const userData: any = (
-      await db
-        .query(
-          `SELECT UserID,Email,UserType,FullName,RegisteredDate,LastLoginDate,IsDeleted,ContactNumber,StaffType,Comments,UpdatedDate,UpdatedByID,CreatedByID FROM User;`
-        )
+      await db.query(`SELECT UserID,Email,UserType,FullName,RegisteredDate,LastLoginDate,
+          IsDeleted,ContactNumber,StaffType,Comments,UpdatedDate,UpdatedByID,CreatedByID 
+          FROM User;`)
     )[0];
     const userData2: Array<Object> = Array.from(userData);
     const jsonUserData = JSON.parse(JSON.stringify(userData2));
-    const userData3 = await fastcsv.writeToBuffer(jsonUserData, {
-      headers: true,
-    });
+    const userData3 = await fastcsv.writeToBuffer(jsonUserData, { headers: true, });
 
     //PROJECT
-    const projectData: any = (
-      await db.query(`SELECT * FROM Project;`)
-    )[0];
+    const projectData: any = (await db.query(`SELECT * FROM Project;`))[0];
     const projectData2: Array<Object> = Array.from(projectData);
     const jsonProjectData = JSON.parse(JSON.stringify(projectData2));
     const projectData3 = await fastcsv.writeToBuffer(jsonProjectData, {
@@ -643,8 +528,7 @@ router.post(
       JSON.stringify(imagingPlatformInstanceData2)
     );
     const imagingPlatformInstanceData3 = await fastcsv.writeToBuffer(
-      jsonImagingPlatformInstanceData,
-      { headers: true }
+      jsonImagingPlatformInstanceData, { headers: true }
     );
 
     //PROJECT USER PHOTOGRAPHY LINK
@@ -658,8 +542,7 @@ router.post(
       JSON.stringify(projectUserPhotographyLinkData2)
     );
     const projectUserPhotographyLinkData3 = await fastcsv.writeToBuffer(
-      jsonProjectUserPhotographyLinkData,
-      { headers: true }
+      jsonProjectUserPhotographyLinkData, { headers: true }
     );
 
     //ENUM
@@ -676,10 +559,7 @@ router.post(
     zip.addFile("user.csv", userData3);
     zip.addFile("project.csv", projectData3);
     zip.addFile("imagingPlatformInstance.csv", imagingPlatformInstanceData3);
-    zip.addFile(
-      "projectUserPhotographyLink.csv",
-      projectUserPhotographyLinkData3
-    );
+    zip.addFile("projectUserPhotographyLink.csv", projectUserPhotographyLinkData3);
     zip.addFile("EnumerationValues.txt", Buffer.from(EnumerationValuesString));
 
     res.json({
@@ -691,12 +571,11 @@ router.post(
 );
 
 router.post('/enable-or-disable-user-registration',
-  isAuthenticated,isAdmin ,async (req: Request,res:Response)=>{
+  isAuthenticated, isAdmin, async (req: Request, res: Response) => {
     const isEnabled = req.body.IsEnabled
-    console.log('req.body.IsEnabled',isEnabled)
-    const txt = isEnabled == 1? 'enabled':'disabled';
-    await db.query('UPDATE IsUserRegistrationEnabled SET IsEnabled = ?',[isEnabled])
-    return res.json({success:true, message:'User Registration Is now '+txt})
+    const txt = isEnabled == 1 ? 'enabled' : 'disabled';
+    await db.query('UPDATE IsUserRegistrationEnabled SET IsEnabled = ?', [isEnabled])
+    return res.json({ success: true, message: 'User Registration Is now ' + txt })
   }
 )
 

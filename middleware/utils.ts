@@ -1,18 +1,12 @@
-const { Passport } = require("passport");
-
 // Date formatting helper function (place this BEFORE your route handler)
-const formatDate = (dateString: string) => {
-  if (!dateString) return "Not specified";
-  const date = new Date(dateString);
-  return date.toLocaleString("en-US", {
-    year: "numeric",
-    month: "short",
-    day: "numeric",
-  });
-};
-const formatDisplayDate = (date: Date) => {
-  const d = date ? new Date(date).toISOString().split("T")[0] : null;
-  return d;
+
+const formatDisplayDate = (date: any) => {
+console.log('date',date)
+  var d1 = new Date(date)
+  console.log('d1',d1)
+  const d2 = d1 ? d1.toISOString().split("T")[0] : null;
+  console.log('d2',d2)
+  return d2;
 };
 
 const projectStatusEnumeration = () => {
@@ -63,7 +57,6 @@ const clusterIDRegex = /^[\d][A-Z]o{7}\d{7}$/;
 const resolutionRegex = /^\d{1,5}x\d{1,5}$/;
 
 export {
-  formatDate,
   formatDisplayDate,
   projectStatusEnumeration,
   mediaFileFormatEnumeration,

@@ -11,150 +11,128 @@
       float: center;
       font-size: 1.475rem;
     }
-
   </style>
 </head>
 
 <body>
   <div class="main-con">
-    <%- currentUser.UserType=='admin' 
-    ? include('../sidenavs/admin')
-    : include('../sidenavs/user') %>
+    <%- currentUser.UserType=='admin' ? include('../sidenavs/admin') : include('../sidenavs/user') %>
 
-    <form id="main-form">
-      <div id="horizontal-panel">
-        <a href="/media/view-all" class="btn btn-primary">
-          <i class="fas fa-arrow-left"></i> Back to all media
-        </a>
-        <h2>
-          Enter new Image Metadata 
-        </h2>
-        <p class="requirement-of-field">* = required</p>
-      </div>
-
-      <!-- Hidden IDs -->
-
-      <div class="form-group">
-        <label>Project and Photographer Pair*</label>
-        <select name="projectAndPhotographerPair" id="projectAndPhotographerPair" requried 
-        <%= currentUser.UserType == 'photographerOnly' ? 'disabled' : ''%>>
-          <option value="">-- Select a project and photographer pair--</option>
-          <%allProjectAndPhotographerPairs.forEach( u=>{%>
-          <option value="<%=u.ProjectID%>,<%=u.UserID%>">
-
-
-            <%=u.projectName%> | <%=u.photographerName%>
-          </option>
-          <%})%>
-        </select>
-      </div>
-
-      <!-- The rest of the form stays the same... -->
-      <div class="form-group">
-        <label for="mediaFileName">Media File Full Name*</label>
-        <input type="text" name="mediaFileName" id="mediaFileName" value="" required>
-      </div>
-
-      <div class="form-group">
-        <label for="filePath">File Path*</label>
-        <input type="text" name="filePath" id="filePath" value="" required>
-      </div>
-
-      <div class="form-group">
-        <label for="catalogID">Catalog ID* </label>
-        <input type="text" name="catalogID" id="catalogID" value="" required>
-      </div>
-
-      <div class="form-group">
-        <label for="morphoID">Morpho ID*</label>
-        <input type="text" name="morphoID" id="morphoID" value="" required>
-      </div>
-
-      <div class="form-group">
-        <label for="clusterID">Cluster ID </label>
-        <input type="text" name="clusterID" id="clusterID" value="">
-      </div>
-
-      <div class="form-group">
-        <label for="imagingDate">Date of Imaging</label>
-        <input type="date" name="imagingDate" id="imagingDate">
-      </div>
-
-      <div class="form-group">
-        <label for="resolution">Resolution* </label>
-        <input  type="text" name="resolution" id="resolution" value="" required>
-      </div>
-
-      <div class="form-group">
-        <label for="fileSize">File Size in Bytes*</label>
-        <input type="number" name="fileSizeBytes" id="fileSizeBytes" value="" required>
-      </div>
-
-      <div class="form-group">
-        <label for="fileFormat">Media File Format*</label>
-        <select name="fileFormat" id="fileFormat" onchange="fileFormatOnChange()" requried>
-          <option value="">-- Select a media file format --</option>
-          <%fileFormats.forEach( fileFormat=>{%>
-          <option value="<%=fileFormat%>" >
-            <%=fileFormat%>
-          </option>
-          <%})%>
-        </select>
-      </div>
-
-      <div class="form-group">
-        <label for="description">Description of Image</label>
-        <textarea name="description" id="description">  </textarea>
-      </div>
-
-      <div class="form-group">
-        <div class="horizontal-panel2">
-          <label class="label2" for="imagingPlatform">imaging Platform</label>
-          <!-- <button class="addButton" id="addImagingPlatform">Add Imaging Platform</button> -->
+      <form id="main-form">
+        <div id="horizontal-panel">
+          <a href="/media/view-all" class="btn btn-primary">
+            <i class="fas fa-arrow-left"></i> Back to all media
+          </a>
+          <h2>
+            Enter new Image Metadata
+          </h2>
+          <p class="requirement-of-field">* = required</p>
         </div>
-        <select name="imagingPlatform" id="imagingPlatform">
-          <option value="">-- Select a imaging platform --</option>
-          <%imagingPlatforms.forEach( imagingPlatform=>{%>
-          <option value="<%=imagingPlatform%>" >
-            <%=imagingPlatform%>
-          </option>
-          <%})%>
-        </select>
-      </div>
 
-      <div class="form-group">
-        <div class="horizontal-panel2">
-          <label class="label2" for="imageEditingTool">Image Editing Tool</label>
-          <!-- <button class='addButton' id="addImageEditingTool">Add Image Editing Tool</button> -->
+        <div class="form-group">
+          <label>Project and Photographer Pair*</label>
+          <select name="projectAndPhotographerPair" id="projectAndPhotographerPair" requried
+            <%=currentUser.UserType=='photographerOnly' ? 'disabled' : '' %>>
+            <option value="">-- Select a project and photographer pair--</option>
+            <%allProjectAndPhotographerPairs.forEach( u=>{%>
+              <option value="<%=u.ProjectID%>,<%=u.UserID%>">
+                <%=u.projectName%> | <%=u.photographerName%>
+              </option>
+              <%})%>
+          </select>
         </div>
-        <select name="imageEditingTool" id="imageEditingTool">
-          <option value="">-- Select a image editing tool --</option>
-          <%imageEditingTools.forEach( imageEditingTool=>{%>
-          <option value="<%=imageEditingTool%>" >
-            <%=imageEditingTool%>
-          </option>
-          <%})%>
-        </select>
-      </div>
+        <div class="form-group">
+          <label for="mediaFileName">Media File Full Name*</label>
+          <input type="text" name="mediaFileName" id="mediaFileName" value="" required>
+        </div>
+        <div class="form-group">
+          <label for="filePath">File Path*</label>
+          <input type="text" name="filePath" id="filePath" value="" required>
+        </div>
+        <div class="form-group">
+          <label for="catalogID">Catalog ID* </label>
+          <input type="text" name="catalogID" id="catalogID" value="" required>
+        </div>
+        <div class="form-group">
+          <label for="morphoID">Morpho ID*</label>
+          <input type="text" name="morphoID" id="morphoID" value="" required>
+        </div>
+        <div class="form-group">
+          <label for="clusterID">Cluster ID </label>
+          <input type="text" name="clusterID" id="clusterID" value="">
+        </div>
+        <div class="form-group">
+          <label for="imagingDate">Date of Imaging</label>
+          <input type="date" name="imagingDate" id="imagingDate">
+        </div>
+        <div class="form-group">
+          <label for="resolution">Resolution* </label>
+          <input type="text" name="resolution" id="resolution" value="" required>
+        </div>
+        <div class="form-group">
+          <label for="fileSize">File Size in Bytes*</label>
+          <input type="number" name="fileSizeBytes" id="fileSizeBytes" value="" required>
+        </div>
+        <div class="form-group">
+          <label for="fileFormat">Media File Format*</label>
+          <select name="fileFormat" id="fileFormat" onchange="fileFormatOnChange()" requried>
+            <option value="">-- Select a media file format --</option>
+            <%fileFormats.forEach( fileFormat=>{%>
+              <option value="<%=fileFormat%>">
+                <%=fileFormat%>
+              </option>
+              <%})%>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="description">Description of Image</label>
+          <textarea name="description" id="description">  </textarea>
+        </div>
+        <div class="form-group">
+          <div class="horizontal-panel2">
+            <label class="label2" for="imagingPlatform">imaging Platform</label>
+            <!-- <button class="addButton" id="addImagingPlatform">Add Imaging Platform</button> -->
+          </div>
+          <select name="imagingPlatform" id="imagingPlatform">
+            <option value="">-- Select a imaging platform --</option>
+            <%imagingPlatforms.forEach( imagingPlatform=>{%>
+              <option value="<%=imagingPlatform%>">
+                <%=imagingPlatform%>
+              </option>
+              <%})%>
+          </select>
+        </div>
+        <div class="form-group">
+          <div class="horizontal-panel2">
+            <label class="label2" for="imageEditingTool">Image Editing Tool</label>
+            <!-- <button class='addButton' id="addImageEditingTool">Add Image Editing Tool</button> -->
+          </div>
+          <select name="imageEditingTool" id="imageEditingTool">
+            <option value="">-- Select a image editing tool --</option>
+            <%imageEditingTools.forEach( imageEditingTool=>{%>
+              <option value="<%=imageEditingTool%>">
+                <%=imageEditingTool%>
+              </option>
+              <%})%>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="comments">Comments</label>
+          <textarea name="comments" id="comments"></textarea>
+        </div>
 
-      <div class="form-group">
-        <label for="comments">Comments</label>
-        <textarea name="comments" id="comments"></textarea>
-      </div>
+        <p class="note">
+          💡 Note: If there is more than one image for a specimen, please use the pipeline script to capture the
+          metadata
+          details.
+          New image editing tools and/or imaging platform will only be in the system if said changes are submitted
+          Only one enum value of either features can be added at a single time creation of media.
+        </p>
 
-
-      <p class="note">
-        💡 Note: If there is more than one image for a specimen, please use the pipeline script to capture the metadata
-        details.
-        New image editing tools and/or imaging platform will only be in the system if said changes are submitted
-        Only one enum value of either features can be added at a single time creation of media.
-      </p>
-
-      <div class="buttons">
-        <button type="submit"><i class="fas fa-paper-plane"></i> Create Image Metadata</button>
-      </div>
-    </form>
-
+        <div class="buttons">
+          <button type="submit"><i class="fas fa-paper-plane"></i> Create Image Metadata</button>
+        </div>
+      </form>
   </div>
 
   <script>
@@ -165,60 +143,6 @@
       fileNameInput.value = temp + fileFormat.value
     };
 
-    // document.getElementById('addImagingPlatform').addEventListener(
-    //   'click',
-    //   function enterNewImagingPlatform(e) {
-    //     e.preventDefault()
-    //     Swal.fire({
-    //       title: "Add new Imaging Platform",
-    //       text: "Add new Imaging Platform",
-    //       input: 'text',
-    //       showCancelButton: true,
-    //       inputPlaceholder: "Enter it here.",
-    //       preConfirm: (value) => {
-    //         if (value) {
-    //           if ("<%=imagingPlatforms%>".includes(value))
-    //             Swal.showValidationMessage('This Imaging Platform value already exist')
-    //           const select = document.getElementById("imagingPlatform")
-    //           var option = document.createElement('option')
-    //           option.text = option.value = value
-    //           select.add(option, 1)
-    //           select.value = option.text
-    //         } else {
-    //           Swal.showValidationMessage('Value is required')
-    //         }
-    //       }
-    //     })
-    //   }
-    // )
-
-    // document.getElementById('addImageEditingTool').addEventListener(
-    //   'click',
-    //   function enterNewImageEditingTool(e) {
-    //     e.preventDefault()
-    //     Swal.fire({
-    //       title: "Add new Imaging Editing Tool",
-    //       text: "Add new Imaging Editing Tool",
-    //       input: 'text',
-    //       showCancelButton: true,
-    //       inputPlaceholder: "Enter it here.",
-    //       preConfirm: (value) => {
-    //         if (value) {
-    //           if ("<%=imageEditingTools%>".includes(value))
-    //             Swal.showValidationMessage('This Image Editing Tool value already exist')
-    //           const select = document.getElementById("imageEditingTool")
-    //           var option = document.createElement('option')
-    //           option.text = option.value = value
-    //           select.add(option, 1)
-    //           select.value = option.text
-    //         } else {
-    //           Swal.showValidationMessage('Value is required')
-    //         }
-    //       }
-    //     })
-    //   }
-    // )
-
     function isValidFileName(filename, validExtensions) {
       if (!filename) return false;
       const lower = filename.toLowerCase();
@@ -226,6 +150,7 @@
       if (lower.replace(fileFormat.value, "") == "") return false
       return validExtensions.some(ext => lower.endsWith(ext));
     }
+
     document.addEventListener("DOMContentLoaded", () => {
       const form = document.getElementById("main-form");
       const fileNameInput = document.getElementById("mediaFileName");
@@ -253,7 +178,6 @@
         } else {
           fileNameInput.style.borderColor = "";
         }
-
         const clusterIDRegex = /^[\d][A-Z]{7}\d{7}$/
         const clusterID = document.getElementById('clusterID').value
         if (!clusterIDRegex.test(clusterID) && clusterID != "") {
@@ -270,7 +194,7 @@
           fileNameInput.style.borderColor = "";
         }
         if (errorMessages.length > 0) {
-          e.preventDefault(); // prevent form submission
+          e.preventDefault(); 
           Swal.fire({
             icon: 'error',
             title: 'Validation Issue',
@@ -278,8 +202,6 @@
             confirmButtonColor: '#007bff'
           });
         } else {
-          imagingPlatforms = "<%=imagingPlatforms%>"
-          imageEditingTools = "<%=imageEditingTools%>"
           const formData = JSON.stringify({
             fileName: form.mediaFileName.value,
             filePath: form.filePath.value,
@@ -293,12 +215,9 @@
             description: form.description.value,
             imagingPlatform: form.imagingPlatform.value == "" ? null : form.imagingPlatform.value,
             imageEditingTool: form.imageEditingTool.value == "" ? null : form.imageEditingTool.value,
-            // newImagingPlatform: (!imagingPlatforms.includes(form.imagingPlatform.value)) ? form.imagingPlatform.value : null,
-            // newImageEditingTool: (!imageEditingTools.includes(form.imageEditingTool.value)) ? form.imageEditingTool.value : null,
             comments: form.comments.value,
             projectAndPhotographerPair: form.projectAndPhotographerPair.value,
           })
-          console.log(formData)
 
           const submitBtn = form.querySelector('button[type="submit"]');
           const originalBtnText = submitBtn.innerHTML;
@@ -307,9 +226,7 @@
           submitBtn.disabled = true;
           const response = await fetch("/media/create", {
             method: 'POST',
-            headers: {
-              'Content-Type': 'application/json'
-            },
+            headers: {'Content-Type': 'application/json'},
             body: formData
           });
           try {
@@ -319,10 +236,8 @@
             }
 
             const data = await response.json();
-            if (!data.success) {
+            if (!data.success) 
               throw new Error(data.message || "Submission failed");
-            }
-
 
             // Show success message
             await Swal.fire({

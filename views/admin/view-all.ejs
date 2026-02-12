@@ -1,155 +1,140 @@
 <%- include('../sidenavs/admin') %>
 
-<head>
-  <link rel="stylesheet" href="/css/table.css" />
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
-  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-  <link rel="stylesheet" href="https://cdn.datatables.net/2.3.5/css/dataTables.dataTables.css" />
-  <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
-  <script src="https://cdn.datatables.net/2.3.5/js/dataTables.js"></script>
+  <head>
+    <link rel="stylesheet" href="/css/table.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <link rel="stylesheet" href="https://cdn.datatables.net/2.3.5/css/dataTables.dataTables.css" />
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <script src="https://cdn.datatables.net/2.3.5/js/dataTables.js"></script>
 
-</head>
+  </head>
 
-<div class="main-con">
+  <div class="main-con">
+    <div class="horizontal-panel">
+      <h2 class="page-title">User Base Management</h2>
+      <a href="/admin/user-management/create/" class="btn">Add User</a>
+    </div>
 
-  <div class="horizontal-panel">
-    <h2 class="page-title">User Base Management</h2>
-    <a href="/admin/user-management/create/" class="btn">Add User</a>
+    <% if (users.length===0) { %>
+      <p class="no-data">No users found</p>
+      <% } else { %>
+        <table class="user-table" id="userTable">
+          <thead>
+            <tr>
+              <th>User ID</th>
+              <th>Email</th>
+              <th>User Type</th>
+              <th>Full Name</th>
+              <th>StaffType</th>
+              <th>Registered Date</th>
+              <th>Last Login</th>
+              <th>Is Deleted</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% users.forEach(user=> { %>
+              <tr id="row-<%= user.LoginUserID %>">
+                <td>
+                  <%= user.UserID %>
+                </td>
+                <td>
+                  <%= user.Email %>
+                </td>
+                <td>
+                  <%= user.UserType %>
+                </td>
+                <td>
+                  <%=user.FullName%>
+                </td>
+                <td>
+                  <%= user.StaffType %>
+                </td>
+                <td>
+                  <%= new Date(user.RegisteredDate).toLocaleDateString('en-IN', { day: '2-digit' , month: 'short' ,
+                    year: 'numeric' }) %>
+                </td>
+                <td>
+                  <%= user.LastLoginDate ? new Date(user.LastLoginDate).toLocaleDateString('en-IN') : '-' %>
+                </td>
+                <td class="<%= !user.IsDeleted  ? 'status-approved' :  'status-rejected'  %>">
+                  <%=!user.IsDeleted? 'No' : 'Yes' %>
+                </td>
+
+                <td class="horizontal-panel">
+                  <a href="/admin/user-management/view/<%= user.UserID %>" class="btn-view">
+                    <i class="fas fa-view"></i> View
+                  </a>
+                  <a href="/admin/user-management/edit/<%= user.UserID %>"
+                    class="<%=user.IsDeleted?'disabled':'btn-edit'%>">
+                    Edit
+                  </a>
+                  <%if (!user.IsDeleted ){%>
+                    <div style="display:inline;">
+                      <button onclick="submit('delete','<%=user.UserID%>')" class="btn-delete">Delete</button>
+                    </div>
+                    <%} else {%>
+                      <div style="display:inline;">
+                        <button onclick="submit('restore','<%=user.UserID%>')" class="btn-restore">restore</button>
+                      </div>
+                      <%}%>
+                </td>
+              </tr>
+              <% }); %>
+          </tbody>
+        </table>
+        <% } %>
   </div>
 
-  <% if (users.length===0) { %>
-  <p class="no-data">No users found</p>
-  <% } else { %>
-  <table class="user-table" id="user-table">
-    <thead>
-      <tr>
-        <th>User ID</th>
-        <th>Email</th>
-        <th>User Type</th>
-        <th>Full Name</th>
-        <th>StaffType</th>
-        <th>Registered Date</th>
-        <th>Last Login</th>
-        <th>Is Deleted</th>
-        <th>Action</th>
-      </tr>
-    </thead>
-    <tbody>
-      <% users.forEach(user=> { %>
-      <tr id="row-<%= user.LoginUserID %>">
-        <td>
-          <%= user.UserID %>
-        </td>
-        <td>
-          <%= user.Email %>
-        </td>
-        <td>
-          <%= user.UserType %>
-        </td>
 
-        <td><%=user.FullName%></td>
-        <td>
-          <%= user.StaffType %>
-        </td>
-        <td>
-          <%= new Date(user.RegisteredDate).toLocaleDateString('en-IN', { day: '2-digit' ,
-                                            month: 'short' , year: 'numeric' }) %>
-        </td>
-        <td>
-          <%= user.LastLoginDate ? new Date(user.LastLoginDate).toLocaleDateString('en-IN') : '-' %>
-        </td>
+  <script>
+    new DataTable('#userTable', {pageLength: 50,      autoWidth: false })
 
+    function showAlert(message, type) {
+      const alertBox = document.createElement('div');
+      alertBox.className = `alert alert-${type}`;
+      alertBox.textContent = message;
+      document.body.appendChild(alertBox);
+      setTimeout(() => {
+        alertBox.classList.add('fade-out');
+        setTimeout(() => alertBox.remove(), 500);
+      }, 3000);
+    }
 
-
-        <td class="<%= !user.IsDeleted  ? 'status-approved' :  'status-rejected'  %>">
-          <%=!user.IsDeleted? 'No' : 'Yes' %>
-        </td>
-        <td class="horizontal-panel">
-          <a href="/admin/user-management/view/<%= user.UserID %>" class="btn-view">
-            <i class="fas fa-view"></i> View
-          </a>
-          <a href="/admin/user-management/edit/<%= user.UserID %>" class="<%=user.IsDeleted?'disabled':'btn-edit'%>">
-            Edit
-          </a>
-          <%if (!user.IsDeleted ){%>
-          <div style="display:inline;">
-            <button onclick="submit('delete','<%=user.UserID%>')" class="btn-delete">Delete</button>
-          </div>
-          <%} else {%>
-          <div style="display:inline;">
-            <button onclick="submit('restore','<%=user.UserID%>')" class="btn-restore">restore</button>
-          </div>
-          <%}%>
-                                        
-                                    </td>
-                                </tr>
-                                <% }); %>
-    </tbody>
-  </table>
-  <% } %>
-</div>
-
-
-
-<script>
-  new DataTable('#user-table', {
-    pageLength: 50,
-    autoWidth: false
-  })
-
-  function showAlert(message, type) {
-    const alertBox = document.createElement('div');
-    alertBox.className = `alert alert-${type}`;
-    alertBox.textContent = message;
-
-    document.body.appendChild(alertBox);
-
-    setTimeout(() => {
-      alertBox.classList.add('fade-out');
-      setTimeout(() => alertBox.remove(), 500);
-    }, 3000);
-  }
-  async function submit(deletedOrRestore, userID) {
-    console.log('in submit')
-    Swal.fire({
-      title: "Confirm Your password",
-      html: `
+    async function submit(deletedOrRestore, userID) {
+      Swal.fire({
+        title: "Confirm Your password",
+        html: `
       <div style="height: 120px">
       <label>Are you sure you want to ${deletedOrRestore} this user? If so please reenter your password.</label>
       <input type="password" id="reconfirmPasswordInput" placeholder="Password" style="width:98%;height:30%">
-      </div>
-      `,
-      confirmButtonText: 'confirm',
-      preConfirm: async (value) => {
-        if (!value) {
-          Swal.showValidationMessage('please enter your password')
-          return
+      </div>`,
+        confirmButtonText: 'confirm',
+        preConfirm: async (value) => {
+          if (!value) {
+            Swal.showValidationMessage('please enter your password')
+            return
+          }
+          try {
+            const response = await fetch(`/admin/user-management/${deletedOrRestore}/${userID}`, {
+              method: 'POST',
+              headers: {'Content-Type': 'application/json'},
+              body: JSON.stringify({
+                reconfirmPasswordForAdmin: document.getElementById('reconfirmPasswordInput').value
+              })
+            });
+            window.location.href = response.url; 
+          } catch (error) {
+            Swal.close();
+            Swal.fire({
+              title: 'Error!',
+              text: 'An unexpected error occurred\n' + error,
+              icon: 'error',
+              confirmButtonColor: '#00bbff'
+            });
+          }
         }
-        try {
-          const response = await fetch(`/admin/user-management/${deletedOrRestore}/${userID}`, {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-              reconfirmPasswordForAdmin: document.getElementById('reconfirmPasswordInput').value
-            })
-          });
-          window.location.href = response.url; // Redirect to the desired page after success
-        } catch (error) {
-          Swal.close();
-          Swal.fire({
-            title: 'Error!',
-            text: 'An unexpected error occurred\n' + error,
-            icon: 'error',
-            confirmButtonColor: '#00bbff'
-          });
-          console.error('Error:', error);
-        }
-      }
-    })
-  }
-  document.addEventListener("DOMContentLoaded", () => {
-
-  });
-</script>
+      })
+    }
+  </script>

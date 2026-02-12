@@ -1,9 +1,8 @@
 const express = require("express");
 const router = express.Router();
-// import { db } from "./db";
 const db = require('./db')
 const { isAuthenticated } = require("../middleware/auth");
-import { param, query, validationResult } from "express-validator";
+import { param, validationResult } from "express-validator";
 const {
   formatDisplayDate,
   userTypesEnumeration,
@@ -15,89 +14,35 @@ import { Response, Request } from "express";
 const path = require("path");
 const upload = multer({ dest: "upload-bulk-metadata/" });
 
-import pl, { Bool, Null } from "nodejs-polars";
-//OLD
-// router.get('/select-user-for/:mediaID/:projectID', isAuthenticated, async (req, res) => {
-//     const mediaID = req.params.mediaID;
-//     const projectID = req.params.projectID;
-//     const isEdit = mediaID != 'create-mode';
-//     const baseQuery = `
-//             SELECT
-//                 p.ProjectID,
-//                 p.ProjectName,
-//                 u.UserID AS user_id,
-//                 u.FullName AS projectOwnerName,
-//                 u.Email AS projectOwnerEmail,
-//                 u.ContactNumber,
-//                 u.StaffType,
-//                 p.ImagingStartDate,
-//                 p.ImagingEndDate
-//             FROM Project p
-//             JOIN User u ON p.ProjectOwnerID = u.UserID
-//             WHERE
-//                 u.IsDeleted = 0 AND
-//                 p.IsDeleted = 0 AND
-//       `;
-
-//     const currentProjectQuery = `SELECT p.ProjectID,
-//                         p.ProjectName,
-//                         p.ProjectID
-//                         FROM Project p
-//                         WHERE p.ProjectID = ?  `;
-//     const currentProject = isEdit
-//         ? await db.query(currentProjectQuery, [projectID])
-//         : null;
-//     const query = req.session.passport.user.UserType != userTypesEnumeration().admin
-//         ? baseQuery + " AND photographer.UserID = " + req.session.passport.user.UserID
-//         : baseQuery
-//     const query2 = isEdit
-//         ? query + " AND photographer.UserID !=" + currentProject[0][0].photographerID
-//         : query
-//     const users = (await db.query(query2))[0];
-//     console.log('isEdit', isEdit)
-//     res.render('media/user-list', {
-//         users: users,
-//         currentUser: req.session.passport.user,
-//         title: 'Media Image List',
-//         isEdit: isEdit,
-//         mediaID: mediaID,
-//         currentProject: mediaID != 'create-mode' ? currentProject[0][0] : ""
-//     });
-
-// });
+import pl, { Null } from "nodejs-polars";
 
 router.get("/create", isAuthenticated, async (req: Request, res: Response) => {
-  /***
-   * Select Only relevant project andd photographer pairs based on user typer
-   */
-  const allProjectAndPhotographerPairsQuery = `    Select pupl.ProjectID, photographer.UserID, 
-          p.ProjectName as projectName, photographer.FullName as photographerName 
+  //Select Only relevant project andd photographer pairs based on user typer
+
+  const allProjectAndPhotographerPairsQuery = `    
+        Select pupl.ProjectID, photographer.UserID, 
+        p.ProjectName as projectName, photographer.FullName as photographerName 
         FROM ProjectUserPhotographyLink pupl 
         JOIN Project p ON p.ProjectID = pupl.ProjectID 
         JOIN User photographer ON photographer.UserID = pupl.PhotographerID
-        WHERE photographer.UserType != 'admin'
-        `;
+        WHERE photographer.UserType != 'admin'`;
   const user = req.session.passport.user;
   var q2: string;
 
-  if (user.UserType == userTypesEnumeration().projectOwner) {
+  if (user.UserType == userTypesEnumeration().projectOwner)
     q2 = allProjectAndPhotographerPairsQuery + "AND p.ProjectOwnerID = ?";
-  } else if (user.UserType == userTypesEnumeration().photographerOnly) {
+  else if (user.UserType == userTypesEnumeration().photographerOnly)
     q2 = allProjectAndPhotographerPairsQuery + "AND photographer.UserID = ?";
-  } else {
-    q2 = allProjectAndPhotographerPairsQuery;
-  }
-  const allProjectAndPhotographerPairs = (
-    await db.query(q2, [user.UserID])
-  )[0];
-  console.log(allProjectAndPhotographerPairs)
+  else q2 = allProjectAndPhotographerPairsQuery;
+
+  const allProjectAndPhotographerPairs = (await db.query(q2, [user.UserID]))[0];
+
   res.render("media/create", {
     currentUser: req.session.passport.user,
     imageEditingTools: req.session["imageEditingTools"],
     imagingPlatforms: req.session["imagingPlatforms"],
     allProjectAndPhotographerPairs: allProjectAndPhotographerPairs,
     fileFormats: Object.values(mediaFileFormatEnumeration()),
-
     title: "Media Form",
   });
 });
@@ -123,6 +68,7 @@ router.post("/create", isAuthenticated, async (req: Request, res: Response) => {
     console.log("📤 Media submission data:", req.body);
     const createdBy = req.session.passport.user.UserID;
     const updatedBy = createdBy;
+
     // Validation: required fields
     const missingFields = [];
     if (!projectAndPhotographerPair)
@@ -136,7 +82,6 @@ router.post("/create", isAuthenticated, async (req: Request, res: Response) => {
     if (!description) missingFields.push("description");
     // if (!imagingPlatform) missingFields.push("imagingPlatform");
 
-    const splitX = projectAndPhotographerPair.split(",");
     if (missingFields.length > 0) {
       return res.status(400).json({
         success: false,
@@ -144,6 +89,7 @@ router.post("/create", isAuthenticated, async (req: Request, res: Response) => {
       });
     }
 
+    const splitX = projectAndPhotographerPair.split(",");
     const insertQuery = `
       INSERT INTO Media(
             ProjectID,
@@ -165,8 +111,7 @@ router.post("/create", isAuthenticated, async (req: Request, res: Response) => {
             CreatedByID,
             UpdatedDate,
             UpdatedByID
-        ) VALUES(?,  ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW(), ?, NOW(),?)
-        `;
+        ) VALUES(?,  ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW(), ?, NOW(),?)`;
     const projectID = splitX[0];
     const values = [
       projectID,
@@ -188,10 +133,7 @@ router.post("/create", isAuthenticated, async (req: Request, res: Response) => {
       updatedBy,
     ];
 
-    const result: any = (
-      await db.query(insertQuery, values)
-    )[0];
-    console.log("✅ Media submitted successfully, ID:", result.insertId);
+    const result: any = (await db.query(insertQuery, values))[0];
     req.session.save();
     res.json({
       success: true,
@@ -247,16 +189,14 @@ router.post("/view-all-processing", isAuthenticated, async (req: Request, res: R
         photographer.FullName As photographerName
       FROM Media m
       LEFT JOIN Project p ON m.ProjectID = p.ProjectID
-      LEFT JOIN User photographer ON m.PhotographerID = photographer.UserID  
-    `;
+      LEFT JOIN User photographer ON m.PhotographerID = photographer.UserID  `;
   var totalCountQuery = `
       SELECT 
       COUNT(*)
       FROM Media m
       LEFT JOIN Project p ON m.ProjectID = p.ProjectID
-      LEFT JOIN User photographer ON m.PhotographerID = photographer.UserID  
-  `
-  var filteredCountQuery =  totalCountQuery
+      LEFT JOIN User photographer ON m.PhotographerID = photographer.UserID  `
+  var filteredCountQuery = totalCountQuery
   const user = req.session.passport.user;
   var query: string = "";
   var filteredQuery = ""
@@ -288,6 +228,7 @@ router.post("/view-all-processing", isAuthenticated, async (req: Request, res: R
       break;
   }
 
+  // SEARCH TERM PROCESSING
   if (!isSearchTermEmpty) {
     filteredQuery = user.UserType == userTypesEnumeration().admin ? query + ' \nWHERE' : query + "\n AND "
     filteredCountQuery = user.UserType == userTypesEnumeration().admin ? filteredCountQuery + ' \nWHERE' : filteredCountQuery + "\n AND "
@@ -327,17 +268,15 @@ router.post("/view-all-processing", isAuthenticated, async (req: Request, res: R
       else
         params.push("%" + searchTerm + "%")
 
-    console.log('params', params)
-
     if (req.body.order && req.body.order[0].name != 's')
       filteredQuery = filteredQuery + "\nORDER BY " + req.body.order[0].name + " " + req.body.order[0].dir;
     filteredQuery = req.body.length
       ? filteredQuery + "\nLIMIT " + req.body.length + " OFFSET " + req.body.start
       : filteredQuery + "\nLIMIT 10"
     filteredResults = (await db.query(filteredQuery, params))
-    // console.log('filteredQuery', filteredQuery)
-    // console.log('filteredResults', filteredResults)
     filteredCount = (await db.query(filteredCountQuery, params))[0][0]['COUNT(*)']
+
+    // PROCESSING WITHOUT SEARCH TERM
   } else {
     if (req.body.order && req.body.order[0].name != 's')
       query = query + "\nORDER BY " + req.body.order[0].name + " " + req.body.order[0].dir;
@@ -348,6 +287,7 @@ router.post("/view-all-processing", isAuthenticated, async (req: Request, res: R
     for (const x of results[0])
       x['s'] = ""
   }
+
   const totalCount = (await db.query(totalCountQuery, [user.UserID]))[0][0]["COUNT(*)"]
 
   res.json({
@@ -355,7 +295,7 @@ router.post("/view-all-processing", isAuthenticated, async (req: Request, res: R
     recordsTotal: totalCount,
     recordsFiltered: isSearchTermEmpty ? totalCount : filteredCount,
     data: isSearchTermEmpty ? results[0] : filteredResults[0],
-    error: "" 
+    error: ""
   })
 
 })
@@ -378,30 +318,10 @@ router.get("/view/:mediaID", param('mediaID').isInt({ min: 1 }).withMessage("unk
     LEFT JOIN User photographer ON m.PhotographerID = photographer.UserID  
     LEFT JOIN Project project ON m.ProjectID = project.ProjectID
     WHERE m.MediaID = ? 
-    ORDER BY m.CreatedDate DESC
-        `;
+    ORDER BY m.CreatedDate DESC`;
 
-  const results = await db.query(
-    query,
-    [mediaID],
-    // (err: any, results: string | any[]) => {
-    //   if (err) {
-    //     console.error("❌ Error fetching media record:", err);
-    //     return res.status(500).render("error", {
-    //       message: "Error loading media entry",
-    //       error: process.env.NODE_ENV === "development" ? err : null,
-    //     });
-    //   }
-
-    //   if (results.length === 0) {
-    //     return res.status(404).render("error", {
-    //       message: "Media record not found",
-    //     });
-    //   }
-
-
-
-  );
+  const results = await db.query(query, [mediaID]);
+  console.log('imageing date',results[0][0].ImagingDate)
   res.render("media/view", {
     currentUser: req.session.passport.user,
     media: results[0][0], // Since we're querying by ID, we'll only get one record
@@ -409,43 +329,38 @@ router.get("/view/:mediaID", param('mediaID').isInt({ min: 1 }).withMessage("unk
     title: "View Media",
   });
 });
+
 router.get(
   "/edit/:mediaID",
   param('mediaID').isInt({ min: 1 }).withMessage('unknown ID'),
   isAuthenticated,
   async (req: Request, res: Response) => {
     const errors = validationResult(req)
-    if (!errors.isEmpty()) {
+    if (!errors.isEmpty())
       return res.status(400).json({ errors: errors.array() })
-    }
+
     const mediaID = req.params.mediaID;
     const allProjectAndPhotographerPairsQuery = `    Select pupl.ProjectID, photographer.UserID, 
           p.ProjectName as projectName, photographer.FullName as photographerName 
         FROM ProjectUserPhotographyLink pupl 
         JOIN Project p ON p.ProjectID = pupl.ProjectID 
         JOIN User photographer ON photographer.UserID = pupl.PhotographerID
-        WHERE photographer.UserType != 'admin'
-        `;
+        WHERE photographer.UserType != 'admin'`;
+
     const user = req.session.passport.user;
     var q2: string;
     /**
      * retrieve project photographer pair based on user privilleges
      */
-    if (user.UserType == userTypesEnumeration().projectOwner) {
+    if (user.UserType == userTypesEnumeration().projectOwner)
       q2 = allProjectAndPhotographerPairsQuery + "AND p.ProjectOwnerID = ?";
-    } else if (user.UserType == userTypesEnumeration().photographerOnly) {
-      q2 =
-        allProjectAndPhotographerPairsQuery + "AND photographer.UserID = ?";
-    } else {
-      q2 = allProjectAndPhotographerPairsQuery;
-    }
+    else if (user.UserType == userTypesEnumeration().photographerOnly)
+      q2 = allProjectAndPhotographerPairsQuery + "AND photographer.UserID = ?";
+    else q2 = allProjectAndPhotographerPairsQuery;
+
     const allProjectAndPhotographerPairs = (
       await db.query(q2, [user.UserID])
     )[0];
-    console.log(
-      "allProjectAndPhotographerPairs",
-      allProjectAndPhotographerPairs
-    );
 
     const currentMediaQuery =
       `SELECT Media.*,
@@ -459,8 +374,7 @@ router.get(
         WHERE Media.MediaID = ` + mediaID;
     const x: any[] = await db.query(currentMediaQuery);
     const toBeEditedMedia = x[0][0];
-    console.log("-------");
-    console.log("toBeEditedMedia", toBeEditedMedia);
+    console.log('toBeEditedMedia.ImagingDate',toBeEditedMedia.ImagingDate)
     res.render("media/edit", {
       currentUser: req.session.passport.user,
       imageEditingTools: req.session["imageEditingTools"],
@@ -500,9 +414,9 @@ router.post("/edit", isAuthenticated, async (req: Request, res: Response) => {
         WHERE MediaID = ?
                 `;
   const updatedBy = req.session.passport.user.UserID;
-  console.log("mediaData.imageEditingTool", mediaData.imageEditingTool);
   const splitX = mediaData.projectAndPhotographerPair.split(",");
   const projectID = splitX[0];
+  console.log(mediaData.imagingDate)
   const params = [
     mediaData.fileName,
     mediaData.filePath,
@@ -525,8 +439,6 @@ router.post("/edit", isAuthenticated, async (req: Request, res: Response) => {
   // const newImageEditingTool = mediaData.newImageEditingTool;
   // const newImagingPlatform = mediaData.newImagingPlatform;
 
-  // console.log("newImageEditingTool", newImageEditingTool);
-  // console.log("newImagingPlatform", newImagingPlatform);
   // if (
   //   newImageEditingTool != null &&
   //   newImageEditingTool != "" &&
@@ -589,9 +501,9 @@ router.post(
   isAuthenticated,
   (req: Request, res: Response) => {
     const errors = validationResult(req)
-    if (!errors.isEmpty()) {
+    if (!errors.isEmpty())
       return res.status(400).json({ errors: errors.array() })
-    }
+
     const mediaID = req.params.mediaID;
     const userID = req.session.passport.user.UserID;
 
@@ -600,8 +512,7 @@ router.post(
     const checkQuery =
       "SELECT * FROM Media WHERE MediaID = ? AND IsDeleted = 0";
 
-    db
-      .query(checkQuery, [mediaID])
+    db.query(checkQuery, [mediaID])
       .then((results) => {
         if (results[0].length === 0) {
           req.flash("error", "Media not found or already deleted");
@@ -614,8 +525,7 @@ router.post(
                 SET IsDeleted = 1,
                     UpdatedByID = ?,
                     UpdatedDate = NOW() 
-                WHERE MediaID = ?
-        `;
+                WHERE MediaID = ?`;
 
         return db.query(updateQuery, [userID, mediaID]);
       })
@@ -635,9 +545,9 @@ router.post(
   isAuthenticated,
   (req: Request, res: Response) => {
     const errors = validationResult(req)
-    if (!errors.isEmpty()) {
+    if (!errors.isEmpty())
       return res.status(400).json({ errors: errors.array() })
-    }
+
     const mediaID = req.params.mediaID;
     const userID = req.session.passport.user.UserID;
 
@@ -646,9 +556,8 @@ router.post(
     const checkQuery =
       "SELECT * FROM Media WHERE MediaID = ? AND IsDeleted = 1";
 
-    db
-      .query(checkQuery, [mediaID])
-      .then((results) => {
+    db.query(checkQuery, [mediaID])
+      .then((results: (string | any[])[]) => {
         if (results[0].length == 0) {
           req.flash("error", "Media not found or already restored");
           res.redirect("/media/view-all");
@@ -660,8 +569,7 @@ router.post(
                 SET IsDeleted = 0,
                     UpdatedByID = ?,
                     UpdatedDate = NOW() 
-                WHERE MediaID = ?
-            `;
+                WHERE MediaID = ?`;
 
         return db.query(updateQuery, [userID, mediaID]);
       })
@@ -696,12 +604,12 @@ router.post("/bulk-delete", isAuthenticated, async (req: Request, res: Response)
                 SET IsDeleted = 1,
                     UpdatedByID = ?,
                     UpdatedDate = NOW() 
-                WHERE MediaID in (?)
-        `;
+                WHERE MediaID in (?)`;
 
   await db.query(updateQuery, [userID, req.body]);
   return res.status(200).json({ success: true, message: "successfully soft deleted selected metadata" })
 })
+
 router.post("/bulk-restore", isAuthenticated, async (req: Request, res: Response) => {
   if (!Array.isArray(req.body))
     return res.status(400).json({ success: false, message: "request body is not an array" })
@@ -720,34 +628,29 @@ router.post("/bulk-restore", isAuthenticated, async (req: Request, res: Response
                 SET IsDeleted = 0,
                     UpdatedByID = ?,
                     UpdatedDate = NOW() 
-                WHERE MediaID in (?)
-        `;
+                WHERE MediaID in (?)`;
 
   await db.query(updateQuery, [userID, req.body]);
   return res.status(200).json({ success: true, message: "successfully restored selected metadata" })
 })
+
 router.get(
   "/upload-bulk-metadata",
   isAuthenticated,
   async (req: Request, res: Response) => {
-    console.log("upload bulk metadata GET");
     const user = req.session.passport.user;
-    const query = `
-    SELECT  p.ProjectID, p.ProjectName
-    FROM Project p
-`;
+    const query = ` SELECT  p.ProjectID, p.ProjectName
+                    FROM Project p`;
     // list projects based on user type,
     // where non admins will only get projects that they photographs or owns.
     const q2 =
       user.UserType != userTypesEnumeration().admin
         ? query +
-        `
-        JOIN ProjectUserPhotographyLink pupl ON pupl.ProjectID = p.ProjectID
-        WHERE pupl.PhotographerID = ` +
-        user.UserID
+        `JOIN ProjectUserPhotographyLink pupl ON pupl.ProjectID = p.ProjectID
+        WHERE pupl.PhotographerID = ` + user.UserID
         : query;
     const allProjects = (await db.query(q2))[0];
-    console.log(allProjects);
+
     res.render("media/upload-bulk-metadata", {
       currentUser: user,
       allProjects,
@@ -761,22 +664,13 @@ router.post(
   upload.single("bulk-metadata"),
   isAuthenticated,
   async (req: Request, res: Response) => {
+    const user = req.session.passport.user;
     const projectID = req.params.projectID;
-
-    const absolutePath = path
-      .join(__dirname, req.file.path)
-      .replace("/routes", "");
-    console.log("absolutePath", absolutePath);
-    const jsonString = fs.readFileSync(absolutePath, "utf-8");
-    const newRowsTemp = jsonString.split("\n").slice(1);
-    fs.rm(absolutePath, (err: any) => {
-      if (err) {
-        // File deletion failed
-        console.error(err.message);
-        return;
-      }
-    });
-
+    const newTable: string[][] = [];
+    var newTableDF: pl.DataFrame = pl.DataFrame();
+    var hasErrors = false;
+    const newImageEditingTools = [];
+    const uniqueFileNames = [];
     //Conducts some validation for each row of the data.
     interface newRowColumnInterface {
       MorphoID: number;
@@ -792,7 +686,6 @@ router.post(
       Resolution: number;
       // ImagingPlatform: number;
     }
-
     const newRowColumns: newRowColumnInterface = {
       MorphoID: 0,
       CatalogID: 1,
@@ -807,54 +700,41 @@ router.post(
       Resolution: 10,
       // ImagingPlatform: 11,
     };
-    const user = req.session.passport.user;
-    function isValidFileName(filename: string, fileFormat: any) {
-      if (!filename) return false;
-      const lower: string = filename.toLowerCase();
-      if (!lower.endsWith(fileFormat)) return false;
-      if (lower.replace(fileFormat, "") == "") return false;
-      const x: string[] = Object.values(mediaFileFormatEnumeration());
-      return x.some((value: string, index: number, array: string[]) =>
-        lower.endsWith(value.toString())
-      );
-    }
-    const newTable: string[][] = [];
-    var newTableDF: pl.DataFrame = pl.DataFrame();
-    var hasErrors = false;
-    // const newImagingPlatforms: string[] = [];
-    const newImageEditingTools = [];
-    const uniqueFileNames = [];
+
+    const absolutePath = path
+      .join(__dirname, req.file.path)
+      .replace("/routes", "");
+    const jsonString = fs.readFileSync(absolutePath, "utf-8");
+    const newRowsTemp = jsonString.split("\n").slice(1);
+    fs.rm(absolutePath, (err: any) => {
+      if (err) {
+        console.error(err.message);
+        return;
+      }
+    });
 
     const tempListOfObjects1 = (
       await db.query("SELECT DISTINCT FileName FROM Media")
     )[0];
     const tempListOfObjects2: any = tempListOfObjects1;
     const listOfFileNamesFromDB = [];
-    for (const x of tempListOfObjects2) {
+    for (const x of tempListOfObjects2)
       listOfFileNamesFromDB.push(x.FileName);
-    }
 
     const tempListOfLinks1 = (
-      await db
-
-        .query("SELECT DISTINCT * FROM ProjectUserPhotographyLink")
+      await db.query("SELECT DISTINCT * FROM ProjectUserPhotographyLink")
     )[0];
     const tempListOfLinks2: any = tempListOfLinks1;
     const listOfPhotographerProjectLinks = [];
-    for (const x of tempListOfLinks2) {
+    for (const x of tempListOfLinks2)
       listOfPhotographerProjectLinks.push([x.PhotographerID, x.ProjectID]);
-    }
-    console.log(
-      "listOfPhotographerProjectLinks",
-      listOfPhotographerProjectLinks
-    );
 
     //getting each row
     for (var i: number = 0; i < newRowsTemp.length; i++) {
       var newRowTempSplited = newRowsTemp[i].split(",");
-      if (newRowTempSplited.length == 1 && newRowTempSplited[0] == "") {
+      if (newRowTempSplited.length == 1 && newRowTempSplited[0] == "")
         continue;
-      }
+
       const newRow: string[] = [projectID.toString()];
       const fileName = newRowTempSplited[newRowColumns.FileName];
       var errorMessage = "";
@@ -868,27 +748,26 @@ router.post(
           .replaceAll("(", "(")
           .replaceAll(")", ")")
           .trim();
-        // const forNullHandling = [
-        // newRowColumns.ImagingPlatform,
-        // newRowColumns.ImageEditingTool,
-        // newRowColumns.ImagingDate,
-        // newRowColumns.Resolution,
-        // ];
-        const element =
-          // elementTemp == "" && forNullHandling.includes(j) ? null : elementTemp;
-          elementTemp == "" ? null : elementTemp;
-        // if (element == null && !forNullHandling.includes(j))
-        // (errorMessage = errorMessage + "This feature"),
-        //   Object.keys(newRowColumns)[j],
-        //   "is a null value. \n";
+        const element = elementTemp == "" ? null : elementTemp;
 
         //VALIDATION SWITCH CASES with check for new image editing tools
         switch (j) {
           case newRowColumns.FileName:
             const fileNameToCheck = newRowTempSplited[newRowColumns.FileFormat];
+
+            function isValidFileName(filename: string, fileFormat: any) {
+              if (!filename) return false;
+              const lower: string = filename.toLowerCase();
+              if (!lower.endsWith(fileFormat)) return false;
+              if (lower.replace(fileFormat, "") == "") return false;
+              const x: string[] = Object.values(mediaFileFormatEnumeration());
+              return x.some((value: string, index: number, array: string[]) =>
+                lower.endsWith(value.toString())
+              );
+            }
+
             if (!isValidFileName(element!, fileNameToCheck)) {
-              errorMessage =
-                errorMessage +
+              errorMessage = errorMessage +
                 `The media file name '${fileNameToCheck}' must include a valid extension like ` +
                 Object.values(mediaFileFormatEnumeration()) +
                 `or it needs to match FileFormat value in the same row
@@ -897,78 +776,62 @@ router.post(
               break;
             }
             if (listOfFileNamesFromDB.includes(element)) {
-              errorMessage =
-                errorMessage +
+              errorMessage = errorMessage +
                 `There is already an existing entry in the database for the  FileName: '${element}' \n`;
               break;
             }
             if (!uniqueFileNames.includes(element))
               uniqueFileNames.push(element);
-            else {
-              errorMessage =
-                errorMessage +
+            else
+              errorMessage = errorMessage +
                 `There are duplicate FileName for '${element}' within this csv file.\n`;
-            }
             break;
           case newRowColumns.CatalogID:
-            if (!/^[A-Z]{6}\d{7,8}$/.test(element!)) {
-              errorMessage =
-                errorMessage +
-                `CatalogID '${element!}' is not in the correct format. Example of a correct format: ZRCBDP0012345. 6 capital letters and then 7 numbers. \n`;
-            }
+            if (!/^[A-Z]{6}\d{7,8}$/.test(element!))
+              errorMessage = errorMessage +
+                `CatalogID '${element!}' is not in the correct format.\
+                 Example of a correct format: ZRCBDP0012345. 
+                 6 capital letters and then 7 numbers. \n`;
             break;
-          //   case newRowColumns.ClusterID:
-          //     if (!/^[\d][A-Z]{7}\d{7}$/.test(element))
-          //       errorMessage =
-          //         errorMessage +
-          //         errorMessageBuilder(
-          //           "clusterID is not in the correct format. Example of a correct format: 3PZRCBDP1234567.1 number, 7 capital letters and then 7 numbers."
-          //         );
-          //     break;
           case newRowColumns.ImagingDate:
-            // console.log(i,element)
             if (isNaN(new Date(element!).getTime()!) && element != null)
-              errorMessage =
-                errorMessage +
+              errorMessage = errorMessage +
                 `Invalid Imaging Date format. current value: ${element} \n`;
             break;
           case newRowColumns.Resolution:
             if (!/^\d{1,5}x\d{1,5}$/.test(element!) && element != null)
               errorMessage =
                 errorMessage +
-                `Resolution value: '${element}' is not in the correct format. example format: 1440x720, the length and width should not be more than 5 digits. \n`;
+                `Resolution value: '${element}' is not in the correct format. 
+                example format: 1440x720, the length and width should not be more than 5 digits. \n`;
             break;
           case newRowColumns.FileSizeBytes:
-            if (isNaN(parseInt(element!))) {
-              errorMessage =
-                errorMessage +
-                `File size must be in integer, not float or decimal or any other characters. Current Value: '${element}'\n`;
-            }
+            if (isNaN(parseInt(element!)))
+              errorMessage = errorMessage +
+                `File size must be in integer, not float or decimal or any other characters. 
+                Current Value: '${element}'\n`;
 
             if (parseInt(element) <= 0)
-              errorMessage =
-                errorMessage +
-                `File size must be a positive integer. Current Value: ${element}\n`;
+              errorMessage = errorMessage +
+                `File size must be a positive integer. Current Value: ${element} \n`;
             break;
           case newRowColumns.FileFormat:
             if (!Object.values(mediaFileFormatEnumeration()).includes(element))
-              errorMessage =
-                errorMessage +
+              errorMessage = errorMessage +
                 `Invalid file format: ${element}. The format should be any one of these: ` +
-                Object.values(mediaFileFormatEnumeration()).toString() +
-                "\n";
+                Object.values(mediaFileFormatEnumeration()).toString() + "\n";
             break;
           case newRowColumns.PhotographerID:
             console.log("in case photographer ID");
             const photographerID = element;
             if (isNaN(parseInt(photographerID!))) {
-              errorMessage =
-                errorMessage +
-                `Photographer ID must be in integer, not decimal or any other characters. Current Value: '${photographerID}'\n`;
+              errorMessage = errorMessage +
+                `Photographer ID must be in integer, not decimal or any other characters. 
+                Current Value: '${photographerID}'\n`;
               break;
             }
             var matched = false;
-            for (const x of listOfPhotographerProjectLinks) {
+            for (const x of listOfPhotographerProjectLinks)
               if (
                 x[0].toString() == photographerID &&
                 x[1].toString() == projectID
@@ -976,12 +839,12 @@ router.post(
                 matched = true;
                 break;
               }
-            }
+
             if (!matched)
-              errorMessage =
-                errorMessage +
+              errorMessage = errorMessage +
                 `The photographer (ID: ${photographerID}) is not the selected project (ID: ${projectID}). 
-                You may have selected the wrong project from the dropdown box or the wrong photographer ID in the config.ini \n`;
+                You may have selected the wrong project from the dropdown box 
+                or the wrong photographer ID in the config.ini \n`;
             break;
 
           // case newRowColumns.ImagingPlatform:
@@ -1002,21 +865,18 @@ router.post(
               !newImageEditingTools.includes(element!) &&
               element != null &&
               element != ""
-            ) {
-              newImageEditingTools.push(element);
-            }
+            ) newImageEditingTools.push(element);
             break;
 
           case newRowColumns.PhotographerID:
             if (isNaN(parseInt(element!))) {
-              errorMessage =
-                errorMessage +
-                `PhotographerID must be an integer, not decimal or any other characters. Current Value: '${element}' \n`;
+              errorMessage = errorMessage +
+                `PhotographerID must be an integer, not decimal or any other characters. 
+                Current Value: '${element}' \n`;
               break;
             }
             if (parseInt(element) <= 0)
-              errorMessage =
-                errorMessage +
+              errorMessage = errorMessage +
                 `PhotographerID must be a positive integer. Current Value: ${element} \n`;
             break;
         }
@@ -1039,7 +899,8 @@ router.post(
       res.json({
         success: false,
         message:
-          "Media metadata has contraints violations. press okay to csv error log file with the error logs",
+          `Media metadata has contraints violations. 
+          press okay to csv error log file with the error logs`,
         buffer: newTableDF.writeCSV(),
       });
       return;
@@ -1052,10 +913,8 @@ router.post(
     //insert any new image editing tools or Image Platforms
     if (newImageEditingTools != null && newImageEditingTools.length != 0)
       await db
-
-        .query("ALTER TABLE Media MODIFY COLUMN `ImageEditingTool` enum(?)", [
-          allImageEditingTools,
-        ]);
+        .query("ALTER TABLE Media MODIFY COLUMN `ImageEditingTool` enum(?)",
+          [allImageEditingTools]);
     req.session["imageEditingTools"] = allImageEditingTools;
     // const allImagingPlatforms =
     //   req.session["imagingPlatforms"].concat(newImagingPlatforms);
@@ -1081,7 +940,6 @@ router.post(
             UpdatedByID 
         ) VALUES ?`;
     await db.query(insertQuery, [newTable]);
-    console.log("✅ bulk metadata submitted successfully");
     res.json({
       success: true,
       message: "Media metadata bulk upload sucessful",
@@ -1101,7 +959,5 @@ router.get("/download-pipeline-script", isAuthenticated, (req: Request, res: Res
 })
 
 module.exports = router;
-function params(arg0: string) {
-  throw new Error("Function not implemented.");
-}
+
 

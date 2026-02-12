@@ -1,27 +1,27 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<link rel="stylesheet" href="/css/login.css">
+  <link rel="stylesheet" href="/css/login.css">
 
-<style>
-</style>
+  <style>
+  </style>
 </head>
 <div class="background">
   <div class="login-container">
     <h2>Sign In</h2>
     <form id="login-form">
       <div class="password-field">
-      <input type="email" id="email" placeholder="Enter your email" required>
-      <div>
-      <div class="password-field">
-        <input type="password" id="password" placeholder="Enter your password" required>
-        <span id="togglePassword" class="toggle-eye">👁️</span>
-      </div>
+        <input type="email" id="email" placeholder="Enter your email" required>
+        <div>
+          <div class="password-field">
+            <input type="password" id="password" placeholder="Enter your password" required>
+            <span id="togglePassword" class="toggle-eye">👁️</span>
+          </div>
 
-      <!-- <div class="forgot-password">
+          <!-- <div class="forgot-password">
         <a href="/forgot-password">Forgot your password?</a>
       </div> -->
-      <button type="submit">Login</button>
+          <button type="submit">Login</button>
     </form>
     <p class="signup-text">
       Don't have an account? <a href="/auth/register">Sign Up</a>
@@ -39,11 +39,8 @@
     if (loginForm) {
       loginForm.addEventListener("submit", async function (event) {
         event.preventDefault();
-
         const userEmail = document.getElementById("email").value.trim();
         const userPassword = document.getElementById("password").value.trim();
-
-      
 
         try {
           const response = await fetch("/auth/login", {
@@ -57,12 +54,11 @@
           if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
 
           const data = await response.json();
-
-          if (data.success) {
+          if (data.success)
             window.location.href = data.redirect;
-          } else {
+          else
             alert(`❌ Login Failed: ${data.error || 'Unknown error'}`);
-          }
+
         } catch (error) {
           console.error('Login error:', error);
           alert("❌ Login failed. Please check your connection and try again.");

@@ -6,141 +6,141 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>View Project</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
-<link rel="stylesheet" href="/css/view.css">
+  <link rel="stylesheet" href="/css/view.css">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
- <style>
-  #newlyCreatedPhotographers{
-    color: red;
-    font-weight: 600;
-    text-shadow: 5px;
-  }
-  .request-container{
-    margin-left: 100px;
-  }
- </style>
+  <style>
+    #newlyCreatedPhotographers {
+      color: red;
+      font-weight: 600;
+      text-shadow: 5px;
+    }
+
+    .request-container {
+      margin-left: 100px;
+    }
+  </style>
 </head>
 
 <body>
 
   <%- include(currentUser.UserType=='admin' ? '../sidenavs/admin' : '../sidenavs/user' )%>
-  <main>
-    <div class="container request-container">
-      <div class="request-header">
-        <h1 class="h3 mb-0">
-         Project Name: <%= project.ProjectName %> ID: <%=project.ProjectID%>
-        </h1>
-        <p class="text-muted mb-0">Created on <%= project.CreatedDate %> by <%= project.CreatorName
-                                || 'System' %>
-        </p>
-        <% if (project.UpdatedDate) { %>
-        <p class="text-muted">Last updated on <%= project.UpdatedDate %> by <%= project.UpdaterName
-                                    || 'System' %>
-        </p>
-        <% } %>
-        <% if(project.IsDeleted){%>
-        <span class="status-badge bg-danger">
-          Deleted
-        </span>
-        <%}%>
+    <main>
+      <div class="container request-container">
+        <div class="request-header">
+          <h1 class="h3 mb-0">
+            Project Name: <%= project.ProjectName %> ID: <%=project.ProjectID%>
+          </h1>
+          <p class="text-muted mb-0">Created on <%= project.CreatedDate %> by <%= project.CreatorName || 'System' %>
+          </p>
+          <% if (project.UpdatedDate) { %>
+            <p class="text-muted">Last updated on <%= project.UpdatedDate %> by <%= project.UpdaterName || 'System' %>
+            </p>
+            <% } %>
+              <% if(project.IsDeleted){%>
+                <span class="status-badge bg-danger">
+                  Deleted
+                </span>
+                <%}%>
+        </div>
+
+        <div class="row">
+          <div class="col-md-6">
+            <div class="detail-row">
+              <div class="detail-label">Project Owner</div>
+              <div class="detail-value">
+                <%= project.projectOwnerName %>
+              </div>
+            </div>
+
+            <%if(currentUser.UserType=='admin'){%>
+              <div class="detail-row">
+                <div class="detail-label">Project Type</div>
+                <div class="detail-value">
+                  <%= project.ProjectType || 'Not Specified' %>
+                </div>
+              </div>
+              <%}%>
+
+                <div class="detail-row">
+                  <div class="detail-label">Photographer</div>
+                  <div class="detail-value">
+                    <%= project.photographers || 'Not Specified' %>
+                  </div>
                 </div>
 
-                <div class="row">
-                    <div class="col-md-6">
-                        <div class="detail-row">
-                            <div class="detail-label">Project Owner</div>
-                            <div class="detail-value">
-                                <%= project.projectOwnerName %>
-      </div>
-    </div>
-    <%if(currentUser.UserType=='admin'){%>
-    <div class="detail-row">
-      <div class="detail-label">Project Type</div>
-      <div class="detail-value">
-        <%= project.ProjectType || 'Not Specified' %>
-      </div>
-    </div>
-    <%}%>
-    <div class="detail-row">
-      <div class="detail-label">Photographer</div>
-      <div class="detail-value">
-        <%= project.photographers || 'Not Specified' %>
-      </div>
-    </div>
+                <div class="detail-row">
+                  <div class="detail-label">Status</div>
+                  <div class="detail-value">
+                    <span>
+                      <%= project.statusName %>
+                    </span>
+                  </div>
+                </div>
+          </div>
 
-    <div class="detail-row">
-      <div class="detail-label">Status</div>
-      <div class="detail-value">
-        <span>
-          <%= project.statusName %>
-        </span>
-      </div>
-    </div>
+          <div class="col-md-6">
+            <div class="detail-row">
+              <div class="detail-label">Imaging Period</div>
+              <div class="detail-value">
+                <%= project.ImagingStartDate %> to <%= project.ImagingEndDate %>
+              </div>
+            </div>
+            <div class="detail-row">
+              <div class="detail-label">Imaging Platform</div>
+              <div class="detail-value">
+                <%= project.imagingPlatforms || 'Not specified' %>
+              </div>
+            </div>
 
-    </div>
-
-    <div class="col-md-6">
-      <div class="detail-row">
-        <div class="detail-label">Imaging Period</div>
-        <div class="detail-value">
-          <%= project.ImagingStartDate %> to <%= project.ImagingEndDate %>
-        </div>
-      </div>
-      <div class="detail-row">
-        <div class="detail-label">Imaging Platform</div>
-        <div class="detail-value">
-          <%= project.imagingPlatforms || 'Not specified' %>
-        </div>
-      </div>
-      <%if (newlyCreatedPhotographers != ""){%>
+            <%if (newlyCreatedPhotographers !="" ){%>
               <div class="detail-row">
-        <div class="detail-label">Newly Created Photographers</div>
-        <div class="detail-value" id="newlyCreatedPhotographers">
-          <%newlyCreatedPhotographers.forEach( p =>{%>
-            Email: <%=p.email%> Password:<%=p.password%>
-            <%})%>
-            Please tell your photographers to change the password as soon as possible.
+                <div class="detail-label">Newly Created Photographers</div>
+                <div class="detail-value" id="newlyCreatedPhotographers">
+                  <%newlyCreatedPhotographers.forEach( p=>{%>
+                    Email: <%=p.email%> Password:<%=p.password%>
+                        <%})%>
+                          Please tell your photographers to change the password as soon as possible.
+                </div>
+              </div>
+              <%}%>
+
+          </div>
         </div>
-      </div>
-        <%}%>
-    </div>
-    </div>
 
-    <div class="detail-row">
-      <div class="detail-label">Project Summary</div>
-      <div class="detail-value text-area-value">
-        <%= project.SummaryOfProject %>
-      </div>
-    </div>
+        <div class="detail-row">
+          <div class="detail-label">Project Summary</div>
+          <div class="detail-value text-area-value">
+            <%= project.SummaryOfProject %>
+          </div>
+        </div>
 
-    <div class="detail-row">
-      <div class="detail-label">Specimens Details</div>
-      <div class="detail-value text-area-value">
-        <%= project.DetailsOfSpecimens %>
-      </div>
-    </div>
+        <div class="detail-row">
+          <div class="detail-label">Specimens Details</div>
+          <div class="detail-value text-area-value">
+            <%= project.DetailsOfSpecimens %>
+          </div>
+        </div>
 
-    <% if (project.Comments) { %>
-    <div class="detail-row">
-      <div class="detail-label">Additional Comments</div>
-      <div class="detail-value text-area-value">
-        <%= project.Comments %>
+        <% if (project.Comments) { %>
+          <div class="detail-row">
+            <div class="detail-label">Additional Comments</div>
+            <div class="detail-value text-area-value">
+              <%= project.Comments %>
+            </div>
+          </div>
+          <% } %>
+            <div class="mt-4 d-flex justify-content-between">
+              <a href="/project/view-all" class="btn btn-primary">
+                <i class="fas fa-arrow-left"></i> Back to Projects
+              </a>
+              <a href="/project/edit/<%= project.ProjectID %>"
+                class="<%=project.IsDeleted?'disabled':'btn btn-warning'%>">
+                <i class="fas fa-edit"></i> Edit Request
+              </a>
+            </div>
       </div>
-    </div>
-    <% } %>
-    <div class="mt-4 d-flex justify-content-between">
-      <a href="/project/view-all" class="btn btn-primary">
-        <i class="fas fa-arrow-left"></i> Back to Projects
-      </a>
-      <a href="/project/edit/<%= project.ProjectID %>" class="<%=project.IsDeleted?'disabled':'btn btn-warning'%>">
-        <i class="fas fa-edit"></i> Edit Request
-      </a>
-    </div>
-    </div>
-  </main>
-  <!-- Font Awesome for icons -->
-
-  <!-- Bootstrap JS -->
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    </main>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 
 </html>

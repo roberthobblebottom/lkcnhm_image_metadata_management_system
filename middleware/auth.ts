@@ -61,11 +61,11 @@ const reconfirmPasswordFunctionForAdmin = async (
 ) => {
   const reconfirmPassword: string = req.body.reconfirmPasswordForAdmin;
   const username: string = req.session.passport.user.Email;
-  if (!reconfirmPassword) {
+  if (!reconfirmPassword) 
     return res
       .status(400)
       .json({ success: false, message: "Password to reconfirm is empty" });
-  }
+  
   const query =
     "SELECT PasswordSalt, SaltedPassword FROM User WHERE Email = ? AND IsDeleted = 0 AND UserType = 'admin'";
   const [result]: any = await db
@@ -94,7 +94,6 @@ const reconfirmPasswordFunctionForAdmin = async (
     310000,
     32,
     "sha256"
-    
   );
   if (!crypto.timingSafeEqual(user.SaltedPassword, saltedPasswordFromDB)) {
     console.log("❌ Invalid Password");
@@ -102,7 +101,6 @@ const reconfirmPasswordFunctionForAdmin = async (
       .status(400)
       .json({ success: false, message: "Invalid password" });
   } else {
-    console.log('Sucessful reconfirmation of password.')
   }
   next();
 };

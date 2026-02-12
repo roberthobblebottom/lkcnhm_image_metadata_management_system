@@ -81,14 +81,12 @@
       transition: background-color 0.3s ease;
       font-weight: 600;
       font-family: 'Segoe UI', sans-serif;
-
     }
 
-
-.disabled {
-  color: red;
-  font-weight: bold;
-}
+    .disabled {
+      color: red;
+      font-weight: bold;
+    }
   </style>
 </head>
 
@@ -123,20 +121,19 @@
                  value ='<%=element%>')" class="btn btn-edit">
                       Edit</button>
                     <button onclick="reconfirmPassword(
-                  entity='projectType',
-                message='Are you sure you want to delete this enumeration value <%=element%> for project type?<br> The delete of any of these attributes will remove existing table datas\' respective values. ',
-                value= '<%=element%>',
-                enumAction='delete')" class="btn btn-delete">
+                    entity='projectType',
+                    message='Are you sure you want to delete this enumeration value <%=element%> for project type?<br> The delete of any of these attributes will remove existing table datas\' respective values. ',
+                    value= '<%=element%>',
+                    enumAction='delete')" class="btn btn-delete">
                       Delete</button>
                   </div>
                 </td>
-
               </tr>
               <% })%>
           </tbody>
         </table>
-
       </div>
+
       <div class="form-group">
         <div class="horizontal-panel">
           <h3>Imaging Platforms </h3>
@@ -145,7 +142,6 @@
         <table id="imagingPlatformsTable">
           <thead>
             <tr>
-
               <th><label>Value</label></th>
               <th><label>Action</label></th>
             </tr>
@@ -162,8 +158,9 @@
                 value='<%=element%>')" class="btn btn-edit">
                       Edit</button>
                     <button onclick="reconfirmPassword(entity='imagingPlatform',
-                message='Are you sure you want to delete this enumeration value <%=element%> for imaging platform? <br> The delete  of any of these attributes will remove existing table datas\' respective values. ',
-                value='<%=element%>',enumAction='delete')"" class=" btn btn-delete">
+                    message='Are you sure you want to delete this enumeration value <%=element%> for imaging platform? <br> The delete  of any of these attributes will remove existing table datas\' respective values. ',
+                    value='<%=element%>',enumAction='delete')"" 
+                    class=" btn btn-delete">
                       Delete</button>
                   </div>
                 </td>
@@ -172,17 +169,15 @@
           </tbody>
         </table>
       </div>
-      <div class="form-group">
 
+      <div class="form-group">
         <div class="horizontal-panel">
           <h3>Image Editing Tools </h3>
-
           <button class="btn btn-create" onclick="addValue('imageEditingTool')">Create</button>
         </div>
         <table id="imageEditingToolsTable">
           <thead>
             <tr>
-
               <th><label>Value</label></th>
               <th><label>Action</label></th>
             </tr>
@@ -209,13 +204,15 @@
           </tbody>
         </table>
       </div>
-      <h2>Purge Data that are marked as Soft Delete from the Database</h2>
 
+      <h2>Purge Data that are marked as Soft Delete from the Database</h2>
       <button onclick="reconfirmPassword('user',
-    'Are you sure you want to PERNAMANTLY purge user data?')" class="btn btn-primary">
+      'Are you sure you want to PERNAMANTLY purge user data?')" class="btn btn-primary">
         <i class="fas fa-arrow-down"></i> Purge User Data
       </button>
-      <button onclick="reconfirmPassword('project','Are you sure you want to PERNAMANTLY purge project data? WARNING: This will PERNAMENTLY delete image metadatas too.')"
+      <button
+        onclick="reconfirmPassword('project',
+        'Are you sure you want to PERNAMANTLY purge project data? WARNING: This will PERNAMENTLY delete image metadatas too.')"
         class="btn btn-primary">
         <i class="fas fa-arrow-down"></i> Purge Project Data
       </button>
@@ -226,11 +223,15 @@
       </button>
 
       <h2>Download System's Data</h2>
-      <button onclick="reconfirmPassword(entity='',
-      message='Are you sure you want to download the system\'s data?',value='',enumAction='downloadData'
-    )" class="btn btn-primary">
+      <button onclick="reconfirmPassword(
+        entity='',
+        message='Are you sure you want to download the system\'s data?',
+        value='',
+        enumAction='downloadData'
+      )" class="btn btn-primary">
         <i class="fas fa-arrow-down"></i> Download
       </button>
+
       <h2>Security</h2>
       <div class="horizontal-panel">
         <h3 class="<%=IsUserRegistrationEnabled==1?'':'disabled'%>">
@@ -239,10 +240,8 @@
         <button onclick="reconfirmPassword(entity='',
               message='Are you sure you want to disable User Registration? Project Owner will also not be able to create photographer accounts too in Project Management Pages.',
               value='<%=IsUserRegistrationEnabled%>',
-              enumAction='enableOrDisableUserRegistration')"
-              class=" btn btn-primary" 
-           >
-              <%=IsUserRegistrationEnabled==1 ? 'Disable' :'Enable'%>
+              enumAction='enableOrDisableUserRegistration')" class=" btn btn-primary">
+          <%=IsUserRegistrationEnabled==1 ? 'Disable' :'Enable'%>
         </button>
       </div>
 
@@ -262,8 +261,7 @@
       <div style="min-height: 100px; max-height:140px ">
       <label >${message} <br>If so please reenter your password</label>
       <input type="password" id="reconfirmPasswordInput" placeholder="Password" style="width:98%;height:30px;margin-top: 20px">
-      </div>
-      `,
+      </div>`,
       confirmButtonText: 'confirm',
       preConfirm: (value) => {
         if (!value) {
@@ -274,9 +272,6 @@
           purgeData(entity)
         const passwordValue = document.getElementById('reconfirmPasswordInput').value
         switch (enumAction) {
-          // case 'edit':
-          //   editValue(entity, originalValue, passwordValue)
-          //   break
           case 'delete':
             sendDeleteValue(entity,
               originalValue,
@@ -286,13 +281,13 @@
             downloadSystemData()
             break
           case 'enableOrDisableUserRegistration':
-            console.log("HERE")
             enableOrDisableUserRegistration(originalValue);
             break
         }
       }
     })
   }
+
   async function addValue(feature) {
     Swal.fire({
       title: "Add new " + feature,
@@ -301,19 +296,15 @@
       showCancelButton: true,
       inputPlaceholder: "Enter it here."
     }).then((result) => {
-      if (result.value) {
+      if (result.value)
         sendAddValue(feature, result.value)
-      }
     });
-
   }
+
   async function sendAddValue(feature, value) {
-    console.log(feature, value)
     const response = await fetch("/admin/add-enumeration-value", {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         feature: feature,
         value: value
@@ -322,14 +313,13 @@
     try {
       if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(errorData.message || "Submission failed with status " + response.status);
+        throw new Error(errorData.message
+          || "Submission failed with status " + response.status);
       }
 
       const data = await response.json();
-      if (!data.success) {
+      if (!data.success)
         throw new Error(data.message || "Submission failed");
-      }
-
 
       // Show success message
       await Swal.fire({
@@ -341,14 +331,11 @@
         timer: 1000,
         timerProgressBar: true
       });
-
-      console.log(data.redirectUrl)
       // Redirect if URL is provided
       if (data.redirectUrl) {
         window.location.href = data.redirectUrl;
         return; // Stop further execution
       }
-
     } catch (error) {
       await Swal.fire({
         title: 'Error!',
@@ -360,10 +347,7 @@
     }
   }
 
-
-
   function editValue(feature, value) {
-    console.log('value', value)
     Swal.fire({
       title: "Editing Value, " + value + " of the feature " + feature,
       showCancelButton: true,
@@ -384,13 +368,11 @@
       }
     });
   }
+
   async function sendEditValue(feature, oldValue, newValue, password) {
-    console.log(feature, oldValue, newValue, password)
     const response = await fetch("/admin/edit-enumeration-value", {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         reconfirmPasswordForAdmin: password,
         feature: feature,
@@ -405,10 +387,8 @@
       }
 
       const data = await response.json();
-      if (!data.success) {
+      if (!data.success)
         throw new Error(data.message || "Submission failed");
-      }
-
 
       // Show success message
       await Swal.fire({
@@ -421,14 +401,8 @@
         timerProgressBar: true
       });
 
-      console.log(data.redirectUrl)
-      // Redirect if URL is provided
-      if (data.redirectUrl) {
+      if (data.redirectUrl)
         window.location.href = data.redirectUrl;
-        return; // Stop further execution
-      }
-
-
     } catch (error) {
       await Swal.fire({
         title: 'Error!',
@@ -441,12 +415,9 @@
   }
 
   async function sendDeleteValue(feature, value, password) {
-
     const response = await fetch("/admin/delete-enumeration-value", {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         feature: feature,
         value: value,
@@ -460,10 +431,8 @@
       }
 
       const data = await response.json();
-      if (!data.success) {
+      if (!data.success)
         throw new Error(data.message || "Submission failed");
-      }
-
 
       // Show success message
       await Swal.fire({
@@ -475,15 +444,8 @@
         timer: 1000,
         timerProgressBar: true
       });
-
-      console.log(data.redirectUrl)
-      // Redirect if URL is provided
-      if (data.redirectUrl) {
+      if (data.redirectUrl)
         window.location.href = data.redirectUrl;
-        return; // Stop further execution
-      }
-
-
     } catch (error) {
       await Swal.fire({
         title: 'Error!',
@@ -495,20 +457,15 @@
     }
   }
 
-
-
   async function purgeData(entity) {
     try {
       const response = await fetch('/admin/purge-soft-deleted-' + entity + 's', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           reconfirmPasswordForAdmin: document.getElementById("reconfirmPasswordInput").value
         })
       })
-      console.log(response)
       const result = await response.json();
       if (response.status == 400 && !result.success) {
         Swal.fire({
@@ -535,7 +492,6 @@
         link.download = "purged " + entity + " data " + new Date().toISOString() + ".zip";
         link.click();
       })
-
     } catch (error) {
       Swal.fire({
         title: 'Error!',
@@ -549,22 +505,19 @@
   async function downloadSystemData() {
     try {
       const response = await fetch('/admin/download-system-data',
-
         {
           method: 'POST',
-          headers: {
-            'Content-Type': 'application/json'
-          },
+          headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             reconfirmPasswordForAdmin: document.getElementById("reconfirmPasswordInput").value
           })
         }
       )
       const result = await response.json();
-      var bytes = new Uint8Array(result.buffer.data); // pass your byte response to this constructor
-      var blob = new Blob([bytes], {
-        type: "application/zip"
-      }); // change resultByte to bytes
+      // pass your byte response to this constructor
+      var bytes = new Uint8Array(result.buffer.data);
+      // change resultByte to bytes
+      var blob = new Blob([bytes], { type: "application/zip" });
       var link = document.createElement('a');
       link.href = window.URL.createObjectURL(blob);
       link.download = "data " + new Date().toISOString() + ".zip";
@@ -578,18 +531,15 @@
       });
     }
   }
+
   async function enableOrDisableUserRegistration(value) {
     try {
-      const isEnabled =value == 1? 0: 1
+      const isEnabled = value == 1 ? 0 : 1
       const response = await fetch('/admin/enable-or-disable-user-registration',
         {
           method: 'POST',
-          headers: {
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify({
-            IsEnabled:isEnabled 
-          })
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ IsEnabled: isEnabled })
         }
       )
       if (!response.ok) {
@@ -598,9 +548,8 @@
       }
 
       const data = await response.json();
-      if (!data.success) {
+      if (!data.success)
         throw new Error(data.message || "Submission failed");
-      }
 
       const txt = isEnabled == 1 ? 'enabled' : 'disabled';
       // Show success message
@@ -614,10 +563,7 @@
         timerProgressBar: true
       });
 
-      // Redirect if URL is provided
-        window.location.href = '/admin/other-admin-settings';
-        return; // Stop further execution
-
+      window.location.href = '/admin/other-admin-settings';
     } catch (error) {
       Swal.fire({
         title: 'Error!',

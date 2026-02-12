@@ -1,7 +1,5 @@
 const express = require("express");
 const router = express.Router();
-import { RowDataPacket } from "mysql2";
-// import { db } from "./db";
 const db = require('./db')
 import { Request, Response } from "express";
 import crypto from "crypto";
@@ -16,10 +14,6 @@ router.get(
   "/change-password",
   isAuthenticated,
   (req: Request, res: Response) => {
-    if (!req.session.passport.user) {
-      return res.redirect("/login");
-    }
-
     res.render("settings/change-password", {
       currentUser: req.session.passport.user,
       title: "Change Password",
@@ -36,20 +30,18 @@ router.post(
     const oldPassword = req.body.oldPassword;
     const newPassword = req.body.newPassword;
     const confirmNewPassword = req.body.confirmNewPassword;
-
-    if (newPassword != confirmNewPassword) {
+    const getCurrentPasswordStuffQuery =
+      "SELECT SaltedPassword,PasswordSalt FROM User WHERE Email = ?";
+    const updatePasswordQuery =
+      "UPDATE User SET SaltedPassword = ?, PasswordSalt = ? WHERE Email = ?";
+    if (newPassword != confirmNewPassword)
       return res.status(400).json({
         success: false,
         message: "the new passwords does not match",
       });
-    }
 
-    console.log("📩 Change Password Request for:", username);
-    console.log("🧾 Request Body:", req.body);
-    const query =
-      "SELECT SaltedPassword,PasswordSalt FROM User WHERE Email = ?";
     const results = (
-      await db.query(query, [username])
+      await db.query(getCurrentPasswordStuffQuery, [username])
     )[0][0];
     const currentSaltedPassword = results.SaltedPassword;
     const currentPasswordSalt = results.PasswordSalt;
@@ -63,13 +55,11 @@ router.post(
         310000,
         32,
         "sha256")
-      if (!crypto.timingSafeEqual(saltedOldPassword, currentSaltedPassword)) {
-        console.log("old passwords matched");
+      if (!crypto.timingSafeEqual(saltedOldPassword, currentSaltedPassword))
         return res.json({
           success: false,
           message: "old password is incorrect",
         });
-      }
 
       const saltedPassword = crypto.pbkdf2Sync(
         newPassword,
@@ -77,14 +67,13 @@ router.post(
         310000,
         32,
         "sha256")
-      console.log("inside password hashed functions");
-      const updatePasswordQuery =
-        "UPDATE User SET SaltedPassword = ?, PasswordSalt = ? WHERE Email = ?";
+
       await db.query(updatePasswordQuery, [
         saltedPassword,
         newPasswordSalt,
         username,
       ]);
+
       return res.json({
         success: true,
         message: "sucessfully changed password",
@@ -96,9 +85,9 @@ router.post(
         message: `❌ Password change Failed: ${error} `,
       });
     }
-    return;
   }
 );
+
 router.get("/profile", isAuthenticated, async (req: Request, res: Response) => {
   const query = "SELECT * FROM User WHERE User.UserID = ?";
   const result = (
@@ -125,55 +114,54 @@ router.post(
       originalEmail,
     } = req.body;
     const missingFields = [];
+    const updateProfileQuery = `
+      UPDATE User SET
+          Email =?,
+          FullName = ?,
+          ContactNumber = ?,
+          StaffType =?,
+          Comments = ?
+      WHERE UserID = ?`;
+    const checkEmailValidityQuery =
+      `SELECT 1 
+      FROM User 
+      WHERE Email = ? AND Email != ? LIMIT 1`
+
     //validation
     if (!userID) missingFields.push("userID");
     if (!email) missingFields.push("email");
     if (!fullName) missingFields.push("fullName");
-    if (missingFields.length > 0) {
+    if (missingFields.length > 0)
       return res.status(400).json({
         success: false,
         message: "Missing required fields: " + missingFields.join(", "),
       });
-    }
+
     if (!emailRegex.test(email))
       return res.status(400).json({
         success: false,
         message:
           "invalid email, email value does not have '@' or '.' character(s).",
       });
-    console.log('email',email)
-    console.log('originalEmail',originalEmail)
+
     if (email != originalEmail) {
       const result = await db
-        .query("SELECT 1 FROM User WHERE Email = ? AND Email != ? LIMIT 1;", [
-          email,
-          originalEmail,
-        ]);
-      console.log(result[0][0])
-      if (result[0][0]) {
+        .query(checkEmailValidityQuery, [email, originalEmail]);
+
+      if (result[0][0])
         return res.status(400).json({
           success: false,
           message: "Email already exist",
         });
-      }
     }
-    if (!Object.values(staffTypesEnumeration()).includes(staffType)) {
+    if (!Object.values(staffTypesEnumeration()).includes(staffType))
       return res.status(400).json({
         success: false,
         message:
           "invalid staff type that is not these values: " +
           Object.values(staffTypesEnumeration()),
       });
-    }
-    const query = `
-   UPDATE User SET
-      Email =?,
-      FullName = ?,
-      ContactNumber = ?,
-      StaffType =?,
-      Comments = ?
-   WHERE UserID = ?
-  `;
+
     const params = [
       email,
       fullName,
@@ -182,7 +170,7 @@ router.post(
       comments,
       userID,
     ];
-    await db.query(query, params);
+    await db.query(updateProfileQuery, params);
     req.session.passport.user.Email = email;
     req.session.passport.user.FullName = fullName;
     req.session.save();

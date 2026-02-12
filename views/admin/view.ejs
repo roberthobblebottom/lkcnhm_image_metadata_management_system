@@ -24,86 +24,81 @@
 <body>
   <main>
     <div class="main-con">
-
       <%- include('../sidenavs/admin') %>
-      <div class="container request-container">
-        <div class="request-header">
+        <div class="container request-container">
+          <div class="request-header">
+            <h1>View User Details</h1>
+            <p class="text-muted mb-0">Registered on <%= registeredDate %>
+            </p>
+            <% if(user.IsDeleted){%>
+              <span class="status-badge bg-danger">
+                Deleted
+              </span>
+              <%}%>
+          </div>
+          <div class="row">
+            <div class="col-md-6">
+              <div class="detail-row">
+                <div class='detail-label'>User ID</div>
+                <div class="detail-value">
+                  <%=user.UserID%>
+                </div>
+              </div>
+              <div class="detail-row">
+                <div class='detail-label'>Email </div>
+                <div class="detail-value">
+                  <%=user.Email%>
+                </div>
+              </div>
+              <div class="detail-row">
+                <div class='detail-label'>User Type </div>
 
-          <h1>View User Details</h1>
-          <p class="text-muted mb-0">Registered on <%= registeredDate %>
-          </p>
-          <% if(user.IsDeleted){%>
-          <span class="status-badge bg-danger">
-            Deleted
-          </span>
-          <%}%>
-      </div>
-<div class="row">
-  <div class="col-md-6">
-      <div class="detail-row">
-        <div class='detail-label' >User ID</div>
-          <div class="detail-value">
-        <%=user.UserID%>
-        </div>
-      </div>
-      <div class="detail-row">
-        <div class='detail-label'>Email </div>
-        <div class="detail-value">
-          <%=user.Email%>
-        </div>
-      </div>
-      <div class="detail-row">
-        <div class='detail-label'>User Type </div>
+                <div class="detail-value">
+                  <%= user.UserType %>
+                </div>
+              </div>
+              <div class="detail-row">
+                <div class='detail-label'>Full Name </div>
+                <div class="detail-value">
+                  <%=user.FullName%>
+                </div>
+              </div>
+            </div>
 
-        <div class="detail-value">
-          <%= user.UserType %>
-        </div>
-      </div>
-      <div class="detail-row">
-        <div class='detail-label'>Full Name </div>
-        <div class="detail-value">
-          <%=user.FullName%>
-        </div>
-      </div>
-    </div>
+            <div class="col-md-6">
+              <div class="detail-row">
+                <div class='detail-label' for="contactNumber">Contact Number </div>
+                <div class="detail-value">
+                  <%=user.ContactNumber%>
+                </div>
+              </div>
+              <div class=" detail-row">
+                <div class='detail-label' for="staffType">StaffType </div>
+                <div class="detail-value">
+                  <%=user.StaffType%>
+                </div>
+              </div>
+            </div>
+          </div>
 
-    <div class="col-md-6">
-      <div class="detail-row">
-        <div class='detail-label' for="contactNumber">Contact Number </div>
-        <div class="detail-value">
-          <%=user.ContactNumber%>
+          <div class="detail-row">
+            <div class='detail-label' for="comments">Comments </div>
+            <div class="detail-value text-area-value">
+              <%=user.Comments%>
+            </div>
+          </div>
+          <div class="mt-4 d-flex justify-content-between">
+            <a href="/admin/user-management/view-all" class="btn btn-primary">
+              <i class="fas fa-arrow-left"></i> Back to all Users
+            </a>
+            <a href="/admin/user-management/edit/<%= user.UserID%>/"
+              class="<%=user.IsDeleted?'disabled':'btn btn-warning'%>">
+              <i class="fas fa-edit"></i> Edit User Details
+            </a>
+          </div>
         </div>
-      </div>
-      <div class=" detail-row">
-        <div class='detail-label' for="staffType">StaffType </div>
-        <div class="detail-value">
-          <%=user.StaffType%>
-        </div>
-      </div>
-    </div>
-    </div>
-
-    <div class="detail-row">
-      <div class='detail-label' for="comments">Comments </div>
-      <div class="detail-value text-area-value">
-        <%=user.Comments%>
-      </div>
-    </div>
-    <div class="mt-4 d-flex justify-content-between">
-      <a href="/admin/user-management/view-all" class="btn btn-primary">
-        <i class="fas fa-arrow-left"></i> Back to all Users
-      </a>
-      <a href="/admin/user-management/edit/<%= user.UserID%>/" class="<%=user.IsDeleted?'disabled':'btn btn-warning'%>">
-        <i class="fas fa-edit"></i> Edit User Details
-      </a>
-    </div>
-    </div>
     </div>
   </main>
 
-  <script>
-
-  </script>
 </body>
-
 </html>

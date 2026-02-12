@@ -12,141 +12,144 @@
   <div class="main-con">
     <%- currentUser.UserType=='admin' ? include('../sidenavs/admin'): include('../sidenavs/user') %>
 
-    <form id="main-form">
-      <div id="horizontal-panel">
-        <a href="/media/view-all" class="btn btn-primary">
-          <i class="fas fa-arrow-left"></i> Back to all media
-        </a>
-        <h2>
-          Edit Image Metadata
-        </h2>
-        <p class="requirement-of-field">* = required</p>
-      </div>
-      <div class='form-group'>
-        <label>Media ID: <%=toBeEditedMedia.MediaID%></label>
-        <input readonly type='text' name="MediaID" value="<%= toBeEditedMedia.MediaID %>" style="display:none;">
-      </div>
-
-      <div class="form-group">
-        <label>Project and Photographer Pair*</label>
-        <select name="projectAndPhotographerPair" id="projectAndPhotographerPair" requried <%= currentUser.UserType == 'photographerOnly' ? 'disabled' : ''%>>
-          <option value="">-- Select a project and photographer pair--</option>
-          <%allProjectAndPhotographerPairs.forEach( u=>{%>
-          <option value="<%=u.ProjectID%>,<%=u.UserID%>" <%=
-            u.projectName== toBeEditedMedia.ProjectName  
-            && (u.photographerName == toBeEditedMedia.photographerName) 
-          ? 'selected'  : "" %>>
-            <%=u.projectName%> | <%=u.photographerName%>
-          </option>
-          <%})%>
-        </select>
-      </div>
-
-      <div class="form-group">
-        <label for="mediaFileName">Media File Full Name*</label>
-        <input type="text" name="mediaFileName" id="mediaFileName" value="<%=toBeEditedMedia.FileName%>" required>
-      </div>
-
-      <div class="form-group">
-        <label for="filePath">File Path*</label>
-        <input type="text" name="filePath" id="filePath" value="<%=toBeEditedMedia.FilePath %>" required>
-      </div>
-
-      <div class="form-group">
-        <label for="catalogID">Catalog ID* </label>
-        <input type="text" name="catalogID" id="catalogID" value="<%=toBeEditedMedia.CatalogID %>" required>
-      </div>
-
-      <div class="form-group">
-        <label for="morphoID">Morpho ID*</label>
-        <input type="text" name="morphoID" id="morphoID" value="<%= toBeEditedMedia.MorphoID  %>" required>
-      </div>
-
-      <div class="form-group">
-        <label for="clusterID">Cluster ID </label>
-        <input type="text" name="clusterID" id="clusterID" value="<%=toBeEditedMedia.ClusterID %>">
-      </div>
-
-      <div class="form-group">
-        <label for="imagingDate">Date of Imaging</label>
-        <input type="date" name="imagingDate" id="imagingDate" value="<%=toBeEditedImagingDate%>">
-      </div>
-
-      <div class="form-group">
-        <label for="resolution">Resolution* </label>
-        <input  type="text" name="resolution" id="resolution" value="<%=toBeEditedMedia.Resolution%>" required>
-      </div>
-
-      <div class="form-group">
-        <label for="fileSize">File Size in Bytes* </label>
-        <input  type="number" name="fileSizeBytes" id="fileSizeBytes" value="<%=toBeEditedMedia.FileSizeBytes%>" required>
-      </div>
-
-      <div class="form-group">
-        <label for="fileFormat">Media File Format* </label>
-        <select name="fileFormat" id="fileFormat" onchange="fileFormatOnChange()" requried>
-          <option value="">-- Select a media file format --</option>
-          <%fileFormats.forEach( fileFormat=>{%>
-          <option value="<%=fileFormat%>" <%=fileFormat==toBeEditedMedia.FileFormat ? 'selected' : '' %>>
-            <%=fileFormat%>
-          </option>
-          <%})%>
-        </select>
-      </div>
-
-      <div class="form-group">
-        <label for="description">Description of Image</label>
-        <textarea name="description" id="description"> <%=toBeEditedMedia.Description%></textarea>
-      </div>
-
-      <div class="form-group">
-        <div class="horizontal-panel2">
-          <label class="label2" for="imagingPlatform">imaging Platform</label>
-          <!-- <button class="addButton" id="addImagingPlatform">Add Imaging Platform</button> -->
+      <form id="main-form">
+        <div id="horizontal-panel">
+          <a href="/media/view-all" class="btn btn-primary">
+            <i class="fas fa-arrow-left"></i> Back to all media
+          </a>
+          <h2>
+            Edit Image Metadata
+          </h2>
+          <p class="requirement-of-field">* = required</p>
         </div>
-        <select name="imagingPlatform" id="imagingPlatform">
-          <option value="">-- Select a imaging platform --</option>
-          <%imagingPlatforms.forEach( imagingPlatform=>{%>
-          <option value="<%=imagingPlatform%>" <%=imagingPlatform==toBeEditedMedia.ImagingPlatform  ? 'selected' : '' %>>
-            <%=imagingPlatform%>
-          </option>
-          <%})%>
-
-        </select>
-      </div>
-
-      <div class="form-group">
-
-        <div class="horizontal-panel2">
-          <label class="label2" for="imageEditingTool">Image Editing Tool</label>
-          <!-- <button class="addButton" id="addImageEditingTool">Add Image Editing Tool</button> -->
+        <div class='form-group'>
+          <label>Media ID: <%=toBeEditedMedia.MediaID%></label>
+          <input readonly type='text' name="MediaID" value="<%= toBeEditedMedia.MediaID %>" style="display:none;">
         </div>
-        <select name="imageEditingTool" id="imageEditingTool">
-          <option value="">-- Select a image editing tool --</option>
-          <%imageEditingTools.forEach( imageEditingTool=>{%>
-          <option value="<%=imageEditingTool%>" <%=imageEditingTool == toBeEditedMedia.ImageEditingTool ? 'selected' : '' %>>
-            <%=imageEditingTool%>
-          </option>
-          <%})%>
-        </select>
-      </div>
 
-      <div class="form-group">
-        <label for="comments">Comments</label>
-        <textarea name="comments" id="comments"><%=toBeEditedMedia.Comments  %></textarea>
-      </div>
+        <div class="form-group">
+          <label>Project and Photographer Pair*</label>
+          <select name="projectAndPhotographerPair" id="projectAndPhotographerPair" requried
+            <%=currentUser.UserType=='photographerOnly' ? 'disabled' : '' %>>
+            <option value="">-- Select a project and photographer pair--</option>
+            <%allProjectAndPhotographerPairs.forEach( u=>{%>
+              <option value="<%=u.ProjectID%>,<%=u.UserID%>" <%=u.projectName==toBeEditedMedia.ProjectName &&
+                (u.photographerName==toBeEditedMedia.photographerName) ? 'selected' : "" %>>
+                <%=u.projectName%> | <%=u.photographerName%>
+              </option>
+              <%})%>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="mediaFileName">Media File Full Name*</label>
+          <input type="text" name="mediaFileName" id="mediaFileName" value="<%=toBeEditedMedia.FileName%>" required>
+        </div>
+
+        <div class="form-group">
+          <label for="filePath">File Path*</label>
+          <input type="text" name="filePath" id="filePath" value="<%=toBeEditedMedia.FilePath %>" required>
+        </div>
+
+        <div class="form-group">
+          <label for="catalogID">Catalog ID* </label>
+          <input type="text" name="catalogID" id="catalogID" value="<%=toBeEditedMedia.CatalogID %>" required>
+        </div>
+
+        <div class="form-group">
+          <label for="morphoID">Morpho ID*</label>
+          <input type="text" name="morphoID" id="morphoID" value="<%= toBeEditedMedia.MorphoID  %>" required>
+        </div>
+
+        <div class="form-group">
+          <label for="clusterID">Cluster ID </label>
+          <input type="text" name="clusterID" id="clusterID" value="<%=toBeEditedMedia.ClusterID %>">
+        </div>
+
+        <div class="form-group">
+          <label for="imagingDate">Date of Imaging</label>
+          <input type="date" name="imagingDate" id="imagingDate" value="<%=toBeEditedImagingDate%>">
+        </div>
+
+        <div class="form-group">
+          <label for="resolution">Resolution* </label>
+          <input type="text" name="resolution" id="resolution" value="<%=toBeEditedMedia.Resolution%>" required>
+        </div>
+
+        <div class="form-group">
+          <label for="fileSize">File Size in Bytes* </label>
+          <input type="number" name="fileSizeBytes" id="fileSizeBytes" value="<%=toBeEditedMedia.FileSizeBytes%>"
+            required>
+        </div>
+
+        <div class="form-group">
+          <label for="fileFormat">Media File Format* </label>
+          <select name="fileFormat" id="fileFormat" onchange="fileFormatOnChange()" requried>
+            <option value="">-- Select a media file format --</option>
+            <%fileFormats.forEach( fileFormat=>{%>
+              <option value="<%=fileFormat%>" <%=fileFormat==toBeEditedMedia.FileFormat ? 'selected' : '' %>>
+                <%=fileFormat%>
+              </option>
+              <%})%>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="description">Description of Image</label>
+          <textarea name="description" id="description"> <%=toBeEditedMedia.Description%></textarea>
+        </div>
+
+        <div class="form-group">
+          <div class="horizontal-panel2">
+            <label class="label2" for="imagingPlatform">imaging Platform</label>
+          </div>
+          <select name="imagingPlatform" id="imagingPlatform">
+            <option value="">-- Select a imaging platform --</option>
+            <%imagingPlatforms.forEach( imagingPlatform=>{%>
+              <option value="<%=imagingPlatform%>" <%=imagingPlatform==toBeEditedMedia.ImagingPlatform ? 'selected' : ''
+                %>>
+                <%=imagingPlatform%>
+              </option>
+              <%})%>
+
+          </select>
+        </div>
+
+        <div class="form-group">
+
+          <div class="horizontal-panel2">
+            <label class="label2" for="imageEditingTool">Image Editing Tool</label>
+            <!-- <button class="addButton" id="addImageEditingTool">Add Image Editing Tool</button> -->
+          </div>
+          <select name="imageEditingTool" id="imageEditingTool">
+            <option value="">-- Select a image editing tool --</option>
+            <%imageEditingTools.forEach( imageEditingTool=>{%>
+              <option value="<%=imageEditingTool%>" <%=imageEditingTool==toBeEditedMedia.ImageEditingTool ? 'selected'
+                : '' %>>
+                <%=imageEditingTool%>
+              </option>
+              <%})%>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="comments">Comments</label>
+          <textarea name="comments" id="comments"><%=toBeEditedMedia.Comments  %></textarea>
+        </div>
 
 
-      <p class="note">
-        💡 Note: If there is more than one image for a specimen, please use the pipeline script to capture the metadata
-        details.
-        New image editing tool and/or imaging platform will only be in the system if said changes are submitted
-        Only one enum value of either features can be added at a single time of edit of a media.
-      </p>
-      <div class="buttons">
-        <button type="submit"><i class="fas fa-paper-plane"></i> Edit Image Metadata</button>
-      </div>
-    </form>
+        <p class="note">
+          💡 Note: If there is more than one image for a specimen, please use the pipeline script to capture the
+          metadata
+          details.
+          New image editing tool and/or imaging platform will only be in the system if said changes are submitted
+          Only one enum value of either features can be added at a single time of edit of a media.
+        </p>
+
+        <div class="buttons">
+          <button type="submit"><i class="fas fa-paper-plane"></i> Edit Image Metadata</button>
+        </div>
+      </form>
 
   </div>
   <script>
@@ -157,84 +160,26 @@
       fileNameInput.value = temp + fileFormat.value
     };
 
-    // document.getElementById('addImagingPlatform').addEventListener(
-    //   'click',
-    //   function enterNewImagingPlatform(e) {
-    //     e.preventDefault()
-    //     Swal.fire({
-    //       title: "Add new Imaging Platform",
-    //       text: "Add new Imaging Platform",
-    //       input: 'text',
-    //       showCancelButton: true,
-    //       inputPlaceholder: "Enter it here.",
-    //       preConfirm: (value) => {
-    //         if (value) {
-    //           if ("<%=imagingPlatforms%>".includes(value))
-    //             Swal.showValidationMessage('This Imaging Platform value already exist')
-    //           const select = document.getElementById("imagingPlatform")
-    //           var option = document.createElement('option')
-    //           option.text = option.value = value
-    //           select.add(option, 1)
-    //           select.value = option.text
-    //         } else {
-    //           Swal.showValidationMessage('Value is required')
-    //         }
-    //       }
-    //     })
-    //   }
-    // )
+    function isValidFileName(filename, validExtensions) {
+      if (!filename) return false;
+      const lower = filename.toLowerCase();
+      if (!lower.endsWith(fileFormat.value)) return false
+      if (lower.replace(fileFormat.value, "") == "") return false
+      return validExtensions.some(ext => lower.endsWith(ext));
+    }
 
-    // document.getElementById('addImageEditingTool').addEventListener(
-    //   'click',
-    //   function enterNewImageEditingTool(e) {
-    //     e.preventDefault()
-    //     Swal.fire({
-    //       title: "Add new Imaging Editing Tool",
-    //       text: "Add new Imaging Editing Tool",
-    //       input: 'text',
-    //       showCancelButton: true,
-    //       inputPlaceholder: "Enter it here.",
-    //       preConfirm: (value) => {
-    //         if (value) {
-    //           if ("<%=imageEditingTools%>".includes(value))
-    //             Swal.showValidationMessage('This Image Editing Tool value already exist')
-    //           const select = document.getElementById("imageEditingTool")
-    //           var option = document.createElement('option')
-    //           option.text = option.value = value
-    //           select.add(option, 1)
-    //           select.value = option.text
-    //         } else {
-    //           Swal.showValidationMessage('Value is required')
-    //         }
-    //       }
-    //     })
-    //   }
-    // )
-    function isValidFileName(filename,validExtensions) {
-        if (!filename) return false;
-        const lower = filename.toLowerCase();
-        if (!lower.endsWith(fileFormat.value)) return false
-        if (lower.replace(fileFormat.value, "") == "") return false
-        return validExtensions.some(ext => lower.endsWith(ext));
-      }
     document.addEventListener("DOMContentLoaded", () => {
       const form = document.getElementById("main-form");
       const fileNameInput = document.getElementById("mediaFileName");
       const fileFormat = document.getElementById("fileFormat");
       const validExtensions = "<%=fileFormats%>".split(",");
-      const now = new Date()
-      now.setDate(new Date().getDate())
-      document.getElementById('imagingDate').value = now.toISOString().slice(0, 16).split('T')[0]
       fileFormatOnChange()
-      // Check for a valid file extension
-      
 
       form.addEventListener("submit", async (e) => {
-
         e.preventDefault();
         const fileName = fileNameInput.value.trim();
         let errorMessages = [];
-        if (!isValidFileName(fileName,validExtensions)) {
+        if (!isValidFileName(fileName, validExtensions)) {
           errorMessages.push("📁 The media file name must include a valid extension like `.jpg`, `.png`, `.tiff`, etc. AND must the the same as media File Format from selection drop down box.\n\n");
           fileNameInput.style.borderColor = "red";
         } else {
@@ -272,9 +217,6 @@
             confirmButtonColor: '#007bff'
           });
         } else {
-          console.log(form.imageEditingTool.value)
-          imagingPlatforms = "<%=imagingPlatforms%>"
-          imageEditingTools = "<%=imageEditingTools%>"
           const formData = JSON.stringify({
             fileName: form.mediaFileName.value,
             filePath: form.filePath.value,
@@ -288,14 +230,10 @@
             description: form.description.value,
             imagingPlatform: form.imagingPlatform.value == "" ? null : form.imagingPlatform.value,
             imageEditingTool: form.imageEditingTool.value == "" ? null : form.imageEditingTool.value,
-            // newImagingPlatform: (!imagingPlatforms.includes(form.imagingPlatform.value)) ? form.imagingPlatform.value : null,
-            // newImageEditingTool: (!imageEditingTools.includes(form.imageEditingTool.value)) ? form.imageEditingTool.value : null,
             comments: form.comments.value,
             MediaID: form.MediaID.value,
             projectAndPhotographerPair: form.projectAndPhotographerPair.value,
           })
-          console.log("HERERERERER")
-          console.log(formData)
 
           const submitBtn = form.querySelector('button[type="submit"]');
           const originalBtnText = submitBtn.innerHTML;
@@ -304,9 +242,7 @@
           submitBtn.disabled = true;
           const response = await fetch("/<%='media/edit' %>", {
             method: 'POST',
-            headers: {
-              'Content-Type': 'application/json'
-            },
+            headers: {'Content-Type': 'application/json'},
             body: formData
           });
           try {
@@ -316,10 +252,8 @@
             }
 
             const data = await response.json();
-            if (!data.success) {
+            if (!data.success) 
               throw new Error(data.message || "Submission failed");
-            }
-
 
             // Show success message
             await Swal.fire({
@@ -332,8 +266,6 @@
               timerProgressBar: true
             });
 
-            console.log(data.redirectUrl)
-            // Redirect if URL is provided
             if (data.redirectUrl) {
               window.location.href = data.redirectUrl;
               return; // Stop further execution
