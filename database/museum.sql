@@ -16,7 +16,7 @@ CREATE TABLE User (
     LastLoginDate DATETIME NULL,
     IsDeleted BOOLEAN NOT NULL DEFAULT 0,
     ContactNumber VARCHAR(100), 
-    StaffType ENUM('NHM Staff','NHM Intern','NHM Research Visitor','NUS Undergraduate Student','NUS Graduate Student','Non-NUS Student','Other'), 
+    StaffType ENUM('NHM Staff','NHM Intern','NHM Research Visitor','NUS Undergraduate Student','NUS Graduate Student','Non-NUS Student','Other') NOT NULL, 
     Comments VARCHAR(255), 
     UpdatedDate DATETIME NULL,
     UpdatedByID INT , 
@@ -30,8 +30,7 @@ CREATE TABLE Project (
         ProjectOwnerID INT ,
         ProjectName VARCHAR(150) NOT NULL ,
         ProjectType 
-        ENUM('BDP','GalleryBDP','InternalResearch','StudentProject','Visitor','Other') 
-        ,
+        ENUM('BDP','GalleryBDP','InternalResearch','StudentProject','Visitor','Other') ,
         ImagingStartDate DATETIME NOT NULL,
         ImagingEndDate DATETIME NOT NULL,
         SummaryOfProject VARCHAR(255),
@@ -99,7 +98,7 @@ CREATE TABLE Media (
 
 CREATE TABLE IsUserRegistrationEnabled (
         ID INT PRIMARY Key,
-        IsEnabled BOOL DEFAULT 0
+        IsEnabled BOOL NOT NULL DEFAULT 0
 );
 INSERT INTO IsUserRegistrationEnabled () VALUES(
         1,1

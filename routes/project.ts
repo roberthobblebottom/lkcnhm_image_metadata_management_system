@@ -423,6 +423,7 @@ router.get(
 
     try {
       const projectID = req.params.projectID;
+      console.log('projectID',projectID)
       const projectAndOwnerQuery = `
             SELECT p.*, projectOwner.FullName, projectOwner.Email            
             FROM Project p        
