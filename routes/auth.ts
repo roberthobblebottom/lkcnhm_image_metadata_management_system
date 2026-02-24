@@ -35,14 +35,14 @@ passport.use(
         return cb(null, false, { message: "Database error" });
       });
 
-    if (result.length === 0) 
+    if (result.length === 0)
       return cb(null, false, { message: "Invalid email or password" });
-    
+
     const user = result[0];
 
-    if (new Date(user.PasswordTimeoutTill) >= new Date() ) 
+    if (new Date(user.PasswordTimeoutTill) >= new Date())
       return cb(null, false, { message: "Login timeout till " + user.PasswordTimeoutTill + ".\n Please try again later." });
-    
+
     crypto.pbkdf2(
       password,
       user.PasswordSalt,
@@ -71,7 +71,7 @@ passport.use(
             message: "Incorrect username or password.",
           });
         }
-        return cb(null, user, {message: null});
+        return cb(null, user, { message: null });
       }
     );
   })
@@ -218,7 +218,7 @@ router.post("/login", (req: Request, res: Response, next: NextFunction) => {
       failureMessage: "CUSTOM", // not working
     },
     (err: any, user: User, info: any) => {
-      if ( info.message !== null) 
+      if (info.message !== null)
         return res.status(400).json({ sucess: false, message: info.message })
       if (err)
         return next(err);
@@ -262,9 +262,8 @@ router.post("/login", (req: Request, res: Response, next: NextFunction) => {
         req.session.projectTypes = projectTypes;
 
         req.session.save((err: any) => {
-          if (err) 
+          if (err)
             return res.status(500).json({ error: "Session save error" });
-          
 
           return res.json({
             success: true,
