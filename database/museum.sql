@@ -16,15 +16,18 @@ CREATE TABLE User (
     LastLoginDate DATETIME NULL,
     IsDeleted BOOLEAN NOT NULL DEFAULT 0,
     ContactNumber VARCHAR(100), 
-    StaffType ENUM('NHM Staff','NHM Intern','NHM Research Visitor','NUS Undergraduate Student','NUS Graduate Student','Non-NUS Student','Other') NOT NULL, 
+    StaffType ENUM('NHM Staff','NHM Intern','NHM Research Visitor','NUS Undergraduate Student','NUS Graduate Student','Non-NUS Student','Other') , 
     Comments VARCHAR(255), 
     UpdatedDate DATETIME NULL,
     UpdatedByID INT , 
     CreatedByID INT ,
+    PasswordTries INT NOT NULL DEFAULT 0,
+    PasswordTimeoutTill DATETIME
     FOREIGN KEY (UpdatedByID) REFERENCES User(UserID) ,
     FOREIGN KEY (CreatedByID) REFERENCES User(UserID)
 );
-
+-- ALTER TABLE User ADD PasswordTries INT NOT NULL DEFAULT 0;
+-- ALTER TABLE User ADD PasswordTimeoutTill DATETIME;
 CREATE TABLE Project (
         ProjectID INT AUTO_INCREMENT PRIMARY KEY,
         ProjectOwnerID INT ,

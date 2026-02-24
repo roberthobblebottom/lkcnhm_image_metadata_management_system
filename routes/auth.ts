@@ -25,7 +25,9 @@ passport.use(
   ) {
     //Do not change the variable name from username to email, it doesn't work.
     const query =
-      "SELECT PasswordSalt, SaltedPassword, UserID,UserType,FullName,Email FROM User WHERE Email = ? AND IsDeleted = 0";
+      `SELECT PasswordSalt, SaltedPassword, UserID,
+      UserType,FullName,Email,PasswordTries,PasswordTimeoutTill 
+      FROM User WHERE Email = ? AND IsDeleted = 0`;
     const [result]: any = await db
       .query(query, [username])
       .catch((error: any) => {
@@ -33,30 +35,43 @@ passport.use(
         return cb(null, false, { message: "Database error" });
       });
 
-    if (result.length === 0) {
-      console.log("🚫 User Not Found");
+    if (result.length === 0) 
       return cb(null, false, { message: "Invalid email or password" });
-    }
-
+    
     const user = result[0];
-    console.log("🆔 Found User:", user.Email);
 
+    if (new Date(user.PasswordTimeoutTill) >= new Date() ) 
+      return cb(null, false, { message: "Login timeout till " + user.PasswordTimeoutTill + ".\n Please try again later." });
+    
     crypto.pbkdf2(
       password,
       user.PasswordSalt,
       310000,
       32,
       "sha256",
-      function (err, hashedPassword) {
+      async function (err, hashedPassword) {
         if (err) return cb(err, undefined, undefined);
         if (!crypto.timingSafeEqual(user.SaltedPassword, hashedPassword)) {
-          console.log("❌ Invalid Password");
+          const newPasswordTries = parseInt(user.PasswordTries) + 1
+          const timeoutIntervalMinutes: number = 5
+          if (newPasswordTries % 3 == 0) {
+            await db.query(`UPDATE User 
+                SET PasswordTries = ?, 
+                PasswordTimeoutTill = (NOW() + INTERVAL ? MINUTE) 
+                WHERE UserID = ?`,
+              [newPasswordTries, timeoutIntervalMinutes, user.UserID])
+            return cb(null, false, {
+              message: "3 invalid passwords entered. Login timeout, please wait for "
+                + timeoutIntervalMinutes.toString() + " minutes and try again.",
+            });
+          }
+          await db.query('UPDATE User SET PasswordTries = ? WHERE UserID = ?',
+            [newPasswordTries, user.UserID])
           return cb(null, false, {
             message: "Incorrect username or password.",
           });
         }
-        console.log("successful local strategy execution");
-        return cb(null, user, undefined);
+        return cb(null, user, {message: null});
       }
     );
   })
@@ -157,10 +172,10 @@ router.post("/register", async (req: Request, res: Response) => {
   console.log(`🔹 Register Attempt: ${email}`);
 
   const checkEmailQuery = "SELECT Email FROM User WHERE Email = ? LIMIT 1";
-  const isThereExistingEmail =  (await db.query(checkEmailQuery, [email]))[0][0]
+  const isThereExistingEmail = (await db.query(checkEmailQuery, [email]))[0][0]
 
   if (isThereExistingEmail)
-    return res.status(400).json({message:"Email already exist"})
+    return res.status(400).json({ message: "Email already exist" })
 
   const newPasswordSalt = crypto.randomBytes(16).toString("hex");
   const saltedPassword = crypto.pbkdf2Sync(
@@ -187,7 +202,7 @@ router.post("/register", async (req: Request, res: Response) => {
 
   await db.query(insertUserQuery, params)
   console.log(`✅ User Registered Successfully: ${email}`);
-  return res.status(200).json({success:true,message:"User successfully registration",redirect:"/login",});
+  return res.status(200).json({ success: true, message: "User successfully registration", redirect: "/login", });
 
 });
 
@@ -203,14 +218,18 @@ router.post("/login", (req: Request, res: Response, next: NextFunction) => {
       failureMessage: "CUSTOM", // not working
     },
     (err: any, user: User, info: any) => {
-      if (err) return next(err);
+      if ( info.message !== null) 
+        return res.status(400).json({ sucess: false, message: info.message })
+      if (err)
+        return next(err);
       if (!user) return res.status(401).send(info);
+
       req.login(user, async (err: any) => {
         // I am not suppose to use this as password authenticate already does it, but somehow this guy's code from stackoverflow works
         if (err) return res.status(500).json({ error: "Login failed." });
         // 🔄 Update LastLoginDate
         const updateQuery =
-          "UPDATE User SET LastLoginDate = NOW() WHERE UserID = ? ";
+          "UPDATE User SET LastLoginDate = NOW(),PasswordTries = 0, PasswordTimeoutTill = NULL WHERE UserID = ? ";
         await db.query(updateQuery, [user.UserID])
 
         // these codes feels redundant now, may needed to be removed
@@ -241,14 +260,11 @@ router.post("/login", (req: Request, res: Response, next: NextFunction) => {
           projectTypes.at(-1).replace(")", "")
         );
         req.session.projectTypes = projectTypes;
-        console.log('user session before save', req.session.passport.user)
-        req.session.save((err: any) => {
-          if (err) {
-            console.error("❌ Session Save Error:", err);
-            return res.status(500).json({ error: "Session error" });
-          }
 
-          console.log("login in  serialised passport user", req.session.passport.user.Email)
+        req.session.save((err: any) => {
+          if (err) 
+            return res.status(500).json({ error: "Session save error" });
+          
 
           return res.json({
             success: true,

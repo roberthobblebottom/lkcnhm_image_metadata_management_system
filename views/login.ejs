@@ -42,27 +42,27 @@
         const userEmail = document.getElementById("email").value.trim();
         const userPassword = document.getElementById("password").value.trim();
 
-        try {
-          const response = await fetch("/auth/login", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            credentials: 'include', // Important for sessions
-            body: JSON.stringify({ username: userEmail, password: userPassword })
-            // Do not change username to email, it doesn't work
-          });
+        const response = await fetch("/auth/login", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          credentials: 'include', // Important for sessions
+          body: JSON.stringify({ username: userEmail, password: userPassword })
+          // Do not change username to email, it doesn't work
+        });
+        console.log(response)
+        // if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
 
-          if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
 
-          const data = await response.json();
-          if (data.success)
-            window.location.href = data.redirect;
-          else
-            alert(`❌ Login Failed: ${data.error || 'Unknown error'}`);
+        const data = await response.json();
+        console.log(data)
+        if (data.success)
+          window.location.href = data.redirect;
+        else if (data.error)
+          alert(`❌ Login Failed: ${data.error}`);
+        else if (data.message)
+          alert(`❌ Login Failed: ${data.message}`);
 
-        } catch (error) {
-          console.error('Login error:', error);
-          alert("❌ Login failed. Please check your connection and try again.");
-        }
+
       });
     }
 
