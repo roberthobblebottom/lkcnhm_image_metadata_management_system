@@ -45,7 +45,8 @@ router.get(
       projectTypes: req.session.projectTypes,
       imagingPlatforms: req.session.imagingPlatforms,
       title: "Project Form",
-      isUserRegistrationEnabled
+      isUserRegistrationEnabled,
+      emailRegex
     });
   }
 );

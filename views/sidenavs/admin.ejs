@@ -19,7 +19,7 @@
     <ul class="nav-links">
       <li>
         <div id="fullName" class="loginDetails"></div>
-        <div id="email" class="loginDetails"></div>
+        <div id="emailSidebar" class="loginDetails"></div>
         <div id="userType" class="loginDetails"></div>
         <div id="userID" class="loginDetails"></div>
       </li>
@@ -29,7 +29,7 @@
         </a>
       </li>
       <li>
-        <a href="/settings/profile"><i class="fas fa-key"></i><span>Profile</span></a>
+        <a href="/settings/profile"><i class="fas fa-key"></i><span>View/Edit Profile</span></a>
       </li>
       <li>
         <a href="/admin/user-management/view-all">
@@ -73,7 +73,7 @@
           const userType = data.UserType;
           const userID = data.UserID;
           document.getElementById("fullName").textContent = `Logged in as: ${fullName}`;
-          document.getElementById("email").textContent = `Email: ${email}`;
+          document.getElementById("emailSidebar").textContent = `Email: ${email}`;
           document.getElementById("userType").textContent = `Role: ${userType}`;
           document.getElementById("userID").textContent = `UserID: ${userID}`;
         })

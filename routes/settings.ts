@@ -148,7 +148,7 @@ router.post(
       const result = await db
         .query(checkEmailValidityQuery, [email, originalEmail]);
 
-      if (result[0][0])
+      if (result[0]!=0)
         return res.status(400).json({
           success: false,
           message: "Email already exist",

@@ -63,11 +63,11 @@
               <div class="horizontal-panel2">
                 <label for="newSelectedPhotographers">Photographer(s)*</label>
                 <% if(isUserRegistrationEnabled){%>
-                  <button class="addButton" id="addPhotographerButton">Add Photographer</button>
+                  <button class="addButton" id="addPhotographerButton">Register New Photographer</button>
                   <%}%>
               </div>
               <select multiple id="newSelectedPhotographers">
-                <option value="">Select Photographers</span>
+                <option value="">Assign Registered Photographer(s)</span>
                   <% photographers.forEach(photographer=>{ %>
                 <option class="dropdown-item" value="<%=photographer.UserID%>"
                   <%=photographer.UserID==currentUser.UserID && currentUser.UserType !='admin' ? 'selected' :''%>>
@@ -182,31 +182,43 @@
     document.getElementById('addPhotographerButton').addEventListener('click', async function (e) {
       e.preventDefault()
       Swal.fire({
-        title: "Add new Photographer",
-        text: "Add new Photographer",
+        title: "Register New Photographer Account",
+        text: "Register New Photographer Account",
         width: '700px',
         html: `
+        <div style='height: 130px;'>
         <input 
           id="newPhotographerEmail" 
-          placeholder="Enter Email"
-          style="width:95%;height:40%;font-size:30px;margin-bottom:5px" 
+          placeholder="Enter Photographer's Email"
+          style="width:95%;height:25%;font-size:30px;margin-bottom:5px" 
           required>
         <br>
         <input 
           id="newPhotographerFullName" 
-          placeholder="Enter Full Name" 
-          style="width:95%;height:40%;font-size:30px;" 
-          required">`,
+          placeholder="Enter Photographer's Full Name" 
+          style="width:95%;height:25%;font-size:30px;" 
+          required">
+          <br>
+        <label style="color:red;margin-right:20px;">  Please tell your Photographer to change their account password as soon as possible.
+          </label>
+          <label>Passwords to these accounts will be given to you after you have created the project.<label>
+          </div>
+          `,
         showCancelButton: true,
       }).then((result) => {
         const email = document.getElementById('newPhotographerEmail').value
-        const emailRegex = /^[a-zA-Z0-9](\.?[a-zA-Z0-9_-])*[a-zA-Z0-9]@[a-zA-Z0-9-]+\.[a-zA-Z]{2,}$/
+
+const emailRegex = /[a-z0-9!#$%&'*+\/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+\/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?/
+        console.log(emailRegex.toString())
         const fullName = document.getElementById('newPhotographerFullName').value
         if (email && fullName) {
+          console.log('1')
           if (!emailRegex.test(email)) {
+          console.log('2')
             alert("you entered an email with an invalid format")
             return
           }
+          console.log('3')
           newSelectedPhotographers.setChoices([{
             value: email,
             label: fullName,

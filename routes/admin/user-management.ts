@@ -98,8 +98,8 @@ router.post(
           "invalid staff type that is not these values: " +
           Object.values(staffTypesEnumeration()),
       });
-    const result = (await db.query(checkEmailValidityQuery, [email]))[0];
-    if (result[0])
+    const result = await db.query(checkEmailValidityQuery, [email]);
+    if (result[0] != 0)
       return res.status(400).json({
         success: false,
         message: "Email already exist",
@@ -215,7 +215,7 @@ router.get(
       return res.status(400).json({ errors: errors.array() })
 
     const result = (await db.query(query, [userID]))[0];
-    if (result.length === 0) 
+    if (result.length === 0)
       return res.render("admin/edit", {
         title: "User Not Found",
         message: {
@@ -311,7 +311,8 @@ router.post(
           email,
           originalEmail,
         ]);
-      if (result[0])
+      console.log("result[0]" + JSON.stringify(result))
+      if (result[0].length != 0)
         return res.status(400).json({
           success: false,
           message: "Email already exist",

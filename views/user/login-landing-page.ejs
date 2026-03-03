@@ -1,56 +1,80 @@
 <%- include('../sidenavs/user') %>
 
-<style>
-  body {
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    background: #ffffff;
-    margin: 0;
-    padding: 0;
-  }
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: #ffffff;
+      margin: 0;
+      padding: 0;
+    }
 
-  .dashboard-container {
-    padding: 30px 20px;
-    max-width: 1400px;
-    margin: 0 auto;
-    margin-left: 320px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-  }
+    .dashboard-container {
+      padding: 30px 20px;
+      max-width: 1400px;
+      margin: 0 auto;
+      margin-left: 320px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
 
-  .welcome-section {
-    text-align: center;
-    margin-bottom: 40px;
-  }
+    .welcome-section {
+      text-align: center;
+      margin-bottom: 40px;
+    }
 
-  .welcome-title {
-    color: #143f4c;
-    font-size: 2.4em;
-    margin-bottom: 15px;
-  }
+    .welcome-title {
+      color: #143f4c;
+      font-size: 2.4em;
+      margin-bottom: 15px;
+    }
 
-  h2 {
-    color: #143f4c;
-    font-size: 1.8em;
-    margin-bottom: 15px;
-  }
-</style>
+    h2 {
+      color: #143f4c;
+      font-size: 1.8em;
+      margin-bottom: 15px;
+    }
+  </style>
 
-<div class="dashboard-container">
-  <div class="welcome-section">
-    <h1 class="welcome-title">Welcome to Image Metadata Management System</h1>
-    <h2>Help Guide:</h2>
-    <p>The Image Metadata Management System is a one-stop portal for handling imaging project metadata for tracking of projects and safekeeping of important image-related information. You can navigate the system through the panel on the left. 
-    </p>
-    <% if(currentUser.UserType == 'photographerOnly'){%>
-    <p>If you are using a newly created photographer account made by your project\'s owner, please change your password as soon as possible</p>
-      <%}else{%>
-    <p>You can create “photographer” accounts for your staff during the creation or editing of any projects. Please remember to remind them to change their passwords as soon as possible for account security. </p>
-        <%}%>
-    <p>To start uploading image metadata or registering an imaging project, please click on "Image Metadata Management" or "Project Management" repectively on the sidebar to the left. 
-    </p>
-    <a href="/media/upload-bulk-metadata/">Pipeline program is downloadable here.</a> They are the buttons on the lowest panel of buttons.
+  <div class="dashboard-container">
+    <div class="welcome-section">
+      <h1 class="welcome-title">Welcome to Image Metadata Management System</h1>
+      <p style="font-size: large;">The Image Metadata Management System is a one-stop portal for handling imaging
+        project metadata for tracking of projects and safekeeping of important image-related information. </p>
+
+      <h2>Quick Start Guide:</h2>
+      <p style="font-size: x-large;">
+        Download the Mandatory bulk metadata extraction tool at
+        <img src="/images/image-metadata-management.png" alt="Image Metadata Management Button"> page from the sidebar.
+        The download button on the top panel of buttons 
+        
+        <br>
+        <img src="/images/download-extraction-tool.png" alt="Location of the button in the page" style="width:600px;height:auto;">
+
+        <br>
+        Read the full instructions on how to use the tool.
+        <br>
+        <br>
+
+        To register a new project, please click on <img src="/images/project-managment-link.png"
+          alt="Project Managment Button"> on the sidebar to the left and then click "Add Project".
+        <br>
+        To upload image metadata (only after registering related project), please click on <img
+          src="/images/image-metadata-management.png" alt="Image Metadata Management Button"> on the sidebar on the
+        left and then click on "Upload Bulk Metadata"
+        <br>
+      </p>
+
+      <% if(currentUser.UserType=='photographerOnly' ){%>
+        <p>If you are using a newly created photographer account made by your project\'s owner, please change your
+          password as soon as possible</p>
+        <%}else{%>
+          <p>You can create “photographer” accounts for your staff during the creation or editing of any projects.
+            Please remember to remind them to change their passwords as soon as possible for account security. </p>
+          <%}%>
+            <h2>Full Instructions</h2>
+            TODO: INSERT PDF HERE
+    </div>
   </div>
-</div>
 
-</main>
+  </main>

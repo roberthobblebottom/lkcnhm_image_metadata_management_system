@@ -112,18 +112,22 @@
         submitBtn.classList.add('loading');
         submitBtn.innerHTML = '<i class="fas fa-spinner"></i> Submitting...';
         submitBtn.disabled = true;
-        if (!/^[\w\-\.]+@([\w-]+\.)+[\w-]{2,}$/.test(form.email.value)) {
+
+        console.log(document.getElementById("email"))
+        const email = document.getElementById("email").value.trim();
+        const emailRegex = /[a-z0-9!#$%&'*+\/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+\/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?/
+        if (!emailRegex.test(email)) {
           submitBtn.disabled = false;
+          submitBtn.value = "Upload"
           submitBtn.innerHTML = 'Edit Profile';
-          await Swal.fire({
-            title: 'Error!',
-            text: "invalid email, email value does not have '@' or '.' character(s).",
+          Swal.fire({
             icon: 'error',
-            confirmButtonText: 'OK',
-            confirmButtonColor: '#dc3545'
+            title: 'Invalid Email',
+            text: 'Please enter a valid email address. e.g. test@gmail.com'
           });
-          return
+          return;
         }
+
         //   if (!passwordRegex.test(password)) {
         //     Swal.fire({
         //       title: 'Invalid Password',
@@ -160,14 +164,14 @@
             title: 'Updating User',
             html: 'Please wait...',
             allowOutsideClick: false,
-            didOpen: () =>   Swal.showLoading()
+            didOpen: () => Swal.showLoading()
           });
 
           // Send AJAX request
           console.log(params)
           const response = await fetch('/admin/user-management/create/', {
             method: 'POST',
-            headers: {'Content-Type': 'application/json'},
+            headers: { 'Content-Type': 'application/json' },
             body: params
           });
 

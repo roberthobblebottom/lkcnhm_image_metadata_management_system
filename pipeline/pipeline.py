@@ -26,7 +26,7 @@ logging.basicConfig(filename="pipeline-" + now + ".log", level=logging.INFO)
 def recursion(
     path,
     output,
-    photographerID,
+    # photographerID,
     # projectID
     window_pending,
     logger,
@@ -39,7 +39,7 @@ def recursion(
             return recursion(
                 file_or_folder_path,
                 output,
-                photographerID,
+                # photographerID,
                 # projectID
                 window_pending,
                 logger,
@@ -66,6 +66,7 @@ def recursion(
         exifData = PIL.Image.open(file_or_folder_path).getexif()
         new_row = {}
         # new_row["ProjectName"] = projectID
+        photographerID = None
         new_row["PhotographerID"] = photographerID
         new_row["FilePath"] = file_or_folder_path
         splitter = "\\" if platform.system() == 'Windows' else '/'
@@ -206,14 +207,14 @@ def main():
 
     # global window_pending
     windowPending = Tk()
-    windowPending.geometry("1000x250")
+    windowPending.geometry("900x300")
     windowPending.title("Set Up Pipeline")
 
     config = configparser.ConfigParser()
     try:
         config.read("config.ini")
     except Exception:
-        x = "Unable reading config.ini, Maybe config.ini is missing from the current directory? Or the required variables ('photographerID' and 'directory') not present or not  in the format of `photographerID =`  at least."
+        x = "Unable reading config.ini, Maybe config.ini is missing from the current directory? Or the required variables 'directory' not present."
         logger.info(x)
         windowPending.destroy()
         w = Toplevel()
@@ -226,16 +227,16 @@ def main():
         w.mainloop()
         return
 
-    photographerID = (
-        config["DEFAULT"]["photographerID"]
-        if config["DEFAULT"]["photographerID"]
-        else ""
-    )
+    # photographerID = (
+    #     config["DEFAULT"]["photographerID"]
+    #     if config["DEFAULT"]["photographerID"]
+    #     else ""
+    # )
     dir = config["DEFAULT"]["directory"] if config["DEFAULT"]["directory"] else ""
 
     label = ttk.Label(
         windowPending,
-        text="Setting up image metadata pipeline",
+        text="Setting up image metadata pipeline,\n Select a folder and press 'Extract'.\n For more information, please consult the documentation.",
         font=font,
         wraplength=0.3,
         justify=CENTER,
@@ -243,17 +244,17 @@ def main():
     msg = dir if dir != "" else "None selected"
     labelFileOpen = ttk.Label(
         windowPending,
-        text="Directory opened: " + msg,
+        text="Folder selected: " + msg,
         font=font,
         wraplength=500,
     )
-    labelPhotographerID = ttk.Label(
-        windowPending, text="Photographer ID:", font=font, wraplength=0.3
-    )
-    photographerIDStringVar = StringVar(value=photographerID)
-    photographerIDEntry = ttk.Entry(
-        windowPending, textvariable=photographerIDStringVar, font=font
-    )
+    # labelPhotographerID = ttk.Label(
+    #     windowPending, text="Photographer ID:", font=font, wraplength=0.3
+    # )
+    # photographerIDStringVar = StringVar(value=photographerID)
+    # photographerIDEntry = ttk.Entry(
+    #     windowPending, textvariable=photographerIDStringVar, font=font
+    # )
     dirStringVar = StringVar(value=dir)
 
     logger.info("dir" + dirStringVar.get())
@@ -264,22 +265,22 @@ def main():
             title="Select a folder",
         )
         dirStringVar.set(filename)
-        labelFileOpen.configure(text="Directory opened: " + filename)
+        labelFileOpen.configure(text="folder opened: " + filename)
 
     button_file_select = Button(
-        windowPending, text="Browse", command=browseFiles, font=font
+        windowPending, text="select folder", command=browseFiles, font=font
     )
 
     def continue_main():
         dir = dirStringVar.get()
-        photographerID = photographerIDStringVar.get()
-        if not photographerID.isdigit():
-            messagebox.showerror("Invalid Input", "must be an integer")
-            return
+        # photographerID = photographerIDStringVar.get()
+        # if not photographerID.isdigit():
+        #     messagebox.showerror("Invalid Input", "must be an integer")
+        #     return
         if dir == "":
             messagebox.showerror("Missing folder selection", "folder must be selected")
             return
-        config["DEFAULT"]["photographerID"] = photographerID
+        # config["DEFAULT"]["photographerID"] = photographerID
         config["DEFAULT"]["directory"] = dir
         with open("config.ini", "w") as c:
             config.write(c)
@@ -301,7 +302,7 @@ def main():
         recursion(
             path=dir,
             output=output,
-            photographerID=photographerID,
+            # photographerID=photographerID,
             # projectID = f3.split("/")[-1]
             window_pending=windowPending,
             logger=logger,
@@ -325,16 +326,19 @@ def main():
             .otherwise(lit("")),
         ).select(pl.exclude("ImageWidth", "ImageLength", "Make", "Model"))
 
-        fileName = "metadata_for_photographer_ID_" + str(photographerID) + ".csv"
+        # fileName = "metadata_for_photographer_ID_" + str(photographerID) + ".csv"
+        fileName = "metadata-"+str(now)+".csv"
         df.write_csv(fileName)
         windowPending.quit()
         w.destroy()
         w = Tk()
-        w.geometry("1000x200")
+        w.geometry("1000x300")
         w.title("Sucess!")
         label = ttk.Label(
             w,
-            text="The Metatdata is extracted as " + fileName,
+            text="The Metatdata is extracted as " + fileName 
+            + "\n log file is also saved. Both files are in the same folder."
+            + "\n UPLOAD THE METADATA IMMEDIATELY INTO THE IMAGE METADATA MANAGMENT SYSTEM.",
             font=("Helvetica", 30),
             wraplength=1000,
         )
@@ -353,8 +357,8 @@ def main():
     labelFileOpen.grid(column=1, row=2)
     button_file_select.grid(column=2, row=2)
 
-    labelPhotographerID.grid(column=1, row=4)
-    photographerIDEntry.grid(column=2, row=4)
+    # labelPhotographerID.grid(column=1, row=4)
+    # photographerIDEntry.grid(column=2, row=4)
 
     buttonStart.grid(column=1, row=5)
     buttonQuit.grid(column=2, row=5)

@@ -21,6 +21,24 @@
 
     .hidden {
       display: none;
+
+    }
+
+    .vertical-panel {
+      vertical-align: middle;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .btn-restore {
+      color: black;
+    }
+
+    .btn-bulk {
+      height: 35px;
+      display: flex;
+      align-items: center;
     }
   </style>
 </head>
@@ -35,13 +53,19 @@
         <% if (disableCreateMedia){ %>
           You do not have any projects you can add media to.
           <% }else{ %>
-            <a href="/media/create/" class="btn">Add Media(s)</a>
-            <a href="/media/upload-bulk-metadata/" class="btn"> Upload Bulk MetaData</a>
+            <a href="/media/upload-bulk-metadata/" class="btn btn-bulk"> Upload Bulk MetaData</a>
+
+            <a href="/media/create/" class="btn">Add <br> Single Metadata Entry </a>
             <a class="btn-delete hidden" id="deletedSelected"> Delete Selected</a>
             <a class="btn-restore hidden" id="restoreSelected"> Restore Selected</a>
             <%}%>
+              <a href="/media/download-template" class="btn-restore btn">
+                <i class="fas fa-arrow-down"></i> Download <br> Image Metadata Template
+              </a>
+              <a href="/media/download-pipeline-script" class="btn-restore btn">
+                <i class="fas fa-arrow-down"></i> Download <br> Metadata Extraction Tool
+              </a>
       </div>
-
       <table id="dataTable" class="dataTable">
         <thead>
           <tr>

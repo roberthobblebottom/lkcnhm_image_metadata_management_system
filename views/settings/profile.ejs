@@ -86,19 +86,20 @@
         submitBtn.classList.add('loading');
         submitBtn.innerHTML = '<i class="fas fa-spinner"></i> Submitting...';
         submitBtn.disabled = true;
-        if (!/^[\w\-\.]+@([\w-]+\.)+[\w-]{2,}$/.test(form.email.value)) {
-          submitBtn.disabled = false;
-          submitBtn.innerHTML = 'Edit Profile';
-          await Swal.fire({
-            title: 'Error!',
-            text: "invalid email, email value does not have '@' or '.' character(s).",
-            icon: 'error',
-            confirmButtonText: 'OK',
-            confirmButtonColor: '#dc3545'
-          });
-          return
-        }
 
+ 
+        const email = document.getElementById("email").value.trim();
+const emailRegex = /[a-z0-9!#$%&'*+\/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+\/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?/
+  submitBtn.disabled = false;
+          submitBtn.innerHTML = 'Edit Profile';
+      if (!emailRegex.test(email)) {
+        Swal.fire({
+          icon: 'error',
+          title: 'Invalid Email',
+          text: 'Please enter a valid email address. e.g. test@gmail.com'
+        });
+        return;
+      }
         const formData = JSON.stringify({
           userID: form.userID.value,
           email: form.email.value,

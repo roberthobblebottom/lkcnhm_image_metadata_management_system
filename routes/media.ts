@@ -15,6 +15,7 @@ const path = require("path");
 const upload = multer({ dest: "upload-bulk-metadata/" });
 
 import pl, { Null } from "nodejs-polars";
+import { emailRegex } from "../middleware/utils";
 
 router.get("/create", isAuthenticated, async (req: Request, res: Response) => {
   //Select Only relevant project andd photographer pairs based on user typer
@@ -629,7 +630,6 @@ router.post("/bulk-restore", isAuthenticated, async (req: Request, res: Response
                     UpdatedByID = ?,
                     UpdatedDate = NOW() 
                 WHERE MediaID in (?)`;
-
   await db.query(updateQuery, [userID, req.body]);
   return res.status(200).json({ success: true, message: "successfully restored selected metadata" })
 })
@@ -640,7 +640,7 @@ router.get(
   async (req: Request, res: Response) => {
     const user = req.session.passport.user;
     const query = ` SELECT  p.ProjectID, p.ProjectName
-                    FROM Project p`;
+                    FROM Project p\n`;
     // list projects based on user type,
     // where non admins will only get projects that they photographs or owns.
     const q2 =
