@@ -322,7 +322,7 @@ router.get("/view/:mediaID", param('mediaID').isInt({ min: 1 }).withMessage("unk
     ORDER BY m.CreatedDate DESC`;
 
   const results = await db.query(query, [mediaID]);
-  console.log('imageing date',results[0][0].ImagingDate)
+  console.log('imageing date', results[0][0].ImagingDate)
   res.render("media/view", {
     currentUser: req.session.passport.user,
     media: results[0][0], // Since we're querying by ID, we'll only get one record
@@ -375,7 +375,7 @@ router.get(
         WHERE Media.MediaID = ` + mediaID;
     const x: any[] = await db.query(currentMediaQuery);
     const toBeEditedMedia = x[0][0];
-    console.log('toBeEditedMedia.ImagingDate',toBeEditedMedia.ImagingDate)
+    console.log('toBeEditedMedia.ImagingDate', toBeEditedMedia.ImagingDate)
     res.render("media/edit", {
       currentUser: req.session.passport.user,
       imageEditingTools: req.session["imageEditingTools"],
@@ -651,10 +651,40 @@ router.get(
         : query;
     const allProjects = (await db.query(q2))[0];
 
+
+    const projectPhotographersQuery = `
+    SELECT pupl.PhotographerID, u.FullName, p.ProjectID, p.ProjectName FROM ProjectUserPhotographyLink pupl 
+    JOIN User u ON u.UserID = pupl.PhotographerID
+    JOIN Project p on p.ProjectID = pupl.ProjectID
+    `
+    const projectPhotographersQuery2 =
+      user.UserType != userTypesEnumeration().admin
+        ? projectPhotographersQuery +
+        `\nWHERE pupl.PhotographerID = ` + user.UserID
+        + `\nORDER BY p.ProjectID `
+        : projectPhotographersQuery
+        + `\nORDER BY p.ProjectID `
+    const projectPhotographers = (await db.query(projectPhotographersQuery2,))[0]
+    console.log('projectPhotographers', projectPhotographers)
+    const projectPhotographers2 = []
+    let currentProjectID = projectPhotographers[0].ProjectID
+    // let innerArray = []
+    // for (let x of projectPhotographers) {
+    //   if (x.ProjectID != currentProjectID) {
+    //     currentProjectID = x.ProjectID
+    //     projectPhotographers2.push(innerArray)
+    //     innerArray = []
+    //   }
+    //   innerArray.push(x)
+    // }
+    // projectPhotographers2.push(innerArray)
+    // console.log('projectPhotographers2', projectPhotographers2)
     res.render("media/upload-bulk-metadata", {
       currentUser: user,
       allProjects,
       title: "Media Form",
+      projectPhotographers,
+      // projectPhotographersString: JSON.stringify(projectPhotographers)
     });
   }
 );

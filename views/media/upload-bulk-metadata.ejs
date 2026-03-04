@@ -22,12 +22,25 @@
       margin-bottom: 50px;
       margin-right: 10px;
     }
-    #submitButton{
-      float:right;
+
+    #submitButton {
+      float: right;
+    }
+
+    .choices {
+      width: 98% !important;
+
+    }
+
+    .choices__inner {
+      min-height: 1px !important;
+      ;
+      height: 30px !important;
     }
   </style>
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/choices.js@11.1.0/public/assets/styles/choices.min.css" />
+  <script src="https://cdn.jsdelivr.net/npm/choices.js/public/assets/scripts/choices.min.js"></script>
 </head>
 
 <body>
@@ -48,15 +61,27 @@
               <%})%>
           </select>
         </div>
+
+        <div class="form-group">
+          <label>Select Photographer</label>
+          <select id="selectPhotographer">
+            <% projectPhotographers.forEach( photographer=> {%>
+              <option id="option<%=photographer.PhotographerID%>" value="<%=photographer.PhotographerID%>"
+                ProjectID="<%=photographer.ProjectID%>">
+                <%=photographer.FullName%>
+              </option>
+              <%})%>
+                <option value="-1">Do not override, photographers IDs are in the CSV file already</option>
+          </select>
+        </div>
         <div class="form-group">
           <label>File (CSV only):</label>
           <input id="fileInput" type="file" name="bulk-metadata" accept=".csv" required />
         </div>
-
         <a href="/media/view-all" class="btn ">
           <i class="fas fa-arrow-left"></i> Back to all media
         </a>
-       
+
 
         <input type="submit" class="btn" id="submitButton" value="Upload" />
 
@@ -67,8 +92,49 @@
   </div>
 
   <script>
+    console
     document.addEventListener("DOMContentLoaded", () => {
       const form = document.getElementById('fileUploadForm');
+      const selectProjects = document.getElementById('selectProjects');
+      const allOptionsRaw = document.getElementById('selectPhotographer').options
+      const allOptions = []
+      for (const o of allOptionsRaw)
+        // console.log('label',o.label)
+        // console.log('value',o.value)
+        // console.log('projectID',o.attributes['2'].value)
+        allOptions.push({
+          label: o.label,
+          value: o.value,
+          projectID: o.attributes['2'] != null ? o.attributes['2'].value : null
+        })
+      // console.log('allOptions', allOptions)
+      const selectPhotographer = new Choices(document.getElementById('selectPhotographer'))
+      let photographersToShow = []
+
+      //INIT photographers options to show based on selected Project
+      const selectedProjectID = selectProjects.value
+      for (x of allOptions)
+        if (x.projectID == selectedProjectID)
+          photographersToShow.push(x)
+      // console.log(photographersToShow)
+      selectPhotographer.clearChoices(clearOptions = false, clearItems = true)
+      photographersToShow[0]['selected'] = true
+      selectPhotographer.setChoices(photographersToShow)
+
+      selectProjects.addEventListener('change', (e) => {
+        e.preventDefault()
+        const selectedProjectID = selectProjects.value
+        photographersToShow = []
+        for (x of allOptions)
+          if (x.projectID == selectedProjectID)
+            photographersToShow.push(x)
+        // console.log(photographersToShow)
+        selectPhotographer.clearChoices(clearOptions = false, clearItems = true)
+
+        photographersToShow[0]['selected'] = true
+        selectPhotographer.setChoices(photographersToShow)
+      })
+
       form.addEventListener('submit', async (e) => {
         e.preventDefault()
         const submitBtn = document.getElementById('submitButton');
