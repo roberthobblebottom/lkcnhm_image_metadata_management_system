@@ -655,7 +655,7 @@ router.get(
 
 
     const projectPhotographersQuery = `
-    SELECT pupl.PhotographerID, u.FullName, p.ProjectID, p.ProjectName FROM ProjectUserPhotographyLink pupl 
+    SELECT pupl.PhotographerID, u.FullName, p.ProjectID, p.ProjectName, p.ProjectOwnerID FROM ProjectUserPhotographyLink pupl 
     JOIN User u ON u.UserID = pupl.PhotographerID
     JOIN Project p on p.ProjectID = pupl.ProjectID
     `
