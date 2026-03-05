@@ -69,7 +69,9 @@
               <option id="option<%=photographer.PhotographerID%>" value="<%=photographer.PhotographerID%>"
                 ProjectID="<%=photographer.ProjectID%>">
                 <%=photographer.FullName%>
+                <%=photographer.PhotographerID%>
               </option>
+
               <%})%>
                 <option value="-1">Do not override, photographers IDs are in the CSV file already</option>
           </select>
@@ -128,9 +130,12 @@
         for (x of allOptions)
           if (x.projectID == selectedProjectID)
             photographersToShow.push(x)
+        photographersToShow.push({label:"Do not override, photographerIDs are already in the csv file.",
+          value:-1,
+          projectID:-1
+        })
         // console.log(photographersToShow)
         selectPhotographer.clearChoices(clearOptions = false, clearItems = true)
-
         photographersToShow[0]['selected'] = true
         selectPhotographer.setChoices(photographersToShow)
       })
@@ -141,11 +146,13 @@
         var data = null
         try {
           const formData = new FormData(form)
-          const response = await fetch('/media/upload-bulk-metadata/' + form.selectProjects.value, {
+          formData.append("photographerID",form.selectPhotographer.value)
+          formData.append("projectID",form.selectProjects.value)
+          console.log(formData)
+          const response = await fetch('/media/upload-bulk-metadata/' , {
             method: 'POST',
-            enctype: "multipart/form-data",
-            body: formData
-          });
+            // enctype: "multipart/form-data",
+            body: formData          });
           submitBtn.innerHTML = '<i class="fas fa-spinner"></i> Submitting...';
           submitBtn.disabled = true;
           if (!response.ok) {

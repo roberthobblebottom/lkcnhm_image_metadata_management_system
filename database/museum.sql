@@ -22,7 +22,7 @@ CREATE TABLE User (
     UpdatedByID INT , 
     CreatedByID INT ,
     PasswordTries INT NOT NULL DEFAULT 0,
-    PasswordTimeoutTill DATETIME
+    PasswordTimeoutTill DATETIME,
     FOREIGN KEY (UpdatedByID) REFERENCES User(UserID) ,
     FOREIGN KEY (CreatedByID) REFERENCES User(UserID)
 );

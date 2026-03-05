@@ -16,6 +16,8 @@ const upload = multer({ dest: "upload-bulk-metadata/" });
 
 import pl, { Null } from "nodejs-polars";
 import { emailRegex } from "../middleware/utils";
+import { error } from "console";
+import { errorMonitor } from "events";
 
 router.get("/create", isAuthenticated, async (req: Request, res: Response) => {
   //Select Only relevant project andd photographer pairs based on user typer
@@ -690,12 +692,16 @@ router.get(
 );
 
 router.post(
-  "/upload-bulk-metadata/:projectID",
+  "/upload-bulk-metadata/",
   upload.single("bulk-metadata"),
   isAuthenticated,
   async (req: Request, res: Response) => {
     const user = req.session.passport.user;
-    const projectID = req.params.projectID;
+    // const projectID = req.params.projectID;
+
+    const overridingPhotographerID = req.body.photographerID
+    const overridingProjectID = req.body.projectID
+
     const newTable: string[][] = [];
     var newTableDF: pl.DataFrame = pl.DataFrame();
     var hasErrors = false;
@@ -730,7 +736,6 @@ router.post(
       Resolution: 10,
       // ImagingPlatform: 11,
     };
-
     const absolutePath = path
       .join(__dirname, req.file.path)
       .replace("/routes", "");
@@ -742,12 +747,11 @@ router.post(
         return;
       }
     });
-
     const tempListOfObjects1 = (
       await db.query("SELECT DISTINCT FileName FROM Media")
     )[0];
     const tempListOfObjects2: any = tempListOfObjects1;
-    const listOfFileNamesFromDB = [];
+    const listOfFileNamesFromDB: any[] = [];
     for (const x of tempListOfObjects2)
       listOfFileNamesFromDB.push(x.FileName);
 
@@ -755,9 +759,30 @@ router.post(
       await db.query("SELECT DISTINCT * FROM ProjectUserPhotographyLink")
     )[0];
     const tempListOfLinks2: any = tempListOfLinks1;
-    const listOfPhotographerProjectLinks = [];
+    const listOfPhotographerProjectLinks: any[][] = [];
     for (const x of tempListOfLinks2)
       listOfPhotographerProjectLinks.push([x.PhotographerID, x.ProjectID]);
+    function checkProjectPhotographerLink(listOfPhotographerProjectLinks: any[][],
+      photographerID: number, projectID: number, errorMessage: string = "") {
+      var matched = false;
+      for (const x of listOfPhotographerProjectLinks)
+        if (x[0] == photographerID && x[1] == projectID)
+          return "";
+
+      if (!matched)
+        errorMessage = errorMessage +
+          `The photographer (ID: ${photographerID}) is not in the selected project (ID: ${projectID}). 
+                You may have selected the wrong project from the dropdown box 
+                or the wrong photographer ID in the config.ini \n`;
+    }
+    if (overridingPhotographerID != -1) {
+      const msg = checkProjectPhotographerLink(listOfPhotographerProjectLinks,
+        overridingPhotographerID,
+        overridingProjectID)
+      if (msg != "")
+        return res.status(400).json({ sucess: false, message: msg })
+    }
+
 
     //getting each row
     for (var i: number = 0; i < newRowsTemp.length; i++) {
@@ -765,7 +790,7 @@ router.post(
       if (newRowTempSplited.length == 1 && newRowTempSplited[0] == "")
         continue;
 
-      const newRow: string[] = [projectID.toString()];
+      const newRow: string[] = [overridingProjectID.toString()];
       const fileName = newRowTempSplited[newRowColumns.FileName];
       var errorMessage = "";
       // getting individual cells of the row.
@@ -778,7 +803,7 @@ router.post(
           .replaceAll("(", "(")
           .replaceAll(")", ")")
           .trim();
-        const element = elementTemp == "" ? null : elementTemp;
+        var element = elementTemp == "" ? null : elementTemp;
 
         //VALIDATION SWITCH CASES with check for new image editing tools
         switch (j) {
@@ -852,29 +877,21 @@ router.post(
                 Object.values(mediaFileFormatEnumeration()).toString() + "\n";
             break;
           case newRowColumns.PhotographerID:
-            console.log("in case photographer ID");
-            const photographerID = element;
-            if (isNaN(parseInt(photographerID!))) {
+            element = overridingPhotographerID != -1 ? overridingPhotographerID : element;
+            if (isNaN(parseInt(element!))) {
               errorMessage = errorMessage +
                 `Photographer ID must be in integer, not decimal or any other characters. 
-                Current Value: '${photographerID}'\n`;
+                Current Value: '${element}'\n`;
               break;
             }
-            var matched = false;
-            for (const x of listOfPhotographerProjectLinks)
-              if (
-                x[0].toString() == photographerID &&
-                x[1].toString() == projectID
-              ) {
-                matched = true;
-                break;
-              }
-
-            if (!matched)
+            if (parseInt(element) <= 0) {
               errorMessage = errorMessage +
-                `The photographer (ID: ${photographerID}) is not the selected project (ID: ${projectID}). 
-                You may have selected the wrong project from the dropdown box 
-                or the wrong photographer ID in the config.ini \n`;
+                `PhotographerID must be a positive integer. Current Value: ${element} \n`;
+              break;
+            }
+            checkProjectPhotographerLink(listOfPhotographerProjectLinks,
+              parseInt(element),
+              parseInt(overridingProjectID), errorMessage)
             break;
 
           // case newRowColumns.ImagingPlatform:
@@ -898,17 +915,6 @@ router.post(
             ) newImageEditingTools.push(element);
             break;
 
-          case newRowColumns.PhotographerID:
-            if (isNaN(parseInt(element!))) {
-              errorMessage = errorMessage +
-                `PhotographerID must be an integer, not decimal or any other characters. 
-                Current Value: '${element}' \n`;
-              break;
-            }
-            if (parseInt(element) <= 0)
-              errorMessage = errorMessage +
-                `PhotographerID must be a positive integer. Current Value: ${element} \n`;
-            break;
         }
         if (element == null) newRow.push(element!);
         else newRow.push(element.toString());
