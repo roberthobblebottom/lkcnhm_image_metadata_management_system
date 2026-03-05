@@ -660,12 +660,13 @@ router.get(
     JOIN Project p on p.ProjectID = pupl.ProjectID
     `
     const projectPhotographersQuery2 =
-      user.UserType != userTypesEnumeration().admin
+      user.UserType == userTypesEnumeration().photographerOnly
         ? projectPhotographersQuery +
-        `\nWHERE pupl.PhotographerID = ` + user.UserID
-        + `\nORDER BY p.ProjectID `
-        : projectPhotographersQuery
-        + `\nORDER BY p.ProjectID `
+        `\nWHERE pupl.PhotographerID = ` + user.UserID + `\nORDER BY p.ProjectID `
+        : user.UserType == userTypesEnumeration().projectOwner
+          ? projectPhotographersQuery +
+          `\nWHERE p.ProjectOwnerID= ` + user.UserID + `\nORDER BY p.ProjectID `
+          : projectPhotographersQuery + `\nORDER BY p.ProjectID `
     const projectPhotographers = (await db.query(projectPhotographersQuery2,))[0]
     console.log('projectPhotographers', projectPhotographers)
     const projectPhotographers2 = []
