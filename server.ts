@@ -75,6 +75,12 @@ app.get("/user/login-landing-page", isAuthenticated, (req: Request, res: Respons
     currentUser: req.session.passport.user,
   });
 });
+app.get("/download-instructions", isAuthenticated, async (req: any, res: Response) => {
+  //helps to retrieve metadata template file for downloading.
+  const filePath: string = "Instructions.pdf";
+  res.download(filePath);
+});
+
 
 // ✅ Start Server
 app.listen(PORT,'0.0.0.0', () => {
