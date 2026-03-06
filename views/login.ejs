@@ -4,48 +4,49 @@
   <link rel="stylesheet" href="/css/login.css">
 
   <style>
+    /* DO NOT PUT THESE IN login.css, it doesn't work that way! But i don't know why it works this way*/
+    h1 {
+      text-align: center;
+      font-size: 5.5rem;
+      color: #fff;
+      font-family: "Lato", sans-serif;
+      font-weight: 900;
+      font-style: normal;
+    }
 
-  h1 {
-    text-align: center;
-  font-size: 5.5rem;
-  color: #fff;
-  font-family: "Lato", sans-serif;
-  font-weight: 900;
-  font-style: normal;
-}
-main {
-  display: flex;                 /* Use flexbox layout */
-  flex-direction: column;       /* Arrange items in a column */
-  align-items: center;          /* Center items horizontally */
-  justify-content: center;      /* Center items vertically */
-  height: 100vh;                /* Make main take full viewport height */
-}
+    main {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+    }
   </style>
 </head>
 <div class="background">
   <main>
-<img src="../images/Group-1.svg" alt="NUS Logo" class="nus-logo">
-            <h1>Imaging Metadata Management System</h1>
-  <div class="login-container">
-    <h2>Sign In</h2>
-    <form id="login-form">
-      <div class="password-field">
-        <input type="email" id="email" placeholder="Enter your email" required>
-        <div>
-          <div class="password-field">
-            <input type="password" id="password" placeholder="Enter your password" required>
-            <span id="togglePassword" class="toggle-eye">👁️</span>
-          </div>
+    <img src="../images/Group-1.svg" alt="NUS Logo" class="nus-logo">
+    <h1>Imaging Metadata Management System</h1>
+    <div class="login-container">
+      <h2>Sign In</h2>
+      <form id="login-form">
+        <div class="password-field">
+          <input type="email" id="email" placeholder="Enter your email" required>
+          <div>
+            <div class="password-field">
+              <input type="password" id="password" placeholder="Enter your password" required>
+              <span id="togglePassword" class="toggle-eye">👁️</span>
+            </div>
 
-          <!-- <div class="forgot-password">
+            <!-- <div class="forgot-password">
         <a href="/forgot-password">Forgot your password?</a>
       </div> -->
-          <button type="submit">Login</button>
-    </form>
-    <p class="signup-text">
-      Don't have an account? <a href="/auth/register">Sign Up</a>
-    </p>
-  </div>
+            <button type="submit">Login</button>
+      </form>
+      <p class="signup-text">
+        Don't have an account? <a href="/auth/register">Sign Up</a>
+      </p>
+    </div>
   </main>
 </div>
 

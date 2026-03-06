@@ -123,18 +123,19 @@ button.delete-btn:hover {
 }
 
 .btn-view {
-  background-color: #17a2b8;
-  color: #fff;
+  background-color: #17a2b8 !important;
+  color: #fff !important;
 }
 
 .btn-edit {
-  background-color: #ffc107;
-  color: #000;
+  background-color: #ffc107 !important;
+  color: #000 !important;
 }
 
 .btn-delete {
-  background-color: #dc3545;
-  color: #fff;
+  background-color: #dc3545 !important;
+  color: #fff !important;
+
 }
 
 .no-data {
