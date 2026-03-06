@@ -749,7 +749,7 @@ router.post(
       }
     });
     const tempListOfObjects1 = (
-      await db.query("SELECT DISTINCT FileName FROM Media")
+      await db.query("SELECT DISTINCT FileName FROM Media WHERE IsDeleted = 0")
     )[0];
     const tempListOfObjects2: any = tempListOfObjects1;
     const listOfFileNamesFromDB: any[] = [];
@@ -757,7 +757,11 @@ router.post(
       listOfFileNamesFromDB.push(x.FileName);
 
     const tempListOfLinks1 = (
-      await db.query("SELECT DISTINCT * FROM ProjectUserPhotographyLink")
+      await db.query(`SELECT DISTINCT * FROM ProjectUserPhotographyLink pupl
+              JOIN User u ON u.UserID = pupl.PhotographerID
+              JOIN Project p ON p.ProjectID = pupl.ProjectID
+              WHERE u.IsDeleted = 0 AND p.IsDeleted = 0
+        `)
     )[0];
     const tempListOfLinks2: any = tempListOfLinks1;
     const listOfPhotographerProjectLinks: any[][] = [];

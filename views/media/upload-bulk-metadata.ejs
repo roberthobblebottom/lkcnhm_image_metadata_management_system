@@ -101,15 +101,11 @@
       const allOptionsRaw = document.getElementById('selectPhotographer').options
       const allOptions = []
       for (const o of allOptionsRaw)
-        // console.log('label',o.label)
-        // console.log('value',o.value)
-        // console.log('projectID',o.attributes['2'].value)
         allOptions.push({
           label: o.label,
           value: o.value,
           projectID: o.attributes['2'] != null ? o.attributes['2'].value : null
         })
-      // console.log('allOptions', allOptions)
       const selectPhotographer = new Choices(document.getElementById('selectPhotographer'))
       let photographersToShow = []
 
@@ -118,7 +114,6 @@
       for (x of allOptions)
         if (x.projectID == selectedProjectID)
           photographersToShow.push(x)
-      // console.log(photographersToShow)
       selectPhotographer.clearChoices(clearOptions = false, clearItems = true)
       photographersToShow[0]['selected'] = true
       selectPhotographer.setChoices(photographersToShow)
@@ -134,7 +129,6 @@
           value:-1,
           projectID:-1
         })
-        // console.log(photographersToShow)
         selectPhotographer.clearChoices(clearOptions = false, clearItems = true)
         photographersToShow[0]['selected'] = true
         selectPhotographer.setChoices(photographersToShow)

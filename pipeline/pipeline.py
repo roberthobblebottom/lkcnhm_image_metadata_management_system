@@ -17,6 +17,7 @@ from tkinter import filedialog, messagebox
 from PIL.ExifTags import TAGS, GPSTAGS, IFD
 import platform
 logger = logging.getLogger(__name__)
+import os
 # from PIL import ExifTags
 # IFD_CODE_LOOKUP = {i.value: i.name for i in ExifTags.IFD}
 now = datetime.now().isoformat().replace(".", "-").replace(":", "-")
@@ -30,6 +31,10 @@ def recursion(
     # projectID
     window_pending,
     logger,
+    progresStringVar,
+    finishedCount,
+    totalCount,
+    startTimer
 ):
     _p =path + "\\*" if platform.system() == 'Windows' else path + "/*"
     for file_or_folder_path in glob(_p):
@@ -43,6 +48,10 @@ def recursion(
                 # projectID
                 window_pending,
                 logger,
+    progresStringVar=progresStringVar,
+    finishedCount=finishedCount,
+    totalCount=totalCount,
+    startTimer=startTimer
             )
         if file_or_folder_path.split(".")[-1] not in [
             "tiff",
@@ -193,7 +202,8 @@ def recursion(
 
         logging.info(str(new_row.transpose(include_header=True)))
         output.append(new_row)
-
+        finishedCount += 1
+        progresStringVar.set(progresStringVar.get().split(":")[0]+": "+str(finishedCount)+"/"+str(totalCount) +" \nTime: "+str(timedelta(seconds = timer()-startTimer)))
         window_pending.update()
 
 
@@ -273,6 +283,9 @@ def main():
 
     def continue_main():
         dir = dirStringVar.get()
+        totalCount = 0
+        finishedCount = 0
+        splitter = "\\" if platform.system() == 'Windows' else '/'
         # photographerID = photographerIDStringVar.get()
         # if not photographerID.isdigit():
         #     messagebox.showerror("Invalid Input", "must be an integer")
@@ -285,12 +298,16 @@ def main():
         with open("config.ini", "w") as c:
             config.write(c)
         windowPending.destroy()
+        for x in os.listdir(dir):
+            if os.path.isfile(dir+splitter+x):
+                totalCount = totalCount + 1
         w = Tk()
-        w.geometry("500x100")
+        w.geometry("700x150")
         w.title("Running")
+        progresStringVar = StringVar(value = "The Extraction is currently running progress: /"+str(totalCount))
         label = ttk.Label(
             w,
-            text="The Extraction is currently running",
+            textvariable= progresStringVar,
             font=font,
             wraplength=1500,
             justify="center",
@@ -306,10 +323,15 @@ def main():
             # projectID = f3.split("/")[-1]
             window_pending=windowPending,
             logger=logger,
+            progresStringVar=progresStringVar,
+            finishedCount=finishedCount,
+            totalCount=totalCount,
+            startTimer = start
         )
 
         stop = timer()
-        logger.info("estimated time taken " + str(timedelta(seconds=stop - start)))
+        totalTimeTaken = str(timedelta(seconds=stop - start))
+        logger.info("estimated time taken " + totalTimeTaken)
 
         df = pl.concat(output)
         df =df.with_columns(
@@ -332,12 +354,13 @@ def main():
         windowPending.quit()
         w.destroy()
         w = Tk()
-        w.geometry("1000x300")
+        w.geometry("1000x400")
         w.title("Sucess!")
         label = ttk.Label(
             w,
             text="The Metatdata is extracted as " + fileName 
             + "\n log file is also saved. Both files are in the same folder."
+            + "\n total extraction time:"+totalTimeTaken
             + "\n UPLOAD THE METADATA IMMEDIATELY INTO THE IMAGE METADATA MANAGMENT SYSTEM.",
             font=("Helvetica", 30),
             wraplength=1000,
