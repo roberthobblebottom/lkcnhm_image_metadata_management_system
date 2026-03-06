@@ -353,7 +353,7 @@ router.get(
     LEFT JOIN User creator ON p.CreatedByID = creator.UserID
     LEFT JOIN User updater ON p.UpdatedByID = updater.UserID
     WHERE p.ProjectID = ?    `;
-    const photographersQuery = `SELECT user.FullName FROM ProjectUserPhotographyLink pupl 
+    const photographersQuery = `SELECT user.FullName, user.UserID FROM ProjectUserPhotographyLink pupl 
         JOIN User user ON user.UserID = pupl.PhotographerID
         WHERE pupl.ProjectID = ? `;
     const imagingPlatformsQuery = `
@@ -371,7 +371,7 @@ router.get(
     )[0];
     const photographers: any[] = [];
     for (var x of photographersTemp1)
-      photographers.push(x.FullName);
+      photographers.push(x.FullName+" (ID: "+x.UserID.toString()+")");
 
     const imagingPlatformsTemp1: any = (
       await db.query(imagingPlatformsQuery, [projectID])
