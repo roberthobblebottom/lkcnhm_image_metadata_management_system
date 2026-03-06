@@ -57,7 +57,8 @@ const serveHTML = (route: any, file: any) => {
 
 app.get("/", (req: Request, res: Response) => {
   req.session.destroy((err)=>{})
-  res.render("index", { title: "register" });
+  // res.render("index", { title: "register" });
+  res.redirect("/user/login-landing-page")
 });
 
 app.get("/login", (req: Request, res: Response) => {

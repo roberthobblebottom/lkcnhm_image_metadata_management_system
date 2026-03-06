@@ -16,14 +16,6 @@
   }
   
   
-  .background {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 100%;
-   
-  }
-
   .login-container {
     background: white;
     border-radius: 30px;
