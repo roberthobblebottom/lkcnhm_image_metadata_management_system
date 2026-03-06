@@ -429,7 +429,7 @@ router.get(
             SELECT p.*, projectOwner.FullName, projectOwner.Email            
             FROM Project p        
             LEFT JOIN User projectOwner ON p.ProjectOwnerID = projectOwner.UserID  
-            WHERE p.ProjectID = 1 AND (projectOwner.IsDeleted = 0 OR  projectOwner.UserID IS NULL);`;
+            WHERE p.ProjectID = ? AND (projectOwner.IsDeleted = 0 OR  projectOwner.UserID IS NULL);`;
       const getProjectOwners = `
             SELECT u.UserID,u.FullName, u.Email, u.UserType 
             FROM User u
