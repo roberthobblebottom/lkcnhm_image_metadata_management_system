@@ -28,7 +28,8 @@ router.get(
     const getPhotographers = `
     SELECT u.UserID,u.FullName, u.Email 
     FROM User u
-    WHERE u.UserType != 'admin' AND u.IsDeleted = 0`;
+    WHERE u.UserType != 'admin' 
+    AND u.IsDeleted = 0`;
     const isUserRegistrationEnabledQuery = 'SELECT IsEnabled FROM IsUserRegistrationEnabled'
 
     const [projectOwners, photographers, isUserRegistrationEnabledResults] = await Promise.all([
@@ -355,12 +356,12 @@ router.get(
     WHERE p.ProjectID = ?    `;
     const photographersQuery = `SELECT user.FullName, user.UserID FROM ProjectUserPhotographyLink pupl 
         JOIN User user ON user.UserID = pupl.PhotographerID
-        WHERE pupl.ProjectID = ? `;
+        WHERE pupl.ProjectID = ? 
+        AND user.IsDeleted = 0`;
     const imagingPlatformsQuery = `
     SELECT ImagingPlatform FROM ImagingPlatformInstance WHERE ProjectID = ? `;
     const newlyCreatedPhotographers = req.session.newlyCreatedPhotographers;
     req.session.newlyCreatedPhotographers = [];
-
     req.session.save();
 
     const errors = validationResult(req)
@@ -429,7 +430,9 @@ router.get(
             SELECT p.*, projectOwner.FullName, projectOwner.Email            
             FROM Project p        
             LEFT JOIN User projectOwner ON p.ProjectOwnerID = projectOwner.UserID  
-            WHERE p.ProjectID = ? AND (projectOwner.IsDeleted = 0 OR  projectOwner.UserID IS NULL);`;
+            WHERE p.ProjectID = ? 
+            AND (projectOwner.IsDeleted = 0 OR  projectOwner.UserID IS NULL)
+            AND p.IsDeleted = 0 `;
       const getProjectOwners = `
             SELECT u.UserID,u.FullName, u.Email, u.UserType 
             FROM User u

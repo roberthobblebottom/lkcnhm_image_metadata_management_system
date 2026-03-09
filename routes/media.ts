@@ -28,7 +28,9 @@ router.get("/create", isAuthenticated, async (req: Request, res: Response) => {
         FROM ProjectUserPhotographyLink pupl 
         JOIN Project p ON p.ProjectID = pupl.ProjectID 
         JOIN User photographer ON photographer.UserID = pupl.PhotographerID
-        WHERE photographer.UserType != 'admin'`;
+        WHERE photographer.UserType != 'admin'
+        AND photographer.IsDeleted = 0 
+        AND p.IsDeleted =0`;
   const user = req.session.passport.user;
   var q2: string;
 
@@ -163,7 +165,8 @@ router.get(
         `SELECT * 
         FROM ProjectUserPhotographyLink pupl 
         RIGHT JOIN Project p ON p.ProjectID = pupl.ProjectID
-        WHERE pupl.PhotographerID = ? OR p.ProjectOwnerID = ? LIMIT 1`,
+        WHERE pupl.PhotographerID = ? OR p.ProjectOwnerID = ?
+        AND p.IsDeleted = 0 LIMIT 1`,
         [user.UserID, user.UserID]
       )
     )[0];
@@ -177,9 +180,8 @@ router.get(
   }
 );
 
+// Datatables server side processing
 router.post("/view-all-processing", isAuthenticated, async (req: Request, res: Response) => {
-  // console.log(req.body)
-  // console.log('view all processing')
   const baseQuery = `
       SELECT 
         m.MediaID,
@@ -348,7 +350,9 @@ router.get(
         FROM ProjectUserPhotographyLink pupl 
         JOIN Project p ON p.ProjectID = pupl.ProjectID 
         JOIN User photographer ON photographer.UserID = pupl.PhotographerID
-        WHERE photographer.UserType != 'admin'`;
+        WHERE photographer.UserType != 'admin' 
+        AND photographer.IsDeleted = 0
+        AND p.IsDeleted = 0`;
 
     const user = req.session.passport.user;
     var q2: string;
@@ -356,9 +360,9 @@ router.get(
      * retrieve project photographer pair based on user privilleges
      */
     if (user.UserType == userTypesEnumeration().projectOwner)
-      q2 = allProjectAndPhotographerPairsQuery + "AND p.ProjectOwnerID = ?";
+      q2 = allProjectAndPhotographerPairsQuery + "\nAND p.ProjectOwnerID = ?";
     else if (user.UserType == userTypesEnumeration().photographerOnly)
-      q2 = allProjectAndPhotographerPairsQuery + "AND photographer.UserID = ?";
+      q2 = allProjectAndPhotographerPairsQuery + "\nAND photographer.UserID = ?";
     else q2 = allProjectAndPhotographerPairsQuery;
 
     const allProjectAndPhotographerPairs = (
@@ -641,31 +645,35 @@ router.get(
   isAuthenticated,
   async (req: Request, res: Response) => {
     const user = req.session.passport.user;
-    const query = ` SELECT  p.ProjectID, p.ProjectName
+    const allProjectsQueryBase = ` SELECT  p.ProjectID, p.ProjectName
                     FROM Project p\n`;
     // list projects based on user type,
     // where non admins will only get projects that they photographs or owns.
-    const q2 =
+    const allProjectsQuery =
       user.UserType != userTypesEnumeration().admin
-        ? query +
+        ? allProjectsQueryBase +
         `JOIN ProjectUserPhotographyLink pupl ON pupl.ProjectID = p.ProjectID
         WHERE pupl.PhotographerID = ` + user.UserID
-        : query;
-    const allProjects = (await db.query(q2))[0];
+        : allProjectsQueryBase;
+    const allProjects = (await db.query(allProjectsQuery))[0];
 
 
     const projectPhotographersQuery = `
-    SELECT pupl.PhotographerID, u.FullName, p.ProjectID, p.ProjectName, p.ProjectOwnerID FROM ProjectUserPhotographyLink pupl 
+    SELECT pupl.PhotographerID, u.FullName, p.ProjectID, p.ProjectName, p.ProjectOwnerID 
+    FROM ProjectUserPhotographyLink pupl 
     JOIN User u ON u.UserID = pupl.PhotographerID
     JOIN Project p on p.ProjectID = pupl.ProjectID
+    WHERE u.IsDeleted = 0 
+    AND p.IsDeleted = 0
     `
     const projectPhotographersQuery2 =
       user.UserType == userTypesEnumeration().photographerOnly
         ? projectPhotographersQuery +
-        `\nWHERE pupl.PhotographerID = ` + user.UserID + `\nORDER BY p.ProjectID `
+        `\n AND pupl.PhotographerID = ` + user.UserID + `
+         \n ORDER BY p.ProjectID `
         : user.UserType == userTypesEnumeration().projectOwner
-          ? projectPhotographersQuery +
-          `\nWHERE p.ProjectOwnerID= ` + user.UserID + `\nORDER BY p.ProjectID `
+          ? projectPhotographersQuery + `\n AND p.ProjectOwnerID= ` + user.UserID 
+          +`\n ORDER BY p.ProjectID `
           : projectPhotographersQuery + `\nORDER BY p.ProjectID `
     const projectPhotographers = (await db.query(projectPhotographersQuery2,))[0]
     console.log('projectPhotographers', projectPhotographers)
