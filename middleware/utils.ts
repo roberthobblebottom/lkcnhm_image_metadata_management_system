@@ -1,11 +1,8 @@
 // Date formatting helper function (place this BEFORE your route handler)
 
 const formatDisplayDate = (date: any) => {
-console.log('date',date)
   var d1 = new Date(date)
-  console.log('d1',d1)
   const d2 = d1 ? d1.toISOString().split("T")[0] : null;
-  console.log('d2',d2)
   return d2;
 };
 

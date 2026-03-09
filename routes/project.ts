@@ -147,8 +147,8 @@ router.post(
           const fullName = x[0];
           const email = x[1];
           const newPasswordSalt = crypto.randomBytes(16).toString();
-          // const newPassword = crypto.randomBytes(8).toString() // TODO: switch to this in production
-          const newPassword = "1"; // For testing only
+          const newPassword = Buffer.from(crypto.randomBytes(4)).toString('hex') // TODO: switch to this in production
+          // const newPassword = "1"; // For testing only
           const saltedPassword = crypto.pbkdf2Sync(
             newPassword, newPasswordSalt, 310000, 32, "sha256"
           );
@@ -172,7 +172,6 @@ router.post(
             const result = (await db.query(insertUserQuery, params))[0];
             const o: any = result;
             insertedId = Object.values(o)[2].toString(); //the weird way of getting insertedId
-            console.log("newly created user id:", insertedId);
             newlyCreatedPhotographers.push({
               email: email, password: newPassword,
             });
@@ -425,7 +424,6 @@ router.get(
 
     try {
       const projectID = req.params.projectID;
-      console.log('projectID',projectID)
       const projectAndOwnerQuery = `
             SELECT p.*, projectOwner.FullName, projectOwner.Email            
             FROM Project p        
@@ -530,8 +528,8 @@ router.post(
         detailsOfSpecimens,
         projectStatus,
         projectOwnerID,
-        selectedImagingPlatforms,
-        selectedPhotographers,
+        selectedImagingPlatforms: newlySelectedImagingPlatforms,
+        selectedPhotographers: newlySelectedPhotographers,
         toBeCreatedPhotographers,
       } = req.body;
       // === 1. VALIDATION ===
@@ -541,18 +539,18 @@ router.post(
           .json({ success: false, message: "Missing required fields" });
 
       if (
-        selectedImagingPlatforms.length == 0 ||
-        (selectedImagingPlatforms.length == 1 &&
-          selectedImagingPlatforms[0] == "")
+        newlySelectedImagingPlatforms.length == 0 ||
+        (newlySelectedImagingPlatforms.length == 1 &&
+          newlySelectedImagingPlatforms[0] == "")
       ) 
         return res
           .status(400)
           .json({ success: false, message: "No Selected Imaging Platforms" });
-      if (selectedPhotographers.length == 0) 
+      if (newlySelectedPhotographers.length == 0) 
         return res
           .status(400)
           .json({ success: false, message: "no Selected Photographers" });
-      if (!selectedPhotographers.includes(projectOwnerID.toString())) 
+      if (!newlySelectedPhotographers.includes(projectOwnerID.toString())) 
         return res.status(400).json({
           success: false,
           message: "Photographers must include him or herself.",
@@ -591,13 +589,13 @@ router.post(
       if (isUserRegistrationEnabled) {
         const newlyCreatedPhotographers: { email: string; password: string }[] =
           [];
+        console.log(toBeCreatedPhotographers)
         for (const x of toBeCreatedPhotographers) {
           const fullName = x[0];
           const email = x[1];
           const newPasswordSalt = crypto.randomBytes(16).toString();
-          // const newPassword = crypto.randomBytes(8).toString() // TODO: switch to this in production
-          const newPassword = "1"; // For testing only
-          var insertedId = "";
+          const newPassword = Buffer.from(crypto.randomBytes(4)).toString('hex') // TODO: switch to this in production
+          // const newPassword = "1"; // For testing only
           const saltedPassword = crypto.pbkdf2Sync(
             newPassword,
             newPasswordSalt,
@@ -619,17 +617,22 @@ router.post(
             "",
             "",
           ];
+          console.log('1')
           try {
+            console.log('2')
             const result = (await db.query(insertUserQuery, params))[0];
+            console.log(result)
             const o: any = result;
-            insertedId = Object.values(o)[2].toString(); //the weird way of getting insertedId
+            console.log("Object.value(o)",Object.values(o))
+            const insertedID = Object.values(o)[2].toString(); //the weird way of getting insertedId
+            console.log('insertedId',insertedID)
             newlyCreatedPhotographers.push({
               email: email,
               password: newPassword,
             });
-            for (let x = 0; x < selectedPhotographers.length; x++) 
-              if (emailRegex.test(selectedPhotographers[x])) {
-                selectedPhotographers[x] = insertedId;
+            for (let x = 0; x < newlySelectedPhotographers.length; x++) 
+              if (emailRegex.test(newlySelectedPhotographers[x])) {
+                newlySelectedPhotographers[x] = insertedID;
                 break;
             }
           } catch (err: any) {
@@ -700,7 +703,7 @@ router.post(
       
 
       //Getting differences
-      const temp2 = selectedImagingPlatforms.filter(
+      const temp2 = newlySelectedImagingPlatforms.filter(
         (e: any) => !currentSelectedImagingPlatforms.includes(e)
       );
       const imagingPlatformsToBeAdded: string[][] = [];
@@ -709,7 +712,7 @@ router.post(
       
       const imagingPlatformsToBeRemoved: any =
         currentSelectedImagingPlatforms.filter(
-          (e: any) => !selectedImagingPlatforms.includes(e)
+          (e: any) => !newlySelectedImagingPlatforms.includes(e)
         );
 
       //the update
@@ -740,14 +743,16 @@ router.post(
         currentSelectedPhotographers.push(x.PhotographerID.toString());
 
       //Getting differences
-      const temp4 = selectedPhotographers.filter(
+      const temp4 = newlySelectedPhotographers.filter(
         (e: any) => !currentSelectedPhotographers.includes(e)
       );
+      console.log('newlySelectedPhotographers',newlySelectedPhotographers)
       const photographersToBeAdded: string[][] = [];
-      for (const x of temp4) photographersToBeAdded.push([x, projectID.toString()]);
+      for (const x of temp4) 
+        photographersToBeAdded.push([x, projectID.toString()]);
       const photographersToBeRemoved: string[] =
         currentSelectedPhotographers.filter(
-          (e: any) => !selectedPhotographers.includes(e)
+          (e: any) => !newlySelectedPhotographers.includes(e)
         );
 
       //the update
