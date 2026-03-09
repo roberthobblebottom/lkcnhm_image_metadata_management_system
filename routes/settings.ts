@@ -9,7 +9,8 @@ import {
   staffTypesEnumeration,
 } from "../middleware/utils";
 const { isAuthenticated } = require("../middleware/auth");
-
+import path from "path";
+const fs = require("fs");
 router.get(
   "/change-password",
   isAuthenticated,
@@ -39,7 +40,16 @@ router.post(
         success: false,
         message: "the new passwords does not match",
       });
-
+    try {
+      const filePath = __dirname.replace("routes", "") + 'public/common-passwords.txt'
+      const commonPasswords = fs.readFileSync(path.resolve(filePath)).toString().split('\n')
+      if (commonPasswords.includes(newPassword))
+        return res.status(400).json({
+          sucess: false, message: "a common password detected, please use another password"
+        })
+    } catch (error) {
+      console.error(`Error reading file: ${error}`);
+    }
     const results = (
       await db.query(getCurrentPasswordStuffQuery, [username])
     )[0][0];
@@ -148,7 +158,7 @@ router.post(
       const result = await db
         .query(checkEmailValidityQuery, [email, originalEmail]);
 
-      if (result[0]!=0)
+      if (result[0] != 0)
         return res.status(400).json({
           success: false,
           message: "Email already exist",

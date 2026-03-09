@@ -7,12 +7,14 @@ import * as passportStrategy from "passport-local";
 import crypto from "crypto";
 import {
   emailRegex,
+  passwordRegex,
   staffTypesEnumeration,
   userTypesEnumeration,
 } from "../middleware/utils";
 import { Response, Request, NextFunction } from "express";
 import { User } from "../@types/types";
-
+const fs = require("fs");
+import path from 'path';
 passport.use(
   new passportStrategy.Strategy(async function verify(
     username: string,
@@ -99,7 +101,7 @@ passport.deserializeUser((user: User, cb: (arg0: null, arg1: any) => any) => {
 });
 router.get("/register", async (req: Request, res, Response) => {
   const isEnabled = (await db.query('SELECT IsEnabled FROM IsUserRegistrationEnabled'))[0][0].IsEnabled
-  console.log(isEnabled)
+
   if (!isEnabled) {
     return res.status(400).json({
       sucess: false,
@@ -152,8 +154,26 @@ router.post("/register", async (req: Request, res: Response) => {
   if (password != confirmPassword) {
     return res.status(400).json({
       success: false,
-      message: "the  passwords does not match",
+      message: "the passwords does not match",
     });
+  }
+  if (!passwordRegex.test(password))
+    return res.status(400).json(
+      {
+        success: false,
+        message: "the password doesn't match the requirements of 7 characters or more characters and at least a digit and a lower case letter"
+      })
+
+  try {
+    const filePath = __dirname.replace("routes", "") + 'public/common-passwords.txt'
+    const commonPasswords = fs.readFileSync(path.resolve(filePath)).toString().split('\n')
+
+    if (commonPasswords.includes(password))
+      return res.status(400).json({
+        sucess: false, message: "a common password detected, please use another password"
+      })
+  } catch (error) {
+    console.error(`Error reading file: ${error}`);
   }
   if (!Object.values(userTypesEnumeration()).includes(userType)) {
     return res.status(400).json({

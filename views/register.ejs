@@ -141,9 +141,10 @@
       <div class="form-group">
         <label>Password*</label>
         <input type="password" id="password" name="password" required
-          title="Password must be at least 8 characters long and include an uppercase letter, a number, and a symbol."
-          style="padding-right: 40px;" />
-        <!-- pattern="(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{8,}"  -->
+          title="Password must be at least 7 characters long and include at least an lowercase letter and a number"
+          style="padding-right: 40px;"
+         pattern="^(?=.*[a-z])(?=.*[0-9])\S{7,}$" 
+          />
         <span id="togglePassword" class="togglePassword">
           👁️
         </span>
@@ -151,7 +152,7 @@
       <div class="form-group">
         <label>Confirm Password*</label>
         <input type="password" id="confirmPassword" name="confirmPassword" required
-          title="Password must be at least 8 characters long and include an uppercase letter, a number, and a symbol."
+          title="Password must be at least 7 characters long and include at least a lowercase letter, a number."
           style="padding-right: 40px;" />
         <!-- pattern="(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{8,}"  -->
         <span id="toggleConfirmPassword" class="toggleConfirmPassword">
@@ -236,6 +237,8 @@
         return;
       }
 
+      //no client side password checking for common passwords, it is done only on server side
+      
       messageEl.innerText = "⏳ Processing registration...";
 
       fetch("/auth/register", {

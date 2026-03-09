@@ -10,6 +10,8 @@ import {
 } from "../../middleware/utils";
 import { Response, Request } from "express";
 import { param, validationResult } from "express-validator";
+import path from "path";
+const fs = require("fs");
 const {
   isAuthenticated,
   isAdmin,
@@ -84,6 +86,17 @@ router.post(
         success: false,
         message: "the new passwords does not match",
       });
+
+    try {
+      const filePath = __dirname.replace("routes/admin", "") + 'public/common-passwords.txt'
+      const commonPasswords = fs.readFileSync(path.resolve(filePath)).toString().split('\n')
+      if (commonPasswords.includes(password))
+        return res.status(400).json({
+          sucess: false, message: "a common password detected, please use another password"
+        })
+    } catch (error) {
+      console.error(`Error reading file: ${error}`);
+    }
     if (!Object.values(userTypesEnumeration()).includes(userType))
       return res.status(400).json({
         success: false,
@@ -290,6 +303,29 @@ router.post(
         success: false,
         message: "the new passwords does not match",
       });
+try {
+      const filePath = __dirname.replace("routes/admin", "") + 'public/common-passwords.txt'
+      const commonPasswords = fs.readFileSync(path.resolve(filePath)).toString().split('\n')
+      if (commonPasswords.includes(password))
+        return res.status(400).json({
+          sucess: false, message: "a common password detected, please use another password"
+        })
+    } catch (error) {
+      console.error(`Error reading file: ${error}`);
+    }
+
+    try {
+      const filePath = __dirname.replace("routes", "") + 'public/common-passwords.txt'
+      const commonPasswords = fs.readFileSync(path.resolve(filePath)).toString().split('\n')
+
+      if (commonPasswords.includes(password))
+        return res.status(400).json({
+          sucess: false, message: "a common password detected, please use another password"
+        })
+    } catch (error) {
+      console.error(`Error reading file: ${error}`);
+    }
+
     if (!Object.values(userTypesEnumeration()).includes(userType))
       return res.status(400).json({
         success: false,

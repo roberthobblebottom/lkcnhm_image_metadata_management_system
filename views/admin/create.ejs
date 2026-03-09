@@ -33,7 +33,11 @@
       </div>
       <div class="form-group">
         <label for="Password">Password* :</label>
-        <input type="password" id="password" name="password" value="" required>
+        <input type="password" id="password" name="password" value="" 
+        
+          title="Password must be at least 7 characters long and include at least an lowercase letter and a number"
+         pattern="^(?=.*[a-z])(?=.*[0-9])\S{7,}$" 
+        required>
       </div>
       <div class="form-group">
         <label for="confirmPassword">Confirm Password*</label>

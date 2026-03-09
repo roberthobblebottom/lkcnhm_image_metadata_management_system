@@ -55,7 +55,7 @@ const emailRegex = /[a-z0-9!#$%&'*+\/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+\/=?^_`{|}~
 const catalogIDRegex = /^[A-Z]{6}\d{7}$/;
 const clusterIDRegex = /^[\d][A-Z]o{7}\d{7}$/;
 const resolutionRegex = /^\d{1,5}x\d{1,5}$/;
-
+const passwordRegex = /^(?=.*[a-z])(?=.*[0-9])\S{7,}$/;
 export {
   formatDisplayDate,
   projectStatusEnumeration,
@@ -66,4 +66,5 @@ export {
   catalogIDRegex,
   clusterIDRegex,
   resolutionRegex,
+  passwordRegex
 };
