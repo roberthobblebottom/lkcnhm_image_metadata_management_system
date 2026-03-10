@@ -6,6 +6,8 @@
   <title>📸 Media Submission Form</title>
   <link rel="stylesheet" href="/css/form.css" />
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/choices.js@11.1.0/public/assets/styles/choices.min.css" />
+  <script src="https://cdn.jsdelivr.net/npm/choices.js/public/assets/scripts/choices.min.js"></script>
   <style>
     h2 {
       float: center;
@@ -29,14 +31,26 @@
           <p class="requirement-of-field">* = required</p>
         </div>
 
+
         <div class="form-group">
-          <label>Project and Photographer Pair*</label>
-          <select name="projectAndPhotographerPair" id="projectAndPhotographerPair" requried
-            <%=currentUser.UserType=='photographerOnly' ? 'disabled' : '' %>>
-            <option value="">-- Select a project and photographer pair--</option>
-            <%allProjectAndPhotographerPairs.forEach( u=>{%>
-              <option value="<%=u.ProjectID%>,<%=u.UserID%>">
-                <%=u.projectName%> | <%=u.photographerName%>
+          <label>Project*</label>
+          <select id="selectProject" required>
+            <option value="">-- Select a project--</option>
+            <%allProjects.forEach( project=>{%>
+              <option value="<%=project.ProjectID%>">
+                <%=project.ProjectName%>
+              </option>
+              <%})%>
+          </select>
+        </div>
+        <div class="form-group">
+
+          <label>Photographer*</label>
+          <select id="selectPhotographer" required>
+            <option value="-1" projectID='-1'>-- Select a photographer--</option>
+            <%projectPhotographers.forEach( pair=>{%>
+              <option value="<%=pair.PhotographerID%>" projectID="<%=pair.ProjectID%>">
+                <%=pair.FullName%>
               </option>
               <%})%>
           </select>
@@ -160,7 +174,42 @@
       now.setDate(new Date().getDate())
       document.getElementById('imagingDate').value = now.toISOString().slice(0, 16).split('T')[0]
       fileFormatOnChange()
+      const selectProject = document.getElementById('selectProject');
+      const allOptionsRaw = document.getElementById('selectPhotographer').options
+      const allOptions = []
+      for (const o of allOptionsRaw) {
+        console.log(o.attributes)
+        allOptions.push({
+          label: o.label,
+          value: o.value,
+          projectID: o.attributes['1'] != null ? o.attributes['1'].value : null
+        })
+      }
+      const selectPhotographer = new Choices(document.getElementById('selectPhotographer'))
+      let photographersToShow = []
+      const selectedProjectID = selectProject.value
+      for (x of allOptions)
+        if (x.projectID == selectedProjectID)
+          photographersToShow.push(x)
+      selectPhotographer.clearChoices(clearOptions = false, clearItems = true)
 
+      selectPhotographer.setChoices(photographersToShow)
+
+      selectProject.addEventListener('change', (e) => {
+        e.preventDefault()
+        const selectedProjectID = selectProject.value
+        photographersToShow = []
+        for (x of allOptions)
+          if (x.projectID == selectedProjectID)
+            photographersToShow.push(x)
+        // photographersToShow.push({label:"Do not override, photographerIDs are already in the csv file.",
+        //   value:-1,
+        //   projectID:-1
+        // })
+        selectPhotographer.clearChoices(clearOptions = false, clearItems = true)
+ 
+        selectPhotographer.setChoices(photographersToShow)
+      })
       form.addEventListener("submit", async (e) => {
         e.preventDefault();
         const fileName = fileNameInput.value.trim();
@@ -194,7 +243,7 @@
           fileNameInput.style.borderColor = "";
         }
         if (errorMessages.length > 0) {
-          e.preventDefault(); 
+          e.preventDefault();
           Swal.fire({
             icon: 'error',
             title: 'Validation Issue',
@@ -216,7 +265,9 @@
             imagingPlatform: form.imagingPlatform.value == "" ? null : form.imagingPlatform.value,
             imageEditingTool: form.imageEditingTool.value == "" ? null : form.imageEditingTool.value,
             comments: form.comments.value,
-            projectAndPhotographerPair: form.projectAndPhotographerPair.value,
+            // projectAndPhotographerPair: form.projectAndPhotographerPair.value,
+ projectID: selectProject.value,
+            photographerID: form.selectPhotographer.value
           })
 
           const submitBtn = form.querySelector('button[type="submit"]');
@@ -226,7 +277,7 @@
           submitBtn.disabled = true;
           const response = await fetch("/media/create", {
             method: 'POST',
-            headers: {'Content-Type': 'application/json'},
+            headers: { 'Content-Type': 'application/json' },
             body: formData
           });
           try {
@@ -236,7 +287,7 @@
             }
 
             const data = await response.json();
-            if (!data.success) 
+            if (!data.success)
               throw new Error(data.message || "Submission failed");
 
             // Show success message

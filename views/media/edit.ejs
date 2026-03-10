@@ -150,7 +150,9 @@
           <label for="comments">Comments</label>
           <textarea name="comments" id="comments"><%=toBeEditedMedia.Comments  %></textarea>
         </div>
-        <label style="display:none" id="toBeEditedMediaFullName" value=""><%=toBeEditedMedia.photographerName%></label>
+        <label style="display:none" id="toBeEditedMediaFullName">
+          <%=toBeEditedMedia.photographerName%>
+        </label>
 
         <p class="note">
           💡 Note: If there is more than one image for a specimen, please use the pipeline script to capture the
@@ -192,9 +194,9 @@
       const selectProject = document.getElementById('selectProject');
       const allOptionsRaw = document.getElementById('selectPhotographer').options
       const allOptions = []
-      const toBeEditedMediaPhotographerName = document.getElementById("toBeEditedMediaFullName").textContent
-      console.log('toBeEditedMediaPhotographerName', toBeEditedMediaPhotographerName)
-      console.log('allOptionsRaw', allOptionsRaw)
+      const toBeEditedMediaPhotographerName = document.getElementById("toBeEditedMediaFullName")
+      .textContent.trim()
+      console.log(toBeEditedMediaPhotographerName)
       for (const o of allOptionsRaw) {
         console.log(o.attributes)
         allOptions.push({
@@ -206,13 +208,11 @@
       const selectPhotographer = new Choices(document.getElementById('selectPhotographer'))
       let photographersToShow = []
       const selectedProjectID = selectProject.value
-      console.log('allOptions', allOptions)
       for (x of allOptions)
         if (x.projectID == selectedProjectID)
           photographersToShow.push(x)
       selectPhotographer.clearChoices(clearOptions = false, clearItems = true)
       for (x of photographersToShow)
-      // console.log(x.label)
         if (x.label == toBeEditedMediaPhotographerName)
           x['selected'] = true
 

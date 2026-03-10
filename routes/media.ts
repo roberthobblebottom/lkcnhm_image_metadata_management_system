@@ -22,33 +22,65 @@ import { errorMonitor } from "events";
 router.get("/create", isAuthenticated, async (req: Request, res: Response) => {
   //Select Only relevant project andd photographer pairs based on user typer
 
-  const allProjectAndPhotographerPairsQuery = `    
-        Select pupl.ProjectID, photographer.UserID, 
-        p.ProjectName as projectName, photographer.FullName as photographerName 
-        FROM ProjectUserPhotographyLink pupl 
-        JOIN Project p ON p.ProjectID = pupl.ProjectID 
-        JOIN User photographer ON photographer.UserID = pupl.PhotographerID
-        WHERE photographer.UserType != 'admin'
-        AND photographer.IsDeleted = 0 
-        AND p.IsDeleted =0`;
+  // const allProjectAndPhotographerPairsQuery = `    
+  //       Select pupl.ProjectID, photographer.UserID, 
+  //       p.ProjectName as projectName, photographer.FullName as photographerName 
+  //       FROM ProjectUserPhotographyLink pupl 
+  //       JOIN Project p ON p.ProjectID = pupl.ProjectID 
+  //       JOIN User photographer ON photographer.UserID = pupl.PhotographerID
+  //       WHERE photographer.UserType != 'admin'
+  //       AND photographer.IsDeleted = 0 
+  //       AND p.IsDeleted =0`;
   const user = req.session.passport.user;
-  var q2: string;
+  // var q2: string;
 
-  if (user.UserType == userTypesEnumeration().projectOwner)
-    q2 = allProjectAndPhotographerPairsQuery + "AND p.ProjectOwnerID = ?";
-  else if (user.UserType == userTypesEnumeration().photographerOnly)
-    q2 = allProjectAndPhotographerPairsQuery + "AND photographer.UserID = ?";
-  else q2 = allProjectAndPhotographerPairsQuery;
+  // if (user.UserType == userTypesEnumeration().projectOwner)
+  //   q2 = allProjectAndPhotographerPairsQuery + "AND p.ProjectOwnerID = ?";
+  // else if (user.UserType == userTypesEnumeration().photographerOnly)
+  //   q2 = allProjectAndPhotographerPairsQuery + "AND photographer.UserID = ?";
+  // else q2 = allProjectAndPhotographerPairsQuery;
 
-  const allProjectAndPhotographerPairs = (await db.query(q2, [user.UserID]))[0];
+  // const allProjectAndPhotographerPairs = (await db.query(q2, [user.UserID]))[0];
 
+    const allProjectsQueryBase = ` SELECT  p.ProjectID, p.ProjectName
+                    FROM Project p\n`;
+    // list projects based on user type,
+    // where non admins will only get projects that they photographs or owns.
+    const allProjectsQuery =
+      user.UserType != userTypesEnumeration().admin
+        ? allProjectsQueryBase +
+        `JOIN ProjectUserPhotographyLink pupl ON pupl.ProjectID = p.ProjectID
+        WHERE pupl.PhotographerID = ` + user.UserID
+        : allProjectsQueryBase;
+    const allProjects = (await db.query(allProjectsQuery))[0];
+ 
+//--------------------------------------------------------------------------------
+ const projectPhotographersQuery = `
+    SELECT pupl.PhotographerID, u.FullName, p.ProjectID, p.ProjectName, p.ProjectOwnerID 
+    FROM ProjectUserPhotographyLink pupl 
+    JOIN User u ON u.UserID = pupl.PhotographerID
+    JOIN Project p on p.ProjectID = pupl.ProjectID
+    WHERE u.IsDeleted = 0 
+    AND p.IsDeleted = 0
+    `
+    const projectPhotographersQuery2 =
+      user.UserType == userTypesEnumeration().photographerOnly
+        ? projectPhotographersQuery +
+        `\n AND pupl.PhotographerID = ` + user.UserID + `
+         \n ORDER BY p.ProjectID `
+        : user.UserType == userTypesEnumeration().projectOwner
+          ? projectPhotographersQuery + `\n AND p.ProjectOwnerID= ` + user.UserID 
+          +`\n ORDER BY p.ProjectID `
+          : projectPhotographersQuery + `\nORDER BY p.ProjectID `
+    const projectPhotographers = (await db.query(projectPhotographersQuery2,))[0]
   res.render("media/create", {
     currentUser: req.session.passport.user,
     imageEditingTools: req.session["imageEditingTools"],
     imagingPlatforms: req.session["imagingPlatforms"],
-    allProjectAndPhotographerPairs: allProjectAndPhotographerPairs,
     fileFormats: Object.values(mediaFileFormatEnumeration()),
     title: "Media Form",
+    allProjects,
+    projectPhotographers
   });
 });
 router.post("/create", isAuthenticated, async (req: Request, res: Response) => {
@@ -67,7 +99,8 @@ router.post("/create", isAuthenticated, async (req: Request, res: Response) => {
       imagingPlatform,
       imageEditingTool,
       comments,
-      projectAndPhotographerPair,
+      projectID,
+      photographerID,
     } = req.body;
 
     console.log("📤 Media submission data:", req.body);
@@ -76,8 +109,9 @@ router.post("/create", isAuthenticated, async (req: Request, res: Response) => {
 
     // Validation: required fields
     const missingFields = [];
-    if (!projectAndPhotographerPair)
+    if (!photographerID)
       missingFields.push("projectAndPhotographerPair");
+    if (!projectID) missingFields.push("fileName");
     if (!fileName) missingFields.push("fileName");
     if (!filePath) missingFields.push("filePath");
     if (!catalogID) missingFields.push("catalogID");
@@ -94,7 +128,6 @@ router.post("/create", isAuthenticated, async (req: Request, res: Response) => {
       });
     }
 
-    const splitX = projectAndPhotographerPair.split(",");
     const insertQuery = `
       INSERT INTO Media(
             ProjectID,
@@ -117,10 +150,9 @@ router.post("/create", isAuthenticated, async (req: Request, res: Response) => {
             UpdatedDate,
             UpdatedByID
         ) VALUES(?,  ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW(), ?, NOW(),?)`;
-    const projectID = splitX[0];
     const values = [
       projectID,
-      splitX[1],
+      photographerID,
       fileName,
       filePath,
       catalogID || null,
