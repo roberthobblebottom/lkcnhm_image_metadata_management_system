@@ -345,30 +345,42 @@ router.get(
       return res.status(400).json({ errors: errors.array() })
 
     const mediaID = req.params.mediaID;
-    const allProjectAndPhotographerPairsQuery = `    Select pupl.ProjectID, photographer.UserID, 
-          p.ProjectName as projectName, photographer.FullName as photographerName 
-        FROM ProjectUserPhotographyLink pupl 
-        JOIN Project p ON p.ProjectID = pupl.ProjectID 
-        JOIN User photographer ON photographer.UserID = pupl.PhotographerID
-        WHERE photographer.UserType != 'admin' 
-        AND photographer.IsDeleted = 0
-        AND p.IsDeleted = 0`;
-
     const user = req.session.passport.user;
-    var q2: string;
-    /**
-     * retrieve project photographer pair based on user privilleges
-     */
-    if (user.UserType == userTypesEnumeration().projectOwner)
-      q2 = allProjectAndPhotographerPairsQuery + "\nAND p.ProjectOwnerID = ?";
-    else if (user.UserType == userTypesEnumeration().photographerOnly)
-      q2 = allProjectAndPhotographerPairsQuery + "\nAND photographer.UserID = ?";
-    else q2 = allProjectAndPhotographerPairsQuery;
+    // const allProjectAndPhotographerPairsQuery = `    Select pupl.ProjectID, photographer.UserID, 
+    //       p.ProjectName as projectName, photographer.FullName as photographerName 
+    //     FROM ProjectUserPhotographyLink pupl 
+    //     JOIN Project p ON p.ProjectID = pupl.ProjectID 
+    //     JOIN User photographer ON photographer.UserID = pupl.PhotographerID
+    //     WHERE photographer.UserType != 'admin' 
+    //     AND photographer.IsDeleted = 0
+    //     AND p.IsDeleted = 0`;
 
-    const allProjectAndPhotographerPairs = (
-      await db.query(q2, [user.UserID])
-    )[0];
+    // var q2: string;
+    // /**
+    //  * retrieve project photographer pair based on user privilleges
+    //  */
+    // if (user.UserType == userTypesEnumeration().projectOwner)
+    //   q2 = allProjectAndPhotographerPairsQuery + "\nAND p.ProjectOwnerID = ?";
+    // else if (user.UserType == userTypesEnumeration().photographerOnly)
+    //   q2 = allProjectAndPhotographerPairsQuery + "\nAND photographer.UserID = ?";
+    // else q2 = allProjectAndPhotographerPairsQuery;
 
+    // const allProjectAndPhotographerPairs = (
+    //   await db.query(q2, [user.UserID])
+    // )[0];
+
+const allProjectsQueryBase = ` SELECT  p.ProjectID, p.ProjectName
+                    FROM Project p\n`;
+    // list projects based on user type,
+    // where non admins will only get projects that they photographs or owns.
+    const allProjectsQuery =
+      user.UserType != userTypesEnumeration().admin
+        ? allProjectsQueryBase +
+        `JOIN ProjectUserPhotographyLink pupl ON pupl.ProjectID = p.ProjectID
+        WHERE pupl.PhotographerID = ` + user.UserID
+        : allProjectsQueryBase;
+    const allProjects = (await db.query(allProjectsQuery))[0];
+//--------------------------------------------------------------------------------
     const currentMediaQuery =
       `SELECT Media.*,
         projectOwner.FullName projectOwnerName,
@@ -381,16 +393,36 @@ router.get(
         WHERE Media.MediaID = ` + mediaID;
     const x: any[] = await db.query(currentMediaQuery);
     const toBeEditedMedia = x[0][0];
-    console.log('toBeEditedMedia.ImagingDate', toBeEditedMedia.ImagingDate)
+console.log(toBeEditedMedia)
+//--------------------------------------------------------------------------------
+ const projectPhotographersQuery = `
+    SELECT pupl.PhotographerID, u.FullName, p.ProjectID, p.ProjectName, p.ProjectOwnerID 
+    FROM ProjectUserPhotographyLink pupl 
+    JOIN User u ON u.UserID = pupl.PhotographerID
+    JOIN Project p on p.ProjectID = pupl.ProjectID
+    WHERE u.IsDeleted = 0 
+    AND p.IsDeleted = 0
+    `
+    const projectPhotographersQuery2 =
+      user.UserType == userTypesEnumeration().photographerOnly
+        ? projectPhotographersQuery +
+        `\n AND pupl.PhotographerID = ` + user.UserID + `
+         \n ORDER BY p.ProjectID `
+        : user.UserType == userTypesEnumeration().projectOwner
+          ? projectPhotographersQuery + `\n AND p.ProjectOwnerID= ` + user.UserID 
+          +`\n ORDER BY p.ProjectID `
+          : projectPhotographersQuery + `\nORDER BY p.ProjectID `
+    const projectPhotographers = (await db.query(projectPhotographersQuery2,))[0]
     res.render("media/edit", {
       currentUser: req.session.passport.user,
       imageEditingTools: req.session["imageEditingTools"],
       imagingPlatforms: req.session["imagingPlatforms"],
-      allProjectAndPhotographerPairs,
+      allProjects,
       fileFormats: Object.values(mediaFileFormatEnumeration()),
       toBeEditedMedia,
-      toBeEditedImagingDate: formatDisplayDate(toBeEditedMedia.ImagingDate),
+      toBeEditedImagingDate: toBeEditedMedia.ImagingDate===null?null: formatDisplayDate(toBeEditedMedia.ImagingDate),
       title: "Media Form",
+      projectPhotographers,
     });
   }
 );
@@ -421,9 +453,9 @@ router.post("/edit", isAuthenticated, async (req: Request, res: Response) => {
         WHERE MediaID = ?
                 `;
   const updatedBy = req.session.passport.user.UserID;
-  const splitX = mediaData.projectAndPhotographerPair.split(",");
-  const projectID = splitX[0];
-  console.log(mediaData.imagingDate)
+  // const splitX = mediaData.projectAndPhotographerPair.split(",");
+  // const projectID = splitX[0];
+  console.log('photographer id ',mediaData.photographerID)
   const params = [
     mediaData.fileName,
     mediaData.filePath,
@@ -439,8 +471,8 @@ router.post("/edit", isAuthenticated, async (req: Request, res: Response) => {
     mediaData.imageEditingTool,
     mediaData.comments,
     updatedBy, // current user making the update
-    projectID,
-    splitX[1],
+    mediaData.projectID,
+     mediaData.photographerID,
     mediaData.MediaID,
   ];
   // const newImageEditingTool = mediaData.newImageEditingTool;
@@ -677,8 +709,8 @@ router.get(
           : projectPhotographersQuery + `\nORDER BY p.ProjectID `
     const projectPhotographers = (await db.query(projectPhotographersQuery2,))[0]
     console.log('projectPhotographers', projectPhotographers)
-    const projectPhotographers2 = []
-    let currentProjectID = projectPhotographers[0].ProjectID
+    // const projectPhotographers2 = []
+    // let currentProjectID = projectPhotographers[0].ProjectID
     // let innerArray = []
     // for (let x of projectPhotographers) {
     //   if (x.ProjectID != currentProjectID) {

@@ -6,6 +6,8 @@
   <title>📸 Media Submission Form</title>
   <link rel="stylesheet" href="/css/form.css" />
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/choices.js@11.1.0/public/assets/styles/choices.min.css" />
+  <script src="https://cdn.jsdelivr.net/npm/choices.js/public/assets/scripts/choices.min.js"></script>
 </head>
 
 <body>
@@ -28,19 +30,32 @@
         </div>
 
         <div class="form-group">
-          <label>Project and Photographer Pair*</label>
-          <select name="projectAndPhotographerPair" id="projectAndPhotographerPair" required
-            <%=currentUser.UserType=='photographerOnly' ? 'disabled' : '' %>>
-            <option value="">-- Select a project and photographer pair--</option>
-            <%allProjectAndPhotographerPairs.forEach( u=>{%>
-              <option value="<%=u.ProjectID%>,<%=u.UserID%>" <%=u.projectName==toBeEditedMedia.ProjectName &&
-                (u.photographerName==toBeEditedMedia.photographerName) ? 'selected' : "" %>>
-                <%=u.projectName%> | <%=u.photographerName%>
+
+          <label>Project*</label>
+          <select id="selectProject" required <%=currentUser.UserType=='photographerOnly' ? 'disabled' : '' %>>
+            <option value="">-- Select a project--</option>
+            <%allProjects.forEach( project=>{%>
+              <option value="<%=project.ProjectID%>" <%=project.ProjectName==toBeEditedMedia.ProjectName ? 'selected'
+                : "" %>>
+                <%=project.ProjectName%>
               </option>
               <%})%>
           </select>
         </div>
+        <div class="form-group">
 
+          <label>Photographer*</label>
+          <select id="selectPhotographer" required <%=currentUser.UserType=='photographerOnly' ? 'disabled' : '' %>>
+            <option value="-1" projectID='-1'>-- Select a photographer--</option>
+            <%projectPhotographers.forEach( pair=>{%>
+              <option value="<%=pair.PhotographerID%>" <%=pair.FullName==toBeEditedMedia.FullName ? 'selected' : "" %>
+                projectID="<%=pair.ProjectID%>"
+                  >
+                  <%=pair.FullName%>
+              </option>
+              <%})%>
+          </select>
+        </div>
         <div class="form-group">
           <label for="mediaFileName">Media File Full Name*</label>
           <input type="text" name="mediaFileName" id="mediaFileName" value="<%=toBeEditedMedia.FileName%>" required>
@@ -124,8 +139,7 @@
           <select name="imageEditingTool" id="imageEditingTool">
             <option value="">-- Select a image editing tool --</option>
             <%imageEditingTools.forEach( imageEditingTool=>{%>
-              <option value="<%=imageEditingTool%>" <%=imageEditingTool==toBeEditedMedia.ImageEditingTool ? 'selected'
-                : '' %>>
+              <option value="<%=imageEditingTool%>">
                 <%=imageEditingTool%>
               </option>
               <%})%>
@@ -136,7 +150,7 @@
           <label for="comments">Comments</label>
           <textarea name="comments" id="comments"><%=toBeEditedMedia.Comments  %></textarea>
         </div>
-
+        <label style="display:none" id="toBeEditedMediaFullName" value=""><%=toBeEditedMedia.photographerName%></label>
 
         <p class="note">
           💡 Note: If there is more than one image for a specimen, please use the pipeline script to capture the
@@ -174,6 +188,53 @@
       const fileFormat = document.getElementById("fileFormat");
       const validExtensions = "<%=fileFormats%>".split(",");
       fileFormatOnChange()
+
+      const selectProject = document.getElementById('selectProject');
+      const allOptionsRaw = document.getElementById('selectPhotographer').options
+      const allOptions = []
+      const toBeEditedMediaPhotographerName = document.getElementById("toBeEditedMediaFullName").textContent
+      console.log('toBeEditedMediaPhotographerName', toBeEditedMediaPhotographerName)
+      console.log('allOptionsRaw', allOptionsRaw)
+      for (const o of allOptionsRaw) {
+        console.log(o.attributes)
+        allOptions.push({
+          label: o.label,
+          value: o.value,
+          projectID: o.attributes['1'] != null ? o.attributes['1'].value : null
+        })
+      }
+      const selectPhotographer = new Choices(document.getElementById('selectPhotographer'))
+      let photographersToShow = []
+      const selectedProjectID = selectProject.value
+      console.log('allOptions', allOptions)
+      for (x of allOptions)
+        if (x.projectID == selectedProjectID)
+          photographersToShow.push(x)
+      selectPhotographer.clearChoices(clearOptions = false, clearItems = true)
+      for (x of photographersToShow)
+      // console.log(x.label)
+        if (x.label == toBeEditedMediaPhotographerName)
+          x['selected'] = true
+
+      selectPhotographer.setChoices(photographersToShow)
+
+      selectProject.addEventListener('change', (e) => {
+        e.preventDefault()
+        const selectedProjectID = selectProject.value
+        photographersToShow = []
+        for (x of allOptions)
+          if (x.projectID == selectedProjectID)
+            photographersToShow.push(x)
+        // photographersToShow.push({label:"Do not override, photographerIDs are already in the csv file.",
+        //   value:-1,
+        //   projectID:-1
+        // })
+        selectPhotographer.clearChoices(clearOptions = false, clearItems = true)
+        for (x of photographersToShow)
+          if (x.label == toBeEditedMediaPhotographerName)
+            x['selected'] = true
+        selectPhotographer.setChoices(photographersToShow)
+      })
 
       form.addEventListener("submit", async (e) => {
         e.preventDefault();
@@ -232,7 +293,9 @@
             imageEditingTool: form.imageEditingTool.value == "" ? null : form.imageEditingTool.value,
             comments: form.comments.value,
             MediaID: form.MediaID.value,
-            projectAndPhotographerPair: form.projectAndPhotographerPair.value,
+            // projectAndPhotographerPair: form.projectAndPhotographerPair.value,
+            projectID: selectProject.value,
+            photographerID: form.selectPhotographer.value
           })
 
           const submitBtn = form.querySelector('button[type="submit"]');
@@ -242,7 +305,7 @@
           submitBtn.disabled = true;
           const response = await fetch("/<%='media/edit' %>", {
             method: 'POST',
-            headers: {'Content-Type': 'application/json'},
+            headers: { 'Content-Type': 'application/json' },
             body: formData
           });
           try {
@@ -252,7 +315,7 @@
             }
 
             const data = await response.json();
-            if (!data.success) 
+            if (!data.success)
               throw new Error(data.message || "Submission failed");
 
             // Show success message
