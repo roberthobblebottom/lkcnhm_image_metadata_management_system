@@ -55,7 +55,7 @@
           <% }else{ %>
             <a href="/media/upload-bulk-metadata/" class="btn btn-bulk"> Upload Bulk</a>
 
-            <a href="/media/create/" class="btn">Add <br> Single  Entry </a>
+            <a href="/media/create/" class="btn">Add <br> Single Entry </a>
             <a class="btn-delete hidden" id="deletedSelected"> Delete Selected</a>
             <a class="btn-restore hidden" id="restoreSelected"> Restore Selected</a>
             <%}%>
@@ -63,7 +63,7 @@
                 <i class="fas fa-arrow-down"></i> Download <br> Image Metadata Template
               </a>
               <a href="/media/download-pipeline-script" class="btn-restore btn">
-                <i class="fas fa-arrow-down"></i> Download <br>  Extraction Tool
+                <i class="fas fa-arrow-down"></i> Download <br> Extraction Tool
               </a>
       </div>
       <table id="dataTable" class="dataTable">
@@ -89,14 +89,24 @@
 
 <script>
   const pageLength = 25
+  var selectedMediaIDs = []
+  var selectedIndexes = []
+  var justRendered = false
   const dt = new DataTable('#dataTable', {
-    // select: { style: 'multi', selector: 'td:first-child' },
+    select: {
+      style: 'multi',
+      //  selector: 'td:first-child'
+    },
     columnDefs: [
       {
         orderable: true,
-        render: (data, type, full) => `
-          <input type="checkbox" id="checkbox_${full.MediaID}" onclick="checkboxClick(${full.MediaID})"></input>
-          <label id ="label_${full.MediaID}"></label>`,
+        render: (data, type, full) => {
+          // console.log("render", data, full, type)
+          if (selectedMediaIDs.includes(full.MediaID))
+            return '<label id="checkbox_' + full.MediaID + '">☑</label>'
+          else
+            return '<label id="checkbox_' + full.MediaID + '">☐</label>'
+        },
         orderData: [], targets: 0
       },
       { orderable: false, targets: 9 }
@@ -155,17 +165,17 @@
     },
 
   })
-  var selectedMediaIDs = []
-  var selectedIndexes = []
-  function checkboxClick(mediaID) {
-    if (document.getElementById("checkbox_" + mediaID).checked) {
-      selectedMediaIDs.push(mediaID)
-      document.getElementById('numberOfSelected').textContent = "Number of Selected " + selectedMediaIDs.length
-    } else {
-      selectedMediaIDs.pop(mediaID)
-      document.getElementById('numberOfSelected').textContent = ""
-    }
 
+  // function checkboxClick(mediaID) {
+  //   if (document.getElementById("checkbox_" + mediaID).checked) {
+  //     selectedMediaIDs.push(mediaID)
+  //     document.getElementById('numberOfSelected').textContent = "Number of Selected " + selectedMediaIDs.length
+  //   } else {
+  //     selectedMediaIDs.pop(mediaID)
+  //     document.getElementById('numberOfSelected').textContent = ""
+  //   }
+  // }
+  function showButtonsIfAnySelectedMediaIDs() {
     if (selectedMediaIDs.length == 0) {
       document.getElementsByClassName("btn-delete hidden")[0].style.display = 'none'
       document.getElementsByClassName("btn-restore hidden")[0].style.display = 'none'
@@ -176,113 +186,150 @@
 
   }
   dt.on('draw', (e, settings) => {
+    console.log('draw ', selectedMediaIDs)
     for (id of selectedMediaIDs) {
-      const checkbox = document.getElementById('checkbox_' + id)
-      if (checkbox != null)
-        checkbox.checked = true
+      const index = dt.column(1).data().indexOf(id)
+      if (index > -1) {
+        justRendered = true
+        dt.row(index).select()
+        // const c = dt.row(index).data()
+        // c['s'] = '☑'
+      }
+      // data.select()
     }
+    showButtonsIfAnySelectedMediaIDs()
+  }
+  )
+  document.addEventListener("DOMContentLoaded", (e) => {
+    dt.on('select', (e, dt, type, indexes) => {
+      if (justRendered) {
+        console.log('here')
+        justRendered = false
+        return
+      }
+      console.log("on select", indexes)
+      const n = dt.column(1).data()[parseInt(indexes[indexes.length - 1])]
+      selectedMediaIDs.push(n)
+      document.getElementById('numberOfSelected').textContent = "Selected Media IDs:" + selectedMediaIDs
 
-    document.getElementById('deletedSelected').addEventListener('click', async (e) => {
-      await Swal.fire({
-        title: 'Confirmation',
-        text: 'Are you sure you want to delete the selected rows? Rows that are already deleted will be ignored',
-        confirmButtonText: 'OK',
-        confirmButtonColor: '#28a745'
-      }).then(async (result) => {
-        if (!result['isConfirmed'])
-          return
-        const response = await fetch('/media/bulk-delete', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify(selectedMediaIDs)
-        })
-        try {
-          if (!response.ok) {
-            const errorData = await response.json();
-            throw new Error(errorData.message || "Submission failed with status " + response.status);
-          }
+      console.log(selectedMediaIDs)
+      const c = dt.row(n).data()
+      document.getElementById("checkbox_" + n.toString()).textContent = '☑'
 
-          const data = await response.json();
-          if (!data.success)
-            throw new Error(data.message || "Submission failed");
-
-
-          await Swal.fire({
-            title: 'Success!',
-            text: 'metadata deleted successfully!',
-            icon: 'success',
-            confirmButtonText: 'OK',
-            confirmButtonColor: '#28a745',
-            timer: 1000,
-            timerProgressBar: true
-          });
-
-          window.location.href = '/media/view-all';
-          return;
-        } catch (error) {
-          await Swal.fire({
-            title: 'Error!',
-            text: error.message,
-            icon: 'error',
-            confirmButtonText: 'OK',
-            confirmButtonColor: '#dc3545'
-          });
-        }
-      });
+      showButtonsIfAnySelectedMediaIDs()
     })
-    document.getElementById('restoreSelected').addEventListener('click', async (e) => {
-      await Swal.fire({
-        title: 'Confirmation',
-        text: 'Are you sure you want to restore the selected rows? Rows that are already restored will be ignored',
-        confirmButtonText: 'OK',
-        confirmButtonColor: '#28a745'
-      }).then(async (result) => {
-        if (!result['isConfirmed'])
-          return
-        const response = await fetch('/media/bulk-restore', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify(selectedMediaIDs)
-        })
-        try {
-          if (!response.ok) {
-            const errorData = await response.json();
-            throw new Error(errorData.message || "Submission failed with status " + response.status);
-          }
 
-          const data = await response.json();
-          if (!data.success) {
-            throw new Error(data.message || "Submission failed");
-          }
+    dt.on('deselect', (e, dt, type, indexes) => {
+      const n = dt.column(1).data()[parseInt(indexes[indexes.length - 1])]
+      selectedMediaIDs.pop(n)
+      document.getElementById('numberOfSelected').textContent = ""
+      const c = dt.row(n).data()
+      document.getElementById("checkbox_" + n.toString()).textContent = '☐'
 
-          await Swal.fire({
-            title: 'Success!',
-            text: 'metadata restored successfully!',
-            icon: 'success',
-            confirmButtonText: 'OK',
-            confirmButtonColor: '#28a745',
-            timer: 1000,
-            timerProgressBar: true
-          });
-
-          window.location.href = '/media/view-all';
-          return;
-        } catch (error) {
-          await Swal.fire({
-            title: 'Error!',
-            text: error.message,
-            icon: 'error',
-            confirmButtonText: 'OK',
-            confirmButtonColor: '#dc3545'
-          });
-        }
-      });
+      showButtonsIfAnySelectedMediaIDs()
     })
   })
+  document.getElementById('deletedSelected').addEventListener('click', async (e) => {
+    await Swal.fire({
+      title: 'Confirmation',
+      text: 'Are you sure you want to delete the selected rows? Selected IDs:'+selectedMediaIDs+'.Rows that are already deleted will be ignored',
+      confirmButtonText: 'OK',
+      confirmButtonColor: '#28a745'
+    }).then(async (result) => {
+      if (!result['isConfirmed'])
+        return
+      const response = await fetch('/media/bulk-delete', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(selectedMediaIDs)
+      })
+      try {
+        if (!response.ok) {
+          const errorData = await response.json();
+          throw new Error(errorData.message || "Submission failed with status " + response.status);
+        }
+
+        const data = await response.json();
+        if (!data.success)
+          throw new Error(data.message || "Submission failed");
+
+
+        await Swal.fire({
+          title: 'Success!',
+          text: 'metadata deleted successfully!',
+          icon: 'success',
+          confirmButtonText: 'OK',
+          confirmButtonColor: '#28a745',
+          timer: 1000,
+          timerProgressBar: true
+        });
+
+        window.location.href = '/media/view-all';
+        return;
+      } catch (error) {
+        await Swal.fire({
+          title: 'Error!',
+          text: error.message,
+          icon: 'error',
+          confirmButtonText: 'OK',
+          confirmButtonColor: '#dc3545'
+        });
+      }
+    });
+  })
+  document.getElementById('restoreSelected').addEventListener('click', async (e) => {
+    await Swal.fire({
+      title: 'Confirmation',
+      text: 'Are you sure you want to restore the selected rows? Selected IDs:'+selectedMediaIDs+'.Rows that are already restored will be ignored',
+      confirmButtonText: 'OK',
+      confirmButtonColor: '#28a745'
+    }).then(async (result) => {
+      if (!result['isConfirmed'])
+        return
+      const response = await fetch('/media/bulk-restore', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(selectedMediaIDs)
+      })
+      try {
+        if (!response.ok) {
+          const errorData = await response.json();
+          throw new Error(errorData.message || "Submission failed with status " + response.status);
+        }
+
+        const data = await response.json();
+        if (!data.success) {
+          throw new Error(data.message || "Submission failed");
+        }
+
+        await Swal.fire({
+          title: 'Success!',
+          text: 'metadata restored successfully!',
+          icon: 'success',
+          confirmButtonText: 'OK',
+          confirmButtonColor: '#28a745',
+          timer: 1000,
+          timerProgressBar: true
+        });
+
+        window.location.href = '/media/view-all';
+        return;
+      } catch (error) {
+        await Swal.fire({
+          title: 'Error!',
+          text: error.message,
+          icon: 'error',
+          confirmButtonText: 'OK',
+          confirmButtonColor: '#dc3545'
+        });
+      }
+    });
+  })
+
 </script>
 
 </html>
