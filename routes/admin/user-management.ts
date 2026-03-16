@@ -298,22 +298,23 @@ router.post(
         message:
           "invalid email, email value does not have '@' or '.' character(s).",
       });
-    if (password != confirmPassword && password.trim() != "")
-      return res.status(400).json({
-        success: false,
-        message: "the new passwords does not match",
-      });
-try {
-      const filePath = __dirname.replace("routes/admin", "") + 'public/common-passwords.txt'
-      const commonPasswords = fs.readFileSync(path.resolve(filePath)).toString().split('\n')
-      if (commonPasswords.includes(password))
+    if (password.trim() != "") {
+      if (password != confirmPassword)
         return res.status(400).json({
-          sucess: false, message: "a common password detected, please use another password"
-        })
-    } catch (error) {
-      console.error(`Error reading file: ${error}`);
+          success: false,
+          message: "the new passwords does not match",
+        });
+      try {
+        const filePath:string = __dirname.replace("routes/admin", "") + 'public/common-passwords.txt'
+        const commonPasswords:string[] = fs.readFileSync(path.resolve(filePath)).toString().split('\n')
+        if (commonPasswords.includes(password))
+          return res.status(400).json({
+            sucess: false, message: "a common password detected, please use another password"
+          })
+      } catch (error) {
+        console.error(`Error reading file: ${error}`);
+      }
     }
-
     try {
       const filePath = __dirname.replace("routes", "") + 'public/common-passwords.txt'
       const commonPasswords = fs.readFileSync(path.resolve(filePath)).toString().split('\n')
