@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <title>📸 Media Submission Form</title>
+  <link rel="stylesheet" href="/css/form.css" />
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/choices.js@11.1.0/public/assets/styles/choices.min.css" />
+  <script src="https://cdn.jsdelivr.net/npm/choices.js/public/assets/scripts/choices.min.js"></script>
+  <style>
+    #mediaIDsLabel {
+      font-size: 15px;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="main-con">
+    <%- currentUser.UserType=='admin' ? include('../sidenavs/admin'): include('../sidenavs/user') %>
+
+      <form id="main-form">
+        <div id="horizontal-panel">
+          <a href="/media/view-all" class="btn btn-primary">
+            <i class="fas fa-arrow-left"></i> Back to all media
+          </a>
+          <h2>
+            Edit Bulk Image Metadata
+          </h2>
+          <p>
+            Only fill in attributes that are going to be overwritten for all these select metadata ids.<br>
+            Leave the rest as blank to keep the original data.<br>
+            If the records are already deleted, the edit(s) will not work on it.
+          </p>
+
+        </div>
+        <div class='form-group'>
+          <label id='mediaIDsLabel'>Media IDs entries to change: <%=mediaIDs%></label>
+          <input readonly type='text' name="MediaID" value="<%= mediaIDs %>" style="display:none;">
+        </div>
+
+        <div class="form-group">
+          <label>Project</label>
+          <select id="selectProject">
+            <option value="">-- Select a project--</option>
+            <%allProjects.forEach( project=>{%>
+              <option value="<%=project.ProjectID%>">
+                <%=project.ProjectName%>
+              </option>
+              <%})%>
+          </select>
+        </div>
+        <div class="form-group">
+
+          <label>Photographer</label>
+          <select id="selectPhotographer">
+            <option value="" projectID='-1'>-- Select a photographer--</option>
+            <%projectPhotographers.forEach( pair=>{%>
+              <option value="<%=pair.PhotographerID%>" projectID="<%=pair.ProjectID%>">
+                <%=pair.FullName%>
+              </option>
+              <%})%>
+          </select>
+        </div>
+
+
+        <div class="form-group">
+          <label for="catalogID">Catalog ID </label>
+          <input type="text" name="catalogID" id="catalogID" value="">
+        </div>
+        <div class="form-group">
+          <label for="morphoID">Morpho ID</label>
+          <input type="text" name="morphoID" id="morphoID" value="">
+        </div>
+        <div class="form-group">
+          <label for="clusterID">Cluster ID </label>
+          <input type="text" name="clusterID" id="clusterID" value="">
+        </div>
+        <div class="form-group">
+          <label for="imagingDate">Date of Imaging</label>
+          <input type="date" name="imagingDate" id="imagingDate">
+        </div>
+        <div class="form-group">
+          <label for="resolution">Resolution </label>
+          <input type="text" name="resolution" id="resolution" value="">
+        </div>
+        <div class="form-group">
+          <label for="fileSize">File Size in Bytes</label>
+          <input type="number" name="fileSizeBytes" id="fileSizeBytes" value="">
+        </div>
+        <div class="form-group">
+          <label for="fileFormat">Media File Format</label>
+          <select name="fileFormat" id="fileFormat" onchange="fileFormatOnChange()" requried>
+            <option value="">-- Select a media file format --</option>
+            <%fileFormats.forEach( fileFormat=>{%>
+              <option value="<%=fileFormat%>">
+                <%=fileFormat%>
+              </option>
+              <%})%>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="description">Description of Image</label>
+          <textarea name="description" id="description"></textarea>
+        </div>
+        <div class="form-group">
+          <div class="horizontal-panel2">
+            <label class="label2" for="imagingPlatform">imaging Platform</label>
+            <!-- <button class="addButton" id="addImagingPlatform">Add Imaging Platform</button> -->
+          </div>
+          <select name="imagingPlatform" id="imagingPlatform">
+            <option value="">-- Select a imaging platform --</option>
+            <%imagingPlatforms.forEach( imagingPlatform=>{%>
+              <option value="<%=imagingPlatform%>">
+                <%=imagingPlatform%>
+              </option>
+              <%})%>
+          </select>
+        </div>
+        <div class="form-group">
+          <div class="horizontal-panel2">
+            <label class="label2" for="imageEditingTool">Image Editing Tool</label>
+            <!-- <button class='addButton' id="addImageEditingTool">Add Image Editing Tool</button> -->
+          </div>
+          <select name="imageEditingTool" id="imageEditingTool">
+            <option value="">-- Select a image editing tool --</option>
+            <%imageEditingTools.forEach( imageEditingTool=>{%>
+              <option value="<%=imageEditingTool%>">
+                <%=imageEditingTool%>
+              </option>
+              <%})%>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="comments">Comments</label>
+          <textarea name="comments" id="comments"></textarea>
+        </div>
+
+        <p class="note">
+        </p>
+
+        <div class="buttons">
+          <button type="submit"><i class="fas fa-paper-plane"></i> Edit Selected Image Metadata</button>
+        </div>
+      </form>
+
+  </div>
+
+  <script>
+
+    function isValidFileName(filename, validExtensions) {
+      if (!filename) return false;
+      const lower = filename.toLowerCase();
+      if (!lower.endsWith(fileFormat.value)) return false
+      if (lower.replace(fileFormat.value, "") == "") return false
+      return validExtensions.some(ext => lower.endsWith(ext));
+    }
+
+    document.addEventListener("DOMContentLoaded", () => {
+      const form = document.getElementById("main-form");
+      const fileNameInput = document.getElementById("mediaFileName");
+      const fileFormat = document.getElementById("fileFormat");
+      const validExtensions = "<%=fileFormats%>".split(",");
+      const selectProject = document.getElementById('selectProject');
+      const allOptionsRaw = document.getElementById('selectPhotographer').options
+      const allOptions = []
+      for (const o of allOptionsRaw) {
+        console.log(o.attributes)
+        allOptions.push({
+          label: o.label,
+          value: o.value,
+          projectID: o.attributes['1'] != null ? o.attributes['1'].value : null
+        })
+      }
+      const selectPhotographer = new Choices(document.getElementById('selectPhotographer'))
+      let photographersToShow = []
+      const selectedProjectID = selectProject.value
+      for (x of allOptions)
+        if (x.projectID == selectedProjectID)
+          photographersToShow.push(x)
+      selectPhotographer.clearChoices(clearOptions = false, clearItems = true)
+
+      selectPhotographer.setChoices(photographersToShow)
+
+      selectProject.addEventListener('change', (e) => {
+        e.preventDefault()
+        const selectedProjectID = selectProject.value
+        photographersToShow = []
+        for (x of allOptions)
+          if (x.projectID == selectedProjectID)
+            photographersToShow.push(x)
+        selectPhotographer.clearChoices(clearOptions = false, clearItems = true)
+        selectPhotographer.setChoices(photographersToShow)
+      })
+      form.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        let errorMessages = [];
+
+        const catalogIDRegex = /^[A-Z]{6}\d{7}$/;
+        const catalogID = document.getElementById('catalogID').value
+        if (!catalogIDRegex.test(catalogID) && catalogID != "") {
+          errorMessages.push("catalogID is not in the correct format. Example of a correct format: ZRCBDP0012345. 6 capital letters and then 7 numbers. \n\n");
+        }
+        const clusterIDRegex = /^[\d][A-Z]{7}\d{7}$/
+        const clusterID = document.getElementById('clusterID').value
+        if (!clusterIDRegex.test(clusterID) && clusterID != "") {
+          errorMessages.push("clusterID is not in the correct format. Example of a correct format:3PZRCBDP1234567, 1 number, 7 capital letters and then 7 numbers. \n\n ");
+        }
+        const resolutionRegex = /^\d{1,5}x\d{1,5}$/;
+        const resolution = document.getElementById('resolution').value.toLowerCase()
+        if (!resolutionRegex.test(resolution) && resolution != "") {
+          errorMessages.push("resolution is not in the correct format. example format: 1440x720 \n\n");
+        }
+        if (errorMessages.length > 0) {
+          e.preventDefault();
+          Swal.fire({
+            icon: 'error',
+            title: 'Validation Issue',
+            html: errorMessages.join("<br>"),
+            confirmButtonColor: '#007bff'
+          });
+        } else {
+          Swal.fire({
+            title: 'Confirm Bulk Edit',
+            text: 'Are you sure you want to override these columns of these selected metadata entries?',
+            icon: 'question',
+            showConfirmButton: true,
+            showCancelButton: true
+          }).then(
+            async (result) => {
+              if (!result['isConfirmed'])
+                return
+              const formData = JSON.stringify({
+                catalogID: form.catalogID.value,
+
+                morphoID: form.morphoID.value,
+                clusterID: form.clusterID.value,
+                imagingDate: form.imagingDate.value,
+                resolution: form.resolution.value,
+                fileSizeBytes: form.fileSizeBytes.value,
+                fileFormat: form.fileFormat.value,
+                description: form.description.value,
+                imagingPlatform: form.imagingPlatform.value,
+                imageEditingTool: form.imageEditingTool.value,
+                comments: form.comments.value,
+                projectID: selectProject.value,
+                photographerID: form.selectPhotographer.value,
+                mediaIDs: '<%=mediaIDs%>'
+              })
+
+              console.log(formData)
+              const submitBtn = form.querySelector('button[type="submit"]');
+              const originalBtnText = submitBtn.innerHTML;
+              submitBtn.classList.add('loading');
+              submitBtn.innerHTML = '<i class="fas fa-spinner"></i> Submitting...';
+              submitBtn.disabled = true;
+              const response = await fetch("/media/bulk-edit", {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: formData
+              });
+              try {
+                if (!response.ok) {
+                  const errorData = await response.json();
+                  throw new Error(errorData.message || "Submission failed with status " + response.status);
+                }
+
+                const data = await response.json();
+                if (!data.success)
+                  throw new Error(data.message || "Submission failed");
+
+                // Show success message
+                await Swal.fire({
+                  title: 'Success!',
+                  text: 'project created successfully!',
+                  icon: 'success',
+                  confirmButtonText: 'OK',
+                  confirmButtonColor: '#28a745',
+                  timer: 1000,
+                  timerProgressBar: true
+                });
+
+                // Redirect if URL is provided
+                if (data.redirectUrl) {
+                  window.location.href = data.redirectUrl;
+                  return; // Stop further execution
+                }
+
+                // Reset form (if no redirection)
+                form.reset();
+
+              } catch (error) {
+                await Swal.fire({
+                  title: 'Error!',
+                  text: error.message,
+                  icon: 'error',
+                  confirmButtonText: 'OK',
+                  confirmButtonColor: '#dc3545'
+                });
+              } finally {
+                submitBtn.disabled = false;
+                submitBtn.value = "Upload"
+                submitBtn.innerHTML = "Upload"
+              }
+            })
+        }
+      })
+    })
+
+  </script>
+
+
+
+
+
+</body>
+
+</html>
