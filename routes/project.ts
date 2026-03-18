@@ -31,24 +31,28 @@ router.get(
     WHERE u.UserType != 'admin' 
     AND u.IsDeleted = 0`;
     const isUserRegistrationEnabledQuery = 'SELECT IsEnabled FROM IsUserRegistrationEnabled'
+    try {
+      const [projectOwners, photographers, isUserRegistrationEnabledResults] = await Promise.all([
+        db.query(getProjectOwners),
+        db.query(getPhotographers),
+        db.query(isUserRegistrationEnabledQuery)
+      ])
+      const isUserRegistrationEnabled = (isUserRegistrationEnabledResults)[0][0].IsEnabled
 
-    const [projectOwners, photographers, isUserRegistrationEnabledResults] = await Promise.all([
-      db.query(getProjectOwners),
-      db.query(getPhotographers),
-      db.query(isUserRegistrationEnabledQuery)
-    ]);
-    const isUserRegistrationEnabled = (isUserRegistrationEnabledResults)[0][0].IsEnabled
-
-    res.render("project/create", {
-      currentUser: req.session.passport.user,
-      projectOwners: projectOwners[0],
-      photographers: photographers[0],
-      projectTypes: req.session.projectTypes,
-      imagingPlatforms: req.session.imagingPlatforms,
-      title: "Project Form",
-      isUserRegistrationEnabled,
-      emailRegex
-    });
+      res.render("project/create", {
+        currentUser: req.session.passport.user,
+        projectOwners: projectOwners[0],
+        photographers: photographers[0],
+        projectTypes: req.session.projectTypes,
+        imagingPlatforms: req.session.imagingPlatforms,
+        title: "Project Form",
+        isUserRegistrationEnabled,
+        emailRegex
+      });
+    } catch (e: any) {
+      console.error(e);
+      res.status(500).json({ error: e, sucess: false })
+    }
   }
 );
 
@@ -63,8 +67,15 @@ router.post(
       const isUserRegistrationEnabledQuery =
         'SELECT IsEnabled FROM IsUserRegistrationEnabled'
       const isUserRegistrationEnabled =
-        (await db.query(isUserRegistrationEnabledQuery))[0][0].IsEnabled
+        (await db.query(isUserRegistrationEnabledQuery)
+          .catch((e: any) => {
+            console.error(e);
+            res.status(500).json({ error: e, sucess: false })
+          }))[0][0].IsEnabled
 
+      const userID = req.session.passport.user.UserID;
+      const startDate = new Date(req.body.startDate);
+      const endDate = new Date(req.body.endDate);
       const requiredFields = [
         "projectOwner",
         "projectName",
@@ -73,52 +84,39 @@ router.post(
         "summary",
         "specimenDetails",
       ];
-      const missingFields = requiredFields.filter((field) => !req.body[field]);
 
+      //VALIDATIONS
+      const missingFields = requiredFields.filter((field) => !req.body[field]);
       if (missingFields.length > 0)
         return res.status(400).json({
           success: false,
           message: `Missing required fields: ${missingFields.join(", ")}`,
         });
-
-
-      const startDate = new Date(req.body.startDate);
-      const endDate = new Date(req.body.endDate);
       if (isNaN(startDate.getTime()) || isNaN(endDate.getTime()))
         return res.status(400).json({
           success: false,
           message: "Invalid date format provided",
         });
-
-
       if (endDate < startDate)
         return res.status(400).json({
           success: false,
           message: "End date cannot be before start date",
         });
-
-
-      const userID = req.session.passport.user.UserID;
       if (!userID)
         return res.status(401).json({
           success: false,
           message: "Unauthorized: Please login first.",
         });
-
-
       if (req.body.selectedImagingPlatforms.length == 0)
         return res.status(400).json({
           success: false,
           message: "there are no selected Imaging Platforms",
         });
-
-
       if (req.body.selectedPhotographers.length == 0)
         return res.status(400).json({
           success: false,
           message: "there are no selected selected photographers",
         });
-
       for (const x of req.body.toBeCreatedPhotographers) {
         if (!emailRegex.test(x[1]))
           return res.status(400).json({
@@ -133,7 +131,6 @@ router.post(
             success: false,
             message: "there is at least a photographer with missing full name ",
           });
-
       }
 
       const selectedPhotographers = req.body.selectedPhotographers;
@@ -169,12 +166,15 @@ router.post(
             userID,
           ];
           try {
-            const result = (await db.query(insertUserQuery, params))[0];
+            const temp1 = await db.query(insertUserQuery, params)
+              .catch((e: any) => {
+                console.error(e);
+                res.status(500).json({ error: e, sucess: false })
+              })
+            const result = temp1[0];
             const o: any = result;
             insertedId = Object.values(o)[2].toString(); //the weird way of getting insertedId
-            newlyCreatedPhotographers.push({
-              email: email, password: newPassword,
-            });
+            newlyCreatedPhotographers.push({ email: email, password: newPassword, });
             for (let x = 0; x < selectedPhotographers.length; x++)
               if (emailRegex.test(selectedPhotographers[x])) {
                 selectedPhotographers[x] = insertedId;
@@ -211,7 +211,7 @@ router.post(
             IsDeleted,
             ProjectStatus
         ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, NOW(), ?, NOW(), ?, 0, ?)`;
-      const insertPhotographersQuery = `
+      const insertPhotographersLinksQuery = `
         INSERT INTO ProjectUserPhotographyLink (PhotographerID,ProjectID)
         VALUES ?`;
       const insertImagingPlatformsQuery = `
@@ -232,25 +232,38 @@ router.post(
           userID,
           userID,
           projectStatusEnumeration().in_progress,
-        ]);
+        ]).catch((e: any) => {
+          console.error(e);
+          res.status(500).json({ error: e, sucess: false })
+        });
       const insertedProjectID = Object.values(result[0])[2].toString();
-      const photographersTuple: string[][] = [];
+
+      const photographersLinksTuple: string[][] = [];
       for (var x of selectedPhotographers)
-        photographersTuple.push([x, insertedProjectID]);
-      await db.query(insertPhotographersQuery, [photographersTuple]);
+        photographersLinksTuple.push([x, insertedProjectID]);
+      await db
+        .query(insertPhotographersLinksQuery, [photographersLinksTuple])
+        .catch((e: any) => {
+          console.error(e);
+          res.status(500).json({ error: e, sucess: false })
+        })
 
       // insert into ImagingPlatformInstance Table
       const imagingPlatformsTuple: string[][] = [];
       for (x of req.body.selectedImagingPlatforms)
         imagingPlatformsTuple.push([x, insertedProjectID]);
       await db
-        .query(insertImagingPlatformsQuery, [imagingPlatformsTuple]);
+        .query(insertImagingPlatformsQuery, [imagingPlatformsTuple])
+        .catch((e: any) => {
+          console.error(e);
+          res.status(500).json({ error: e, sucess: false })
+        })
 
-      const redirectUrl = `/project/view/${insertedProjectID}`;
+      
       res.json({
         success: true,
         message: "project submitted successfully",
-        redirectUrl: redirectUrl,
+        redirectUrl:`/project/view/${insertedProjectID}`
       });
     } catch (err: any) {
       console.error("❌ Error in submitProject:", err);
@@ -371,7 +384,7 @@ router.get(
     )[0];
     const photographers: any[] = [];
     for (var x of photographersTemp1)
-      photographers.push(x.FullName+" (ID: "+x.UserID.toString()+")");
+      photographers.push(x.FullName + " (ID: " + x.UserID.toString() + ")");
 
     const imagingPlatformsTemp1: any = (
       await db.query(imagingPlatformsQuery, [projectID])
@@ -400,7 +413,7 @@ router.get(
           ? imagingPlatforms.toString().replace(",", ", ")
           : "Not Specified",
     };
-    console.log('results',results)
+    console.log('results', results)
     res.render("project/view", {
       project: project,
       currentUser: req.session.passport.user,
@@ -533,7 +546,7 @@ router.post(
         toBeCreatedPhotographers,
       } = req.body;
       // === 1. VALIDATION ===
-      if (!imagingStartDate || !imagingEndDate || !projectStatus) 
+      if (!imagingStartDate || !imagingEndDate || !projectStatus)
         return res
           .status(400)
           .json({ success: false, message: "Missing required fields" });
@@ -542,15 +555,15 @@ router.post(
         newlySelectedImagingPlatforms.length == 0 ||
         (newlySelectedImagingPlatforms.length == 1 &&
           newlySelectedImagingPlatforms[0] == "")
-      ) 
+      )
         return res
           .status(400)
           .json({ success: false, message: "No Selected Imaging Platforms" });
-      if (newlySelectedPhotographers.length == 0) 
+      if (newlySelectedPhotographers.length == 0)
         return res
           .status(400)
           .json({ success: false, message: "no Selected Photographers" });
-      if (!newlySelectedPhotographers.includes(projectOwnerID.toString())) 
+      if (!newlySelectedPhotographers.includes(projectOwnerID.toString()))
         return res.status(400).json({
           success: false,
           message: "Photographers must include him or herself.",
@@ -558,27 +571,27 @@ router.post(
       // Date validation
       const startDate = new Date(imagingStartDate);
       const endDate = new Date(imagingEndDate);
-      if (isNaN(startDate.getTime())) 
+      if (isNaN(startDate.getTime()))
         return res
           .status(400)
           .json({ success: false, message: "Invalid start date format" });
-      if (isNaN(endDate.getTime())) 
+      if (isNaN(endDate.getTime()))
         return res
           .status(400)
           .json({ success: false, message: "Invalid end date format" });
-      if (startDate >= endDate) 
+      if (startDate >= endDate)
         return res.status(400).json({
           success: false,
           message: "End date must be after start date",
         });
       for (const x of toBeCreatedPhotographers) {
-        if (!emailRegex.test(x[1])) 
+        if (!emailRegex.test(x[1]))
           return res.status(400).json({
             success: false,
             message:
               "there is at least a photographer with email of the wrong format",
           });
-        if (x[0] == "" || !x[0]) 
+        if (x[0] == "" || !x[0])
           return res.status(400).json({
             success: false,
             message: "there is at least a photographer with missing full name ",
@@ -623,18 +636,18 @@ router.post(
             const result = (await db.query(insertUserQuery, params))[0];
             console.log(result)
             const o: any = result;
-            console.log("Object.value(o)",Object.values(o))
+            console.log("Object.value(o)", Object.values(o))
             const insertedID = Object.values(o)[2].toString(); //the weird way of getting insertedId
-            console.log('insertedId',insertedID)
+            console.log('insertedId', insertedID)
             newlyCreatedPhotographers.push({
               email: email,
               password: newPassword,
             });
-            for (let x = 0; x < newlySelectedPhotographers.length; x++) 
+            for (let x = 0; x < newlySelectedPhotographers.length; x++)
               if (emailRegex.test(newlySelectedPhotographers[x])) {
                 newlySelectedPhotographers[x] = insertedID;
                 break;
-            }
+              }
           } catch (err: any) {
             const msg =
               err.toString().toLowerCase().includes("duplicate") &&
@@ -698,38 +711,38 @@ router.post(
         await db.query(selectImagingQuery, [projectID])
       )[0];
       const currentSelectedImagingPlatforms: string[] = [];
-      for (var x of temp) 
+      for (var x of temp)
         currentSelectedImagingPlatforms.push(x.ImagingPlatform);
-      
+
 
       //Getting differences
       const temp2 = newlySelectedImagingPlatforms.filter(
         (e: any) => !currentSelectedImagingPlatforms.includes(e)
       );
       const imagingPlatformsToBeAdded: string[][] = [];
-      for (x of temp2) 
+      for (x of temp2)
         imagingPlatformsToBeAdded.push([x, projectID]);
-      
+
       const imagingPlatformsToBeRemoved: any =
         currentSelectedImagingPlatforms.filter(
           (e: any) => !newlySelectedImagingPlatforms.includes(e)
         );
 
       //the update
-      if (imagingPlatformsToBeRemoved.length != 0) 
+      if (imagingPlatformsToBeRemoved.length != 0)
         await db
           .query(
             "DELETE FROM ImagingPlatformInstance WHERE ImagingPlatform in (?) AND ProjectID =?",
             [imagingPlatformsToBeRemoved, projectID]
           );
-      
-      if (imagingPlatformsToBeAdded.length != 0) 
+
+      if (imagingPlatformsToBeAdded.length != 0)
         await db
           .query(
             "INSERT INTO ImagingPlatformInstance(ImagingPlatform,ProjectID) VALUES ? ",
             [imagingPlatformsToBeAdded]
           );
-      
+
       /// IMAGING PLATFORMS OPERATIONS END
 
       /// Photographers OPERATIONS START
@@ -746,9 +759,9 @@ router.post(
       const temp4 = newlySelectedPhotographers.filter(
         (e: any) => !currentSelectedPhotographers.includes(e)
       );
-      console.log('newlySelectedPhotographers',newlySelectedPhotographers)
+      console.log('newlySelectedPhotographers', newlySelectedPhotographers)
       const photographersToBeAdded: string[][] = [];
-      for (const x of temp4) 
+      for (const x of temp4)
         photographersToBeAdded.push([x, projectID.toString()]);
       const photographersToBeRemoved: string[] =
         currentSelectedPhotographers.filter(
@@ -756,13 +769,13 @@ router.post(
         );
 
       //the update
-      if (photographersToBeRemoved.length != 0) 
+      if (photographersToBeRemoved.length != 0)
         await db
           .query(
             "DELETE FROM ProjectUserPhotographyLink WHERE PhotographerID in (?) AND ProjectID =?",
             [photographersToBeRemoved, projectID]
           );
-      if (photographersToBeAdded.length != 0) 
+      if (photographersToBeAdded.length != 0)
         await db
           .query(
             "INSERT INTO ProjectUserPhotographyLink(PhotographerID,ProjectID) VALUES ? ",

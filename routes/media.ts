@@ -14,14 +14,12 @@ import { Response, Request } from "express";
 const path = require("path");
 const upload = multer({ dest: "upload-bulk-metadata/" });
 
-import pl, { col, Null } from "nodejs-polars";
-import { emailRegex } from "../middleware/utils";
-import { error } from "console";
-import { errorMonitor } from "events";
+import pl, { Null } from "nodejs-polars";
 
 router.get("/create", isAuthenticated, async (req: Request, res: Response) => {
-
   const user = req.session.passport.user;
+
+  //--------------------------------------------------------------------------------
   const allProjectsQueryBase = ` SELECT  p.ProjectID, p.ProjectName
                     FROM Project p\n`;
   // list projects based on user type,
@@ -32,7 +30,12 @@ router.get("/create", isAuthenticated, async (req: Request, res: Response) => {
       `JOIN ProjectUserPhotographyLink pupl ON pupl.ProjectID = p.ProjectID
         WHERE pupl.PhotographerID = ` + user.UserID
       : allProjectsQueryBase;
-  const allProjects = (await db.query(allProjectsQuery))[0];
+  const temp1 = await db.query(allProjectsQuery)
+    .catch((e: any) => {
+      console.error(e);
+      res.status(500).json({ error: e, sucess: false })
+    });
+  const allProjects = temp1[0]
 
   //--------------------------------------------------------------------------------
   const projectPhotographersQuery = `
@@ -41,8 +44,7 @@ router.get("/create", isAuthenticated, async (req: Request, res: Response) => {
     JOIN User u ON u.UserID = pupl.PhotographerID
     JOIN Project p on p.ProjectID = pupl.ProjectID
     WHERE u.IsDeleted = 0 
-    AND p.IsDeleted = 0
-    `
+    AND p.IsDeleted = 0`
   const projectPhotographersQuery2 =
     user.UserType == userTypesEnumeration().photographerOnly
       ? projectPhotographersQuery +
@@ -52,7 +54,13 @@ router.get("/create", isAuthenticated, async (req: Request, res: Response) => {
         ? projectPhotographersQuery + `\n AND p.ProjectOwnerID= ` + user.UserID
         + `\n ORDER BY p.ProjectID `
         : projectPhotographersQuery + `\nORDER BY p.ProjectID `
-  const projectPhotographers = (await db.query(projectPhotographersQuery2,))[0]
+
+  const temp2 = await db.query(projectPhotographersQuery2,).catch((e: any) => {
+    console.error(e);
+    res.status(500).json({ error: e, sucess: false })
+  })
+  const projectPhotographers = temp2[0]
+
   res.render("media/create", {
     currentUser: req.session.passport.user,
     imageEditingTools: req.session["imageEditingTools"],
@@ -63,6 +71,7 @@ router.get("/create", isAuthenticated, async (req: Request, res: Response) => {
     projectPhotographers
   });
 });
+
 router.post("/create", isAuthenticated, async (req: Request, res: Response) => {
   try {
     const {
@@ -83,7 +92,6 @@ router.post("/create", isAuthenticated, async (req: Request, res: Response) => {
       photographerID,
     } = req.body;
 
-    console.log("📤 Media submission data:", req.body);
     const createdBy = req.session.passport.user.UserID;
     const updatedBy = createdBy;
 
@@ -96,17 +104,13 @@ router.post("/create", isAuthenticated, async (req: Request, res: Response) => {
     if (!filePath) missingFields.push("filePath");
     if (!catalogID) missingFields.push("catalogID");
     if (!morphoID) missingFields.push("morphoID");
-    // if (!clusterID) missingFields.push("clusterID");
-    // if (!imagingDate) missingFields.push("imagingDate");
     if (!description) missingFields.push("description");
-    // if (!imagingPlatform) missingFields.push("imagingPlatform");
 
-    if (missingFields.length > 0) {
+    if (missingFields.length > 0)
       return res.status(400).json({
         success: false,
         message: "Missing required fields: " + missingFields.join(", "),
-      });
-    }
+      })
 
     const insertQuery = `
       INSERT INTO Media(
@@ -135,23 +139,23 @@ router.post("/create", isAuthenticated, async (req: Request, res: Response) => {
       photographerID,
       fileName,
       filePath,
-      catalogID || null,
-      morphoID || null,
+      catalogID,
+      morphoID,
       clusterID || null,
-      imagingDate || null,
+      imagingDate,
       resolution || null,
-      fileSizeBytes || null,
-      fileFormat || null,
+      fileSizeBytes,
+      fileFormat,
       description || null,
       imagingPlatform,
-      imageEditingTool || null,
+      imageEditingTool,
       comments || null,
       createdBy,
       updatedBy,
     ];
 
     const result: any = (await db.query(insertQuery, values))[0];
-    req.session.save();
+
     res.json({
       success: true,
       message: "Media metadata sucessfully created",
@@ -172,7 +176,8 @@ router.get(
   isAuthenticated,
   async (req: Request, res: Response) => {
     const user = req.session.passport.user;
-    const anyLinks = (
+
+    const temp =
       await db.query(
         `SELECT * 
         FROM ProjectUserPhotographyLink pupl 
@@ -180,14 +185,22 @@ router.get(
         WHERE pupl.PhotographerID = ? OR p.ProjectOwnerID = ?
         AND p.IsDeleted = 0 LIMIT 1`,
         [user.UserID, user.UserID]
-      )
-    )[0];
+      ).catch((error: { message: any; }) => {
+        console.error("db query errror:", error);
+        return res.status(500).json({
+          success: false,
+          message: "Server error during media submission.",
+          error: error.message,
+        });
+      })
+    const anyLinks = temp[0];
 
     res.render("media/view-all", {
       title: "Media Management",
       currentUser: user,
       disableCreateMedia:
-        anyLinks.length == 0 && user.UserType != userTypesEnumeration().admin,
+        anyLinks.length == 0
+        && user.UserType != userTypesEnumeration().admin,
     });
   }
 );
@@ -223,10 +236,12 @@ router.post("/view-all-processing", isAuthenticated, async (req: Request, res: R
   var params = user.UserType == userTypesEnumeration().admin ? [] : [user.UserID]
   const isSearchTermEmpty = req.body.search.value == ''
   var searchTerm = req.body.search.value.toLowerCase().trim()
+  // for filtering boolean keywords
   searchTerm = ['yes', 'ye', 'y', '1', 'true', 'tru', 'tr', 't'].includes(searchTerm)
     ? true : ['no', 'n', '0', 'false', 'fals', 'fal', 'fa', 'f'].includes(searchTerm) ? false : searchTerm
 
-  //LOGIC
+  //--------------------------BUILDING QUERY------------------------------------
+
   switch (user.UserType) {
     case userTypesEnumeration().admin:
       query = baseQuery
@@ -279,6 +294,8 @@ router.post("/view-all-processing", isAuthenticated, async (req: Request, res: R
       filteredQuery = filteredQuery + constraint2
       filteredCountQuery = filteredCountQuery + constraint2
     }
+
+    //searching thorugh 
     for (let i = 0; i < 8; i++)
       if (searchTerm == false || searchTerm == true)
         params.push(searchTerm)
@@ -290,8 +307,15 @@ router.post("/view-all-processing", isAuthenticated, async (req: Request, res: R
     filteredQuery = req.body.length
       ? filteredQuery + "\nLIMIT " + req.body.length + " OFFSET " + req.body.start
       : filteredQuery + "\nLIMIT 10"
-    filteredResults = (await db.query(filteredQuery, params))
-    filteredCount = (await db.query(filteredCountQuery, params))[0][0]['COUNT(*)']
+    filteredResults = await db.query(filteredQuery, params).catch((e: any) => {
+      console.error(e);
+      res.status(500).json({ error: e, sucess: false })
+    })
+    const temp1 = await db.query(filteredCountQuery, params).catch((e: any) => {
+      console.error(e);
+      res.status(500).json({ error: e, sucess: false })
+    })
+    filteredCount = temp1[0][0]['COUNT(*)']
 
     // PROCESSING WITHOUT SEARCH TERM
   } else {
@@ -300,12 +324,19 @@ router.post("/view-all-processing", isAuthenticated, async (req: Request, res: R
     query = req.body.length
       ? query + "\nLIMIT " + req.body.length + " OFFSET " + req.body.start
       : query + "\nLIMIT 10"
-    results = (await db.query(query, params));
+    results = await db.query(query, params).catch((e: any) => {
+      console.error(e);
+      res.status(500).json({ error: e, sucess: false })
+    });
     for (const x of results[0])
       x['s'] = ""
   }
 
-  const totalCount = (await db.query(totalCountQuery, [user.UserID]))[0][0]["COUNT(*)"]
+  const temp2 = await db.query(totalCountQuery, [user.UserID]).catch((e: any) => {
+    console.error(e);
+    res.status(500).json({ error: e, sucess: false })
+  });
+  const totalCount = temp2[0][0]["COUNT(*)"]
 
   res.json({
     draw: req.body.draw,
@@ -337,7 +368,10 @@ router.get("/view/:mediaID", param('mediaID').isInt({ min: 1 }).withMessage("unk
     WHERE m.MediaID = ? 
     ORDER BY m.CreatedDate DESC`;
 
-  const results = await db.query(query, [mediaID]);
+  const results = await db.query(query, [mediaID]).catch((e: any) => {
+    console.error(e);
+    res.status(500).json({ error: e, sucess: false })
+  })
   console.log('imageing date', results[0][0].ImagingDate)
   res.render("media/view", {
     currentUser: req.session.passport.user,
@@ -403,8 +437,11 @@ router.get(
         JOIN User projectOwner ON Project.ProjectOwnerID = projectOwner.UserID
         JOIN User photographer ON photographer.UserID = Media.PhotographerID
         WHERE Media.MediaID = ` + mediaID;
-    const x: any[] = await db.query(currentMediaQuery);
-    const toBeEditedMedia = x[0][0];
+    const temp1: any[] = await db.query(currentMediaQuery).catch((e: any) => {
+      console.error(e);
+      res.status(500).json({ error: e, sucess: false })
+    });
+    const toBeEditedMedia = temp1[0][0];
     console.log(toBeEditedMedia)
     //--------------------------------------------------------------------------------
     const projectPhotographersQuery = `
@@ -424,7 +461,11 @@ router.get(
           ? projectPhotographersQuery + `\n AND p.ProjectOwnerID= ` + user.UserID
           + `\n ORDER BY p.ProjectID `
           : projectPhotographersQuery + `\nORDER BY p.ProjectID `
-    const projectPhotographers = (await db.query(projectPhotographersQuery2,))[0]
+    const temp2 = await db.query(projectPhotographersQuery2,).catch((e: any) => {
+      console.error(e);
+      res.status(500).json({ error: e, sucess: false })
+    })
+    const projectPhotographers = temp2[0]
     res.render("media/edit", {
       currentUser: req.session.passport.user,
       imageEditingTools: req.session["imageEditingTools"],
@@ -443,31 +484,26 @@ router.get(
 router.post("/edit", isAuthenticated, async (req: Request, res: Response) => {
   const mediaData = req.body;
   // Update existing media
-  const query = `
-        UPDATE Media SET
-            FileName = ?,
-            FilePath = ?,
-            CatalogID = ?,
-            MorphoID = ?,
-            ClusterID = ?,
-            ImagingDate = ?,
-            Resolution = ?,
-            FileSizeBytes = ?,
-            FileFormat = ?,
-            Description = ?,
-            ImagingPlatform = ?,
-            ImageEditingTool = ?,
-            Comments = ?,
-            UpdatedDate = NOW(),
-            UpdatedByID = ?,
-            ProjectID =?,
-            PhotographerID = ?
-        WHERE MediaID = ?
-                `;
+  const query = `UPDATE Media SET
+                  FileName = ?,
+                  FilePath = ?,
+                  CatalogID = ?,
+                  MorphoID = ?,
+                  ClusterID = ?,
+                  ImagingDate = ?,
+                  Resolution = ?,
+                  FileSizeBytes = ?,
+                  FileFormat = ?,
+                  Description = ?,
+                  ImagingPlatform = ?,
+                  ImageEditingTool = ?,
+                  Comments = ?,
+                  UpdatedDate = NOW(),
+                  UpdatedByID = ?,
+                  ProjectID =?,
+                  PhotographerID = ?
+                  WHERE MediaID = ?`;
   const updatedBy = req.session.passport.user.UserID;
-  // const splitX = mediaData.projectAndPhotographerPair.split(",");
-  // const projectID = splitX[0];
-  console.log('photographer id ', mediaData.photographerID)
   const params = [
     mediaData.fileName,
     mediaData.filePath,
@@ -486,57 +522,12 @@ router.post("/edit", isAuthenticated, async (req: Request, res: Response) => {
     mediaData.projectID,
     mediaData.photographerID,
     mediaData.MediaID,
-  ];
-  // const newImageEditingTool = mediaData.newImageEditingTool;
-  // const newImagingPlatform = mediaData.newImagingPlatform;
+  ]
 
-  // if (
-  //   newImageEditingTool != null &&
-  //   newImageEditingTool != "" &&
-  //   !req.session.imageEditingTools.includes(newImageEditingTool)
-  // ) {
-  //   req.session.imageEditingTools.push(newImageEditingTool);
-  //   const i = req.session.imageEditingTools;
-  //   console.log("i", i);
-  //   await db
-  //     
-  //     .query<RowDataPacket[]>(
-  //       "ALTER TABLE Media MODIFY COLUMN `ImageEditingTool` ENUM(?)",
-  //       [i]
-  //     );
-  // }
-
-  //   if (
-  //     newImagingPlatform != null &&
-  //     newImagingPlatform != "" &&
-  //     !req.session.imagingPlatforms.includes(newImagingPlatform)
-  //   ) {
-  //     req.session.imagingPlatforms.push(newImagingPlatform);
-  //     const i = req.session.imagingPlatforms;
-  //     await db
-  //       
-  //       .query<RowDataPacket[]>(
-  //         "ALTER TABLE Media MODIFY COLUMN `ImagingPlatform` enum(?)",
-  //         [i]
-  //       );
-  //     await db
-  //       
-  //       .query<RowDataPacket[]>(
-  //         "ALTER TABLE ImagingPlatformInstance MODIFY COLUMN `ImagingPlatform` enum(?)",
-  //         [i]
-  //       );
-  //     // for new enums, the list of imaging platforms that the entity project has
-  //     // needs to be updated:
-  //     await db
-  //       
-  //       .query<RowDataPacket[]>(
-  //         "INSERT IGNORE INTO ImagingPlatformInstance (ProjectID, ImagingPlatform) VALUES (?,?) ",
-  //         [projectID, newImagingPlatform]
-  //       ); // I can't remember why I ignore errors here, sorry.
-  //   }
-  //   req.session.save();
-
-  await db.query(query, params)
+  await db.query(query, params).catch((e: any) => {
+    console.error(e);
+    res.status(500).json({ error: e, sucess: false })
+  })
 
   res.json({
     success: true,
@@ -564,7 +555,7 @@ router.post(
       "SELECT * FROM Media WHERE MediaID = ? AND IsDeleted = 0";
 
     db.query(checkQuery, [mediaID])
-      .then((results) => {
+      .then((results: (string | any[])[]) => {
         if (results[0].length === 0) {
           req.flash("error", "Media not found or already deleted");
           res.redirect("/media/view-all");
@@ -657,7 +648,10 @@ router.post("/bulk-delete", isAuthenticated, async (req: Request, res: Response)
                     UpdatedDate = NOW() 
                 WHERE MediaID in (?)`;
 
-  await db.query(updateQuery, [userID, req.body]);
+  await db.query(updateQuery, [userID, req.body]).catch((e: any) => {
+    console.error(e);
+    res.status(500).json({ error: e, sucess: false })
+  });
   return res.status(200).json({ success: true, message: "successfully soft deleted selected metadata" })
 })
 
@@ -680,7 +674,10 @@ router.post("/bulk-restore", isAuthenticated, async (req: Request, res: Response
                     UpdatedByID = ?,
                     UpdatedDate = NOW() 
                 WHERE MediaID in (?)`;
-  await db.query(updateQuery, [userID, req.body]);
+  await db.query(updateQuery, [userID, req.body]).catch((e: any) => {
+    console.error(e);
+    res.status(500).json({ error: e, sucess: false })
+  });
   return res.status(200).json({ success: true, message: "successfully restored selected metadata" })
 })
 
@@ -701,7 +698,7 @@ router.get("/bulk-edit", isAuthenticated, async (req: Request, res: Response) =>
   }
   const user = req.session.passport.user
   const allProjectsQueryBase = ` SELECT  p.ProjectID, p.ProjectName
-                    FROM Project p\n`;
+                                FROM Project p\n`;
   // list projects based on user type,
   // where non admins will only get projects that they photographs or owns.
   const allProjectsQuery =
@@ -710,7 +707,11 @@ router.get("/bulk-edit", isAuthenticated, async (req: Request, res: Response) =>
       `JOIN ProjectUserPhotographyLink pupl ON pupl.ProjectID = p.ProjectID
         WHERE pupl.PhotographerID = ` + user.UserID
       : allProjectsQueryBase;
-  const allProjects = (await db.query(allProjectsQuery))[0];
+  const temp1 = await db.query(allProjectsQuery).catch((e: any) => {
+    console.error(e);
+    res.status(500).json({ error: e, sucess: false })
+  });
+  const allProjects = temp1[0]
 
   const projectPhotographersQuery = `
     SELECT pupl.PhotographerID, u.FullName, p.ProjectID, p.ProjectName, p.ProjectOwnerID 
@@ -718,8 +719,7 @@ router.get("/bulk-edit", isAuthenticated, async (req: Request, res: Response) =>
     JOIN User u ON u.UserID = pupl.PhotographerID
     JOIN Project p on p.ProjectID = pupl.ProjectID
     WHERE u.IsDeleted = 0 
-    AND p.IsDeleted = 0
-    `
+    AND p.IsDeleted = 0`
   const projectPhotographersQuery2 =
     user.UserType == userTypesEnumeration().photographerOnly
       ? projectPhotographersQuery +
@@ -729,9 +729,14 @@ router.get("/bulk-edit", isAuthenticated, async (req: Request, res: Response) =>
         ? projectPhotographersQuery + `\n AND p.ProjectOwnerID= ` + user.UserID
         + `\n ORDER BY p.ProjectID `
         : projectPhotographersQuery + `\nORDER BY p.ProjectID `
-  const projectPhotographers = (await db.query(projectPhotographersQuery2,))[0]
+  const temp2 = await db.query(projectPhotographersQuery2).catch((e: any) => {
+    console.error(e);
+    res.status(500).json({ error: e, sucess: false })
+  })
+  const projectPhotographers = temp2[0]
 
-  console.log('bulk eidt')
+  // const selectedMetadataQuery = "SELECT * FROM Media WHERE MediaID in (?)"
+  // const selectedMetadata = (await db.query(selectedMetadataQuery,mediaIDs))[0];
   res.render("media/bulk-edit", {
     mediaIDs,
     currentUser: user,
@@ -739,28 +744,16 @@ router.get("/bulk-edit", isAuthenticated, async (req: Request, res: Response) =>
     imagingPlatforms: req.session["imagingPlatforms"],
     fileFormats: Object.values(mediaFileFormatEnumeration()),
     allProjects,
-    projectPhotographers
+    projectPhotographers,
+    // selectedMetadata
   })
-
 })
+
+
+
 router.post("/bulk-edit", isAuthenticated, async (req: Request, res: Response) => {
   try {
-    const {
-      catalogID,
-      morphoID,
-      clusterID,
-      imagingDate,
-      resolution,
-      fileSizeBytes,
-      fileFormat,
-      description,
-      imagingPlatform,
-      imageEditingTool,
-      comments,
-      projectID,
-      photographerID,
-      mediaIDs
-    } = req.body;
+    const mediaIDs = req.body.mediaID;
     const columns = ['catalogID',
       'morphoID',
       'clusterID',
@@ -776,26 +769,25 @@ router.post("/bulk-edit", isAuthenticated, async (req: Request, res: Response) =
       'photographerID']
     const updatedBy = req.session.passport.user.UserID;
 
+    //building query and params
     var insertQuery = `Update Media SET `
-    var values = [];
+    var params = [];
     const reqBodyEntries = Object.entries(req.body)
-    console.log(reqBodyEntries)
-    for (var i = 0; i < reqBodyEntries.length;i++) {
+    for (var i = 0; i < reqBodyEntries.length; i++) {
       const x = reqBodyEntries[i]
-      console.log(x)
       if (x[1].toString().trim() == "" || !columns.includes(x[0])) continue
       insertQuery += " " + x[0] + " = ?,"
-      values.push(x[1])
+      params.push(x[1])
     }
     insertQuery += `
     UpdatedByID = ?,
     UpdatedDate = NOW()
     WHERE MediaID IN (?) AND IsDeleted = 0`
-    values.push(updatedBy)
-    values.push(mediaIDs.indexOf(',') > -1 ? mediaIDs.split(",") : mediaIDs)
-    console.log(insertQuery)
-    console.log(values)
-    await db.query(insertQuery, values);
+    params.push(updatedBy)
+    params.push(mediaIDs.indexOf(',') > -1 ? mediaIDs.split(",") : mediaIDs)
+
+    await db.query(insertQuery, params);
+
     res.json({
       success: true,
       message: "Media metadatas sucessfully created",
@@ -810,11 +802,15 @@ router.post("/bulk-edit", isAuthenticated, async (req: Request, res: Response) =
     });
   }
 });
+
+
+
 router.get(
   "/upload-bulk-metadata",
   isAuthenticated,
   async (req: Request, res: Response) => {
     const user = req.session.passport.user;
+
     const allProjectsQueryBase = ` SELECT  p.ProjectID, p.ProjectName
                     FROM Project p\n`;
     // list projects based on user type,
@@ -825,8 +821,11 @@ router.get(
         `JOIN ProjectUserPhotographyLink pupl ON pupl.ProjectID = p.ProjectID
         WHERE pupl.PhotographerID = ` + user.UserID
         : allProjectsQueryBase;
-    const allProjects = (await db.query(allProjectsQuery))[0];
-
+    const temp1 = await db.query(allProjectsQuery).catch((e: any) => {
+      console.error(e);
+      res.status(500).json({ error: e, sucess: false })
+    });
+    const allProjects = temp1[0]
 
     const projectPhotographersQuery = `
     SELECT pupl.PhotographerID, u.FullName, p.ProjectID, p.ProjectName, p.ProjectOwnerID 
@@ -834,8 +833,7 @@ router.get(
     JOIN User u ON u.UserID = pupl.PhotographerID
     JOIN Project p on p.ProjectID = pupl.ProjectID
     WHERE u.IsDeleted = 0 
-    AND p.IsDeleted = 0
-    `
+    AND p.IsDeleted = 0`
     const projectPhotographersQuery2 =
       user.UserType == userTypesEnumeration().photographerOnly
         ? projectPhotographersQuery +
@@ -845,27 +843,17 @@ router.get(
           ? projectPhotographersQuery + `\n AND p.ProjectOwnerID= ` + user.UserID
           + `\n ORDER BY p.ProjectID `
           : projectPhotographersQuery + `\nORDER BY p.ProjectID `
-    const projectPhotographers = (await db.query(projectPhotographersQuery2,))[0]
-    console.log('projectPhotographers', projectPhotographers)
-    // const projectPhotographers2 = []
-    // let currentProjectID = projectPhotographers[0].ProjectID
-    // let innerArray = []
-    // for (let x of projectPhotographers) {
-    //   if (x.ProjectID != currentProjectID) {
-    //     currentProjectID = x.ProjectID
-    //     projectPhotographers2.push(innerArray)
-    //     innerArray = []
-    //   }
-    //   innerArray.push(x)
-    // }
-    // projectPhotographers2.push(innerArray)
-    // console.log('projectPhotographers2', projectPhotographers2)
+    const temp2 = await db.query(projectPhotographersQuery2,).catch((e: any) => {
+      console.error(e);
+      res.status(500).json({ error: e, sucess: false })
+    })
+    const projectPhotographers = temp2[0];
+
     res.render("media/upload-bulk-metadata", {
       currentUser: user,
       allProjects,
       title: "Media Form",
       projectPhotographers,
-      // projectPhotographersString: JSON.stringify(projectPhotographers)
     });
   }
 );
@@ -876,16 +864,14 @@ router.post(
   isAuthenticated,
   async (req: Request, res: Response) => {
     const user = req.session.passport.user;
-    // const projectID = req.params.projectID;
-
     const overridingPhotographerID = req.body.photographerID
     const overridingProjectID = req.body.projectID
-
     const newTable: string[][] = [];
     var newTableDF: pl.DataFrame = pl.DataFrame();
     var hasErrors = false;
     const newImageEditingTools = [];
     const uniqueFileNames = [];
+
     //Conducts some validation for each row of the data.
     interface newRowColumnInterface {
       MorphoID: number;
@@ -926,25 +912,32 @@ router.post(
         return;
       }
     });
-    const tempListOfObjects1 = (
+
+    const tempListOfFileNames1 =
       await db.query("SELECT DISTINCT FileName FROM Media WHERE IsDeleted = 0")
-    )[0];
-    const tempListOfObjects2: any = tempListOfObjects1;
+        .catch((e: any) => {
+          console.error(e);
+          res.status(500).json({ error: e, sucess: false })
+        })
+    const tempListOfFileNames2: any = tempListOfFileNames1[0];
     const listOfFileNamesFromDB: any[] = [];
-    for (const x of tempListOfObjects2)
+    for (const x of tempListOfFileNames2)
       listOfFileNamesFromDB.push(x.FileName);
 
-    const tempListOfLinks1 = (
+    const tempListOfLinks1 =
       await db.query(`SELECT DISTINCT * FROM ProjectUserPhotographyLink pupl
               JOIN User u ON u.UserID = pupl.PhotographerID
               JOIN Project p ON p.ProjectID = pupl.ProjectID
-              WHERE u.IsDeleted = 0 AND p.IsDeleted = 0
-        `)
-    )[0];
-    const tempListOfLinks2: any = tempListOfLinks1;
+              WHERE u.IsDeleted = 0 AND p.IsDeleted = 0`)
+        .catch((e: any) => {
+          console.error(e);
+          res.status(500).json({ error: e, sucess: false })
+        });
+    const tempListOfLinks2: any = tempListOfLinks1[0];
     const listOfPhotographerProjectLinks: any[][] = [];
     for (const x of tempListOfLinks2)
       listOfPhotographerProjectLinks.push([x.PhotographerID, x.ProjectID]);
+
     function checkProjectPhotographerLink(listOfPhotographerProjectLinks: any[][],
       photographerID: number, projectID: number, errorMessage: string = "") {
       var matched = false;
@@ -958,6 +951,7 @@ router.post(
                 You may have selected the wrong project from the dropdown box 
                 or the wrong photographer ID in the config.ini \n`;
     }
+
     if (overridingPhotographerID != -1) {
       const msg = checkProjectPhotographerLink(listOfPhotographerProjectLinks,
         overridingPhotographerID,
@@ -1133,7 +1127,11 @@ router.post(
     if (newImageEditingTools != null && newImageEditingTools.length != 0)
       await db
         .query("ALTER TABLE Media MODIFY COLUMN `ImageEditingTool` enum(?)",
-          [allImageEditingTools]);
+          [allImageEditingTools])
+        .catch((e: any) => {
+          console.error(e);
+          res.status(500).json({ error: e, sucess: false })
+        });
     req.session["imageEditingTools"] = allImageEditingTools;
     // const allImagingPlatforms =
     //   req.session["imagingPlatforms"].concat(newImagingPlatforms);
@@ -1142,7 +1140,10 @@ router.post(
     //     
     //     .query("ALTER TABLE Media MODIFY COLUMN `ImagingPlatform` enum(?)", [
     //       allImagingPlatforms,
-    //     ]);
+    //     ]) .catch((e: any) => {
+    //   console.error(e);
+    //   res.status(500).json({ error: e, sucess: false })
+    // });
     // req.session["imagingPlatforms"] = allImagingPlatforms;
     // END OF SECTION
 
@@ -1158,7 +1159,12 @@ router.post(
             UpdatedDate ,
             UpdatedByID 
         ) VALUES ?`;
-    await db.query(insertQuery, [newTable]);
+    await db.query(insertQuery, [newTable])
+      .catch((e: any) => {
+        console.error(e);
+        res.status(500).json({ error: e, sucess: false })
+      });
+
     res.json({
       success: true,
       message: "Media metadata bulk upload sucessful",

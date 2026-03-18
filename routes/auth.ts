@@ -15,6 +15,7 @@ import { Response, Request, NextFunction } from "express";
 import { User } from "../@types/types";
 const fs = require("fs");
 import path from 'path';
+
 passport.use(
   new passportStrategy.Strategy(async function verify(
     username: string,
@@ -25,6 +26,7 @@ passport.use(
       arg2: { message: string } | undefined
     ) => void
   ) {
+
     //Do not change the variable name from username to email, it doesn't work.
     const query =
       `SELECT PasswordSalt, SaltedPassword, UserID,
@@ -37,45 +39,53 @@ passport.use(
         return cb(null, false, { message: "Database error" });
       });
 
-    if (result.length === 0)
+    if (result.length === 0 || result[0].Email == null || result[0].Email == ""
+      || result[0].SaltedPassword == null || result[0].SaltedPassword == ""
+    )
       return cb(null, false, { message: "Invalid email or password" });
 
     const user = result[0];
 
+    //checks if user is still on timeout
     if (new Date(user.PasswordTimeoutTill) >= new Date())
-      return cb(null, false, { message: "Login timeout till " + user.PasswordTimeoutTill + ".\n Please try again later." });
+      return cb(null, false, {
+        message:
+          "Login timeout till " + user.PasswordTimeoutTill + ".\n Please try again later."
+      });
 
-    crypto.pbkdf2(
+    const saltedPassword = crypto.pbkdf2Sync(
       password,
       user.PasswordSalt,
       310000,
       32,
       "sha256",
-      async function (err, hashedPassword) {
-        if (err) return cb(err, undefined, undefined);
-        if (!crypto.timingSafeEqual(user.SaltedPassword, hashedPassword)) {
-          const newPasswordTries = parseInt(user.PasswordTries) + 1
-          const timeoutIntervalMinutes: number = 5
-          if (newPasswordTries % 3 == 0) {
-            await db.query(`UPDATE User 
+    );
+
+    //Password timeout logic
+    if (!crypto.timingSafeEqual(user.SaltedPassword, saltedPassword)) {
+      const newPasswordTries = parseInt(user.PasswordTries) + 1
+      const timeoutIntervalMinutes: number = 5
+
+      //timeout for every 3 tries, and the amount of timeout accumilates
+      if (newPasswordTries % 3 == 0) {
+        const newTimeoutIntervalMinutes =timeoutIntervalMinutes * Math.floor(newPasswordTries / 3)
+        await db.query(`UPDATE User 
                 SET PasswordTries = ?, 
                 PasswordTimeoutTill = (NOW() + INTERVAL ? MINUTE) 
                 WHERE UserID = ?`,
-              [newPasswordTries, timeoutIntervalMinutes, user.UserID])
-            return cb(null, false, {
-              message: "3 invalid passwords entered. Login timeout, please wait for "
-                + timeoutIntervalMinutes.toString() + " minutes and try again.",
-            });
-          }
-          await db.query('UPDATE User SET PasswordTries = ? WHERE UserID = ?',
-            [newPasswordTries, user.UserID])
-          return cb(null, false, {
-            message: "Incorrect username or password.",
-          });
-        }
-        return cb(null, user, { message: null });
+          [newPasswordTries,newTimeoutIntervalMinutes,user.UserID])
+        return cb(null, false, {
+          message: "3 invalid passwords entered. Login timeout, please wait for "
+            + newTimeoutIntervalMinutes.toString() + " minutes and try again.",
+        });
       }
-    );
+      await db.query('UPDATE User SET PasswordTries = ? WHERE UserID = ?',
+        [newPasswordTries, user.UserID])
+      return cb(null, false, { message: "Incorrect username or password.", });
+    }
+
+    //sucessful login
+    return cb(null, user, { message: null });
   })
 );
 
@@ -99,15 +109,15 @@ passport.deserializeUser((user: User, cb: (arg0: null, arg1: any) => any) => {
     return cb(null, user);
   });
 });
+
 router.get("/register", async (req: Request, res, Response) => {
   const isEnabled = (await db.query('SELECT IsEnabled FROM IsUserRegistrationEnabled'))[0][0].IsEnabled
-
-  if (!isEnabled) {
+  if (!isEnabled)
     return res.status(400).json({
       sucess: false,
       message: "User Registration is not enabled"
     })
-  }
+
   return res.render('register', {
     staffTypes: Object.values(staffTypesEnumeration()),
     userTypes: [
@@ -116,6 +126,7 @@ router.get("/register", async (req: Request, res, Response) => {
     ]
   })
 })
+
 router.post("/register", async (req: Request, res: Response) => {
   const isUserRegistrationEnabledQuery = 'SELECT IsEnabled FROM IsUserRegistrationEnabled'
   const isUserRegistrationEnabled = (await db.query(isUserRegistrationEnabledQuery))[0][0].IsEnabled
@@ -139,12 +150,11 @@ router.post("/register", async (req: Request, res: Response) => {
   if (!userType) missingFields.push("userType");
   if (!fullName) missingFields.push("fullName");
 
-  if (missingFields.length > 0) {
+  if (missingFields.length > 0)
     return res.status(400).json({
       success: false,
       message: "Missing required fields: " + missingFields.join(", "),
     });
-  }
   if (!emailRegex.test(email))
     return res.status(400).json({
       success: false,
@@ -163,11 +173,9 @@ router.post("/register", async (req: Request, res: Response) => {
         success: false,
         message: "the password doesn't match the requirements of 7 characters or more characters and at least a digit and a lower case letter"
       })
-
   try {
     const filePath = __dirname.replace("routes", "") + 'public/common-passwords.txt'
     const commonPasswords = fs.readFileSync(path.resolve(filePath)).toString().split('\n')
-
     if (commonPasswords.includes(password))
       return res.status(400).json({
         sucess: false, message: "a common password detected, please use another password"
@@ -175,25 +183,24 @@ router.post("/register", async (req: Request, res: Response) => {
   } catch (error) {
     console.error(`Error reading file: ${error}`);
   }
-  if (!Object.values(userTypesEnumeration()).includes(userType)) {
+
+  if (!Object.values(userTypesEnumeration()).includes(userType))
     return res.status(400).json({
       success: false,
       message:
         "invalid user type that is not these values: " + Object.values(userTypesEnumeration()),
     });
-  }
-  if (!Object.values(staffTypesEnumeration()).includes(staffType)) {
+  if (!Object.values(staffTypesEnumeration()).includes(staffType))
     return res.status(400).json({
       success: false,
       message:
         "invalid staff type that is not these values: " + Object.values(staffTypesEnumeration()),
     });
-  }
-  console.log(`🔹 Register Attempt: ${email}`);
 
+
+  // does email exist:
   const checkEmailQuery = "SELECT Email FROM User WHERE Email = ? LIMIT 1";
   const isThereExistingEmail = (await db.query(checkEmailQuery, [email]))[0][0]
-
   if (isThereExistingEmail)
     return res.status(400).json({ message: "Email already exist" })
 
@@ -221,8 +228,12 @@ router.post("/register", async (req: Request, res: Response) => {
   ];
 
   await db.query(insertUserQuery, params)
-  console.log(`✅ User Registered Successfully: ${email}`);
-  return res.status(200).json({ success: true, message: "User successfully registration", redirect: "/login", });
+
+  return res.status(200).json({
+    success: true,
+    message: "User successfully registration",
+    redirect: "/login",
+  });
 
 });
 
@@ -245,11 +256,16 @@ router.post("/login", (req: Request, res: Response, next: NextFunction) => {
       if (!user) return res.status(401).send(info);
 
       req.login(user, async (err: any) => {
-        // I am not suppose to use this as password authenticate already does it, but somehow this guy's code from stackoverflow works
+        // I am not suppose to use this as password authenticate already does it, 
+        // but somehow this guy's code from stackoverflow works
         if (err) return res.status(500).json({ error: "Login failed." });
-        // 🔄 Update LastLoginDate
         const updateQuery =
-          "UPDATE User SET LastLoginDate = NOW(),PasswordTries = 0, PasswordTimeoutTill = NULL WHERE UserID = ? ";
+          `UPDATE User 
+          SET 
+            LastLoginDate = NOW(),
+            PasswordTries = 0,
+            PasswordTimeoutTill = NULL 
+          WHERE UserID = ? `;
         await db.query(updateQuery, [user.UserID])
 
         // these codes feels redundant now, may needed to be removed
@@ -302,18 +318,14 @@ router.post("/login", (req: Request, res: Response, next: NextFunction) => {
 router.get("/logout", (req: Request, res: Response) => {
   try {
     if (!req.session.passport.user || !req.session.passport.user.UserID) {
-      console.warn("⚠️ Logout Attempt Without Login");
+      console.warn("⚠️ Logout Attempt Without user session");
       return res.redirect("/");
     }
-    console.log(`🔹 Logout Attempt: ${req.session.passport.user.Email}`);
-
     req.session.destroy((err: any) => {
       if (err) {
         console.error("❌ Logout Error:", err);
-
         return res.redirect("/");
       }
-      console.log("✅ User Logged Out");
       return res.redirect("/");
     });
   } catch (error) {
@@ -323,16 +335,16 @@ router.get("/logout", (req: Request, res: Response) => {
 });
 
 router.get("/current-user", (req: Request, res: Response) => {
-  if (req.session && req.session.passport.user) {
+  if (req.session && req.session.passport.user)
     res.json({
       Email: req.session.passport.user.Email,
       FullName: req.session.passport.user.FullName,
       UserType: req.session.passport.user.UserType,
       UserID: req.session.passport.user.UserID,
     });
-  } else {
+  else
     res.status(401).json({ error: "Not logged in" });
-  }
+
 });
 
 module.exports = router;
