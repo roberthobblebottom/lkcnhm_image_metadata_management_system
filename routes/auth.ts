@@ -1,20 +1,20 @@
-const express = require('express');
-const router = express.Router();
-const db = require('./db');
-// import { db } from "./db";
-import passport from "passport";
-import * as passportStrategy from "passport-local";
-import crypto from "crypto";
+const express = require('express')
+const router = express.Router()
+const db = require('./db')
+// import { db } from "./db"
+import passport from "passport"
+import * as passportStrategy from "passport-local"
+import crypto from "crypto"
 import {
   emailRegex,
   passwordRegex,
   staffTypesEnumeration,
   userTypesEnumeration,
-} from "../middleware/utils";
-import { Response, Request, NextFunction } from "express";
-import { User } from "../@types/types";
-const fs = require("fs");
-import path from 'path';
+} from "../middleware/utils"
+import { Response, Request, NextFunction } from "express"
+import { User } from "../@types/types"
+const fs = require("fs")
+import path from 'path'
 
 passport.use(
   new passportStrategy.Strategy(async function verify(
@@ -31,27 +31,27 @@ passport.use(
     const query =
       `SELECT PasswordSalt, SaltedPassword, UserID,
       UserType,FullName,Email,PasswordTries,PasswordTimeoutTill 
-      FROM User WHERE Email = ? AND IsDeleted = 0`;
+      FROM User WHERE Email = ? AND IsDeleted = 0`
     const [result]: any = await db
       .query(query, [username])
       .catch((error: any) => {
-        console.error("❌ Database Error:", error);
-        return cb(null, false, { message: "Database error" });
-      });
+        console.error("❌ Database Error:", error)
+        return cb(null, false, { message: "Database error" })
+      })
 
     if (result.length === 0 || result[0].Email == null || result[0].Email == ""
       || result[0].SaltedPassword == null || result[0].SaltedPassword == ""
     )
-      return cb(null, false, { message: "Invalid email or password" });
+      return cb(null, false, { message: "Invalid email or password" })
 
-    const user = result[0];
+    const user = result[0]
 
     //checks if user is still on timeout
     if (new Date(user.PasswordTimeoutTill) >= new Date())
       return cb(null, false, {
         message:
           "Login timeout till " + user.PasswordTimeoutTill + ".\n Please try again later."
-      });
+      })
 
     const saltedPassword = crypto.pbkdf2Sync(
       password,
@@ -59,7 +59,7 @@ passport.use(
       310000,
       32,
       "sha256",
-    );
+    )
 
     //Password timeout logic
     if (!crypto.timingSafeEqual(user.SaltedPassword, saltedPassword)) {
@@ -77,17 +77,17 @@ passport.use(
         return cb(null, false, {
           message: "3 invalid passwords entered. Login timeout, please wait for "
             + newTimeoutIntervalMinutes.toString() + " minutes and try again.",
-        });
+        })
       }
       await db.query('UPDATE User SET PasswordTries = ? WHERE UserID = ?',
         [newPasswordTries, user.UserID])
-      return cb(null, false, { message: "Incorrect username or password.", });
+      return cb(null, false, { message: "Incorrect username or password.", })
     }
 
-    //sucessful login
-    return cb(null, user, { message: null });
+    //successful login
+    return cb(null, user, { message: null })
   })
-);
+)
 
 // serialise user to be added into session data.
 passport.serializeUser(
@@ -98,23 +98,23 @@ passport.serializeUser(
         FullName: user.FullName,
         Email: user.Email,
         UserType: user.UserType,
-      });
-    });
+      })
+    })
   }
-);
+)
 
 // retrieving session data
 passport.deserializeUser((user: User, cb: (arg0: null, arg1: any) => any) => {
   process.nextTick(function () {
-    return cb(null, user);
-  });
-});
+    return cb(null, user)
+  })
+})
 
 router.get("/register", async (req: Request, res, Response) => {
   const isEnabled = (await db.query('SELECT IsEnabled FROM IsUserRegistrationEnabled'))[0][0].IsEnabled
   if (!isEnabled)
     return res.status(400).json({
-      sucess: false,
+      success: false,
       message: "User Registration is not enabled"
     })
 
@@ -142,30 +142,30 @@ router.post("/register", async (req: Request, res: Response) => {
     contactNumber,
     staffType,
     comments,
-  } = req.body;
-  const missingFields = [];
-  if (!email) missingFields.push("email");
-  if (!password) missingFields.push("password");
-  if (!confirmPassword) missingFields.push("confirmPassword");
-  if (!userType) missingFields.push("userType");
-  if (!fullName) missingFields.push("fullName");
+  } = req.body
+  const missingFields = []
+  if (!email) missingFields.push("email")
+  if (!password) missingFields.push("password")
+  if (!confirmPassword) missingFields.push("confirmPassword")
+  if (!userType) missingFields.push("userType")
+  if (!fullName) missingFields.push("fullName")
 
   if (missingFields.length > 0)
     return res.status(400).json({
       success: false,
       message: "Missing required fields: " + missingFields.join(", "),
-    });
+    })
   if (!emailRegex.test(email))
     return res.status(400).json({
       success: false,
       message:
         "invalid email, email value does not have '@' or '.' character(s).",
-    });
+    })
   if (password != confirmPassword) {
     return res.status(400).json({
       success: false,
       message: "the passwords does not match",
-    });
+    })
   }
   if (!passwordRegex.test(password))
     return res.status(400).json(
@@ -178,10 +178,10 @@ router.post("/register", async (req: Request, res: Response) => {
     const commonPasswords = fs.readFileSync(path.resolve(filePath)).toString().split('\n')
     if (commonPasswords.includes(password))
       return res.status(400).json({
-        sucess: false, message: "a common password detected, please use another password"
+        success: false, message: "a common password detected, please use another password"
       })
   } catch (error) {
-    console.error(`Error reading file: ${error}`);
+    console.error(`Error reading file: ${error}`)
   }
 
   if (!Object.values(userTypesEnumeration()).includes(userType))
@@ -189,22 +189,22 @@ router.post("/register", async (req: Request, res: Response) => {
       success: false,
       message:
         "invalid user type that is not these values: " + Object.values(userTypesEnumeration()),
-    });
+    })
   if (!Object.values(staffTypesEnumeration()).includes(staffType))
     return res.status(400).json({
       success: false,
       message:
         "invalid staff type that is not these values: " + Object.values(staffTypesEnumeration()),
-    });
+    })
 
 
   // does email exist:
-  const checkEmailQuery = "SELECT Email FROM User WHERE Email = ? LIMIT 1";
+  const checkEmailQuery = "SELECT Email FROM User WHERE Email = ? LIMIT 1"
   const isThereExistingEmail = (await db.query(checkEmailQuery, [email]))[0][0]
   if (isThereExistingEmail)
     return res.status(400).json({ message: "Email already exist" })
 
-  const newPasswordSalt = crypto.randomBytes(16).toString("hex");
+  const newPasswordSalt = crypto.randomBytes(16).toString("hex")
   const saltedPassword = crypto.pbkdf2Sync(
     password,
     newPasswordSalt,
@@ -215,7 +215,7 @@ router.post("/register", async (req: Request, res: Response) => {
             INSERT INTO User 
             (Email, SaltedPassword,PasswordSalt,  UserType, RegisteredDate,
               UpdatedDate,FullName,ContactNumber,StaffType,Comments)
-            VALUES (?, ?,?,  ?, NOW(),NOW(),  ?, ?,?,?)`;
+            VALUES (?, ?,?,  ?, NOW(),NOW(),  ?, ?,?,?)`
   const params = [
     email,
     saltedPassword,
@@ -225,7 +225,7 @@ router.post("/register", async (req: Request, res: Response) => {
     contactNumber,
     staffType,
     comments
-  ];
+  ]
 
   await db.query(insertUserQuery, params)
 
@@ -233,9 +233,9 @@ router.post("/register", async (req: Request, res: Response) => {
     success: true,
     message: "User successfully registration",
     redirect: "/login",
-  });
+  })
 
-});
+})
 
 // Login User
 router.post("/login", (req: Request, res: Response, next: NextFunction) => {
@@ -250,56 +250,56 @@ router.post("/login", (req: Request, res: Response, next: NextFunction) => {
     },
     (err: any, user: User, info: any) => {
       if (info.message !== null)
-        return res.status(400).json({ sucess: false, message: info.message })
+        return res.status(400).json({ success: false, message: info.message })
       if (err)
-        return next(err);
-      if (!user) return res.status(401).send(info);
+        return next(err)
+      if (!user) return res.status(401).send(info)
 
       req.login(user, async (err: any) => {
         // I am not suppose to use this as password authenticate already does it, 
         // but somehow this guy's code from stackoverflow works
-        if (err) return res.status(500).json({ error: "Login failed." });
+        if (err) return res.status(500).json({ error: "Login failed." })
         const updateQuery =
           `UPDATE User 
           SET 
             LastLoginDate = NOW(),
             PasswordTries = 0,
             PasswordTimeoutTill = NULL 
-          WHERE UserID = ? `;
+          WHERE UserID = ? `
         await db.query(updateQuery, [user.UserID])
 
         // these codes feels redundant now, may needed to be removed
         const x1: any[] = await db
-          .query("SHOW COLUMNS FROM Media LIKE 'ImageEditingTool' ");
+          .query("SHOW COLUMNS FROM Media LIKE 'ImageEditingTool' ")
         req.session.imageEditingTools = x1[0][0]["Type"]
           .replace("enum(", "")
           .replace(")", "")
           .replaceAll("'", "")
-          .split(",");
+          .split(",")
 
         const x2: any[] = await db
-          .query("SHOW COLUMNS FROM Media LIKE 'ImagingPlatform' ");
+          .query("SHOW COLUMNS FROM Media LIKE 'ImagingPlatform' ")
         const ip = x2[0][0]["Type"]
         const ip2 = ip.substring(5, ip.length - 1)
           .replaceAll("'", "")
-          .split(",");
-        req.session.imagingPlatforms = ip2;
+          .split(",")
+        req.session.imagingPlatforms = ip2
         const x3: any[] = await db
-          .query("SHOW COLUMNS FROM Project LIKE 'ProjectType' ");
+          .query("SHOW COLUMNS FROM Project LIKE 'ProjectType' ")
         const projectTypes = x3[0][0]["Type"]
           .replaceAll("enum(", "")
           .replaceAll("'", "")
-          .split(",");
+          .split(",")
         projectTypes.splice(
           projectTypes.length - 1,
           1,
           projectTypes.at(-1).replace(")", "")
-        );
-        req.session.projectTypes = projectTypes;
+        )
+        req.session.projectTypes = projectTypes
 
         req.session.save((err: any) => {
           if (err)
-            return res.status(500).json({ error: "Session save error" });
+            return res.status(500).json({ error: "Session save error" })
 
           return res.json({
             success: true,
@@ -307,32 +307,32 @@ router.post("/login", (req: Request, res: Response, next: NextFunction) => {
               user.UserType === userTypesEnumeration().admin
                 ? "/admin/login-landing-page"
                 : "/user/login-landing-page",
-          });
-        });
-      });
+          })
+        })
+      })
     }
-  )(req, res, next);
-});
+  )(req, res, next)
+})
 
 // Logout User
 router.get("/logout", (req: Request, res: Response) => {
   try {
     if (!req.session.passport.user || !req.session.passport.user.UserID) {
-      console.warn("⚠️ Logout Attempt Without user session");
-      return res.redirect("/");
+      console.warn("⚠️ Logout Attempt Without user session")
+      return res.redirect("/")
     }
     req.session.destroy((err: any) => {
       if (err) {
-        console.error("❌ Logout Error:", err);
-        return res.redirect("/");
+        console.error("❌ Logout Error:", err)
+        return res.redirect("/")
       }
-      return res.redirect("/");
-    });
+      return res.redirect("/")
+    })
   } catch (error) {
-    console.error("❌ Logout Try-Catch Error:", error);
-    return res.redirect("/");
+    console.error("❌ Logout Try-Catch Error:", error)
+    return res.redirect("/")
   }
-});
+})
 
 router.get("/current-user", (req: Request, res: Response) => {
   if (req.session && req.session.passport.user)
@@ -341,10 +341,10 @@ router.get("/current-user", (req: Request, res: Response) => {
       FullName: req.session.passport.user.FullName,
       UserType: req.session.passport.user.UserType,
       UserID: req.session.passport.user.UserID,
-    });
+    })
   else
-    res.status(401).json({ error: "Not logged in" });
+    res.status(401).json({ error: "Not logged in" })
 
-});
+})
 
-module.exports = router;
+module.exports = router

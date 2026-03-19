@@ -2,17 +2,17 @@
 
 const formatDisplayDate = (date: any) => {
   var d1 = new Date(date)
-  const d2 = d1 ? d1.toISOString().split("T")[0] : null;
-  return d2;
-};
+  const d2 = d1 ? d1.toISOString().split("T")[0] : null
+  return d2
+}
 
 const projectStatusEnumeration = () => {
   return {
     in_progress: "started",
     on_hiatus: "on hiatus",
     completed: "completed",
-  };
-};
+  }
+}
 
 const mediaFileFormatEnumeration = () => {
   return {
@@ -23,16 +23,16 @@ const mediaFileFormatEnumeration = () => {
     tif: ".tif",
     svg: ".svg",
     raw: ".raw",
-  };
-};
+  }
+}
 
 const userTypesEnumeration = () => {
   return {
     photographerOnly: "photographerOnly",
     projectOwner: "projectOwner",
     admin: "admin",
-  };
-};
+  }
+}
 
 const staffTypesEnumeration = () => { 
   return {
@@ -49,10 +49,10 @@ const staffTypesEnumeration = () => {
 
 // const emailRegex = /(?:[a-z0-9!#$%&'*+\x2f=?^_`\x7b-\x7d~\x2d]+(?:\.[a-z0-9!#$%&'*+\x2f=?^_`\x7b-\x7d~\x2d]+)*|"(?:[\x01-\x08\x0b\x0c\x0e-\x1f\x21\x23-\x5b\x5d-\x7f]|\\[\x01-\x09\x0b\x0c\x0e-\x7f])*")@(?:(?:[a-z0-9](?:[a-z0-9\x2d]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9\x2d]*[a-z0-9])?|\[(?:(?:(2(5[0-5]|[0-4][0-9])|1[0-9][0-9]|[1-9]?[0-9]))\.){3}(?:(2(5[0-5]|[0-4][0-9])|1[0-9][0-9]|[1-9]?[0-9])|[a-z0-9\x2d]*[a-z0-9]:(?:[\x01-\x08\x0b\x0c\x0e-\x1f\x21-\x5a\x53-\x7f]|\\[\x01-\x09\x0b\x0c\x0e-\x7f])+)\])/
 const emailRegex = /[a-z0-9!#$%&'*+\/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+\/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?/
-const catalogIDRegex = /^[A-Z]{6}\d{7}$/;
-const clusterIDRegex = /^[\d][A-Z]o{7}\d{7}$/;
-const resolutionRegex = /^\d{1,5}x\d{1,5}$/;
-const passwordRegex = /^(?=.*[a-z])(?=.*[0-9])\S{7,}$/;
+const catalogIDRegex = /^[A-Z]{6}\d{7}$/
+const clusterIDRegex = /^[\d][A-Z]o{7}\d{7}$/
+const resolutionRegex = /^\d{1,5}x\d{1,5}$/
+const passwordRegex = /^(?=.*[a-z])(?=.*[0-9])\S{7,}$/
 export {
   formatDisplayDate,
   projectStatusEnumeration,
@@ -64,4 +64,4 @@ export {
   clusterIDRegex,
   resolutionRegex,
   passwordRegex
-};
+}

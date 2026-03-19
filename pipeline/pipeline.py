@@ -355,7 +355,7 @@ def main():
         w.destroy()
         w = Tk()
         w.geometry("1000x400")
-        w.title("Sucess!")
+        w.title("success!")
         label = ttk.Label(
             w,
             text="The Metatdata is extracted as " + fileName 
