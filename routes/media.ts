@@ -422,7 +422,12 @@ router.get(
         `JOIN ProjectUserPhotographyLink pupl ON pupl.ProjectID = p.ProjectID
         WHERE pupl.PhotographerID = ` + user.UserID
         : allProjectsQueryBase
-    const allProjects = (await db.query(allProjectsQuery))[0]
+    const t = await db.query(allProjectsQuery)
+      .catch((e: any) => {
+        console.error(e)
+        res.status(500).json({ error: e, success: false })
+      })
+    const allProjects = t[0]
     //--------------------------------------------------------------------------------
     const currentMediaQuery =
       `SELECT Media.*,

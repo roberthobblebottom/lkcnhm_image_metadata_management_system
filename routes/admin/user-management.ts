@@ -233,11 +233,11 @@ router.get(
     if (!errors.isEmpty())
       return res.status(400).json({ errors: errors.array() })
 
-    const temp = (await db.query(query, [userID])
+    const temp = await db.query(query, [userID])
       .catch((e: any) => {
         console.error(e)
         res.status(500).json({ error: e, success: false })
-      }))
+      })
     const result = temp[0]
     if (result.length === 0)
       return res.render("admin/edit", {

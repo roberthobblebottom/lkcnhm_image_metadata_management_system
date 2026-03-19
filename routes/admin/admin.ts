@@ -589,11 +589,11 @@ router.post(
   isAdmin,
   async (req: Request, res: Response) => {
     //MEDIA
-    const temp5: any = (await db.query(`SELECT * FROM Media`)
+    const temp5: any = await db.query(`SELECT * FROM Media`)
       .catch((e: any) => {
         console.error(e)
         res.status(500).json({ error: e, success: false })
-      }))
+      })
     const mediaData = temp5[0]
     const mediaData2: Array<Object> = Array.from(mediaData)
     const jsonMediaData2 = JSON.parse(JSON.stringify(mediaData2))
@@ -602,7 +602,7 @@ router.post(
     })
 
     //USER
-    const temp4: any = (
+    const temp4: any = 
       await db.query(`SELECT UserID,Email,UserType,FullName,RegisteredDate,LastLoginDate,
           IsDeleted,ContactNumber,StaffType,Comments,UpdatedDate,UpdatedByID,CreatedByID 
           FROM User`)
@@ -610,18 +610,18 @@ router.post(
           console.error(e)
           res.status(500).json({ error: e, success: false })
         })
-    )
+    
     const userData = temp4[0]
     const userData2: Array<Object> = Array.from(userData)
     const jsonUserData = JSON.parse(JSON.stringify(userData2))
     const userData3 = await fastcsv.writeToBuffer(jsonUserData, { headers: true, })
 
     //PROJECT
-    const temp3: any = (await db.query(`SELECT * FROM Project`)
+    const temp3: any = await db.query(`SELECT * FROM Project`)
       .catch((e: any) => {
         console.error(e)
         res.status(500).json({ error: e, success: false })
-      }))
+      })
     const projectData = temp3[0]
     const projectData2: Array<Object> = Array.from(projectData)
     const jsonProjectData = JSON.parse(JSON.stringify(projectData2))

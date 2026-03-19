@@ -68,12 +68,12 @@ passport.use(
 
       //timeout for every 3 tries, and the amount of timeout accumilates
       if (newPasswordTries % 3 == 0) {
-        const newTimeoutIntervalMinutes =timeoutIntervalMinutes * Math.floor(newPasswordTries / 3)
+        const newTimeoutIntervalMinutes = timeoutIntervalMinutes * Math.floor(newPasswordTries / 3)
         await db.query(`UPDATE User 
                 SET PasswordTries = ?, 
                 PasswordTimeoutTill = (NOW() + INTERVAL ? MINUTE) 
                 WHERE UserID = ?`,
-          [newPasswordTries,newTimeoutIntervalMinutes,user.UserID])
+          [newPasswordTries, newTimeoutIntervalMinutes, user.UserID])
         return cb(null, false, {
           message: "3 invalid passwords entered. Login timeout, please wait for "
             + newTimeoutIntervalMinutes.toString() + " minutes and try again.",
@@ -111,7 +111,12 @@ passport.deserializeUser((user: User, cb: (arg0: null, arg1: any) => any) => {
 })
 
 router.get("/register", async (req: Request, res, Response) => {
-  const isEnabled = (await db.query('SELECT IsEnabled FROM IsUserRegistrationEnabled'))[0][0].IsEnabled
+  const temp = await db.query('SELECT IsEnabled FROM IsUserRegistrationEnabled')
+    .catch((e: any) => {
+      console.error(e)
+      res.status(500).json({ error: e, success: false })
+    })
+  const isEnabled = temp[0][0].IsEnabled
   if (!isEnabled)
     return res.status(400).json({
       success: false,
@@ -129,7 +134,12 @@ router.get("/register", async (req: Request, res, Response) => {
 
 router.post("/register", async (req: Request, res: Response) => {
   const isUserRegistrationEnabledQuery = 'SELECT IsEnabled FROM IsUserRegistrationEnabled'
-  const isUserRegistrationEnabled = (await db.query(isUserRegistrationEnabledQuery))[0][0].IsEnabled
+  const temp1 = await db.query(isUserRegistrationEnabledQuery)
+    .catch((e: any) => {
+      console.error(e)
+      res.status(500).json({ error: e, success: false })
+    })
+  const isUserRegistrationEnabled = temp1[0][0].IsEnabled
   if (!isUserRegistrationEnabled)
     res.status(400).json({ success: false, message: "User Registration is disabled." })
 
@@ -200,7 +210,12 @@ router.post("/register", async (req: Request, res: Response) => {
 
   // does email exist:
   const checkEmailQuery = "SELECT Email FROM User WHERE Email = ? LIMIT 1"
-  const isThereExistingEmail = (await db.query(checkEmailQuery, [email]))[0][0]
+  const temp2 = await db.query(checkEmailQuery, [email])
+    .catch((e: any) => {
+      console.error(e)
+      res.status(500).json({ error: e, success: false })
+    })
+  const isThereExistingEmail = temp2[0][0]
   if (isThereExistingEmail)
     return res.status(400).json({ message: "Email already exist" })
 
@@ -228,6 +243,10 @@ router.post("/register", async (req: Request, res: Response) => {
   ]
 
   await db.query(insertUserQuery, params)
+    .catch((e: any) => {
+      console.error(e)
+      res.status(500).json({ error: e, success: false })
+    })
 
   return res.status(200).json({
     success: true,

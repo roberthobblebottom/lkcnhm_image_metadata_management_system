@@ -322,7 +322,12 @@ router.get(
     for (var x of photographersTemp2)
       photographers[x.ProjectID] = x.photographersNames
 
-    const result = (await db.query(query, [userID]))[0]
+    const temp= await db.query(query, [userID])
+    .catch((e: any) => {
+          console.error(e)
+          res.status(500).json({ error: e, success: false })
+        })
+    const result = temp[0]
     if (result.length === 0)
       return res.render("project/view-all", {
         projects: [],
@@ -646,7 +651,8 @@ router.post(
           "",
           "",
         ]
-        const result = (await db.query(insertUserQuery, params)
+
+        const temp = await db.query(insertUserQuery, params)
           .catch((err: any) => {
             console.error(err)
             const condition = err.toString().toLowerCase().includes("duplicate") &&
@@ -656,7 +662,8 @@ router.post(
               res.status(400).json({ success: false, message: msg })
             } else
               res.status(500).json({ success: false, error: err })
-          }))[0]
+          })
+        const result = temp[0]
         const o: any = result
         const insertedID = Object.values(o)[2].toString() //the weird way of getting insertedId
         newlyCreatedPhotographers.push({
