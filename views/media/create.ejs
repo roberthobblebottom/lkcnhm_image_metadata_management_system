@@ -207,7 +207,7 @@
         //   projectID:-1
         // })
         selectPhotographer.clearChoices(clearOptions = false, clearItems = true)
- 
+
         selectPhotographer.setChoices(photographersToShow)
       })
       form.addEventListener("submit", async (e) => {
@@ -266,7 +266,7 @@
             imageEditingTool: form.imageEditingTool.value == "" ? null : form.imageEditingTool.value,
             comments: form.comments.value,
             // projectAndPhotographerPair: form.projectAndPhotographerPair.value,
- projectID: selectProject.value,
+            projectID: selectProject.value,
             photographerID: form.selectPhotographer.value
           })
 
@@ -321,7 +321,7 @@
           } finally {
             submitBtn.disabled = false;
             submitBtn.value = "Upload"
-            submitBtn.innerHTML = "Upload"
+            submitBtn.innerHTML = originalBtnText
           }
         }
       });

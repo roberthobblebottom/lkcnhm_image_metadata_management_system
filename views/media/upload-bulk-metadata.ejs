@@ -84,7 +84,7 @@
         </a>
 
 
-        <input type="submit" class="btn" id="submitButton" value="Upload" />
+        <button type="submit" class="btn" id="submitButton"><i class="fas fa-paper-plane"></i> Upload</button>
 
         <p class="note"> You may even do bulk editing of metadata of the csv file you have processed in Office Excel or
           other programs.
@@ -99,6 +99,7 @@
       const selectProject = document.getElementById('selectProject');
       const allOptionsRaw = document.getElementById('selectPhotographer').options
       const allOptions = []
+      const originalBtnText = submitBtn.innerHTML;
       for (const o of allOptionsRaw)
         allOptions.push({
           label: o.label,
@@ -124,9 +125,10 @@
         for (x of allOptions)
           if (x.projectID == selectedProjectID)
             photographersToShow.push(x)
-        photographersToShow.push({label:"Do not override, photographerIDs are already in the csv file.",
-          value:-1,
-          projectID:-1
+        photographersToShow.push({
+          label: "Do not override, photographerIDs are already in the csv file.",
+          value: -1,
+          projectID: -1
         })
         selectPhotographer.clearChoices(clearOptions = false, clearItems = true)
         photographersToShow[0]['selected'] = true
@@ -139,13 +141,14 @@
         var data = null
         try {
           const formData = new FormData(form)
-          formData.append("photographerID",form.selectPhotographer.value)
-          formData.append("projectID",form.selectProject.value)
+          formData.append("photographerID", form.selectPhotographer.value)
+          formData.append("projectID", form.selectProject.value)
           console.log(formData)
-          const response = await fetch('/media/upload-bulk-metadata/' , {
+          const response = await fetch('/media/upload-bulk-metadata/', {
             method: 'POST',
             // enctype: "multipart/form-data",
-            body: formData          });
+            body: formData
+          });
           submitBtn.innerHTML = '<i class="fas fa-spinner"></i> Submitting...';
           submitBtn.disabled = true;
           if (!response.ok) {
@@ -203,6 +206,8 @@
         } finally {
           submitBtn.disabled = false;
           submitBtn.innerHTML = "Upload"
+
+          submitBtn.innerHTML = originalBtnText
         }
       });
     });

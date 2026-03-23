@@ -195,7 +195,7 @@
       const allOptionsRaw = document.getElementById('selectPhotographer').options
       const allOptions = []
       const toBeEditedMediaPhotographerName = document.getElementById("toBeEditedMediaFullName")
-      .textContent.trim()
+        .textContent.trim()
       console.log(toBeEditedMediaPhotographerName)
       for (const o of allOptionsRaw) {
         console.log(o.attributes)
@@ -350,6 +350,7 @@
           } finally {
             submitBtn.disabled = false;
             submitBtn.value = "Upload"
+            submitBtn.innerHTML = originalBtnText
           }
         }
       });

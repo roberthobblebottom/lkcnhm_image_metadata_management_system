@@ -13,7 +13,7 @@
   <div class="main-con">
     <div class="horizontal-panel">
       <h2 class="page-title">User Base Management</h2>
-      <a href="/admin/user-management/create/" class="btn">Add User</a>
+      <a href="/admin/user-management/create/" class="btn"><i class="fa-solid fa-user-plus"></i> Add User</a>
     </div>
 
     <% if (users.length===0) { %>
@@ -64,19 +64,23 @@
 
                 <td class="horizontal-panel">
                   <a href="/admin/user-management/view/<%= user.UserID %>" class="btn-view">
-                    <i class="fas fa-view"></i> View
+                    <i class="fa-solid fa-magnifying-glass"></i> View
                   </a>
                   <a href="/admin/user-management/edit/<%= user.UserID %>"
                     class="<%=user.IsDeleted?'disabled':'btn-edit'%>">
+                    <i class="fa-solid fa-pen-to-square"></i>
                     Edit
                   </a>
                   <%if (!user.IsDeleted ){%>
                     <div style="display:inline;">
-                      <button onclick="submit('delete','<%=user.UserID%>')" class="btn-delete">Delete</button>
+                      <button onclick="submit('delete','<%=user.UserID%>')" class="btn-delete">
+                        <i class="fa-solid fa-trash"></i>
+                        Delete</button>
                     </div>
                     <%} else {%>
                       <div style="display:inline;">
-                        <button onclick="submit('restore','<%=user.UserID%>')" class="btn-restore">restore</button>
+                        <button onclick="submit('restore','<%=user.UserID%>')" class="btn-restore"><i
+                            class="fa-solid fa-trash-arrow-up"></i> Restore</button>
                       </div>
                       <%}%>
                 </td>
@@ -89,7 +93,7 @@
 
 
   <script>
-    new DataTable('#userTable', {pageLength: 50,      autoWidth: false })
+    new DataTable('#userTable', { pageLength: 50, autoWidth: false })
 
     function showAlert(message, type) {
       const alertBox = document.createElement('div');
@@ -119,12 +123,12 @@
           try {
             const response = await fetch(`/admin/user-management/${deletedOrRestore}/${userID}`, {
               method: 'POST',
-              headers: {'Content-Type': 'application/json'},
+              headers: { 'Content-Type': 'application/json' },
               body: JSON.stringify({
                 reconfirmPasswordForAdmin: document.getElementById('reconfirmPasswordInput').value
               })
             });
-            window.location.href = response.url; 
+            window.location.href = response.url;
           } catch (error) {
             Swal.close();
             Swal.fire({

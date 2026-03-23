@@ -41,10 +41,8 @@
         <div class="form-group">
           <label for="Password">For changing Password (previous password not shown):</label>
           <input type="password" id="password" name="password" value=""
-          title="Password must be at least 7 characters long and include at least an lowercase letter and a number"
-          
-         pattern="^(?=.*[a-z])(?=.*[0-9])\S{7,}$" 
-          >
+            title="Password must be at least 7 characters long and include at least an lowercase letter and a number"
+            pattern="^(?=.*[a-z])(?=.*[0-9])\S{7,}$">
         </div>
         <div class="form-group">
           <label for="confirmPassword">To confirm changed Password:</label>
@@ -94,7 +92,9 @@
         </div>
 
         <div class="buttons">
-          <button type="submit">Edit User</button>
+          <button type="submit">
+            <i class="fas fa-paper-plane"></i>
+            Edit User</button>
         </div>
       </form>
     </div>
@@ -233,8 +233,7 @@
         } finally {
           submitBtn.disabled = false;
           submitBtn.value = "Upload"
-
-          submitBtn.innerHTML = 'Edit Profile';
+          submitBtn.innerHTML = originalBtnText;
         }
       };
     });

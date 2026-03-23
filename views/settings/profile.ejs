@@ -87,19 +87,19 @@
         submitBtn.innerHTML = '<i class="fas fa-spinner"></i> Submitting...';
         submitBtn.disabled = true;
 
- 
+
         const email = document.getElementById("email").value.trim();
-const emailRegex = /[a-z0-9!#$%&'*+\/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+\/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?/
-  submitBtn.disabled = false;
-          submitBtn.innerHTML = 'Edit Profile';
-      if (!emailRegex.test(email)) {
-        Swal.fire({
-          icon: 'error',
-          title: 'Invalid Email',
-          text: 'Please enter a valid email address. e.g. test@gmail.com'
-        });
-        return;
-      }
+        const emailRegex = /[a-z0-9!#$%&'*+\/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+\/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?/
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = 'Edit Profile';
+        if (!emailRegex.test(email)) {
+          Swal.fire({
+            icon: 'error',
+            title: 'Invalid Email',
+            text: 'Please enter a valid email address. e.g. test@gmail.com'
+          });
+          return;
+        }
         const formData = JSON.stringify({
           userID: form.userID.value,
           email: form.email.value,

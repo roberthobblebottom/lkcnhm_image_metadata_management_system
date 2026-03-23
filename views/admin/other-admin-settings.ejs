@@ -123,7 +123,7 @@
           <div class="form-group">
             <div class="horizontal-panel">
               <h3>Project Types</h3>
-              <button onclick="addValue('projectType')" class="btn-primary btn-create">Create</button>
+              <button onclick="addValue('projectType')" class="btn-primary btn-create"><i class="fa-solid fa-plus"></i> Create</button>
             </div>
             <table id="projectTypesTable">
               <thead>
@@ -142,12 +142,14 @@
                       <div class="horizontal-panel2">
                         <button onclick="editValue(entity = 'projectType',
                  value ='<%=element%>')" class="btn btn-edit">
+                          <i class="fa-solid fa-magnifying-glass"></i>
                           Edit</button>
                         <button onclick="reconfirmPassword(
                     entity='projectType',
                     message='Are you sure you want to delete this enumeration value <%=element%> for project type?<br> The delete of any of these attributes will remove existing table datas\' respective values. ',
                     value= '<%=element%>',
                     enumAction='delete')" class="btn btn-delete">
+                          <i class="fa-solid fa-trash"></i>
                           Delete</button>
                       </div>
                     </td>
@@ -160,7 +162,7 @@
           <div class="form-group">
             <div class="horizontal-panel">
               <h3>Imaging Platforms </h3>
-              <button class="btn-primary btn-create" onclick="addValue('imagingPlatform')">Create</button>
+              <button class="btn-primary btn-create" onclick="addValue('imagingPlatform')"><i class="fa-solid fa-plus"></i> Create</button>
             </div>
             <table id="imagingPlatformsTable">
               <thead>
@@ -179,11 +181,13 @@
                       <div class="horizontal-panel2">
                         <button onclick="editValue(entity='imagingPlatform',
                 value='<%=element%>')" class="btn btn-edit">
+                          <i class="fa-solid fa-magnifying-glass"></i>
                           Edit</button>
                         <button onclick="reconfirmPassword(entity='imagingPlatform',
                     message='Are you sure you want to delete this enumeration value <%=element%> for imaging platform? <br> The delete  of any of these attributes will remove existing table datas\' respective values. ',
                     value='<%=element%>',enumAction='delete')"" 
                     class=" btn btn-delete">
+                          <i class="fa-solid fa-trash"></i>
                           Delete</button>
                       </div>
                     </td>
@@ -196,7 +200,7 @@
           <div class="form-group">
             <div class="horizontal-panel">
               <h3>Image Editing Tools </h3>
-              <button class="btn-primary btn-create" onclick="addValue('imageEditingTool')">Create</button>
+              <button class="btn-primary btn-create" onclick="addValue('imageEditingTool')"><i class="fa-solid fa-plus"></i> Create</button>
             </div>
             <table id="imageEditingToolsTable">
               <thead>
@@ -215,10 +219,12 @@
                       <div class="horizontal-panel2">
                         <button onclick="editValue(entity='imageEditingTool',
                 value='<%=element%>')" class="btn btn-edit">
+                          <i class="fa-solid fa-magnifying-glass"></i>
                           Edit</button>
                         <button onclick="reconfirmPassword(entity='imageEditingTool',
                 message='Are you sure you want to delete this enumeration value <%=element%> for image editing tool?<br>  The delete of any of these attributes will remove existing table datas\' respective values. ',
                 value='<%=element%>',enumAction='delete')" class="btn btn-delete">
+                          <i class="fa-solid fa-trash"></i>
                           Delete</button>
                       </div>
                     </td>
@@ -234,18 +240,18 @@
             <div class="horizontal-panel">
               <button class="btn2 btn-primary" onclick="reconfirmPassword('user',
       'Are you sure you want to PERNAMANTLY purge user data?')" class="btn btn-primary">
-                <i class="fas fa-arrow-down"></i> Purge User Data
+                <i class="fa-regular fa-rectangle-xmark"></i> Purge User Data
               </button>
               <button class="btn2 btn-primary"
                 onclick="reconfirmPassword('project',
         'Are you sure you want to PERNAMANTLY purge project data? WARNING: This will PERNAMENTLY delete image metadatas too.')"
                 class="btn btn-primary">
-                <i class="fas fa-arrow-down"></i> Purge Project Data
+                <i class="fa-regular fa-rectangle-xmark"></i> Purge Project Data
               </button>
               <button class="btn2 btn-primary" onclick="reconfirmPassword('media',
       'Are you sure you want to PERNAMANTLY purge soft deleted media?'
     )" class="btn btn-primary">
-                <i class="fas fa-arrow-down"></i> Purge Media Data
+                <i class="fa-regular fa-rectangle-xmark"></i> Purge Media Data
               </button>
             </div>
           </div>
@@ -258,7 +264,7 @@
         value='',
         enumAction='downloadData'
       )" class="btn btn-primary">
-                <i class="fas fa-arrow-down"></i> Download
+                <i class="fa-solid fa-file-arrow-down"></i> Download
               </button>
             </div>
           </div>
