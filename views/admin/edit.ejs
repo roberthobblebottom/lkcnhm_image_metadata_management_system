@@ -127,7 +127,6 @@
 
       async function submit(form, reconfirmPasswordForAdmin) {
         // Validate form
-        //   const passwordRegex = /^(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{8,}$/;
         const submitBtn = form.querySelector('button[type="submit"]');
         const originalBtnText = submitBtn.innerHTML;
         submitBtn.classList.add('loading');
@@ -139,7 +138,7 @@
         if (!emailRegex.test(email)) {
           submitBtn.disabled = false;
           submitBtn.value = "Upload"
-          submitBtn.innerHTML = 'Edit Profile';
+          submitBtn.innerHTML = originalBtnText;
           Swal.fire({
             icon: 'error',
             title: 'Invalid Email',
@@ -147,15 +146,6 @@
           });
           return;
         }
-        //   if (!passwordRegex.test(password)) {
-        //     Swal.fire({
-        //       title: 'Invalid Password',
-        //       text: 'Password must contain at least 8 characters with one uppercase, one number, and one special character',
-        //       icon: 'error',
-        //       confirmButtonColor: '#00bbff'
-        //     });
-        //     return;
-        //   }
 
         if (form.password.value != form.confirmPassword.value) {
           Swal.fire({

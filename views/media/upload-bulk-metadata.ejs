@@ -99,7 +99,7 @@
       const selectProject = document.getElementById('selectProject');
       const allOptionsRaw = document.getElementById('selectPhotographer').options
       const allOptions = []
-        const submitBtn = document.getElementById('submitButton');
+      const submitBtn = document.getElementById('submitButton');
       const originalBtnText = submitBtn.innerHTML;
       for (const o of allOptionsRaw)
         allOptions.push({
@@ -206,7 +206,6 @@
         } finally {
           submitBtn.disabled = false;
           submitBtn.innerHTML = "Upload"
-
           submitBtn.innerHTML = originalBtnText
         }
       });

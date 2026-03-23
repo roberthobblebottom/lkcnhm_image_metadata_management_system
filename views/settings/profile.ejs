@@ -93,6 +93,9 @@
         submitBtn.disabled = false;
         submitBtn.innerHTML = 'Edit Profile';
         if (!emailRegex.test(email)) {
+          submitBtn.disabled = false;
+          submitBtn.value = "Edit Profile"
+          submitBtn.innerHTML = originalBtnText;
           Swal.fire({
             icon: 'error',
             title: 'Invalid Email',
@@ -159,7 +162,7 @@
         } finally {
           submitBtn.disabled = false;
           submitBtn.value = "Edit Profile"
-          submitBtn.innerHTML = 'Edit Profile';
+          submitBtn.innerHTML = originalBtnText;
         }
       });
   })
