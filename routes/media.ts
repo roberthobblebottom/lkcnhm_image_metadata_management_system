@@ -851,6 +851,7 @@ router.get(
       allProjects,
       title: "Media Form",
       projectPhotographers,
+      imagingPlatforms:req.session.imagingPlatforms
     })
   }
 )
@@ -861,8 +862,10 @@ router.post(
   isAuthenticated,
   async (req: Request, res: Response) => {
     const user = req.session.passport.user
+    const imagingPlatforms = req.session.imagingPlatforms
     const overridingPhotographerID = req.body.photographerID
     const overridingProjectID = req.body.projectID
+    const overridingImagingPlatform = req.body.imagingPlatform
     const newTable: string[][] = []
     var newTableDF: pl.DataFrame = pl.DataFrame()
     var hasErrors = false
@@ -882,7 +885,7 @@ router.post(
       ImageEditingTool: number
       Description: number
       Resolution: number
-      // ImagingPlatform: number
+      ImagingPlatform: number
     }
     const newRowColumns: newRowColumnInterface = {
       MorphoID: 0,
@@ -896,7 +899,7 @@ router.post(
       ImageEditingTool: 8,
       Description: 9,
       Resolution: 10,
-      // ImagingPlatform: 11,
+      ImagingPlatform: 11,
     }
     const absolutePath = path
       .join(__dirname, req.file.path)
@@ -1000,20 +1003,20 @@ router.post(
                 `The media file name '${fileNameToCheck}' must include a valid extension like ` +
                 Object.values(mediaFileFormatEnumeration()) +
                 `or it needs to match FileFormat value in the same row
-                or your FileFormat value is wrong
+                or your File Format value is wrong
                 or there needs to be a file name before the file format\n`
               break
             }
             if (listOfFileNamesFromDB.includes(element)) {
               errorMessage = errorMessage +
-                `There is already an existing entry in the database for the  FileName: '${element}' \n`
+                `There is already an existing entry in the database for the file name: '${element}' \n`
               break
             }
             if (!uniqueFileNames.includes(element))
               uniqueFileNames.push(element)
             else
               errorMessage = errorMessage +
-                `There are duplicate FileName for '${element}' within this csv file.\n`
+                `There are duplicate file name for '${element}' within this csv file.\n`
             break
           case newRowColumns.CatalogID:
             if (!/^[A-Z]{6}\d{7,8}$/.test(element!))
@@ -1025,7 +1028,7 @@ router.post(
           case newRowColumns.ImagingDate:
             if (isNaN(new Date(element!).getTime()!) && element != null)
               errorMessage = errorMessage +
-                `Invalid Imaging Date format. current value: ${element} \n`
+                `Invalid Imaging Date format. current invaliedvalue: ${element} \n`
             break
           case newRowColumns.Resolution:
             if (!/^\d{1,5}x\d{1,5}$/.test(element!) && element != null)
@@ -1038,7 +1041,7 @@ router.post(
             if (isNaN(parseInt(element!)))
               errorMessage = errorMessage +
                 `File size must be in integer, not float or decimal or any other characters. 
-                Current Value: '${element}'\n`
+                Current  invalid value: '${element}'\n`
 
             if (parseInt(element) <= 0)
               errorMessage = errorMessage +
@@ -1055,12 +1058,12 @@ router.post(
             if (isNaN(parseInt(element!))) {
               errorMessage = errorMessage +
                 `Photographer ID must be in integer, not decimal or any other characters. 
-                Current Value: '${element}'\n`
+                Current incorrect value: '${element}'\n`
               break
             }
             if (parseInt(element) <= 0) {
               errorMessage = errorMessage +
-                `PhotographerID must be a positive integer. Current Value: ${element} \n`
+                `PhotographerID must be a positive integer. Current incorrect value: ${element} \n`
               break
             }
             checkProjectPhotographerLink(listOfPhotographerProjectLinks,
@@ -1068,16 +1071,13 @@ router.post(
               parseInt(overridingProjectID), errorMessage)
             break
 
-          // case newRowColumns.ImagingPlatform:
+          case newRowColumns.ImagingPlatform:
           // checks for new Imaging platform to take note
-          // if (
-          //   !req.session.imagingPlatforms.includes(element!) &&
-          //   !newImagingPlatforms.includes(element!) &&
-          //   element != null &&
-          //   element != ""
-          // ) {
-          //   newImagingPlatforms.push(element)
-          // }
+          if (overridingImagingPlatform != "" || overridingImagingPlatform != null)
+            element = overridingImagingPlatform
+          if (!req.session.imagingPlatforms.includes(element!) ) {
+            errorMessage += "ImagingPlatforms should be one of the following values: "+imagingPlatforms+". Current incorrect value is: "+element+"\n"
+          }
           // break
           case newRowColumns.ImageEditingTool:
             // checks for new image editing tools to take note

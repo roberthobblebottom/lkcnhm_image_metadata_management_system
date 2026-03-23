@@ -123,7 +123,7 @@
         if (!emailRegex.test(email)) {
           submitBtn.disabled = false;
           submitBtn.value = "Upload"
-          submitBtn.innerHTML = 'Edit Profile';
+          submitBtn.innerHTML = originalBtnText;
           Swal.fire({
             icon: 'error',
             title: 'Invalid Email',
