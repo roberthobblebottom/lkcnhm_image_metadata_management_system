@@ -106,9 +106,9 @@
         orderable: true,
         render: (data, type, full) => {
           if (selectedMediaIDs.includes(full.MediaID))
-            return '<label id="checkbox_' + full.MediaID + '">☑</label>'
+            return '<label id="checkbox_' + full.MediaID + '" style="font-size:20px">☑</label>'
           else
-            return '<label id="checkbox_' + full.MediaID + '">☐</label>'
+            return '<label id="checkbox_' + full.MediaID + '" style="font-size:20px">☐</label>'
         },
         orderData: [], targets: 0
       },
