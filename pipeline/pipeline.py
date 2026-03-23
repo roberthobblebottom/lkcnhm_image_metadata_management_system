@@ -18,8 +18,6 @@ from PIL.ExifTags import TAGS, GPSTAGS, IFD
 import platform
 logger = logging.getLogger(__name__)
 import os
-# from PIL import ExifTags
-# IFD_CODE_LOOKUP = {i.value: i.name for i in ExifTags.IFD}
 now = datetime.now().isoformat().replace(".", "-").replace(":", "-")
 logging.basicConfig(filename="pipeline-" + now + ".log", level=logging.INFO)
 
@@ -38,8 +36,6 @@ def recursion(
 ):
     _p =path + "\\*" if platform.system() == 'Windows' else path + "/*"
     for file_or_folder_path in glob(_p):
-        # if not isRunning:
-        # return
         if isdir(file_or_folder_path):
             return recursion(
                 file_or_folder_path,
@@ -48,10 +44,10 @@ def recursion(
                 # projectID
                 window_pending,
                 logger,
-    progresStringVar=progresStringVar,
-    finishedCount=finishedCount,
-    totalCount=totalCount,
-    startTimer=startTimer
+                progresStringVar=progresStringVar,
+                finishedCount=finishedCount,
+                totalCount=totalCount,
+                startTimer=startTimer
             )
         if file_or_folder_path.split(".")[-1] not in [
             "tiff",
@@ -74,7 +70,6 @@ def recursion(
         # This line may be the bottleneck in terms of throughput and speed
         exifData = PIL.Image.open(file_or_folder_path).getexif()
         new_row = {}
-        # new_row["ProjectName"] = projectID
         photographerID = None
         new_row["PhotographerID"] = photographerID
         new_row["FilePath"] = file_or_folder_path
@@ -83,20 +78,7 @@ def recursion(
         new_row["FileFormat"] = "." + file_or_folder_path.split(".")[-1]
         fileNameArray = new_row["FileName"].split("_")
         new_row["CatalogID"] = fileNameArray[1]
-        # if not re.search("^[A-Z]{6}\\d{7,8}$", new_row["CatalogID"]):
-        #     raise Exception(
-        #         "CatalogID in the file "
-        #         + new_row["FileName"]
-        #         + " is not in the correct format. Example of a correct format: ZRCBDP0012345. 6 capital letters and then 7 numbers."
-        #     )
         new_row["MorphoID"] = fileNameArray[0]
-        # if len(new_row["MorphoID"]) < 5 or new_row["MorphoID"] is int:
-        #     raise Exception(
-        #         "MorphoID in the file "
-        #         + new_row["FileName"]
-        #         + " may not not in the correct format of a taxon name."
-        #     )
-        # part_with_fileFormat = fileNameArray[-1].split(".")
         new_row["Description"] = (
             fileNameArray[-2] + "   " + fileNameArray[-1].split(".")[0]
             if fileNameArray[-2].lower() != "none"
@@ -133,15 +115,6 @@ def recursion(
                 #         "the file"
                 #         + new_row["FileName"]
                 #         + "has a image width or length value that is not integer. please change it to an integer"
-                #     )
-                # elif tagname == "DateTime":
-                # try:
-                #     datetime.strptime(value, "%Y:%m:%d")
-                # except Valu.info:
-                #     raise Exception(
-                #         "the file"
-                #         + new_row["FileName"]
-                #         + "has a DateTime value that is not in for format of %Y:%m:%d eg: 2005:11:08. please change it."
                 #     )
                 new_row[tagname] = str(value)
 
