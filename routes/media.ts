@@ -754,7 +754,7 @@ router.get("/bulk-edit", isAuthenticated, async (req: Request, res: Response) =>
 
 
 router.post("/bulk-edit", isAuthenticated, async (req: Request, res: Response) => {
-  const mediaIDs = req.body.mediaID
+  const mediaIDs = req.body.mediaIDs
   const columns = ['catalogID',
     'morphoID',
     'clusterID',
