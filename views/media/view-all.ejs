@@ -143,22 +143,20 @@
           var html = `
         <div class="horizontal-panel2">
             <a href="/media/view/${full.MediaID}" class="btn-view"
-            onsubmit="deselectAll()"
-            >
-           <i class="fa-solid fa-magnifying-glass"></i> 
-            View</a>`
+            onclick="deselectAll()"
+            ><i class="fa-solid fa-magnifying-glass"></i> View</a>
+          <a href="/media/edit/${full.MediaID}" class='btn-edit' onclick="deselectAll()" ><i class="fa-solid fa-pen-to-square"></i> Edit</a>
+          `
           return full.IsDeleted
             ? html + `
-          <a href="/media/edit/${full.MediaID}" class='disabled' ><i class="fa-solid fa-pen-to-square"></i> Edit</a>
               <form action="/media/restore/${full.MediaID}" method="POST"
-                onsubmit="return confirm('Are you sure you want to restore this image metadata?');">
+                onsubmit=" return confirm('Are you sure you want to restore this image metadata?');">
                 <button type="submit" class="btn-restore"><i class="fa-solid fa-trash-arrow-up"></i> Restore</button>
               </form>
           </td>`
             : html + `
-          <a href="/media/edit/${full.MediaID}" class='btn-edit' ><i class="fa-solid fa-pen-to-square"></i> Edit</a>
               <form action="/media/delete/${full.MediaID}" method="POST"
-                onsubmit="dt.rows().deselect(); return confirm('Are you sure you want to delete this image metadata?');">
+                onsubmit="return  confirm('Are you sure you want to delete this image metadata?');">
                 <button type="submit" class="btn-delete"><i class="fa-solid fa-trash"></i> Delete</button>
               </form>
           </div>`
@@ -196,7 +194,6 @@
       document.getElementById("editSelected").style.display = 'inline'
       document.getElementById("deselectAll").style.display = 'inline'
     }
-
   }
   dt.on('draw', (e, settings) => {
     for (id of selectedMediaIDs) {
@@ -204,14 +201,10 @@
       if (index > -1) {
         justRendered = true
         dt.row(index).select()
-        // const c = dt.row(index).data()
-        // c['s'] = '☑'
       }
-      // data.select()
     }
     showButtonsIfAnySelectedMediaIDs()
-  }
-  )
+  })
 
   document.addEventListener("DOMContentLoaded", (e) => {
     dt.on('select', (e, dt, type, indexes) => {
@@ -222,7 +215,6 @@
       const n = dt.column(1).data()[parseInt(indexes[indexes.length - 1])]
       selectedMediaIDs.push(n)
       document.getElementById('numberOfSelected').textContent = "Selected Media IDs:" + selectedMediaIDs
-
       const c = dt.row(n).data()
       document.getElementById("checkbox_" + n.toString()).textContent = '☑'
 
