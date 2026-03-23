@@ -55,9 +55,9 @@
           <label>Photographer</label>
           <select id="selectPhotographer">
             <option value="" projectID='-1'>-- Select a photographer--</option>
-            <%projectPhotographers.forEach( pair=>{%>
-              <option value="<%=pair.PhotographerID%>" projectID="<%=pair.ProjectID%>">
-                <%=pair.FullName%>
+            <%photographers.forEach( photographer=>{%>
+              <option value="<%=photographer.PhotographerID%>" projectID="<%=photographer.ProjectID%>">
+                <%=photographer.FullName%>
               </option>
               <%})%>
           </select>

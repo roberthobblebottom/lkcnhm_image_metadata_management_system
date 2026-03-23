@@ -47,11 +47,11 @@
           <label>Photographer*</label>
           <select id="selectPhotographer" required <%=currentUser.UserType=='photographerOnly' ? 'disabled' : '' %>>
             <option value="-1" projectID='-1'>-- Select a photographer--</option>
-            <%projectPhotographers.forEach( pair=>{%>
-              <option value="<%=pair.PhotographerID%>" <%=pair.FullName==toBeEditedMedia.FullName ? 'selected' : "" %>
-                projectID="<%=pair.ProjectID%>"
+            <%photographers.forEach( photographer=>{%>
+              <option value="<%=photographer.PhotographerID%>" <%=photographer.FullName==toBeEditedMedia.FullName ? 'selected' : "" %>
+                projectID="<%=photographer.ProjectID%>"
                   >
-                  <%=pair.FullName%>
+                  <%=photographer.FullName%>
               </option>
               <%})%>
           </select>
