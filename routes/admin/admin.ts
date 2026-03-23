@@ -432,13 +432,15 @@ router.post(
         projectUserPhotographyLinkResults[0]
       )
       const mediasResults = await db.query(
-        `SELECT * FROM MediaWHERE ProjectID = ?`, [temp.ProjectID])
+        `SELECT * FROM Media WHERE ProjectID = ?`, [temp.ProjectID])
         .catch((e: any) => {
           console.error(e)
           res.status(500).json({ error: e, success: false })
         })
       medias = medias.concat(mediasResults[0])
     }
+console.log("DEUBG````````````````````````````````````````````````````````````````````````")
+    console.log(projectData,medias)
     //turning into buffer
     const jsonProjectData = JSON.parse(JSON.stringify(projectData))
     const bufferProjectData = await fastcsv.writeToBuffer(jsonProjectData,
