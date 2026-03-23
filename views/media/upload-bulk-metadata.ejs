@@ -99,6 +99,7 @@
       const selectProject = document.getElementById('selectProject');
       const allOptionsRaw = document.getElementById('selectPhotographer').options
       const allOptions = []
+        const submitBtn = document.getElementById('submitButton');
       const originalBtnText = submitBtn.innerHTML;
       for (const o of allOptionsRaw)
         allOptions.push({
@@ -137,7 +138,6 @@
 
       form.addEventListener('submit', async (e) => {
         e.preventDefault()
-        const submitBtn = document.getElementById('submitButton');
         var data = null
         try {
           const formData = new FormData(form)
