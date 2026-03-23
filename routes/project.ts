@@ -322,11 +322,11 @@ router.get(
     for (var x of photographersTemp2)
       photographers[x.ProjectID] = x.photographersNames
 
-    const temp= await db.query(query, [userID])
-    .catch((e: any) => {
-          console.error(e)
-          res.status(500).json({ error: e, success: false })
-        })
+    const temp = await db.query(query, [userID])
+      .catch((e: any) => {
+        console.error(e)
+        res.status(500).json({ error: e, success: false })
+      })
     const result = temp[0]
     if (result.length === 0)
       return res.render("project/view-all", {
@@ -670,7 +670,7 @@ router.post(
           email: email,
           password: newPassword,
         })
-        for (let x = 0 ;x < newlySelectedPhotographers.length ;x++)
+        for (let x = 0; x < newlySelectedPhotographers.length; x++)
           if (emailRegex.test(newlySelectedPhotographers[x])) {
             newlySelectedPhotographers[x] = insertedID
             break
