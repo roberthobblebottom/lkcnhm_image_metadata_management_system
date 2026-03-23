@@ -4,7 +4,6 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>View User</title>
   <link rel="stylesheet" href="/css/table.css">
   <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
   <link rel="stylesheet" href="https://cdn.datatables.net/2.3.5/css/dataTables.dataTables.css" />
@@ -37,6 +36,15 @@
       margin-top: 20px;
       margin-bottom: 10px;
     }
+
+    h1 {
+      text-align: center;
+      font-size: 1.975rem;
+      color: #212529;
+      font-weight: 700;
+      margin-bottom: 60px;
+    }
+    
 
     /* Form Header */
     h2 {
@@ -97,7 +105,7 @@
     }
 
     .col-md-6 {
-      padding-right: 20px;
+      padding-right: 60px;
     }
 
     .centered-div-for-button {
@@ -112,6 +120,7 @@
 <body>
   <%- include( '../sidenavs/admin' ) %>
     <div class="main-con">
+      <h1> Other Admin Settings</h1>
       <div class="row">
         <div class="col-md-6">
           <div class="detail-row">
@@ -123,7 +132,8 @@
           <div class="form-group">
             <div class="horizontal-panel">
               <h3>Project Types</h3>
-              <button onclick="addValue('projectType')" class="btn-primary btn-create"><i class="fa-solid fa-plus"></i> Create</button>
+              <button onclick="addValue('projectType')" class="btn-primary btn-create"><i class="fa-solid fa-plus"></i>
+                Create</button>
             </div>
             <table id="projectTypesTable">
               <thead>
@@ -162,7 +172,8 @@
           <div class="form-group">
             <div class="horizontal-panel">
               <h3>Imaging Platforms </h3>
-              <button class="btn-primary btn-create" onclick="addValue('imagingPlatform')"><i class="fa-solid fa-plus"></i> Create</button>
+              <button class="btn-primary btn-create" onclick="addValue('imagingPlatform')"><i
+                  class="fa-solid fa-plus"></i> Create</button>
             </div>
             <table id="imagingPlatformsTable">
               <thead>
@@ -200,7 +211,8 @@
           <div class="form-group">
             <div class="horizontal-panel">
               <h3>Image Editing Tools </h3>
-              <button class="btn-primary btn-create" onclick="addValue('imageEditingTool')"><i class="fa-solid fa-plus"></i> Create</button>
+              <button class="btn-primary btn-create" onclick="addValue('imageEditingTool')"><i
+                  class="fa-solid fa-plus"></i> Create</button>
             </div>
             <table id="imageEditingToolsTable">
               <thead>
