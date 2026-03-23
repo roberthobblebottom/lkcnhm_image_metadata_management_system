@@ -816,41 +816,42 @@ router.get(
       user.UserType != userTypesEnumeration().admin
         ? allProjectsQueryBase +
         `JOIN ProjectUserPhotographyLink pupl ON pupl.ProjectID = p.ProjectID
-        WHERE pupl.PhotographerID = ` + user.UserID
-        : allProjectsQueryBase
+        WHERE pupl.PhotographerID = ${user.UserID}
+        AND p.IsDeleted = 0 `
+        : allProjectsQueryBase + "\n WHERE p.IsDeleted = 0"
     const temp1 = await db.query(allProjectsQuery).catch((e: any) => {
       console.error(e)
       res.status(500).json({ error: e, success: false })
     })
     const allProjects = temp1[0]
 
-    const projectPhotographersQuery = `
+    const PhotographersQuery = `
     SELECT pupl.PhotographerID, u.FullName, p.ProjectID, p.ProjectName, p.ProjectOwnerID 
     FROM ProjectUserPhotographyLink pupl 
     JOIN User u ON u.UserID = pupl.PhotographerID
     JOIN Project p on p.ProjectID = pupl.ProjectID
     WHERE u.IsDeleted = 0 
     AND p.IsDeleted = 0`
-    const projectPhotographersQuery2 =
+    const PhotographersQuery2 =
       user.UserType == userTypesEnumeration().photographerOnly
-        ? projectPhotographersQuery +
+        ? PhotographersQuery +
         `\n AND pupl.PhotographerID = ` + user.UserID + `
          \n ORDER BY p.ProjectID `
         : user.UserType == userTypesEnumeration().projectOwner
-          ? projectPhotographersQuery + `\n AND p.ProjectOwnerID= ` + user.UserID
+          ? PhotographersQuery + `\n AND p.ProjectOwnerID= ` + user.UserID
           + `\n ORDER BY p.ProjectID `
-          : projectPhotographersQuery + `\nORDER BY p.ProjectID `
-    const temp2 = await db.query(projectPhotographersQuery2,).catch((e: any) => {
+          : PhotographersQuery + `\nORDER BY p.ProjectID `
+    const temp2 = await db.query(PhotographersQuery2,).catch((e: any) => {
       console.error(e)
       res.status(500).json({ error: e, success: false })
     })
-    const projectPhotographers = temp2[0]
+    const photographers = temp2[0]
 
     res.render("media/upload-bulk-metadata", {
       currentUser: user,
       allProjects,
       title: "Media Form",
-      projectPhotographers,
+       photographers,
       imagingPlatforms:req.session.imagingPlatforms
     })
   }

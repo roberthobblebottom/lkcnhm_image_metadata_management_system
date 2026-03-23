@@ -65,7 +65,7 @@
         <div class="form-group">
           <label>Select Photographer</label>
           <select id="selectPhotographer">
-            <% projectPhotographers.forEach( photographer=> {%>
+            <% photographers.forEach( photographer=> {%>
               <option id="option<%=photographer.PhotographerID%>" value="<%=photographer.PhotographerID%>"
                 ProjectID="<%=photographer.ProjectID%>">
                 <%=photographer.FullName%>
