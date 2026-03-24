@@ -707,12 +707,12 @@ router.get("/bulk-edit", isAuthenticated, async (req: Request, res: Response) =>
   // list projects based on user type,
   // where non admins will only get projects that they photographs or owns.
 
-   const allProjectsQuery =
-      user.UserType != userTypesEnumeration().admin
-        ? allProjectsQueryBase +
-        `JOIN ProjectUserPhotographyLink pupl ON pupl.ProjectID = p.ProjectID
+  const allProjectsQuery =
+    user.UserType != userTypesEnumeration().admin
+      ? allProjectsQueryBase +
+      `JOIN ProjectUserPhotographyLink pupl ON pupl.ProjectID = p.ProjectID
         WHERE pupl.PhotographerID = ` + user.UserID
-        : allProjectsQueryBase
+      : allProjectsQueryBase
   const temp1 = await db.query(allProjectsQuery).catch((e: any) => {
     console.error(e)
     res.status(500).json({ error: e, success: false })
@@ -1083,7 +1083,7 @@ router.post(
             if (!req.session.imagingPlatforms.includes(element!)) {
               errorMessage += "ImagingPlatforms should be one of the following values: " + imagingPlatforms + ". Current incorrect value is: " + element + "\n"
             }
-          // break
+            break
           case newRowColumns.ImageEditingTool:
             // checks for new image editing tools to take note
             if (
