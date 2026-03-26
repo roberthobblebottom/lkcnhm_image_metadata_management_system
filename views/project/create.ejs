@@ -63,7 +63,7 @@
               <div class="horizontal-panel2">
                 <label for="newSelectedPhotographers">Photographer(s)*</label>
                 <% if(isUserRegistrationEnabled){%>
-                  <button class="addButton" id="addPhotographerButton">Register New Photographer</button>
+                  <button class="addButton" id="addPhotographerButton"><i class="fa-solid fa-plus"></i> Register New Photographer</button>
                   <%}%>
               </div>
               <select multiple id="newSelectedPhotographers">
@@ -191,6 +191,7 @@
           id="newPhotographerEmail" 
           placeholder="Enter Photographer's Email"
           style="width:95%;height:25%;font-size:30px;margin-bottom:5px" 
+          autofocus
           required>
         <br>
         <input 
@@ -207,18 +208,13 @@
         showCancelButton: true,
       }).then((result) => {
         const email = document.getElementById('newPhotographerEmail').value
-
-const emailRegex = /[a-z0-9!#$%&'*+\/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+\/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?/
-        console.log(emailRegex.toString())
+        const emailRegex = /[a-z0-9!#$%&'*+\/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+\/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?/
         const fullName = document.getElementById('newPhotographerFullName').value
         if (email && fullName) {
-          console.log('1')
           if (!emailRegex.test(email)) {
-          console.log('2')
             alert("you entered an email with an invalid format")
             return
           }
-          console.log('3')
           newSelectedPhotographers.setChoices([{
             value: email,
             label: fullName,

@@ -70,7 +70,7 @@
                 <label for="newSelectedImagingPlatforms">Photographer(s)*</label>
 
                 <% if(isUserRegistrationEnabled){%>
-                  <button class="addButton" id="addPhotographerButton">Add Photographer</button>
+                  <button class="addButton" id="addPhotographerButton"><i class="fa-solid fa-plus"></i> Register New Photographer</button>
                   <%}%>
               </div>
               <select multiple id="newSelectedPhotographers">
@@ -196,6 +196,7 @@
           id="newPhotographerEmail" 
           placeholder="Enter Photographer's Email"
           style="width:95%;height:25%;font-size:30px;margin-bottom:5px" 
+          autofocus
           required>
         <br>
         <input 

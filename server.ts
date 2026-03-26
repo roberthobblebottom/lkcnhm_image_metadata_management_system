@@ -28,12 +28,12 @@ app.use(
     secret: process.env.SessionSecret,
     resave: false,
     saveUninitialized: false,
-rolling: true, 
-    cookie: { 
+    rolling: true,
+    cookie: {
       // secure: true, 
       httpOnly: true,
-       maxAge: 1000 * 60 * 60 * 6,// 6-hour expiry
-      }, 
+      maxAge: 1000 * 60 * 60 * 6,// 6-hour expiry
+    },
     //
   })
 )
@@ -56,13 +56,13 @@ const serveHTML = (route: any, file: any) => {
 }
 
 app.get("/", (req: Request, res: Response) => {
-  req.session.destroy((err)=>{})
+  req.session.destroy((err) => { })
   // res.render("index", { title: "register" })
   res.redirect("/user/login-landing-page")
 })
 
 app.get("/login", (req: Request, res: Response) => {
-  req.session.destroy((err)=>{})
+  req.session.destroy((err) => { })
   res.render("login", { title: "Login Page" })
 })
 
@@ -83,7 +83,7 @@ app.get("/download-instructions", isAuthenticated, async (req: any, res: Respons
 
 
 // ✅ Start Server
-app.listen(PORT,'0.0.0.0', () => {
+app.listen(PORT, '0.0.0.0', () => {
   console.log(`✅ Server running at http://localhost:${PORT}`)
 })
 
