@@ -147,7 +147,7 @@ INSERT INTO Media (ProjectID,PhotographerID,FileName,FilePath,CatalogID,
 MorphoID,ClusterID,ImagingDate,Resolution,FileSizeBytes,FileFormat,
 Description,ImagingPlatform,ImageEditingTool,
 Comments,CreatedDate,CreatedByID,UpdatedDate,UpdatedByID) VALUES (
-1,1,"photo.png","filepath",'catelogid',"MorphoID","ClusterID",NOW(),
+1,2,"photo.png","filepath",'catelogid',"MorphoID","ClusterID",NOW(),
 "1000x1000",1000,".png","Description",
 "Leica(L5)", "photoshop", 'comments', NOW(),1,NOW(),1);
 

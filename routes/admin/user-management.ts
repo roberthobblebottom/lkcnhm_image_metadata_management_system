@@ -3,14 +3,15 @@ const router = express.Router()
 import crypto from "crypto"
 const db = require('../db')
 import {
+  checkIfParamIsPositiveInteger,
   emailRegex,
   formatDisplayDate,
   staffTypesEnumeration,
   userTypesEnumeration,
 } from "../../middleware/utils"
 import { Response, Request } from "express"
-import { param, validationResult } from "express-validator"
 import path from "path"
+import { check } from "express-validator"
 const fs = require("fs")
 const {
   isAuthenticated,
@@ -183,7 +184,7 @@ router.get(
 //refactored from server.js, not tested and may not be needed
 router.get(
   "/view/:userID",
-  param('userID').isInt({ min: 1 }).withMessage('unknown id'),
+  checkIfParamIsPositiveInteger,
   isAuthenticated,
   isAdmin,
   async (req: Request, res: Response) => {
@@ -196,9 +197,6 @@ router.get(
         FROM User
         WHERE UserID = ? `
 
-    const errors = validationResult(req)
-    if (!errors.isEmpty())
-      return res.status(400).json({ errors: errors.array() })
 
     const temp = await db.query(query, [userID])
       .catch((e: any) => {
@@ -219,7 +217,7 @@ router.get(
 // Render edit user page (support both singular and plural URLs)
 router.get(
   "/edit/:userID",
-  param('userID').isInt({ min: 1 }).withMessage('unknown id'),
+  checkIfParamIsPositiveInteger,
   isAuthenticated,
   isAdmin,
   async (req: Request, res: Response) => {
@@ -229,9 +227,6 @@ router.get(
       ContactNumber,StaffType,Comments,IsDeleted 
       FROM User 
       WHERE UserID = ?`
-    const errors = validationResult(req)
-    if (!errors.isEmpty())
-      return res.status(400).json({ errors: errors.array() })
 
     const temp = await db.query(query, [userID])
       .catch((e: any) => {
@@ -360,9 +355,9 @@ router.post(
           originalEmail,
         ])
         .catch((e: any) => {
-            console.error(e)
-            res.status(500).json({ error: e, success: false })
-          })
+          console.error(e)
+          res.status(500).json({ error: e, success: false })
+        })
       if (result[0].length != 0)
         return res.status(400).json({
           success: false,
@@ -428,15 +423,11 @@ router.post(
 // ✅ Delete User (Soft Delete - Update IsDeleted to 1)
 router.post(
   "/delete/:userID",
-  param('userID').isInt({ min: 1 }).withMessage('unknown id'),
+  checkIfParamIsPositiveInteger,
   isAuthenticated,
   isAdmin,
   reconfirmPasswordFunctionForAdmin,
   async (req: Request, res: Response) => {
-    const errors = validationResult(req)
-    if (!errors.isEmpty()) {
-      return res.status(400).json({ errors: errors.array() })
-    }
     const userID = req.params.userID
     const query = "UPDATE User SET IsDeleted = 1 WHERE UserID = ?"
     await db.query(query, [userID])
@@ -450,15 +441,11 @@ router.post(
 
 router.post(
   "/restore/:userID",
-  param('userID').isInt({ min: 1 }).withMessage('unknown id'),
+  checkIfParamIsPositiveInteger,
   isAuthenticated,
   isAdmin,
   reconfirmPasswordFunctionForAdmin,
   async (req: Request, res: Response) => {
-    const errors = validationResult(req)
-    if (!errors.isEmpty())
-      return res.status(400).json({ errors: errors.array() })
-
     const userID = req.params.userID
     await db.query(
       "UPDATE User SET IsDeleted = 0 WHERE UserID = ?",

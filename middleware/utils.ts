@@ -1,5 +1,6 @@
 // Date formatting helper function (place this BEFORE your route handler)
 
+import { Request, Response, NextFunction } from "express"
 const formatDisplayDate = (date: any) => {
   var d1 = new Date(date)
   const d2 = d1 ? d1.toISOString().split("T")[0] : null
@@ -34,16 +35,15 @@ const userTypesEnumeration = () => {
   }
 }
 
-const staffTypesEnumeration = () => { 
+const staffTypesEnumeration = () => {
   return {
-
     NHMStaff: 'NHM Staff',
     NHMIntern: 'NHM Intern',
     NHMResearchVisitor: 'NHM Research Visitor',
     NUSUndergraduateStudent: 'NUS Undergraduate Student',
     NUSGraduateStudent: 'NUS Graduate Student',
     NonNUSStudent: 'Non-NUS Student',
-    Other:'Other'
+    Other: 'Other'
   }
 }
 
@@ -53,6 +53,16 @@ const catalogIDRegex = /^[A-Z]{6}\d{7}$/
 const clusterIDRegex = /^[\d][A-Z]o{7}\d{7}$/
 const resolutionRegex = /^\d{1,5}x\d{1,5}$/
 const passwordRegex = /^(?=.*[a-z])(?=.*[0-9])\S{7,}$/
+
+function checkIfParamIsPositiveInteger(req: Request, res:Response, next:NextFunction) {
+  const key = Object.keys(req.params)[0]
+  if (!parseInt(req.params[key]))
+    return res.status(400).json({error:key+' is not an integer'})
+  if (parseInt(req.params.mediaID) < 1)
+    return res.status(400).json({error:key+' is not a positive integer'})
+  next()
+}
+
 export {
   formatDisplayDate,
   projectStatusEnumeration,
@@ -63,5 +73,7 @@ export {
   catalogIDRegex,
   clusterIDRegex,
   resolutionRegex,
-  passwordRegex
+  passwordRegex,
+  checkIfParamIsPositiveInteger
+
 }

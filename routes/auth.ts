@@ -15,8 +15,6 @@ import { Response, Request, NextFunction } from "express"
 import { User } from "../@types/types"
 const fs = require("fs")
 import path from 'path'
-import { error } from "console"
-import { header } from "express-validator"
 const { verify } = require('hcaptcha');
 // Your secret key from the hCaptcha dashboard
 async function verify_hcaptcha_token(token: String, remoteip: String = null) {
@@ -170,11 +168,13 @@ router.post("/register", async (req: Request, res: Response) => {
     comments,
     token
   } = req.body
+
   if (!token)
     return res.status(400).json({ success: false, error: 'Missing hCaptcha token' })
   const result = await verify_hcaptcha_token(token)
   if (!result.success)
     res.status(400).json(result)
+
   const missingFields = []
   if (!email) missingFields.push("email")
   if (!password) missingFields.push("password")

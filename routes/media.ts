@@ -2,11 +2,11 @@ const express = require("express")
 const router = express.Router()
 const db = require('./db')
 const { isAuthenticated } = require("../middleware/auth")
-import { param, validationResult } from "express-validator"
 const {
   formatDisplayDate,
   userTypesEnumeration,
   mediaFileFormatEnumeration,
+  checkIfParamIsPositiveInteger
 } = require("../middleware/utils")
 const multer = require("multer")
 import fs from "fs"
@@ -343,15 +343,13 @@ router.post("/view-all-processing", isAuthenticated, async (req: Request, res: R
     data: isSearchTermEmpty ? results[0] : filteredResults[0],
     error: ""
   })
-
 })
 
-router.get("/view/:mediaID", param('mediaID').isInt({ min: 1 }).withMessage("unknown ID"), isAuthenticated, async (req: Request, res: Response) => {
-  const errors = validationResult(req)
-  if (!errors.isEmpty())
-    return res.status(400).json({ errors: errors.array() })
-  const mediaID = req.params.mediaID
-  const query = `
+router.get("/view/:mediaID", isAuthenticated,
+  checkIfParamIsPositiveInteger,
+  async (req: Request, res: Response) => {
+    const mediaID = req.params.mediaID
+    const query = `
     SELECT
         m.*,
         u1.Email AS CreatedByName,
@@ -366,28 +364,24 @@ router.get("/view/:mediaID", param('mediaID').isInt({ min: 1 }).withMessage("unk
     WHERE m.MediaID = ? 
     ORDER BY m.CreatedDate DESC`
 
-  const results = await db.query(query, [mediaID]).catch((e: any) => {
-    console.error(e)
-    res.status(500).json({ error: e, success: false })
+    const results = await db.query(query, [mediaID]).catch((e: any) => {
+      console.error(e)
+      res.status(500).json({ error: e, success: false })
+    })
+    console.log('imageing date', results[0][0].ImagingDate)
+    res.render("media/view", {
+      currentUser: req.session.passport.user,
+      media: results[0][0], // Since we're querying by ID, we'll only get one record
+      mediaID,
+      title: "View Media",
+    })
   })
-  console.log('imageing date', results[0][0].ImagingDate)
-  res.render("media/view", {
-    currentUser: req.session.passport.user,
-    media: results[0][0], // Since we're querying by ID, we'll only get one record
-    mediaID,
-    title: "View Media",
-  })
-})
 
 router.get(
   "/edit/:mediaID",
-  param('mediaID').isInt({ min: 1 }).withMessage('unknown ID'),
   isAuthenticated,
+  checkIfParamIsPositiveInteger,
   async (req: Request, res: Response) => {
-    const errors = validationResult(req)
-    if (!errors.isEmpty())
-      return res.status(400).json({ errors: errors.array() })
-
     const mediaID = req.params.mediaID
     const user = req.session.passport.user
     // const allProjectAndPhotographerPairsQuery = `    Select pupl.ProjectID, photographer.UserID, 
@@ -544,13 +538,9 @@ router.post("/edit", isAuthenticated, async (req: Request, res: Response) => {
 // Soft delete media by setting IsDelete = 1 and redirect
 router.post(
   "/delete/:mediaID",
-  param('mediaID').isInt({ min: 1 }).withMessage('unknown id'),
   isAuthenticated,
+  checkIfParamIsPositiveInteger,
   (req: Request, res: Response) => {
-    const errors = validationResult(req)
-    if (!errors.isEmpty())
-      return res.status(400).json({ errors: errors.array() })
-
     const mediaID = req.params.mediaID
     const userID = req.session.passport.user.UserID
 
@@ -588,13 +578,9 @@ router.post(
 
 router.post(
   "/restore/:mediaID",
-  param('mediaID').isInt({ min: 1 }).withMessage('unknown id'),
+  checkIfParamIsPositiveInteger,
   isAuthenticated,
   (req: Request, res: Response) => {
-    const errors = validationResult(req)
-    if (!errors.isEmpty())
-      return res.status(400).json({ errors: errors.array() })
-
     const mediaID = req.params.mediaID
     const userID = req.session.passport.user.UserID
 

@@ -2,10 +2,9 @@ const express = require("express")
 const router = express.Router()
 const db = require('./db')
 import { Response, Request } from "express"
-import { emailRegex, userTypesEnumeration } from "../middleware/utils"
+import { checkIfParamIsPositiveInteger, emailRegex, userTypesEnumeration } from "../middleware/utils"
 
 import crypto from "crypto"
-import { param, validationResult } from "express-validator"
 const {
   isAuthenticated,
   isAdminOrProjectOwner,
@@ -347,7 +346,7 @@ router.get(
 
 router.get(
   "/view/:projectID",
-  param('projectID').isInt({ min: 1 }).withMessage('unknown id'),
+  checkIfParamIsPositiveInteger,
   isAuthenticated,
   isAdminOrProjectOwner,
   async (req: Request, res: Response) => {
@@ -376,9 +375,7 @@ router.get(
     req.session.newlyCreatedPhotographers = []
     req.session.save()
 
-    const errors = validationResult(req)
-    if (!errors.isEmpty())
-      return res.status(400).json({ errors: errors.array() })
+
     const photographersTemp1: any = (
       await db.query(photographersQuery, [projectID])
         .catch((e: any) => {
@@ -441,14 +438,10 @@ router.get(
 
 router.get(
   "/edit/:projectID",
-  param('projectID').isInt({ min: 1 }).withMessage('unknown id'),
+  checkIfParamIsPositiveInteger,
   isAuthenticated,
   isAdminOrProjectOwner,
   async (req: Request, res: Response) => {
-    const errors = validationResult(req)
-    if (!errors.isEmpty())
-      return res.status(400).json({ errors: errors.array() })
-
     const projectID = req.params.projectID
     const projectAndOwnerQuery = `
             SELECT p.*, projectOwner.FullName, projectOwner.Email            
@@ -872,13 +865,10 @@ router.post(
 // Soft Delete Request (POST)
 router.post(
   "/delete/:projectID",
-  param('projectID').isInt({ min: 1 }).withMessage('unknown id'),
   isAuthenticated,
   isAdminOrProjectOwner,
+  checkIfParamIsPositiveInteger,
   async (req: Request, res: Response) => {
-    const errors = validationResult(req)
-    if (!errors.isEmpty())
-      return res.status(400).json({ errors: errors.array() })
 
     const projectID = req.params.projectID
     const query = `
@@ -902,14 +892,10 @@ router.post(
 //undo soft delete
 router.post(
   "/restore/:projectID",
-  param('projectID').isInt({ min: 1 }).withMessage('unknown id'),
   isAuthenticated,
   isAdminOrProjectOwner,
+  checkIfParamIsPositiveInteger,
   async (req: Request, res: Response) => {
-    const errors = validationResult(req)
-    if (!errors.isEmpty())
-      return res.status(400).json({ errors: errors.array() })
-
     const projectID = req.params.projectID
     const query = `
         UPDATE Project

@@ -145,16 +145,17 @@
             <a href="/media/view/${full.MediaID}" class="btn-view"
             onclick="deselectAll()"
             ><i class="fa-solid fa-magnifying-glass"></i> View</a>
-          <a href="/media/edit/${full.MediaID}" class='btn-edit' onclick="deselectAll()" ><i class="fa-solid fa-pen-to-square"></i> Edit</a>
           `
           return full.IsDeleted
             ? html + `
+          <a  class='disabled' onclick="deselectAll()" ><i class="fa-solid fa-pen-to-square"></i> Edit</a>
               <form action="/media/restore/${full.MediaID}" method="POST"
                 onsubmit=" return confirm('Are you sure you want to restore this image metadata?');">
                 <button type="submit" class="btn-restore"><i class="fa-solid fa-trash-arrow-up"></i> Restore</button>
               </form>
           </td>`
             : html + `
+          <a href="/media/edit/${full.MediaID}" class='btn-edit' onclick="deselectAll()" ><i class="fa-solid fa-pen-to-square"></i> Edit</a>
               <form action="/media/delete/${full.MediaID}" method="POST"
                 onsubmit="return  confirm('Are you sure you want to delete this image metadata?');">
                 <button type="submit" class="btn-delete"><i class="fa-solid fa-trash"></i> Delete</button>
