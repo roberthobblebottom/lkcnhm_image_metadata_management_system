@@ -1,5 +1,6 @@
 import 'express'
 import session from 'express-session'
+import "@hcaptcha/types";
 declare module 'express' {
     interface Request {
         session?: session.Session

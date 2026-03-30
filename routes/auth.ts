@@ -15,7 +15,23 @@ import { Response, Request, NextFunction } from "express"
 import { User } from "../@types/types"
 const fs = require("fs")
 import path from 'path'
-
+import { error } from "console"
+import { header } from "express-validator"
+const { verify } = require('hcaptcha');
+// Your secret key from the hCaptcha dashboard
+async function verify_hcaptcha_token(token: String, remoteip: String = null) {
+  const SECRET_KEY = process.env.HCAPTCHA_SECRET
+  var result = null;
+  await verify(SECRET_KEY, token)
+    .then((data: { success: boolean,credit:boolean, hostname:string,challange_ts:string }) => {
+      result = data.success
+        ? { success: true, message: "Hcaptcha verfication successfull" }
+        : { success: false, message: "Hcaptcha verfication failed" }
+    }
+    )
+    .catch((error) => console.error(error))
+  return result
+}
 passport.use(
   new passportStrategy.Strategy(async function verify(
     username: string,
@@ -142,7 +158,7 @@ router.post("/register", async (req: Request, res: Response) => {
   const isUserRegistrationEnabled = temp1[0][0].IsEnabled
   if (!isUserRegistrationEnabled)
     res.status(400).json({ success: false, message: "User Registration is disabled." })
-
+  
   const {
     email,
     password,
@@ -152,7 +168,13 @@ router.post("/register", async (req: Request, res: Response) => {
     contactNumber,
     staffType,
     comments,
+    token
   } = req.body
+  if (!token)
+    return res.status(400).json({ success: false, error: 'Missing hCaptcha token' })
+  const result = await verify_hcaptcha_token(token)
+  if (!result.success)
+    res.status(400).json(result)
   const missingFields = []
   if (!email) missingFields.push("email")
   if (!password) missingFields.push("password")

@@ -3,6 +3,8 @@
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
 <head>
+  <script src="https://js.hcaptcha.com/1/api.js?onload=onloadHCaptcha&render=explicit" async defer>
+  </script>
   <style>
     .login-container {
       min-height: 1200px
@@ -133,6 +135,7 @@
     </div>
 
     <form id="registerForm">
+      <!-- Your other fields (e.g. email, password) go here -->
       <div class="form-group">
         <label>Email*</label>
         <input type="email" id="email" name="email" required
@@ -142,9 +145,7 @@
         <label>Password*</label>
         <input type="password" id="password" name="password" required
           title="Password must be at least 7 characters long and include at least an lowercase letter and a number"
-          style="padding-right: 40px;"
-         pattern="^(?=.*[a-z])(?=.*[0-9])\S{7,}$" 
-          />
+          style="padding-right: 40px;" pattern="^(?=.*[a-z])(?=.*[0-9])\S{7,}$" />
         <span id="togglePassword" class="togglePassword">
           👁️
         </span>
@@ -196,6 +197,7 @@
         <textarea id="comments"></textarea>
       </div>
 
+      <div id="hcaptcha-container"></div>
 
 
       <button type="submit">Sign Up</button>
@@ -209,76 +211,112 @@
 <p id="message"></p>
 
 <script>
+  let widgetId = null;  // will hold the widget ID assigned by hCaptcha
+
+  function onloadHCaptcha() {
+    // 2. Once SDK is loaded, render invisible hCaptcha widget
+    widgetId = hcaptcha.render('hcaptcha-container', {
+      sitekey: '66d2fcfe-e3ac-423e-92a8-5458d8c4fbbc',
+      size: 'invisible',       // invisible mode
+      callback: onSolve,
+      'error-callback': onError,
+      'expired-callback': onExpired
+    });
+  }
+
+  function onSolve(token, key) {
+    // This function is called after successful solve
+    // `token` is the h-captcha-response value
+    restOfSubmit(token)
+  }
+
+  function onError(err) {
+    console.error('hCaptcha error callback:', err);
+    // log to analytics, restart flow
+  }
+
+  function onExpired() {
+    console.warn('hCaptcha token expired');
+    // make sure to fetch a new token before user submits form
+  }
+  function restOfSubmit(token) {
+    const email = document.getElementById("email").value.trim();
+    const password = document.getElementById("password").value;
+    const messageEl = document.getElementById("message");
+
+    const emailRegex = /[a-z0-9!#$%&'*+\/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+\/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?/
+    if (!emailRegex.test(email)) {
+      Swal.fire({
+        icon: 'error',
+        title: 'Invalid Email',
+        text: 'Please enter a valid email address. e.g. test@gmail.com'
+      });
+      return;
+    }
+
+    if (registerForm.password.value != registerForm.confirmPassword.value) {
+      Swal.fire({
+        icon: 'error',
+        title: 'password confirmation is wrong',
+        text: 'Please enter the same password for comfirmation password input'
+      });
+      return;
+    }
+
+    //no client side password checking for common passwords, it is done only on server side
+
+    messageEl.innerText = "⏳ Processing registration...";
+
+    fetch("/auth/register", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        email: registerForm.email.value,
+        password: registerForm.password.value,
+        confirmPassword: registerForm.confirmPassword.value,
+        userType: registerForm.userType.value,
+        fullName: registerForm.fullName.value,
+        contactNumber: registerForm.contactNumber.value,
+        staffType: registerForm.staffType.value,
+        comments: registerForm.comments.value,
+        token: token
+      })
+    })
+      .then(async res => {
+        if (!res.ok)
+          throw new Error((await res.json()).message);
+        return res.text();
+      })
+      .then(data => {
+        Swal.fire({
+          icon: 'success',
+          title: 'Registration Successful!',
+          text: 'You have been registered successfully.',
+          confirmButtonText: 'OK'
+        }).then(() => window.location.href = "/login");
+        messageEl.innerText = "✅ Registered successfully!";
+      })
+      .catch(err => {
+        Swal.fire({
+          icon: 'error',
+          title: 'Registration Failed',
+          text: err
+        });
+        messageEl.innerText = "";
+        console.error("❌ Registration failed:", err);
+      });
+  }
+
   document.addEventListener("DOMContentLoaded", function () {
     const registerForm = document.getElementById("registerForm");
 
     registerForm.addEventListener("submit", function (e) {
       e.preventDefault();
-      const email = document.getElementById("email").value.trim();
-      const password = document.getElementById("password").value;
-      const messageEl = document.getElementById("message");
-
-      const emailRegex = /[a-z0-9!#$%&'*+\/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+\/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?/
-      if (!emailRegex.test(email)) {
-        Swal.fire({
-          icon: 'error',
-          title: 'Invalid Email',
-          text: 'Please enter a valid email address. e.g. test@gmail.com'
-        });
-        return;
-      }
-
-      if (registerForm.password.value != registerForm.confirmPassword.value) {
-        Swal.fire({
-          icon: 'error',
-          title: 'password confirmation is wrong',
-          text: 'Please enter the same password for comfirmation password input'
-        });
-        return;
-      }
-
-      //no client side password checking for common passwords, it is done only on server side
-      
-      messageEl.innerText = "⏳ Processing registration...";
-
-      fetch("/auth/register", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          email: registerForm.email.value,
-          password: registerForm.password.value,
-          confirmPassword: registerForm.confirmPassword.value,
-          userType: registerForm.userType.value,
-          fullName: registerForm.fullName.value,
-          contactNumber: registerForm.contactNumber.value,
-          staffType: registerForm.staffType.value,
-          comments: registerForm.comments.value,
-        })
-      })
-        .then(async res => {
-          if (!res.ok)
-            throw new Error((await res.json()).message);
-          return res.text();
-        })
-        .then(data => {
-          Swal.fire({
-            icon: 'success',
-            title: 'Registration Successful!',
-            text: 'You have been registered successfully.',
-            confirmButtonText: 'OK'
-          }).then(() => window.location.href = "/login");
-          messageEl.innerText = "✅ Registered successfully!";
-        })
-        .catch(err => {
-          Swal.fire({
-            icon: 'error',
-            title: 'Registration Failed',
-            text: err
-          });
-          messageEl.innerText = "";
-          console.error("❌ Registration failed:", err);
-        });
-    });
+      if (widgetId === null)
+        console.error('Widget not yet initialized')
+      else
+        hcaptcha.execute(widgetId)
+    })
 
     document.getElementById("togglePassword").addEventListener("click", function () {
       const passwordInput = document.getElementById("password");
