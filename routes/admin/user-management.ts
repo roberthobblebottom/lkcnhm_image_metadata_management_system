@@ -11,7 +11,6 @@ import {
 } from "../../middleware/utils"
 import { Response, Request } from "express"
 import path from "path"
-import { check } from "express-validator"
 const fs = require("fs")
 const {
   isAuthenticated,
