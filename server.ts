@@ -23,6 +23,7 @@ app.set("view engine", "ejs") // Set view engine to HTML
 // app.use(cookieParser())
 
 // 🔒 Session setup
+app.set('trust proxy', 1) // trust first proxy
 app.use(
   session({
     secret: process.env.SessionSecret,
