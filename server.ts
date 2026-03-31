@@ -34,18 +34,18 @@ app.use(
     cookie: {
       secure: true, 
       httpOnly: true,
-
-      domain:"https://imaging.biodiversity.sg",
+sameSite:'strict',
+      // domain:"https://imaging.biodiversity.sg",
       // path:"/",
       maxAge: 1000 * 60 * 60 * 6,// 6-hour expiry
     },
     //
   })
 )
+app.use(passport.authenticate('session'))
 app.use(passport.initialize())
 app.use(passport.session())
 
-app.use(passport.authenticate('session'))
 // ✅ API Routes
 app.use("/auth", authRoutes)
 app.use("/admin", adminRoutes)
