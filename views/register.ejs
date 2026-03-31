@@ -220,7 +220,6 @@
 
 <script>
   let widgetId = null;  // will hold the widget ID assigned by hCaptcha
-console.log('<%=process.env.HCAPTCHA_SITEKEY%>')
   function onloadHCaptcha() {
     // 2. Once SDK is loaded, render invisible hCaptcha widget
     widgetId = hcaptcha.render('hcaptcha-container', {
