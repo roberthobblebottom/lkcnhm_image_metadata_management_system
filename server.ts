@@ -32,9 +32,9 @@ app.use(
     cookie: {
       secure: true, 
       // httpOnly: false,
-      // domain:"https://imaging.biodiversity.sg",
+      domain:"https://imaging.biodiversity.sg",
 
-      path:"/",
+      // path:"/",
       maxAge: 1000 * 60 * 60 * 6,// 6-hour expiry
     },
     //
