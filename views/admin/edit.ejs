@@ -28,14 +28,14 @@
           </a>
           <h2>Edit User Details</h2>
         </div>
-        <p class="requirement-of-field">* = required</p>
+        <p class="requirement-of-field">* = cannot be unselected or empty</p>
 
         <div class="form-group">
           <label for="userID">User ID</label>
           <input type="text" id="userID" value="<%=user.UserID%>" readonly>
         </div>
         <div class="form-group">
-          <label for="email">Email </label>
+          <label for="email">Email* </label>
           <input type="text" name="email" id="email" value="<%=user.Email%>" required>
         </div>
         <div class="form-group">
@@ -49,12 +49,23 @@
           <input type="password" id="confirmPassword" name="confirmPassword" value="">
         </div>
         <div class="form-group">
-          <label for="userType">User Type <%=userTypes%></label>
+          <label for="userType">User Type* </label>
           <select name="userType" id="userType" requried>
             <option value="">-- Select a User Type--</option>
             <%userTypes.forEach( u=>{%>
               <option value="<%=u%>" <%=u==user.UserType ? 'selected' : "" %>>
                 <%=u%>
+              </option>
+              <%})%>
+          </select>
+        </div>
+        <div class=" form-group">
+          <label for="staffType">Staff Type* </label>
+          <select name="staffType" id="staffType">
+            <option value="">-- Select a staff type--</option>
+            <%staffTypes.forEach( staffType=>{%>
+              <option value="<%=staffType%>" <%=user.StaffType==staffType?'selected':''%>>
+                <%=staffType%>
               </option>
               <%})%>
           </select>
@@ -71,17 +82,7 @@
           <label for="contactNumber">Contact Number </label>
           <input type="text" id="contactNumber" value="<%=user.ContactNumber%>">
         </div>
-        <div class=" form-group">
-          <label for="staffType">StaffType* </label>
-          <select name="staffType" id="staffType">
-            <option value="">-- Select a staff type--</option>
-            <%staffTypes.forEach( staffType=>{%>
-              <option value="<%=staffType%>" <%=user.StaffType==staffType?'selected':''%>>
-                <%=staffType%>
-              </option>
-              <%})%>
-          </select>
-        </div>
+
         <div class="form-group">
           <label for="comments">Comments </label>
           <textarea id="comments"><%=user.Comments%></textarea>
