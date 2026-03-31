@@ -1,22 +1,19 @@
 require("dotenv").config()
 const express = require("express")
 import { Response, Request } from "express"
-const path = require("path")
 const session = require("express-session")
-const db = require("./routes/db")
 const authRoutes = require("./routes/auth")
 const adminRoutes = require("./routes/admin/admin")
 const mediaRoutes = require("./routes/media")
 const projectRoutes = require("./routes/project")
 const settingsRoutes = require("./routes/settings")
 const adminUserManagementRoutes = require("./routes/admin/user-management")
-const { isAuthenticated, isAdmin } = require("./middleware/auth")
+const { isAuthenticated } = require("./middleware/auth")
 const passport = require("passport")
 const app = express()
 const PORT = process.env.PORT || 3001
 // ✅ Middleware
 app.use(express.static("public"))
-// app.use(express.static(path.join(__dirname,"/public/")))
 app.use(express.json())
 app.use(express.urlencoded({ extended: true }))
 app.set("view engine", "ejs") // Set view engine to HTML
@@ -29,23 +26,23 @@ app.use(
     secret: process.env.SessionSecret,
     name:'sessionId',
     resave: false,
-    saveUninitialized: true,
+    saveUninitialized: false,
     rolling: true,
     cookie: {
-      secure: true, 
+      secure: process.env.NODE_ENV === 'production', 
       httpOnly: true,
 sameSite:'strict',
-      // domain:"https://imaging.biodiversity.sg",
+      // domain:"imaging.biodiversity.sg",
       // path:"/",
       maxAge: 1000 * 60 * 60 * 6,// 6-hour expiry
     },
     //
   })
 )
-app.use(passport.authenticate('session'))
 app.use(passport.initialize())
 app.use(passport.session())
 
+// app.use(passport.authenticate('session'))
 // ✅ API Routes
 app.use("/auth", authRoutes)
 app.use("/admin", adminRoutes)
@@ -55,20 +52,15 @@ app.use("/settings", settingsRoutes)
 app.use("/admin/user-management", adminUserManagementRoutes)
 
 // ✅ Serve HTML pages
-const serveHTML = (route: any, file: any) => {
-  app.get(route, (req: any, res: { sendFile: (arg0: any) => void }) => {
-    res.sendFile(path.resolve(__dirname, "views", file))
-  })
-}
 
 app.get("/", (req: Request, res: Response) => {
-  req.session.destroy((err) => { })
+  req.session.destroy(() => { })
   // res.render("index", { title: "register" })
   res.redirect("/user/login-landing-page")
 })
 
 app.get("/login", (req: Request, res: Response) => {
-  req.session.destroy((err) => { })
+  req.session.destroy(() => { })
   res.render("login", { title: "Login Page" })
 })
 
