@@ -22,6 +22,16 @@ app.set("view engine", "ejs") // Set view engine to HTML
 
 // 🔒 Session setup
 app.set('trust proxy', 1) // trust first proxy
+const cookiesSettings = {
+      secure: process.env.NODE_ENV === 'production', 
+      httpOnly: process.env.NODE_ENV === 'production',
+      sameSite:'strict',
+      path:"/",
+      maxAge: 1000 * 60 * 60 * 6,// 6-hour expiry
+    }
+
+if(process.env.NODE_ENV === "production")
+  cookiesSettings['domain']="imaging.biodiversity.sg"
 app.use(
   session({
     secret: process.env.SessionSecret,
@@ -29,14 +39,7 @@ app.use(
     resave: false,
     saveUninitialized: false,
     rolling: true,
-    cookie: {
-      secure: process.env.NODE_ENV === 'production', 
-      httpOnly: true,
-      sameSite:'strict',
-      // domain:"imaging.biodiversity.sg",
-      path:"/",
-      maxAge: 1000 * 60 * 60 * 6,// 6-hour expiry
-    },
+    cookie: cookiesSettings,
     //
   })
 )
