@@ -13,6 +13,7 @@ const passport = require("passport")
 const app = express()
 const PORT = process.env.PORT || 3001
 // ✅ Middleware
+app.disable('x-powered-by')
 app.use(express.static("public"))
 app.use(express.json())
 app.use(express.urlencoded({ extended: true }))
