@@ -30,8 +30,11 @@ app.use(
     saveUninitialized: false,
     rolling: true,
     cookie: {
-      // secure: true, 
-      httpOnly: true,
+      secure: true, 
+      httpOnly: false,
+      domain:"imaging.biodiversity.sg",
+
+      path:"/",
       maxAge: 1000 * 60 * 60 * 6,// 6-hour expiry
     },
     //
