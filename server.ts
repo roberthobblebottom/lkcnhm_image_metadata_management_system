@@ -10,11 +10,9 @@ const settingsRoutes = require("./routes/settings")
 const adminUserManagementRoutes = require("./routes/admin/user-management")
 const { isAuthenticated } = require("./middleware/auth")
 const passport = require("passport")
-const helmet = require("helmet")
 const app = express()
 const PORT = process.env.PORT || 3001
 // ✅ Middleware
-app.use(helmet())
 app.use(express.static("public"))
 app.use(express.json())
 app.use(express.urlencoded({ extended: true }))
