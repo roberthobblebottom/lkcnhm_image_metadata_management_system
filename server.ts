@@ -26,14 +26,15 @@ app.set("view engine", "ejs") // Set view engine to HTML
 app.use(
   session({
     secret: process.env.SessionSecret,
+    name:'sessionId',
     resave: false,
     saveUninitialized: false,
     rolling: true,
     cookie: {
-      // secure: true, 
+      secure: true, 
       httpOnly: true,
-      // domain:"https://imaging.biodiversity.sg",
 
+      // domain:"https://imaging.biodiversity.sg",
       // path:"/",
       maxAge: 1000 * 60 * 60 * 6,// 6-hour expiry
     },
