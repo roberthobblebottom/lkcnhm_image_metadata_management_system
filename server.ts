@@ -29,10 +29,11 @@ app.use(
     secret: process.env.SessionSecret,
     name:'sessionId',
     resave: false,
-    saveUninitialized: false,
+    saveUninitialized: true,
     rolling: true,
     cookie: {
       secure: true, 
+      httpOnly: true,
 
       domain:"https://imaging.biodiversity.sg",
       // path:"/",
@@ -44,6 +45,7 @@ app.use(
 app.use(passport.initialize())
 app.use(passport.session())
 
+app.use(passport.authenticate('session'))
 // ✅ API Routes
 app.use("/auth", authRoutes)
 app.use("/admin", adminRoutes)
