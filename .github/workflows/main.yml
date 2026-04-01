@@ -9,7 +9,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
 
       - name: Configure SSH for GitHub
         run: |
@@ -17,18 +17,19 @@ jobs:
           echo "${{ secrets.SSH_KEY }}" > ~/.ssh/id_rsa
           chmod 600 ~/.ssh/id_rsa
           ssh-keyscan -H github.com >> ~/.ssh/known_hosts
-          # Test SSH connection to GitHub
-          ssh -T git@github.com
       - name: Deploy
-        uses: appleboy/ssh-action@v0.1.2
-        with:
-          host: ${{secrets.SSH_HOST}}
-          key: ${{secrets.SSH_KEY}}
-          username: ${{secrets.SSH_USERNAME}}
-          passphrase: ${{secrets.SSH_PASSPHRASE}}
-          script: |
-            cd /home/image-metadata-management-system  
-            git pull git@github.com:roberthobblebottom/lkcnhm_image_metadata_management_system.git origin main
-            echo 'Deployment successful to digital ocean'  
-
-            
+        run: |
+          run: |
+            ssh ${{ secrets.SSH_USERNAME }}@${{ secrets.SSH_HOST }} << 'EOF'
+              cd ${{ secrets.APP_DIR }}
+              git pull origin main
+              pm2 reload 0
+            EOF
+          # host: ${{secrets.SSH_HOST}}
+          # key: ${{secrets.SSH_KEY}}
+          # username: ${{secrets.SSH_USERNAME}}
+          # passphrase: ${{secrets.SSH_PASSPHRASE}}
+          # script: |
+          #   cd /home/image-metadata-management-system  
+          #   git pull git@github.com:roberthobblebottom/lkcnhm_image_metadata_management_system.git origin main
+          #   echo 'Deployment successful to digital ocean'   
