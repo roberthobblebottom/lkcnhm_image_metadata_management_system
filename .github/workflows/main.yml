@@ -24,7 +24,7 @@ jobs:
 
       - name: Deploy to image metadata management system
         run: |
-              ssh ${{ secrets.SSH_USERNAME }}@${{ secrets.SSH_HOST }} << 'EOF'
+              ssh -i ~/.ssh/id_rsa -o UserKnownHostsFile=/github/home/.ssh/known_hosts -tt ${{ secrets.SSH_USERNAME }}@${{ secrets.SSH_HOST }} << 'EOF'
               echo "HERE"
               cd ${{ secrets.APP_DIR }}
               git pull origin main
