@@ -19,4 +19,8 @@ jobs:
               echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
               chmod 600 ~/.ssh/id_rsa
               ssh-keyscan -H "${{secrets.SSH_HOST}}" >> ~/.ssh/known_hosts
-              ssh ${{ secrets.SSH_USERNAME }}@${{ secrets.SSH_HOST }} "echo "INSIDE THE SERVER VIA SSH" && cd ${{ secrets.APP_DIR }} && git pull origin main && pm2 reload 0"
+              ssh ${{ secrets.SSH_USERNAME }}@${{ secrets.SSH_HOST }} \\
+              "echo "INSIDE THE SERVER VIA SSH" \\
+              && cd ${{ secrets.APP_DIR }} \\
+              && GIT_SSH_COMMAND='ssh -i ~/.ssh/github_action_git_pull_key -o IdentitiesOnly=yes' git pull git@github.com:roberthobblebottom/lkcnhm_image_metadata_management_system.git \\
+              && pm2 reload 0"
