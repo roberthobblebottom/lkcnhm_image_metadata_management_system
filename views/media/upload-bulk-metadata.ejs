@@ -80,7 +80,7 @@
           <label>Select imaging Platform</label>
           <select id="selectImagingPlatform">
             <% imagingPlatforms.forEach( imagingPlatform=> {%>
-              <option id="option_<%=imagingPlatform%>" value="<%=imagingPlatform%>" >
+              <option id="option_<%=imagingPlatform%>" value="<%=imagingPlatform%>">
                 <%=imagingPlatform%>
               </option>
 
@@ -128,6 +128,11 @@
       for (x of allOptions)
         if (x.projectID == selectedProjectID)
           photographersToShow.push(x)
+      photographersToShow.push({
+        label: "Do not override, photographerIDs are already in the csv file.",
+        value: -1,
+        projectID: -1
+      })
       selectPhotographer.clearChoices(clearOptions = false, clearItems = true)
       photographersToShow[0]['selected'] = true
       selectPhotographer.setChoices(photographersToShow)
@@ -156,7 +161,7 @@
           const formData = new FormData(form)
           formData.append("photographerID", form.selectPhotographer.value)
           formData.append("projectID", form.selectProject.value)
-          formData.append("imagingPlatform",form.selectImagingPlatform.value)
+          formData.append("imagingPlatform", form.selectImagingPlatform.value)
           console.log(formData)
           const response = await fetch('/media/upload-bulk-metadata/', {
             method: 'POST',
