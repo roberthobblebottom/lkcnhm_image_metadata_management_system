@@ -13,7 +13,7 @@ jobs:
 
       - name: Configure SSH for GitHub
         run: |
-          mkdir -p ~/.ssh
+          mkdir -p ~/.ssh && touch ~/.ssh/known_hosts
           echo "${{ secrets.SSH_KEY }}" > ~/.ssh/id_rsa
           chmod 600 ~/.ssh/id_rsa
           ssh-keyscan -H github.com >> ~/.ssh/known_hosts
@@ -21,6 +21,7 @@ jobs:
       - name: Deploy to image metadata management system
         run: |
               ssh ${{ secrets.SSH_USERNAME }}@${{ secrets.SSH_HOST }} << 'EOF'
+              ssh-add - <<< "${{ secrets.SSH_KEY }}"
               echo "HERE"
               cd ${{ secrets.APP_DIR }}
               git pull origin main
