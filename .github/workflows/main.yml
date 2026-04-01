@@ -19,15 +19,12 @@ jobs:
           echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
           chmod 600 ~/.ssh/id_rsa
           ssh-keyscan [hostname] >> ~/.ssh/known_hosts
-          ls ~/.ssh
-      - name: Deploy to image metadata management system
-        run: |
-              ssh -i ~/.ssh/id_rsa -o UserKnownHostsFile=/github/home/.ssh/known_hosts -tt ${{ secrets.SSH_USERNAME }}@${{ secrets.SSH_HOST }} << 'EOF'
-              echo "HERE"
-              cd ${{ secrets.APP_DIR }}
-              git pull origin main
-              pm2 reload 0
-              EOF
+          ssh -i ~/.ssh/id_rsa -o UserKnownHostsFile=/github/home/.ssh/known_hosts -tt ${{ secrets.SSH_USERNAME }}@${{ secrets.SSH_HOST }} << 'EOF'
+          echo "HERE"
+          cd ${{ secrets.APP_DIR }}
+          git pull origin main
+          pm2 reload 0
+          EOF
           # host: ${{secrets.SSH_HOST}}
           # key: ${{secrets.SSH_KEY}}
           # username: ${{secrets.SSH_USERNAME}}
