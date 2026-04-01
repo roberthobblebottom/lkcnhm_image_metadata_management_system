@@ -40,7 +40,7 @@ if(process.env.NODE_ENV === "production")
 app.use(
   session({
     secret: process.env.SessionSecret,
-    store: new RedisStore({client:redisClient,prefix:"image-metadata-management-system-session-storage"}),
+    store: new RedisStore({client:redisClient,prefix:"image-metadata-management-system-session-storage:"}),
     name:'sessionId',
     resave: false,
     saveUninitialized: false,
