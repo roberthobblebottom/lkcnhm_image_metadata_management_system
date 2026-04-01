@@ -15,9 +15,8 @@ jobs:
       - name: Configure SSH for GitHub
         run: |
               eval "\$(ssh-agent -s)"
-          mkdir -p ~/.ssh 
-          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
-          chmod 600 ~/.ssh/id_rsa
-          ssh-keyscan -H "${{secrets.SSH_HOST}}" >> ~/.ssh/known_hosts
-          ssh ${{ secrets.SSH_USERNAME }}@${{ secrets.SSH_HOST }} \\ 
-          "echo "HERE" && cd ${{ secrets.APP_DIR }} && git pull origin main && pm2 reload 0"
+              mkdir -p ~/.ssh 
+              echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
+              chmod 600 ~/.ssh/id_rsa
+              ssh-keyscan -H "${{secrets.SSH_HOST}}" >> ~/.ssh/known_hosts
+              ssh ${{ secrets.SSH_USERNAME }}@${{ secrets.SSH_HOST }} echo "HERE" && cd ${{ secrets.APP_DIR }} && git pull origin main && pm2 reload 0"
