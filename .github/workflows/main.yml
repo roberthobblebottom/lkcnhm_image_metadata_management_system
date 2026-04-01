@@ -19,7 +19,6 @@ jobs:
           ssh-keyscan -H github.com >> ~/.ssh/known_hosts
       - name: Deploy
         run: |
-          run: |
             ssh ${{ secrets.SSH_USERNAME }}@${{ secrets.SSH_HOST }} << 'EOF'
               cd ${{ secrets.APP_DIR }}
               git pull origin main
