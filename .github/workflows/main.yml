@@ -14,8 +14,8 @@ jobs:
       - name: Configure SSH for GitHub
         run: |
           mkdir -p ~/.ssh
-          echo "${{ secrets.SSH_PASSPHRASE }}" > ~/.ssh/id_ed25519
-          chmod 600 ~/.ssh/id_ed25519
+          echo "${{ secrets.SSH_PASSPHRASE }}" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
           ssh-keyscan -H github.com >> ~/.ssh/known_hosts
 
       - name: Deploy to image metadata management system
