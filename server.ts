@@ -1,6 +1,3 @@
-//TEST
-// 
-console.log("TEST")
 require("dotenv").config()
 const express = require("express")
 import { Response, Request } from "express"
@@ -13,6 +10,11 @@ const settingsRoutes = require("./routes/settings")
 const adminUserManagementRoutes = require("./routes/admin/user-management")
 const { isAuthenticated } = require("./middleware/auth")
 const passport = require("passport")
+import {RedisStore}  from 'connect-redis'
+import {createClient} from "redis"
+
+const redisClient = createClient()
+redisClient.connect().catch(console.error)
 const app = express()
 const PORT = process.env.PORT || 3001
 // ✅ Middleware
@@ -38,6 +40,7 @@ if(process.env.NODE_ENV === "production")
 app.use(
   session({
     secret: process.env.SessionSecret,
+    store: new RedisStore({client:redisClient,prefix:"image-metadata-management-system-session-storage"}),
     name:'sessionId',
     resave: false,
     saveUninitialized: false,
