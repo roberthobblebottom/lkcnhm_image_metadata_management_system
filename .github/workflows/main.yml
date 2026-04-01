@@ -14,7 +14,7 @@ jobs:
 
       - name: Configure SSH for GitHub
         run: |
-              eval "\$(ssh-agent -s)"
+              eval "\$(ssh-agent -s)" << "${{secrets.SSH_PASSPHRASE}}"
               mkdir -p ~/.ssh 
               echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
               chmod 600 ~/.ssh/id_rsa
