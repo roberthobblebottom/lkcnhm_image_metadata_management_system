@@ -14,13 +14,12 @@ jobs:
       - name: Configure SSH for GitHub
         run: |
 
-          eval $(ssh-agent) << "$${{ secrets.SSH_PASSPHRASE }}"
+          eval $(ssh-agent) << "${{ secrets.SSH_PASSPHRASE }}"
           mkdir -p ~/.ssh 
           echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
           chmod 600 ~/.ssh/id_rsa
 
           ssh-keyscan [hostname] >> ~/.ssh/known_hosts
-          ssh-add - <<< "${{ secrets.SSH_PRIVATE_KEY }}"
 
       - name: Deploy to image metadata management system
         run: |
