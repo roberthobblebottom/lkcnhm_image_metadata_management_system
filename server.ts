@@ -1,3 +1,4 @@
+console.log("test")
 require("dotenv").config()
 const express = require("express")
 import { Response, Request } from "express"
