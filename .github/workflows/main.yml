@@ -18,7 +18,7 @@ jobs:
           mkdir -p ~/.ssh 
           echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
           chmod 600 ~/.ssh/id_rsa
-          ls ~/.ssh
+          echo "${{ls ~/.ssh}}"
           ssh-keyscan [hostname] >> ~/.ssh/known_hosts
 
       - name: Deploy to image metadata management system
