@@ -1022,7 +1022,7 @@ router.post(
                 `Invalid Imaging Date format. current invaliedvalue: ${element} \n`
             break
           case newRowColumns.Resolution:
-            if (!/^\d{1,5}x\d{1,5}$/.test(element!) && element != null)
+            if (!/^\d{1,5}x\d{1,5}|\d{1,5}X\d{1,5}$/.test(element!) && element != null)
               errorMessage =
                 errorMessage +
                 `Resolution value: '${element}' is not in the correct format. 
