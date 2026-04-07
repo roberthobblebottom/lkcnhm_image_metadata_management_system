@@ -48,7 +48,7 @@ const staffTypesEnumeration = () => {
 }
 
 const emailRegex = /[a-z0-9!#$%&'*+\/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+\/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?/
-const catalogIDRegex = /^zrc(bdp|ent|mis|mol|hym|ara|bdo)\d{7}|$/
+const catalogIDRegex = /^zrc(bdp|ent|mis|mol|hym|ara|bdo)\d{7}$/
 const clusterIDRegex = /^[\d][A-Z]o{7}\d{7}$/
 const resolutionRegex = /^\d{1,5}x\d{1,5}|\d{1,5}X\d{1,5}$/
 const passwordRegex = /^(?=.*[a-z])(?=.*[0-9])\S{7,}$/
