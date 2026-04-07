@@ -15,6 +15,7 @@ const path = require("path")
 const upload = multer({ dest: "upload-bulk-metadata/" })
 
 import pl, { Null } from "nodejs-polars"
+import { catalogIDRegex, resolutionRegex } from "../middleware/utils"
 
 router.get("/create", isAuthenticated, async (req: Request, res: Response) => {
   const user = req.session.passport.user
@@ -1010,7 +1011,7 @@ router.post(
                 `There are duplicate file name for '${element}' within this csv file.\n`
             break
           case newRowColumns.CatalogID:
-            if (!/^[A-Z]{6}\d{7,8}$/.test(element!))
+            if (!catalogIDRegex.test(element.toLowerCase()!))
               errorMessage = errorMessage +
                 `CatalogID '${element!}' is not in the correct format.\
                  Example of a correct format: ZRCBDP0012345. 
@@ -1022,7 +1023,7 @@ router.post(
                 `Invalid Imaging Date format. current invaliedvalue: ${element} \n`
             break
           case newRowColumns.Resolution:
-            if (!/^\d{1,5}x\d{1,5}|\d{1,5}X\d{1,5}$/.test(element!) && element != null)
+            if (!resolutionRegex.test(element!) && element != null)
               errorMessage =
                 errorMessage +
                 `Resolution value: '${element}' is not in the correct format. 
