@@ -77,16 +77,14 @@ def recursion(
         new_row["FileName"] = file_or_folder_path.split(splitter)[-1]
         new_row["FileFormat"] = "." + file_or_folder_path.split(".")[-1]
         fileNameArray = new_row["FileName"].split("_")
+        if len(fileNameArray) > 3:
+            logger.info('the file '+file_or_folder_path+" has more two underscores, please rename the invalid file name if you want to capture this, skipping file.")
+            continue
         new_row["CatalogID"] = fileNameArray[1]
         new_row["MorphoID"] = fileNameArray[0]
-        new_row["Description"] = (
-            fileNameArray[-2] + "   " + fileNameArray[-1].split(".")[0]
-            if fileNameArray[-2].lower() != "none"
-            else fileNameArray[-1].split(".")[0]
-        )
+        new_row["Description"] = fileNameArray[2].split(".")[0]
 
         new_row["FileSizeBytes"] = getsize(file_or_folder_path)
-
         f = [
             "DateTime",
             "Software",
@@ -176,7 +174,9 @@ def recursion(
         logging.info(str(new_row.transpose(include_header=True)))
         output.append(new_row)
         finishedCount += 1
-        progresStringVar.set(progresStringVar.get().split(":")[0]+": "+str(finishedCount)+"/"+str(totalCount) +" \nTime: "+str(timedelta(seconds = timer()-startTimer)))
+        progresStringVar.set(progresStringVar.get().split(":")[0]+": "+str(finishedCount)+"/"+str(totalCount) 
+                            +" \nTime: "
+                            +str(timedelta(seconds = timer()-startTimer)).split(".")[0])
         window_pending.update()
 
 
@@ -212,7 +212,7 @@ def main():
 
     # photographerID = (
     #     config["DEFAULT"]["photographerID"]
-    #     if config["DEFAULT"]["photographerID"]
+    #for     if config["DEFAULT"]["photographerID"]
     #     else ""
     # )
     dir = config["DEFAULT"]["directory"] if config["DEFAULT"]["directory"] else ""
@@ -248,7 +248,9 @@ def main():
             title="Select a folder",
         )
         dirStringVar.set(filename)
-        labelFileOpen.configure(text="folder opened: " + filename)
+        if isinstance(filename,tuple):
+            filename = "None selected"
+        labelFileOpen.configure(text="Folder opened: "+filename )
 
     button_file_select = Button(
         windowPending, text="select folder", command=browseFiles, font=font
@@ -284,6 +286,7 @@ def main():
             font=font,
             wraplength=1500,
             justify="center",
+
         )
         buttonQuit2 = Button(w, text="quit", command=lambda: exit(), font=font)
         label.grid(column=1, row=1)
@@ -305,8 +308,14 @@ def main():
         stop = timer()
         totalTimeTaken = str(timedelta(seconds=stop - start))
         logger.info("estimated time taken " + totalTimeTaken)
-
+        if len(output) ==0:
+            messagebox.showerror("Error","No images of the correct formats can be found, please select another directory")
+            w.destroy()
+            main()
+            return
+            
         df = pl.concat(output)
+
         df =df.with_columns(
             Resolution=when((col("ImageLength") != "") | (col("ImageWidth") != ""))
             .then(pl.concat_str(col("ImageLength"), lit("x"), col("ImageWidth")))
