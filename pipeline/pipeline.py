@@ -325,7 +325,7 @@ def main():
             ImagingDate=col("ImagingDate").str.to_datetime(
                 "%Y:%m:%d", ambiguous="null", strict=False
             ),
-            imagingPlatform=when((col("Make") != "") | (col("Model") != ""))
+            ImagingPlatform=when((col("Make") != "") | (col("Model") != ""))
             .then(pl.concat_str(col("Make"), lit(" "), col("Model")))
             .otherwise(lit("")),
         ).select(pl.exclude("ImageWidth", "ImageLength", "Make", "Model"))
