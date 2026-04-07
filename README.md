@@ -1,5 +1,1 @@
-## Assuming on bash, linux, RUN `sudo pkill -9 node && node server.js`
 
-
-- **2023-05-04 14:00:00** - Rex: Hi,
-05.04.25 delivered to abi by rex for furthur after completing, The registration condition implementation and converting the user request page both admin and user from flask to nodejs and changes made in the Middleware auth, Delete and recover option has been added in the user request page, and created by and updated by also got added and implemented in the database as well as in the website. --> this is just and overview for furthur details ask Rex

@@ -57,7 +57,7 @@ function checkIfParamIsPositiveInteger(req: Request, res:Response, next:NextFunc
   const key = Object.keys(req.params)[0]
   if (!parseInt(req.params[key]))
     return res.status(400).json({error:key+' is not an integer'})
-  if (parseInt(req.params.mediaID) < 1)
+  if (parseInt(req.params[key]) < 1)
     return res.status(400).json({error:key+' is not a positive integer'})
   next()
 }
