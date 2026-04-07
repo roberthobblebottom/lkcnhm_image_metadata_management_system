@@ -1011,11 +1011,14 @@ router.post(
                 `There are duplicate file name for '${element}' within this csv file.\n`
             break
           case newRowColumns.CatalogID:
-            if (!catalogIDRegex.test(element.toLowerCase()!))
+            
+            
+            if (!catalogIDRegex.test(element.toLowerCase()!)){
               errorMessage = errorMessage +
                 `CatalogID '${element!}' is not in the correct format.\
                  Example of a correct format: ZRCBDP0012345. 
                  6 capital letters and then 7 numbers. \n`
+            }
             break
           case newRowColumns.ImagingDate:
             if (isNaN(new Date(element!).getTime()!) && element != null)
