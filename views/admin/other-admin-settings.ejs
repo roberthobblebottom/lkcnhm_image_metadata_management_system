@@ -655,8 +655,10 @@
       submitBtn.innerHTML = '<i class="fas fa-spinner"></i> Submitting...';
       submitBtn.disabled = true;
       if (!response.ok) {
+        console.error(response)
         const errorData = await response.json();
-        throw new Error(errorData.message || "Submission failed with status " + response.status);
+        console.error(errorData)
+        throw new Error(errorData.message +". Submission failed with status " + response.status);
       }
       data = await response.json();
 
