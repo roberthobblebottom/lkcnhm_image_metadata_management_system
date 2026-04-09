@@ -24,6 +24,9 @@ app.use(express.json())
 app.use(express.urlencoded({ extended: true }))
 app.set("view engine", "ejs") // Set view engine to HTML
 // app.use(cookieParser())
+var bodyParser = require('body-parser');
+app.use(bodyParser.json({limit: "50mb"}));
+app.use(bodyParser.urlencoded({limit: "50mb", extended: true, parameterLimit:50000}));
 
 // 🔒 Session setup
 app.set('trust proxy', 1) // trust first proxy
