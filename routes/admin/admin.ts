@@ -7,6 +7,22 @@ const { isAuthenticated, isAdmin, reconfirmPasswordFunctionForAdmin } = require(
 const fastcsv = require("fast-csv")
 import AdmZip from "adm-zip"
 
+const multer = require("multer")
+const path = require("path")
+
+var storage = multer.diskStorage(
+    {
+        destination: './extraction-tool',
+        filename: function (req, file, cb) {
+
+      cb(null, "extraction-tool.zip" );
+
+  }
+        
+    }
+);
+const upload = multer({ storage:storage })
+
 
 router.get(
   "/login-landing-page",
@@ -439,8 +455,8 @@ router.post(
         })
       medias = medias.concat(mediasResults[0])
     }
-console.log("DEUBG````````````````````````````````````````````````````````````````````````")
-    console.log(projectData,medias)
+    console.log("DEUBG````````````````````````````````````````````````````````````````````````")
+    console.log(projectData, medias)
     //turning into buffer
     const jsonProjectData = JSON.parse(JSON.stringify(projectData))
     const bufferProjectData = await fastcsv.writeToBuffer(jsonProjectData,
@@ -547,20 +563,20 @@ router.post(
     for (const id of ids) {
       await Promise.all([
         db.query("UPDATE Media SET CreatedByID = null WHERE CreatedByID = ?",
-            [id]),
+          [id]),
         db.query("UPDATE Media SET UpdatedByID = null WHERE UpdatedByID = ?",
-            [id]),
+          [id]),
         db.query(
-            "UPDATE Project SET ProjectOwnerID = null WHERE ProjectOwnerID = ?",
-            [id]),
+          "UPDATE Project SET ProjectOwnerID = null WHERE ProjectOwnerID = ?",
+          [id]),
         db.query("UPDATE Project SET CreatedByID = null WHERE CreatedByID = ?",
-            [id]),
+          [id]),
         db.query("UPDATE Project SET UpdatedByID = null WHERE UpdatedByID = ?",
-            [id]),
+          [id]),
         db.query("UPDATE User SET CreatedByID = null WHERE CreatedByID = ? ",
-            [id]),
+          [id]),
         db.query("UPDATE User SET UpdatedByID = null WHERE UpdatedByID = ? ",
-            [id])])
+          [id])])
         .catch((e: any) => {
           console.error(e)
           res.status(500).json({ error: e, success: false })
@@ -604,7 +620,7 @@ router.post(
     })
 
     //USER
-    const temp4: any = 
+    const temp4: any =
       await db.query(`SELECT UserID,Email,UserType,FullName,RegisteredDate,LastLoginDate,
           IsDeleted,ContactNumber,StaffType,Comments,UpdatedDate,UpdatedByID,CreatedByID 
           FROM User`)
@@ -612,7 +628,7 @@ router.post(
           console.error(e)
           res.status(500).json({ error: e, success: false })
         })
-    
+
     const userData = temp4[0]
     const userData2: Array<Object> = Array.from(userData)
     const jsonUserData = JSON.parse(JSON.stringify(userData2))
@@ -702,6 +718,16 @@ router.post('/enable-or-disable-user-registration',
         res.status(500).json({ error: e, success: false })
       })
     return res.json({ success: true, message: 'User Registration Is now ' + txt })
+  }
+)
+
+router.post("/upload-extraction-tool",
+  isAdmin, isAuthenticated,
+  upload.single("upload-extraction-tool"),
+  async (req: Request, res: Response) => {
+    return res.status(200).json(
+      { message: 'Sucessfully uploaded' ,success:true}
+    )
   }
 )
 

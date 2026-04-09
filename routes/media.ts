@@ -1171,7 +1171,7 @@ router.get("/download-template", isAuthenticated, async (req: any, res: Response
 })
 
 router.get("/download-pipeline-script", isAuthenticated, (req: Request, res: Response) => {
-  res.download("pipeline.zip")
+  res.download("extraction-tool/extraction-tool.zip")
 })
 
 module.exports = router
