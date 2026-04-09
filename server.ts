@@ -17,18 +17,15 @@ const redisClient = createClient()
 redisClient.connect().catch(console.error)
 const app = express()
 const PORT = process.env.PORT || 3001
-// ✅ Middleware
 app.disable('x-powered-by')
+
+//  Middleware
 app.use(express.static("public"))
-app.use(express.json())
+app.use(express.json({limit: '50mb'}))
 app.use(express.urlencoded({ extended: true }))
 app.set("view engine", "ejs") // Set view engine to HTML
-// app.use(cookieParser())
-var bodyParser = require('body-parser');
-app.use(bodyParser.json({limit: "50mb"}));
-app.use(bodyParser.urlencoded({limit: "50mb", extended: true, parameterLimit:50000}));
 
-// 🔒 Session setup
+// Session setup
 app.set('trust proxy', 1) // trust first proxy
 const cookiesSettings = {
       secure: process.env.NODE_ENV === 'production', 
@@ -56,7 +53,7 @@ app.use(passport.initialize())
 app.use(passport.session())
 
 // app.use(passport.authenticate('session'))
-// ✅ API Routes
+// API Routes
 app.use("/auth", authRoutes)
 app.use("/admin", adminRoutes)
 app.use("/media", mediaRoutes)
@@ -64,11 +61,8 @@ app.use("/project", projectRoutes)
 app.use("/settings", settingsRoutes)
 app.use("/admin/user-management", adminUserManagementRoutes)
 
-// ✅ Serve HTML pages
-
 app.get("/", (req: Request, res: Response) => {
   req.session.destroy(() => { })
-  // res.render("index", { title: "register" })
   res.redirect("/user/login-landing-page")
 })
 
@@ -77,23 +71,20 @@ app.get("/login", (req: Request, res: Response) => {
   res.render("login", { title: "Login Page" })
 })
 
-// ✅ User Dashboard (Protected)
 app.get("/user/login-landing-page", isAuthenticated, (req: Request, res: Response) => {
-
   res.render("user/login-landing-page", {
     user: req.session.passport.user,
     title: "User login landing page",
     currentUser: req.session.passport.user,
   })
 })
+
 app.get("/download-instructions", isAuthenticated, async (req: any, res: Response) => {
   //helps to retrieve metadata template file for downloading.
   const filePath: string = "Instructions.pdf"
   res.download(filePath)
 })
 
-
-// ✅ Start Server
 app.listen(PORT, '0.0.0.0', () => {
   console.log(`✅ Server running at http://localhost:${PORT}`)
 })
