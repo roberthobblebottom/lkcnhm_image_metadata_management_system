@@ -10,9 +10,9 @@ const settingsRoutes = require("./routes/settings")
 const adminUserManagementRoutes = require("./routes/admin/user-management")
 const { isAuthenticated } = require("./middleware/auth")
 const passport = require("passport")
-import {RedisStore}  from 'connect-redis'
-import {createClient} from "redis"
-
+import { RedisStore } from 'connect-redis'
+import { createClient } from "redis"
+const MemoryStore = require('memorystore')(session);
 const redisClient = createClient()
 redisClient.connect().catch(console.error)
 const app = express()
@@ -21,27 +21,31 @@ app.disable('x-powered-by')
 
 //  Middleware
 app.use(express.static("public"))
-app.use(express.json({limit: '50mb'}))
+app.use(express.json({ limit: '50mb' }))
 app.use(express.urlencoded({ extended: true }))
 app.set("view engine", "ejs") // Set view engine to HTML
 
 // Session setup
 app.set('trust proxy', 1) // trust first proxy
 const cookiesSettings = {
-      secure: process.env.NODE_ENV === 'production', 
-      httpOnly: process.env.NODE_ENV === 'production',
-      sameSite:'strict',
-      path:"/",
-      maxAge: 1000 * 60 * 60 * 6,// 6-hour expiry
-    }
+  secure: process.env.NODE_ENV === 'production',
+  httpOnly: process.env.NODE_ENV === 'production',
+  sameSite: 'strict',
+  path: "/",
+  maxAge: 1000 * 60 * 60 * 6,// 6-hour expiry
+}
 
-if(process.env.NODE_ENV === "production")
-  cookiesSettings['domain']="imaging.biodiversity.sg"
+if (process.env.NODE_ENV === "production")
+  cookiesSettings['domain'] = "imaging.biodiversity.sg"
 app.use(
   session({
     secret: process.env.SessionSecret,
-    store: new RedisStore({client:redisClient,prefix:"image-metadata-management-system-session-storage:"}),
-    name:'sessionId',
+    store: process.env.NODE_ENV == "production"
+      ? new RedisStore({ client: redisClient, prefix: "image-metadata-management-system-session-storage:" })
+      : new MemoryStore({
+        checkPeriod: 86400000 // prune expired entries every 24h
+      }),
+    name: 'sessionId',
     resave: false,
     saveUninitialized: false,
     rolling: true,
