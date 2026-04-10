@@ -197,7 +197,8 @@
         e.preventDefault();
         let errorMessages = [];
 
-        const catalogIDRegex = /^[A-Z]{6}\d{7}$/;
+        // const catalogIDRegex = /^[A-Z]{6}\d{7}$/;
+        const catalogIDRegex = /^zrc(bdp|ent)\d{7}$/
         const catalogID = document.getElementById('catalogID').value
         if (!catalogIDRegex.test(catalogID) && catalogID != "") {
           errorMessages.push("catalogID is not in the correct format. Example of a correct format: ZRCBDP0012345. 6 capital letters and then 7 numbers. \n\n");
