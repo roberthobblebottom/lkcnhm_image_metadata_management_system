@@ -41,6 +41,13 @@
           <i class="fas fa-image"></i><span>Image Metadata Management</span>
         </a>
       </li>
+
+           <li id="download-all-projects-data">
+        
+      </li>
+
+
+
       <li>
         <a href="/settings/change-password">
           <i class="fas fa-key"></i><span>Change Password</span>
@@ -70,6 +77,14 @@
           document.getElementById("userID").textContent = `UserID: ${userID}`;
           document.getElementById("projectManagement").hidden =
             userType == 'photographerOnly' ? true : false
+            console.log(userType)
+          document.getElementById("download-all-projects-data").innerHTML = userType == 'projectOwner' 
+          ? `
+          <a href="">
+          <i class="fas fa-arrow-down"></i><span>Download All Projects' data</span>
+        </a>
+          `
+          : ''
         })
 
     });
