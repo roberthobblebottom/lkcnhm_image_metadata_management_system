@@ -223,16 +223,8 @@
         // const catalogIDRegex = /^[A-Z]{6}\d{7}$/;
 
         const catalogIDRegex = /^zrc(bdp|ent)\d{7}$/
-        if (!catalogIDRegex.test(document.getElementById('catalogID').value)) {
+        if (!catalogIDRegex.test(document.getElementById('catalogID').value.toLowerCase())) {
           errorMessages.push("catalogID is not in the correct format. Example of a correct format: ZRCBDP0012345. 6 capital letters and then 7 numbers. \n\n");
-          fileNameInput.style.borderColor = "red";
-        } else {
-          fileNameInput.style.borderColor = "";
-        }
-        const clusterIDRegex = /^[\d][A-Z]{7}\d{7}$/
-        const clusterID = document.getElementById('clusterID').value
-        if (!clusterIDRegex.test(clusterID) && clusterID != "") {
-          errorMessages.push("clusterID is not in the correct format. Example of a correct format:3PZRCBDP1234567, 1 number, 7 capital letters and then 7 numbers. \n\n ");
           fileNameInput.style.borderColor = "red";
         } else {
           fileNameInput.style.borderColor = "";
