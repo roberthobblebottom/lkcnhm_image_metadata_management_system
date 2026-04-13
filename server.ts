@@ -156,6 +156,7 @@ app.get("/download-all-projects-data",
        FROM ImagingPlatformInstance i
        JOIN Project p on i.ProjectID = p.ProjectID
        AND p.IsDeleted = 0
+       AND p.ProjectID in (?)
     `,
       [projectIDs])
       .catch((e: any) => {
