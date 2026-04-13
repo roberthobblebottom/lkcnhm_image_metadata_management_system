@@ -10,7 +10,15 @@
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
   <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
   <script src="https://cdn.datatables.net/2.3.5/js/dataTables.js"></script>
-
+  <style>
+    #non-photographers-only,
+    #actions-cell {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 10px;
+    }
+  </style>
 </head>
 
 <body>
@@ -81,28 +89,31 @@
                         </td>
                         <%}%>
                           <td>
-                            <a href="/project/view/<%= request.ProjectID %>" class="btn-view"><i
-                                class="fa-solid fa-magnifying-glass"></i> View</a>
-                            <div id="non-photographers-only">
-                              <a href="/project/edit/<%= request.ProjectID %>"
-                                class="<%=request.IsDeleted?'disabled':'btn-edit'%>"><i
-                                  class="fa-solid fa-pen-to-square"></i> Edit</a>
+                            <div id="actions-cell">
 
-                              <% if(request.IsDeleted){%>
-                                <form action="/project/restore/<%= request.ProjectID %>" method="POST"
-                                  onsubmit="return confirm('Are you sure you want to restore this project?');"
-                                  style="display:inline;">
-                                  <button type="submit" class="btn-restore"><i class="fa-solid fa-trash-arrow-up"></i>
-                                    Restore</button>
-                                </form>
-                                <%} else {%>
-                                  <form action="/project/delete/<%= request.ProjectID %>" method="POST"
-                                    onsubmit="return confirm('Are you sure you want to delete this project?');"
+                              <a href="/project/view/<%= request.ProjectID %>" class="btn-view"><i
+                                  class="fa-solid fa-magnifying-glass"></i> View</a>
+                              <div id="non-photographers-only">
+                                <a href="/project/edit/<%= request.ProjectID %>"
+                                  class="<%=request.IsDeleted?'disabled':'btn-edit'%>"><i
+                                    class="fa-solid fa-pen-to-square"></i> Edit</a>
+
+                                <% if(request.IsDeleted){%>
+                                  <form action="/project/restore/<%= request.ProjectID %>" method="POST"
+                                    onsubmit="return confirm('Are you sure you want to restore this project?');"
                                     style="display:inline;">
-                                    <button type="submit" class="btn-delete" id="btn-delete">
-                                      <i class="fa-solid fa-trash"></i> Delete</button>
+                                    <button type="submit" class="btn-restore"><i class="fa-solid fa-trash-arrow-up"></i>
+                                      Restore</button>
                                   </form>
-                                  <%}%>
+                                  <%} else {%>
+                                    <form action="/project/delete/<%= request.ProjectID %>" method="POST"
+                                      onsubmit="return confirm('Are you sure you want to delete this project?');"
+                                      style="display:inline;">
+                                      <button type="submit" class="btn-delete" id="btn-delete">
+                                        <i class="fa-solid fa-trash"></i> Delete</button>
+                                    </form>
+                                    <%}%>
+                              </div>
                             </div>
                           </td>
                 </tr>
