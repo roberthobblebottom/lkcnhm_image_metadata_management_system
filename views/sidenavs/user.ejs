@@ -6,6 +6,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="stylesheet" href="/css/navbar.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </head>
 
 <body>
@@ -42,8 +44,13 @@
         </a>
       </li>
 
-           <li id="download-all-projects-data">
-        
+      <li id="download-all-projects-data">
+        <!-- <form id='download-all-projects-data' method="post" action="/download-all-projects-data"></form> -->
+        <!-- <a onclick="document.getElementById('download-all-projects-data').submit()"> -->
+        <button onclick="downloadAllProjectsData()" , class="btn btn-primary">
+
+          <i class="fas fa-arrow-down"></i><span>Download All Projects' data</span>
+        </button>
       </li>
 
 
@@ -62,7 +69,7 @@
 
   </div>
   <script>
-
+    var fullNameGlobal = ""
     document.addEventListener("DOMContentLoaded", function () {
       fetch("/auth/current-user", { cache: 'reload', method: 'GET' })
         .then(res => res.json())
@@ -77,17 +84,43 @@
           document.getElementById("userID").textContent = `UserID: ${userID}`;
           document.getElementById("projectManagement").hidden =
             userType == 'photographerOnly' ? true : false
-            console.log(userType)
-          document.getElementById("download-all-projects-data").innerHTML = userType == 'projectOwner' 
-          ? `
-          <a href="">
-          <i class="fas fa-arrow-down"></i><span>Download All Projects' data</span>
-        </a>
-          `
-          : ''
+          console.log(userType)
+          document.getElementById("download-all-projects-data").hidden =
+            userType == 'projectOwner'
+              ? false
+              : true
+            fullNameGlobal = fullName
         })
 
     });
+
+    async function downloadAllProjectsData() {
+      try {
+        const response = await fetch('/download-all-projects-data',
+          {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+           body: "" 
+          }
+        )
+        const result = await response.json();
+        // pass your byte response to this constructor
+        var bytes = new Uint8Array(result.buffer.data);
+        // change resultByte to bytes
+        var blob = new Blob([bytes], { type: "application/zip" });
+        var link = document.createElement('a');
+        link.href = window.URL.createObjectURL(blob);
+        link.download = "allProjectsDataFor" +fullNameGlobal  + ".zip";
+        link.click();
+      } catch (error) {
+        Swal.fire({
+          title: 'Error!',
+          text: 'An unexpected error occurred',
+          icon: 'error',
+          confirmButtonColor: '#00bbff'
+        });
+      }
+    }
   </script>
 </body>
 

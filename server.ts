@@ -73,7 +73,7 @@ app.use("/admin/user-management", adminUserManagementRoutes)
 
 app.get("/", (req: Request, res: Response) => {
   req.session.destroy(() => { })
-  res.redirect("/user/login-landing-page")
+  res.redirect("/login")
 })
 
 app.get("/login", (req: Request, res: Response) => {
@@ -91,7 +91,10 @@ app.get("/user/login-landing-page", isAuthenticated, (req: Request, res: Respons
 
 
 
-app.get("/download-all-projects-data", isAuthenticated, isProjectOwner, async (req: Request, res: Response) => {
+app.post("/download-all-projects-data",
+   isAuthenticated,
+    isProjectOwner,
+     async (req: Request, res: Response) => {
 
 
 
@@ -100,7 +103,8 @@ app.get("/download-all-projects-data", isAuthenticated, isProjectOwner, async (r
     `SELECT Project.*,projectOwner.FullName FullName,
     GROUP_CONCAT(User.FullName SEPARATOR ",") ALIAS ProjectPhotographersNames,
     GROUP_CONCAT(User.Email SEPARATOR ",") ALIAS ProjectPhotogragraphersEmails ,
-    GROUP_CONCAT(User.StaffType SEPARATOR ",") ALIAS ProjectPhotographersStaffTypes, 
+    GROUP_CONCAT(User.StaffType SEPARATOR ",") ALIAS ProjectPhotographersStaffTypes,
+    GROUP_CONCAT(User.UserType SEPARATOR ",") ALIAS ProjectPhotographerUserTypes,  
     GROUP_BY(ipi.ImagingPlatform SEPARATOR ",") ALIAS ImagingPlatforms FROM Project 
     JOIN ProjectUserPhotographyLink pupl ON pupl.ProjectID = Project.ProjectID 
     JOIN User on User.UserID = pupl.photographerID
@@ -122,9 +126,17 @@ app.get("/download-all-projects-data", isAuthenticated, isProjectOwner, async (r
   const projectData3 = await fastcsv.writeToBuffer(jsonProjectData, {
     headers: true,
   })
+  console.log('project data', projectData)
 
+  // return res.json({message:'testing'})
+  const projectID = null
   //MEDIA
-  const temp5: any = await db.query(`SELECT * FROM Media`)
+  const temp5: any = await db.query(`SELECT Project.ProjectName,User.FullName, Media.* 
+    FROM Media
+    JOIN Project on Media.ProjectID = Project.ProjectID
+    JOIN User on User.UserID = Project.PhotographerID
+    WHERE Project.ProjectID = ?`
+  [projectID])
     .catch((e: any) => {
       console.error(e)
       res.status(500).json({ error: e, success: false })
