@@ -24,7 +24,11 @@
   <div class="main-con">
     <%- currentUser.UserType=='admin' ? include('../sidenavs/admin') : include('../sidenavs/user') %>
       <div class="horizontal-panel">
-        <h2>Project Management</h2>
+        <h2><%if(currentUser.UserType!='admin'){%> 
+          Viewing your projects that you partake 
+          <%} else {%>
+             All Projects
+          <%}%></h2>
         <div id="add-project-for-non-photographers-only">
           <a href="/project/create" class="btn"><i class="fa-solid fa-plus"></i> Add Project</a>
         </div>

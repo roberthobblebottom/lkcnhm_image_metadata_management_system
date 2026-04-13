@@ -283,7 +283,7 @@ router.get(
         LEFT JOIN User ub ON p.UpdatedByID = ub.UserID
         ORDER BY p.CreatedDate DESC `
     const queryForProjectOwner = ` 
-    SELECT 
+    SELECT DISTINCT 
             p.*,
             projectOwner.FullName AS projectOwnerName,
             projectOwner.Email,
@@ -292,13 +292,17 @@ router.get(
         FROM Project p
         LEFT JOIN User projectOwner ON p.ProjectOwnerID = projectOwner.UserID
         LEFT JOIN User cb ON p.CreatedByID = cb.UserID
+
+
         LEFT JOIN User ub ON p.UpdatedByID = ub.UserID
+        JOIN  ProjectUserPhotographyLink pupl ON p.ProjectID = pupl.ProjectID
+        
         WHERE p.IsDeleted = 0
-        AND p.ProjectOwnerID = ?
+        AND (pupl.PhotographerID = ? 
+        OR p.ProjectOwnerID = ?)
         ORDER BY p.CreatedDate DESC  
         `
-    const queryForPhotographerViewing = 
-    `
+    const queryForPhotographerViewing =      `
     SELECT 
             p.*,
             projectOwner.FullName AS projectOwnerName,
@@ -323,15 +327,17 @@ router.get(
     ORDER BY pupl.ProjectID    `
 
     const user = req.session.passport.user
-    const query = user.UserType == userTypesEnumeration().admin 
-    ? queryForAdmin 
-    : (user.UserType == userTypesEnumeration().projectOwner 
-      ? queryForProjectOwner 
-      : queryForPhotographerViewing)
+    const mainQuery = user.UserType == userTypesEnumeration().admin
+      ? queryForAdmin
+      : (user.UserType == userTypesEnumeration().projectOwner
+        ? queryForProjectOwner
+        : queryForPhotographerViewing)
     const userID = user.UserType != "admin" ? [user.UserID] : []
 
     const photographersTemp1: any = (
-      await db.query(queryForPhotographersInTheRespectiveProjects, [user.UserID])
+      await db.query(queryForPhotographersInTheRespectiveProjects,
+        [user.UserID]
+      )
         .catch((e: any) => {
           console.error(e)
           res.status(500).json({ error: e, success: false })
@@ -342,13 +348,17 @@ router.get(
     for (var x of photographersTemp2)
       photographers[x.ProjectID] = x.photographersNames
 
-    const temp = await db.query(query, [userID])
+    const tempProjects = await db.query(mainQuery,
+      user.UserType == userTypesEnumeration().projectOwner ?
+        [user.UserID, user.UserID] : [user.UserID]
+
+    )
       .catch((e: any) => {
         console.error(e)
         res.status(500).json({ error: e, success: false })
       })
-    const result = temp[0]
-    if (result.length === 0)
+    const projects = tempProjects[0]
+    if (projects.length === 0)
       return res.render("project/view-all", {
         projects: [],
         message: "No projects found",
@@ -356,7 +366,7 @@ router.get(
       })
 
     res.render("project/view-all", {
-      projects: result,
+      projects: projects,
       currentUser: user,
       photographers: photographers,
       title: "Projects Dashboard", // Add title here
