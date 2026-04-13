@@ -72,12 +72,10 @@
           body: JSON.stringify({ username: userEmail, password: userPassword })
           // Do not change username to email, it doesn't work
         });
-        console.log(response)
         // if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
 
 
         const data = await response.json();
-        console.log(data)
         if (data.success)
           window.location.href = data.redirect;
         else if (data.error)

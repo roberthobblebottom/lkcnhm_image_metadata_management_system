@@ -444,7 +444,6 @@ router.get(
           ? imagingPlatforms.toString().replace(",", ", ")
           : "Not Specified",
     }
-    console.log('results', results)
     res.render("project/view", {
       project: project,
       currentUser: req.session.passport.user,
@@ -701,14 +700,12 @@ router.post(
     //     i != "" &&
     //     !req.session["imagingPlatforms"].includes(i)
     //   ) {
-    //     console.log("adding ", i)
     //     req.session["imagingPlatforms"].push(i)
     //     hasNewImagingPlatform = true
     //   }
     // }
     // if (hasNewImagingPlatform) {
     //   const i2: string[] = req.session.imagingPlatforms
-    //   console.log(i2)
     //   await db
     //     
     //     .query("ALTER TABLE Media MODIFY COLUMN `ImagingPlatform` enum(?)", [
@@ -732,7 +729,6 @@ router.post(
     //   req.session["projectTypes"].push(projectType)
 
     // const i3: string[] = req.session.projectTypes
-    // console.log(i3)
     // await db
     //   
     //   .query("ALTER TABLE Project MODIFY COLUMN `ProjectType` enum(?)", [i3])

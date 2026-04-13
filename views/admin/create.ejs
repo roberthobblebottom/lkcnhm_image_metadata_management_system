@@ -118,7 +118,6 @@
         submitBtn.innerHTML = '<i class="fas fa-spinner"></i> Submitting...';
         submitBtn.disabled = true;
 
-        console.log(document.getElementById("email"))
         const email = document.getElementById("email").value.trim();
         const emailRegex = /[a-z0-9!#$%&'*+\/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+\/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?/
         if (!emailRegex.test(email)) {
@@ -173,7 +172,6 @@
           });
 
           // Send AJAX request
-          console.log(params)
           const response = await fetch('/admin/user-management/create/', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },

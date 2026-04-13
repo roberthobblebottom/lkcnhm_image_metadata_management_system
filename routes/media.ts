@@ -369,7 +369,6 @@ router.get("/view/:mediaID", isAuthenticated,
       console.error(e)
       res.status(500).json({ error: e, success: false })
     })
-    console.log('imageing date', results[0][0].ImagingDate)
     res.render("media/view", {
       currentUser: req.session.passport.user,
       media: results[0][0], // Since we're querying by ID, we'll only get one record
@@ -442,7 +441,6 @@ router.get(
       res.status(500).json({ error: e, success: false })
     })
     const toBeEditedMedia = temp1[0][0]
-    console.log(toBeEditedMedia)
     //--------------------------------------------------------------------------------
     const photographersQuery = `
     SELECT pupl.PhotographerID, u.FullName, p.ProjectID, p.ProjectName, p.ProjectOwnerID 

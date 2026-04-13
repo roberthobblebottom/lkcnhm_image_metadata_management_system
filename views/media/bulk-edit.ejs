@@ -166,7 +166,6 @@
       const allOptionsRaw = document.getElementById('selectPhotographer').options
       const allOptions = []
       for (const o of allOptionsRaw) {
-        console.log(o.attributes)
         allOptions.push({
           label: o.label,
           value: o.value,
@@ -246,7 +245,6 @@
                 mediaIDs: '<%=mediaIDs%>'
               })
 
-              console.log(formData)
               const submitBtn = form.querySelector('button[type="submit"]');
               const originalBtnText = submitBtn.innerHTML;
               submitBtn.classList.add('loading');

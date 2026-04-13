@@ -455,8 +455,6 @@ router.post(
         })
       medias = medias.concat(mediasResults[0])
     }
-    console.log("DEUBG````````````````````````````````````````````````````````````````````````")
-    console.log(projectData, medias)
     //turning into buffer
     const jsonProjectData = JSON.parse(JSON.stringify(projectData))
     const bufferProjectData = await fastcsv.writeToBuffer(jsonProjectData,

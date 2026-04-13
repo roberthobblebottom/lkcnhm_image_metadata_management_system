@@ -124,8 +124,6 @@ app.get("/download-all-projects-data",
       const x1: any = x
       projectIDs.push(x1.ProjectID)
     }
-    console.log("Project: ",projectData2)
-    console.log(projectIDs)
     const temp4: any = await db.query(
          `
        SELECT p.ProjectName,p.ProjectID,u.FullName,u.UserID, u.UserType, u.StaffType 
@@ -147,7 +145,6 @@ app.get("/download-all-projects-data",
     const photographersData3 = await fastcsv.writeToBuffer(jsonPhotographersData, {
       headers: true,
     })
-    console.log("photographers",photographersData2)
     
     // ImagingPlatformsInstances
     const temp5: any = await db.query(
@@ -169,7 +166,6 @@ app.get("/download-all-projects-data",
     const imagingPlatformsData3 = await fastcsv.writeToBuffer(jsonimagingPlatformsData, {
       headers: true,
     })
-    console.log("Imaging Platforms",imagingPlatformsData2)
 
     //MEDIA
     const temp6: any = await db.query(`SELECT p.ProjectName,User.FullName, m.* 

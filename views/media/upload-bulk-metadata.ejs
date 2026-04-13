@@ -162,7 +162,6 @@
           formData.append("photographerID", form.selectPhotographer.value)
           formData.append("projectID", form.selectProject.value)
           formData.append("imagingPlatform", form.selectImagingPlatform.value)
-          console.log(formData)
           const response = await fetch('/media/upload-bulk-metadata/', {
             method: 'POST',
             // enctype: "multipart/form-data",
