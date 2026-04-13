@@ -13,7 +13,7 @@ const passport = require("passport")
 import { RedisStore } from 'connect-redis'
 import { createClient } from "redis"
 import { isProjectOwner } from "./middleware/auth"
-import { db } from "./routes/db"
+const  db =require( "./routes/db")
 const MemoryStore = require('memorystore')(session);
 const fastcsv = require("fast-csv")
 import AdmZip from "adm-zip"
@@ -91,81 +91,116 @@ app.get("/user/login-landing-page", isAuthenticated, (req: Request, res: Respons
 
 
 
-app.post("/download-all-projects-data",
-   isAuthenticated,
-    isProjectOwner,
-     async (req: Request, res: Response) => {
-
-
-
-  //PROJECT
-  const temp3: any = await db.query(
-    `SELECT Project.*,projectOwner.FullName FullName,
-    GROUP_CONCAT(User.FullName SEPARATOR ",") ALIAS ProjectPhotographersNames,
-    GROUP_CONCAT(User.Email SEPARATOR ",") ALIAS ProjectPhotogragraphersEmails ,
-    GROUP_CONCAT(User.StaffType SEPARATOR ",") ALIAS ProjectPhotographersStaffTypes,
-    GROUP_CONCAT(User.UserType SEPARATOR ",") ALIAS ProjectPhotographerUserTypes,  
-    GROUP_BY(ipi.ImagingPlatform SEPARATOR ",") ALIAS ImagingPlatforms FROM Project 
-    JOIN ProjectUserPhotographyLink pupl ON pupl.ProjectID = Project.ProjectID 
-    JOIN User on User.UserID = pupl.photographerID
-    JOIN ImagingPlatformInstance ipi on ipi.ProjectID = Project.ProjectID
-    JOIN projectOwner on projectOwner.UserID = Project.ProjectOwnerID
-    WHERE Project.ProjectOwnerID = ? 
-    AND Project.IsDeleted = 0
-    AND User.IsDeleted = 0
-    GROUP BY Project.ProjectID 
+app.get("/download-all-projects-data",
+  isAuthenticated,
+  isProjectOwner,
+  async (req: Request, res: Response) => {
+    //PROJECT
+    const temp3: any = await db.query(
+         `
+         SELECT projectOwner.FullName FullName, p.*
+    FROM Project p
+    JOIN User projectOwner on projectOwner.UserID = p.ProjectOwnerID
+    WHERE p.ProjectOwnerID = ? 
+    AND p.IsDeleted = 0
+    GROUP BY p.ProjectID;
     `,
-    [req.session.passport.user.userID])
-    .catch((e: any) => {
-      console.error(e)
-      res.status(500).json({ error: e, success: false })
+      [req.session.passport.user.UserID])
+      .catch((e: any) => {
+        console.error(e)
+        res.status(500).json({ error: e, success: false })
+      })
+    const projectData = temp3[0]
+    const projectData2: Array<Object> = Array.from(projectData)
+    const jsonProjectData = JSON.parse(JSON.stringify(projectData2))
+    const projectData3 = await fastcsv.writeToBuffer(jsonProjectData, {
+      headers: true,
     })
-  const projectData = temp3[0]
-  const projectData2: Array<Object> = Array.from(projectData)
-  const jsonProjectData = JSON.parse(JSON.stringify(projectData2))
-  const projectData3 = await fastcsv.writeToBuffer(jsonProjectData, {
-    headers: true,
-  })
-  console.log('project data', projectData)
+    const projectIDs =  []
 
-  // return res.json({message:'testing'})
-  const projectID = null
-  //MEDIA
-  const temp5: any = await db.query(`SELECT Project.ProjectName,User.FullName, Media.* 
-    FROM Media
-    JOIN Project on Media.ProjectID = Project.ProjectID
-    JOIN User on User.UserID = Project.PhotographerID
-    WHERE Project.ProjectID = ?`
-  [projectID])
-    .catch((e: any) => {
-      console.error(e)
-      res.status(500).json({ error: e, success: false })
+
+    // photographers
+    for (const x of projectData2){
+      const x1: any = x
+      projectIDs.push(x1.ProjectID)
+    }
+    console.log("Project: ",projectData2)
+    console.log(projectIDs)
+    const temp4: any = await db.query(
+         `
+       SELECT p.ProjectName,p.ProjectID,u.FullName,u.UserID, u.UserType, u.StaffType 
+       FROM ProjectUserPhotographyLink pupl
+       JOIN User u ON pupl.PhotographerID = u.UserID
+       JOIN Project p on pupl.ProjectID = p.ProjectID
+       WHERE p.ProjectID IN (?)
+       AND p.IsDeleted = 0
+       AND u.IsDeleted = 0
+    `,
+      [projectIDs])
+      .catch((e: any) => {
+        console.error(e)
+        res.status(500).json({ error: e, success: false })
+      })
+    const photographersData = temp4[0]
+    const photographersData2: Array<Object> = Array.from(photographersData)
+    const jsonPhotographersData = JSON.parse(JSON.stringify(photographersData2))
+    const photographersData3 = await fastcsv.writeToBuffer(jsonPhotographersData, {
+      headers: true,
     })
-  const mediaData = temp5[0]
-  const mediaData2: Array<Object> = Array.from(mediaData)
-  const jsonMediaData2 = JSON.parse(JSON.stringify(mediaData2))
-  const mediaData3 = await fastcsv.writeToBuffer(jsonMediaData2, {
-    headers: true,
+    console.log("photographers",photographersData2)
+    
+    // ImagingPlatformsInstances
+    const temp5: any = await db.query(
+         `
+       SELECT p.ProjectName,p.ProjectID,i.ImagingPlatform 
+       FROM ImagingPlatformInstance i
+       JOIN Project p on i.ProjectID = p.ProjectID
+       AND p.IsDeleted = 0
+    `,
+      [projectIDs])
+      .catch((e: any) => {
+        console.error(e)
+        res.status(500).json({ error: e, success: false })
+      })
+    const imagingPlatformsData = temp5[0]
+    const imagingPlatformsData2: Array<Object> = Array.from(imagingPlatformsData)
+    const jsonimagingPlatformsData = JSON.parse(JSON.stringify(imagingPlatformsData2))
+    const imagingPlatformsData3 = await fastcsv.writeToBuffer(jsonimagingPlatformsData, {
+      headers: true,
+    })
+    console.log("Imaging Platforms",imagingPlatformsData2)
+
+    //MEDIA
+    const temp6: any = await db.query(`SELECT p.ProjectName,User.FullName, m.* 
+    FROM Media m 
+    JOIN Project p on m.ProjectID = p.ProjectID
+    JOIN User on User.UserID = m.PhotographerID
+    WHERE p.ProjectID IN (?)`,
+    [projectIDs])
+      .catch((e: any) => {
+        console.error(e)
+        res.status(500).json({ error: e, success: false })
+      })
+    const mediaData = temp6[0]
+    const mediaData2: Array<Object> = Array.from(mediaData)
+    const jsonMediaData2 = JSON.parse(JSON.stringify(mediaData2))
+    const mediaData3 = await fastcsv.writeToBuffer(jsonMediaData2, {
+      headers: true,
+    })
+
+    const zip = new AdmZip()
+    // zip.addFile("media.csv", mediaData3)
+    zip.addFile("project.csv", projectData3)
+    zip.addFile("photographers.csv", photographersData3 )
+    zip.addFile("imagingPlatforms.csv", imagingPlatformsData3 )
+    zip.addFile("media.csv",mediaData3)
+
+    res.json({
+      success: true,
+      message: "zipfile in blob",
+      buffer: zip.toBuffer(),
+    })
   })
-
-
-
-
-  const zip = new AdmZip()
-  zip.addFile("media.csv", mediaData3)
-
-  zip.addFile("project.csv", projectData3)
-
-
-  res.json({
-    success: true,
-    message: "zipfile in blob",
-    buffer: zip.toBuffer(),
-  })
-
-
-
-})
 
 app.get("/download-instructions", isAuthenticated, async (req: any, res: Response) => {
   //helps to retrieve metadata template file for downloading.

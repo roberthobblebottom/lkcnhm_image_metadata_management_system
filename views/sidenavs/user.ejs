@@ -98,9 +98,7 @@
       try {
         const response = await fetch('/download-all-projects-data',
           {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-           body: "" 
+            method: 'GET',
           }
         )
         const result = await response.json();
@@ -115,7 +113,7 @@
       } catch (error) {
         Swal.fire({
           title: 'Error!',
-          text: 'An unexpected error occurred',
+          text: 'An unexpected error occurred'+error,
           icon: 'error',
           confirmButtonColor: '#00bbff'
         });
