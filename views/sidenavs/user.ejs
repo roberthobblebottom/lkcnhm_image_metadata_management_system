@@ -47,7 +47,7 @@
       <li id="download-all-projects-data">
         <!-- <form id='download-all-projects-data' method="post" action="/download-all-projects-data"></form> -->
         <!-- <a onclick="document.getElementById('download-all-projects-data').submit()"> -->
-        <a onclick="downloadAllProjectsData()" , class="btn btn-primary">
+        <a onclick="downloadAllProjectsData()" >
 
           <i class="fas fa-arrow-down"></i><span>Download All Projects' data</span>
         </a>
@@ -82,9 +82,8 @@
           document.getElementById("emailSidebar").textContent = `Email: ${email}`;
           document.getElementById("userType").textContent = `Role: ${userType}`;
           document.getElementById("userID").textContent = `UserID: ${userID}`;
-          document.getElementById("projectManagement").hidden =
-            userType == 'photographerOnly' ? true : false
-          console.log(userType)
+          // document.getElementById("projectManagement").hidden =
+          //   userType == 'photographerOnly' ? true : false
           document.getElementById("download-all-projects-data").hidden =
             userType == 'projectOwner'
               ? false

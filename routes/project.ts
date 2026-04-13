@@ -269,7 +269,6 @@ router.post(
 router.get(
   "/view-all",
   isAuthenticated,
-  isAdminOrProjectOwner,
   async (req: Request, res: Response) => {
     const queryForAdmin = `
         SELECT 
@@ -283,7 +282,7 @@ router.get(
         LEFT JOIN User cb ON p.CreatedByID = cb.UserID
         LEFT JOIN User ub ON p.UpdatedByID = ub.UserID
         ORDER BY p.CreatedDate DESC `
-    const queryForNonAdmin = `
+    const queryForProjectOwner = ` 
     SELECT 
             p.*,
             projectOwner.FullName AS projectOwnerName,
@@ -296,8 +295,26 @@ router.get(
         LEFT JOIN User ub ON p.UpdatedByID = ub.UserID
         WHERE p.IsDeleted = 0
         AND p.ProjectOwnerID = ?
-        ORDER BY p.CreatedDate DESC  `
-    const queryForPhotographers = `
+        ORDER BY p.CreatedDate DESC  
+        `
+    const queryForPhotographerViewing = 
+    `
+    SELECT 
+            p.*,
+            projectOwner.FullName AS projectOwnerName,
+            projectOwner.Email,
+            cb.FullName AS CreatedByName,
+            ub.FullName AS UpdatedByName
+        FROM Project p
+        LEFT JOIN User projectOwner ON p.ProjectOwnerID = projectOwner.UserID
+        LEFT JOIN User cb ON p.CreatedByID = cb.UserID
+        LEFT JOIN User ub ON p.UpdatedByID = ub.UserID
+        JOIN  ProjectUserPhotographyLink pupl ON p.ProjectID = pupl.ProjectID
+        WHERE p.IsDeleted = 0
+        AND pupl.PhotographerID = ?
+        ORDER BY p.CreatedDate DESC  
+    `
+    const queryForPhotographersInTheRespectiveProjects = `
     SELECT
         pupl.ProjectID,
         GROUP_CONCAT(DISTINCT user.FullName SEPARATOR ', ') as photographersNames
@@ -306,11 +323,15 @@ router.get(
     ORDER BY pupl.ProjectID    `
 
     const user = req.session.passport.user
-    const query = user.UserType != "admin" ? queryForNonAdmin : queryForAdmin
+    const query = user.UserType == userTypesEnumeration().admin 
+    ? queryForAdmin 
+    : (user.UserType == userTypesEnumeration().projectOwner 
+      ? queryForProjectOwner 
+      : queryForPhotographerViewing)
     const userID = user.UserType != "admin" ? [user.UserID] : []
 
     const photographersTemp1: any = (
-      await db.query(queryForPhotographers, [user.UserID])
+      await db.query(queryForPhotographersInTheRespectiveProjects, [user.UserID])
         .catch((e: any) => {
           console.error(e)
           res.status(500).json({ error: e, success: false })
@@ -348,7 +369,6 @@ router.get(
   "/view/:projectID",
   checkIfParamIsPositiveInteger,
   isAuthenticated,
-  isAdminOrProjectOwner,
   async (req: Request, res: Response) => {
     const projectID = req.params.projectID
     const query = `
