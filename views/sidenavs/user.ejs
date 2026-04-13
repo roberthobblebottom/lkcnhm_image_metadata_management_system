@@ -7,7 +7,7 @@
   <link rel="stylesheet" href="/css/navbar.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
 
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </head>
 
 <body>
@@ -47,10 +47,10 @@
       <li id="download-all-projects-data">
         <!-- <form id='download-all-projects-data' method="post" action="/download-all-projects-data"></form> -->
         <!-- <a onclick="document.getElementById('download-all-projects-data').submit()"> -->
-        <button onclick="downloadAllProjectsData()" , class="btn btn-primary">
+        <a onclick="downloadAllProjectsData()" , class="btn btn-primary">
 
           <i class="fas fa-arrow-down"></i><span>Download All Projects' data</span>
-        </button>
+        </a>
       </li>
 
 
@@ -89,35 +89,48 @@
             userType == 'projectOwner'
               ? false
               : true
-            fullNameGlobal = fullName
+          fullNameGlobal = fullName
         })
 
     });
 
     async function downloadAllProjectsData() {
-      try {
-        const response = await fetch('/download-all-projects-data',
-          {
-            method: 'GET',
-          }
-        )
-        const result = await response.json();
-        // pass your byte response to this constructor
-        var bytes = new Uint8Array(result.buffer.data);
-        // change resultByte to bytes
-        var blob = new Blob([bytes], { type: "application/zip" });
-        var link = document.createElement('a');
-        link.href = window.URL.createObjectURL(blob);
-        link.download = "allProjectsDataFor" +fullNameGlobal  + ".zip";
-        link.click();
-      } catch (error) {
-        Swal.fire({
-          title: 'Error!',
-          text: 'An unexpected error occurred'+error,
-          icon: 'error',
-          confirmButtonColor: '#00bbff'
-        });
-      }
+      await Swal.fire(
+        {
+          title: "Confirmation?",
+          text: 'Are you sure you want to download the data',
+          icon: "question",
+            confirmButtonText: 'confirm',
+        }
+
+      ).then(async (confirm) => {
+        if (!confirm)
+          return
+        try {
+          const response = await fetch('/download-all-projects-data',
+            {
+              method: 'GET',
+            }
+          )
+          const result = await response.json();
+          // pass your byte response to this constructor
+          var bytes = new Uint8Array(result.buffer.data);
+          // change resultByte to bytes
+          var blob = new Blob([bytes], { type: "application/zip" });
+          var link = document.createElement('a');
+          link.href = window.URL.createObjectURL(blob);
+          link.download = "allProjectsDataFor" + fullNameGlobal + ".zip";
+          link.click();
+        } catch (error) {
+          Swal.fire({
+            title: 'Error!',
+            text: 'An unexpected error occurred' + error,
+            icon: 'error',
+            confirmButtonColor: '#00bbff'
+          });
+        }
+      })
+
     }
   </script>
 </body>
