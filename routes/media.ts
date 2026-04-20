@@ -113,6 +113,13 @@ router.post("/create", isAuthenticated, async (req: Request, res: Response) => {
       success: false,
       message: "Missing required fields: " + missingFields.join(", "),
     })
+  if (catalogIDRegex.test(catalogID.toUpperCase()!))
+    return res.status(400).json({
+      success: false,
+      message: `CatalogID '${catalogID!}' is close to either ZRCENT or ZRCBDP formats.\
+                 Example of the correct formats: ZRCBDP0012345 or ZRCENT0123456. 
+                 6 capital letters and then 7 numbers. \n`
+    })
 
   const insertQuery = `
       INSERT INTO Media(
@@ -521,7 +528,44 @@ router.post("/edit", isAuthenticated, async (req: Request, res: Response) => {
     mediaData.photographerID,
     mediaData.MediaID,
   ]
+  const noNeedValidation = "no need validation"
+  const paramsNames = [
+    "fileName",
+    "filePath",
+    "catalogID",
+    "morphoID",
+    noNeedValidation,
+    "imagingDate",
+    "resolution",
+    "fileSizeBytes",
+    "fileFormat",
+    "description",
+    noNeedValidation,
+    noNeedValidation,
+    noNeedValidation,
+    "updatedBy",
+    "projectID",
+    "photographerID",
+    "MediaID",
+  ]
+  // Validation: required fields
+  const missingFields = []
+  for (let i = 0; i < params.length; i++)
+    if (!params[i] && paramsNames[i] != noNeedValidation)
+      missingFields.push(paramsNames[i])
+  if (missingFields.length > 0)
+    return res.status(400).json({
+      success: false,
+      message: "Missing required fields: " + missingFields.join(", "),
+    })
 
+  if (catalogIDRegex.test(mediaData.catalogID.toUpperCase()!))
+    return res.status(400).json({
+      success: false,
+      message: `CatalogID '${mediaData.catalogID!}' is close to either ZRCENT or ZRCBDP formats.\
+                 Example of the correct formats: ZRCBDP0012345 or ZRCENT0123456. 
+                 6 capital letters and then 7 numbers. \n`
+    })
   await db.query(query, params).catch((e: any) => {
     console.error(e)
     res.status(500).json({ error: e, success: false })
@@ -758,9 +802,20 @@ router.post("/bulk-edit", isAuthenticated, async (req: Request, res: Response) =
     'projectID',
     'photographerID']
   const updatedBy = req.session.passport.user.UserID
+  const catalogID = req.body.catalogID
+  if (catalogID != null)
+    if (catalogIDRegex.test(catalogID.toUpperCase()!))
+      return res.status(400).json({
+        success: false,
+        message: `CatalogID '${catalogID.catalogID!}' is close to either ZRCENT or ZRCBDP formats.\
+                 Example of the correct formats: ZRCBDP0012345 or ZRCENT0123456. 
+                 6 capital letters and then 7 numbers. \n`
+      })
 
-  //building query and params
-  var insertQuery = `Update Media SET `
+
+
+  //building query and params because the way UPDATE statements are like
+  var insertQuery = `UPDATE Media SET `
   var params = []
   const reqBodyEntries = Object.entries(req.body)
   for (var i = 0; i < reqBodyEntries.length; i++) {
@@ -1009,12 +1064,12 @@ router.post(
                 `There are duplicate file name for '${element}' within this csv file.\n`
             break
           case newRowColumns.CatalogID:
-            
-            
-            if (!catalogIDRegex.test(element.toLowerCase()!)){
+
+
+            if (catalogIDRegex.test(element.toUpperCase()!)) {
               errorMessage = errorMessage +
-                `CatalogID '${element!}' is not in the correct format.\
-                 Example of a correct format: ZRCBDP0012345. 
+                `CatalogID '${element!}' is close to either ZRCENT or ZRCBDP formats.\
+                 Example of the correct formats: ZRCBDP0012345 or ZRCENT0123456. 
                  6 capital letters and then 7 numbers. \n`
             }
             break
