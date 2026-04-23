@@ -202,7 +202,7 @@ app.get("/download-all-projects-data",
 
 app.get("/download-instructions", isAuthenticated, async (req: any, res: Response) => {
   //helps to retrieve metadata template file for downloading.
-  const filePath: string = "Instructions.pdf"
+  const filePath: string = "pipeline/Instructions.pdf"
   res.download(filePath)
 })
 
