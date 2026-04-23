@@ -209,7 +209,7 @@
       <div id="hcaptcha-container"></div>
 
 
-      <button type="submit">Sign Up</button>
+      <button type="submit" onclick="restOfSubmit()">Sign Up</button>
     </form>
     <p class="signup-text">
       Already have an account? <a href="/login">Login</a>
@@ -220,33 +220,33 @@
 <p id="message"></p>
 
 <script>
-  let widgetId = null;  // will hold the widget ID assigned by hCaptcha
-  function onloadHCaptcha() {
-    // 2. Once SDK is loaded, render invisible hCaptcha widget
-    widgetId = hcaptcha.render('hcaptcha-container', {
-      sitekey: '<%=process.env.HCAPTCHA_SITEKEY%>',
-      size: 'invisible',       // invisible mode
-      callback: onSolve,
-      'error-callback': onError,
-      'expired-callback': onExpired
-    });
-  }
+  // let widgetId = null;  // will hold the widget ID assigned by hCaptcha
+  // function onloadHCaptcha() {
+  //   // 2. Once SDK is loaded, render invisible hCaptcha widget
+  //   widgetId = hcaptcha.render('hcaptcha-container', {
+  //     sitekey: '<%=process.env.HCAPTCHA_SITEKEY%>',
+  //     size: 'invisible',       // invisible mode
+  //     callback: onSolve,
+  //     'error-callback': onError,
+  //     'expired-callback': onExpired
+  //   });
+  // }
 
-  function onSolve(token, key) {
-    // This function is called after successful solve
-    // `token` is the h-captcha-response value
-    restOfSubmit(token)
-  }
+  // function onSolve(token, key) {
+  //   // This function is called after successful solve
+  //   // `token` is the h-captcha-response value
+  //   restOfSubmit(token)
+  // }
 
-  function onError(err) {
-    console.error('hCaptcha error callback:', err);
-    // log to analytics, restart flow
-  }
+  // function onError(err) {
+  //   console.error('hCaptcha error callback:', err);
+  //   // log to analytics, restart flow
+  // }
 
-  function onExpired() {
-    console.warn('hCaptcha token expired');
-    // make sure to fetch a new token before user submits form
-  }
+  // function onExpired() {
+  //   console.warn('hCaptcha token expired');
+  //   // make sure to fetch a new token before user submits form
+  // }
   function restOfSubmit(token) {
     const email = document.getElementById("email").value.trim();
     const password = document.getElementById("password").value;

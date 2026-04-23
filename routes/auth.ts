@@ -169,11 +169,11 @@ router.post("/register", async (req: Request, res: Response) => {
     token
   } = req.body
 
-  if (!token)
-    return res.status(400).json({ success: false, error: 'Missing hCaptcha token' })
-  const result = await verify_hcaptcha_token(token)
-  if (!result.success)
-    res.status(400).json(result)
+  // if (!token)
+  //   return res.status(400).json({ success: false, error: 'Missing hCaptcha token' })
+  // const result = await verify_hcaptcha_token(token)
+  // if (!result.success)
+  //   res.status(400).json(result)
 
   const missingFields = []
   if (!email) missingFields.push("email")
