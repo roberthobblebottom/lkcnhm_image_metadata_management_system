@@ -27,7 +27,7 @@ app.disable('x-powered-by')
 
 //  Middleware
 app.use(express.static("public"))
-app.use(express.json({ limit: '50mb' }))
+app.use(express.json({ limit: '50mb' })) // for uploading pipeline file
 app.use(express.urlencoded({ extended: true }))
 app.set("view engine", "ejs") // Set view engine to HTML
 
@@ -47,6 +47,7 @@ app.use(
   session({
     secret: process.env.SessionSecret,
     store: process.env.NODE_ENV == "production"
+    //RedisStore for disk storage of express sessions
       ? new RedisStore({ client: redisClient, prefix: "image-metadata-management-system-session-storage:" })
       : new MemoryStore({
         checkPeriod: 86400000 // prune expired entries every 24h
