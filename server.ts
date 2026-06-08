@@ -21,6 +21,18 @@ import AdmZip from "adm-zip"
 
 const redisClient = createClient()
 redisClient.connect().catch(console.error)
+
+
+// Add this!
+redisClient.on('error', (err) => {
+  console.error('Redis Client Error:', err);
+});
+
+redisClient.on('connect', () => {
+  console.log('Redis connected successfully');
+});
+
+
 const app = express()
 const PORT = process.env.PORT || 3001
 app.disable('x-powered-by')

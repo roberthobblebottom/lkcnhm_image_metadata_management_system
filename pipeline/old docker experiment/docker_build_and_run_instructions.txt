@@ -1,0 +1,16 @@
+sudo docker build . -t imaging-metadata-extraction-tool --no-cache --pull
+
+
+// for  linux mint on x11 system 
+sudo docker run --rm \
+  -e DISPLAY=$DISPLAY \
+  -v /tmp/.X11-unix:/tmp/.X11-unix \
+  -v $HOME/.Xauthority:/root/.Xauthority:ro \
+  --net=host \
+  imaging-metadata-extraction-tool 
+
+// for windows 11 (NOT TESTED)
+docker run --rm `
+  -e DISPLAY=host.docker.internal:0 `
+imaging-metadata-extraction-tool 
+

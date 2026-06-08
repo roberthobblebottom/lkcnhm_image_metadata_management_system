@@ -1,0 +1,18 @@
+SocketClosedUnexpectedlyError: Socket closed unexpectedly
+    at Socket.<anonymous> (/root/lkcnhm_image_metadata_management_system/node_modules/@redis/client/lib/client/socket.ts:303:29)
+    at Object.onceWrapper (node:events:632:26)
+    at Socket.emit (node:events:517:28)
+    at Socket.emit (node:domain:489:12)
+    at TCP.<anonymous> (node:net:351:12)
+SyntaxError: Unexpected token } in JSON at position 13
+    at JSON.parse (<anonymous>)
+    at parse (/root/lkcnhm_image_metadata_management_system/node_modules/body-parser/lib/types/json.js:92:19)
+    at /root/lkcnhm_image_metadata_management_system/node_modules/body-parser/lib/read.js:128:18
+    at AsyncResource.runInAsyncScope (node:async_hooks:203:9)
+    at invokeCallback (/root/lkcnhm_image_metadata_management_system/node_modules/raw-body/index.js:238:16)
+    at done (/root/lkcnhm_image_metadata_management_system/node_modules/raw-body/index.js:227:7)
+    at IncomingMessage.onEnd (/root/lkcnhm_image_metadata_management_system/node_modules/raw-body/index.js:287:7)
+    at IncomingMessage.emit (node:events:517:28)
+    at IncomingMessage.emit (node:domain:489:12)
+    at endReadableNT (node:internal/streams/readable:1400:12)
+

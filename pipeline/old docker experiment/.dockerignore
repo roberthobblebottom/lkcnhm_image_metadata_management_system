@@ -1,0 +1,11 @@
+'test project 1'/
+*.cev
+*.bat
+Instructions.docx
+Instruction.pdf
+woof/
+README.md
+Dockerfile
+build/
+dist/
+.venv/
