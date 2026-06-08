@@ -125,8 +125,8 @@ app.get("/download-all-projects-data",
       })
     const projectData = temp3[0]
     const projectData2: Array<Object> = Array.from(projectData)
-    const jsonProjectData = JSON.parse(JSON.stringify(projectData2))
-    const projectData3 = await fastcsv.writeToBuffer(jsonProjectData, {
+    // const jsonProjectData = JSON.parse(JSON.stringify(projectData2))
+    const projectData3 = await fastcsv.writeToBuffer(projectData2, {
       headers: true,
     })
     const projectIDs =  []
@@ -154,8 +154,8 @@ app.get("/download-all-projects-data",
       })
     const photographersData = temp4[0]
     const photographersData2: Array<Object> = Array.from(photographersData)
-    const jsonPhotographersData = JSON.parse(JSON.stringify(photographersData2))
-    const photographersData3 = await fastcsv.writeToBuffer(jsonPhotographersData, {
+    // const jsonPhotographersData = JSON.parse(JSON.stringify(photographersData2))
+    const photographersData3 = await fastcsv.writeToBuffer(photographersData2, {
       headers: true,
     })
     
@@ -175,8 +175,8 @@ app.get("/download-all-projects-data",
       })
     const imagingPlatformsData = temp5[0]
     const imagingPlatformsData2: Array<Object> = Array.from(imagingPlatformsData)
-    const jsonimagingPlatformsData = JSON.parse(JSON.stringify(imagingPlatformsData2))
-    const imagingPlatformsData3 = await fastcsv.writeToBuffer(jsonimagingPlatformsData, {
+    // const jsonimagingPlatformsData = JSON.parse(JSON.stringify(imagingPlatformsData2))
+    const imagingPlatformsData3 = await fastcsv.writeToBuffer(imagingPlatformsData2, {
       headers: true,
     })
 
@@ -193,8 +193,8 @@ app.get("/download-all-projects-data",
       })
     const mediaData = temp6[0]
     const mediaData2: Array<Object> = Array.from(mediaData)
-    const jsonMediaData2 = JSON.parse(JSON.stringify(mediaData2))
-    const mediaData3 = await fastcsv.writeToBuffer(jsonMediaData2, {
+    // const jsonMediaData2 = JSON.parse(JSON.stringify(mediaData2))
+    const mediaData3 = await fastcsv.writeToBuffer(mediaData2, {
       headers: true,
     })
 

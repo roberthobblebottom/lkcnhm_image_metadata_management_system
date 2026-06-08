@@ -16,3 +16,7 @@ SyntaxError: Unexpected token } in JSON at position 13
     at IncomingMessage.emit (node:domain:489:12)
     at endReadableNT (node:internal/streams/readable:1400:12)
 
+
+zinaida:I deleted and purged some test data
+But it was still working after
+This one is quite spontaneous

@@ -11,17 +11,17 @@ const multer = require("multer")
 const path = require("path")
 
 var storage = multer.diskStorage(
-    {
-        destination: './extraction-tool',
-        filename: function (req, file, cb) {
+  {
+    destination: './extraction-tool',
+    filename: function (req, file, cb) {
 
-      cb(null, "extraction-tool.zip" );
+      cb(null, "extraction-tool.zip");
+
+    }
 
   }
-        
-    }
 );
-const upload = multer({ storage:storage })
+const upload = multer({ storage: storage })
 
 
 router.get(
@@ -374,8 +374,14 @@ router.post(
         message:
           "There is no media data that is soft deleted or another words, marked for deletion",
       })
+    var jsonMediaData
+    try {
+      jsonMediaData = JSON.parse(JSON.stringify(mediaData))
+    } catch (e) {
+      console.error("line 381, jsonMediaData. try catch block on error", e)
 
-    const jsonMediaData = JSON.parse(JSON.stringify(mediaData))
+    }
+
     const bufferMediaData = await fastcsv.writeToBuffer(jsonMediaData,
       { headers: true })
     const zip = new AdmZip()
@@ -456,21 +462,53 @@ router.post(
       medias = medias.concat(mediasResults[0])
     }
     //turning into buffer
-    const jsonProjectData = JSON.parse(JSON.stringify(projectData))
-    const bufferProjectData = await fastcsv.writeToBuffer(jsonProjectData,
+
+    // var jsonProjectData
+    // try {
+    //   jsonProjectData = JSON.parse(JSON.stringify(projectData))
+    // } catch (e) {
+    //   console.error("line 470, jsonProjectData.try catch block on error", e)
+
+    // }
+
+    // const jsonProjectData = JSON.parse(JSON.stringify(projectData))
+    const bufferProjectData = await fastcsv.writeToBuffer(projectData,
       { headers: true, })
-    const jsonImagingPlatformInstanceData = JSON.parse(
-      JSON.stringify(imagingPlatformInstances)
-    )
+
+
+    // var jsonImagingPlatformInstanceData
+    // try {
+    //   jsonImagingPlatformInstanceData = JSON.parse(JSON.stringify(imagingPlatformInstances))
+    // } catch (e) {
+    //   console.error("line 483. try catch block on error", e)
+
+    // }
+    // const jsonImagingPlatformInstanceData = JSON.parse(
+    //   JSON.stringify(imagingPlatformInstances)
+    // )
     const bufferImagingPlatformInstanceData = await fastcsv.writeToBuffer(
-      jsonImagingPlatformInstanceData, { headers: true, })
-    const jsonProjectUserPhotographyLinkData = JSON.parse(
-      JSON.stringify(projectUserPhotographyLinks)
-    )
+      imagingPlatformInstances, { headers: true, })
+    // var jsonProjectUserPhotographyLinkData
+    // try {
+    //   jsonProjectUserPhotographyLinkData = JSON.parse(JSON.stringify(projectUserPhotographyLinks))
+    // } catch (e) {
+    //   console.error("line 495. try catch block on error", e)
+
+    // }
+    // const jsonProjectUserPhotographyLinkData = JSON.parse(
+    //   JSON.stringify(projectUserPhotographyLinks)
+    // )
     const bufferProjectUserPhotographyLinkData = await fastcsv.writeToBuffer(
-      jsonProjectUserPhotographyLinkData, { headers: true })
-    const jsonMediaData = JSON.parse(JSON.stringify(medias))
-    const bufferMediaData = await fastcsv.writeToBuffer(jsonMediaData,
+    projectUserPhotographyLinks, { headers: true })
+    // var jsonMediaData
+    // try {
+    //   jsonMediaData = JSON.parse(JSON.stringify(medias))
+    // } catch (e) {
+    //   console.error("line 507. try catch block on error", e.toString())
+
+    // }
+    // const jsonMediaData = JSON.parse(JSON.stringify(medias))
+    const bufferMediaData = await fastcsv.writeToBuffer(medias,
       { headers: true })
 
     //Zipping
@@ -539,14 +577,38 @@ router.post(
     }
 
     // creating buffer
-    const jsonUserData = JSON.parse(JSON.stringify(userData))
-    const bufferUserData = await fastcsv.writeToBuffer(jsonUserData,
+//  var jsonUserData
+//     try {
+//       jsonUserData = JSON.parse(JSON.stringify(userData))
+//     } catch (e) {
+//       console.error("try catch block on error", e)
+
+//     }
+    // const jsonUserData = JSON.parse(JSON.stringify(userData))
+    const bufferUserData = await fastcsv.writeToBuffer(userData,
       { headers: true, })
-    const jsonProjectUserPhotographyLinkData = JSON.parse(
-      JSON.stringify(projectUserPhotographyLinks)
-    )
+
+    //   var jsonProjectUserPhotographyLinkData
+    // try {
+    //   jsonProjectUserPhotographyLinkData = JSON.parse(JSON.stringify(projectUserPhotographyLinks))
+    // } catch (e) {
+    //   console.error("try catch block on error", e)
+
+    // }
+    // const jsonProjectUserPhotographyLinkData = JSON.parse(
+    //   JSON.stringify(projectUserPhotogrojectUserPhotographyLinkData
+    // try {
+    //   jsonProjectUserPhotographyLinkData = JSON.parse(JSON.stringify(projectUserPhotographyLinks))
+    // } catch (e) {
+    //   console.error("try catch block on error", e)
+
+    // }raphyLinks)
+    // )
+
+
+
     const bufferProjectUserPhotographyLinkData = await fastcsv.writeToBuffer(
-      jsonProjectUserPhotographyLinkData, { headers: true, }
+      projectUserPhotographyLinks, { headers: true, }
     )
 
     //zipping
@@ -629,8 +691,8 @@ router.post(
 
     const userData = temp4[0]
     const userData2: Array<Object> = Array.from(userData)
-    const jsonUserData = JSON.parse(JSON.stringify(userData2))
-    const userData3 = await fastcsv.writeToBuffer(jsonUserData, { headers: true, })
+    // const jsonUserData = JSON.parse(JSON.stringify(userData2))
+    const userData3 = await fastcsv.writeToBuffer(userData2, { headers: true, })
 
     //PROJECT
     const temp3: any = await db.query(`SELECT * FROM Project`)
@@ -640,8 +702,8 @@ router.post(
       })
     const projectData = temp3[0]
     const projectData2: Array<Object> = Array.from(projectData)
-    const jsonProjectData = JSON.parse(JSON.stringify(projectData2))
-    const projectData3 = await fastcsv.writeToBuffer(jsonProjectData, {
+    // const jsonProjectData = JSON.parse(JSON.stringify(projectData2))
+    const projectData3 = await fastcsv.writeToBuffer(projectData2, {
       headers: true,
     })
 
@@ -657,11 +719,11 @@ router.post(
     const imagingPlatformInstanceData2: Array<Object> = Array.from(
       imagingPlatformInstanceData
     )
-    const jsonImagingPlatformInstanceData = JSON.parse(
-      JSON.stringify(imagingPlatformInstanceData2)
-    )
+    // const jsonImagingPlatformInstanceData = JSON.parse(
+    //   JSON.stringify(imagingPlatformInstanceData2)
+    // )
     const imagingPlatformInstanceData3 = await fastcsv.writeToBuffer(
-      jsonImagingPlatformInstanceData, { headers: true }
+      imagingPlatformInstanceData2, { headers: true }
     )
 
     //PROJECT USER PHOTOGRAPHY LINK
@@ -724,7 +786,7 @@ router.post("/upload-extraction-tool",
   upload.single("upload-extraction-tool"),
   async (req: Request, res: Response) => {
     return res.status(200).json(
-      { message: 'Sucessfully uploaded' ,success:true}
+      { message: 'Sucessfully uploaded', success: true }
     )
   }
 )
