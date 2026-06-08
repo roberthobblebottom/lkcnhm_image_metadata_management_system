@@ -43,7 +43,7 @@ app.use(express.json({ limit: '50mb' })) // for uploading pipeline file
 app.use(express.urlencoded({ extended: true }))
 app.set("view engine", "ejs") // Set view engine to HTML
 
-// Session setup
+// Session setupstringify
 app.set('trust proxy', 1) // trust first proxy
 const cookiesSettings = {
   secure: process.env.NODE_ENV === 'production',
@@ -111,7 +111,7 @@ app.get("/download-all-projects-data",
     //PROJECT
     const temp3: any = await db.query(
          `
-         SELECT projectOwner.FullName FullName, p.*
+         SELECT projectOwner.FullName ProjectOwnerFullName, p.*
     FROM Project p
     JOIN User projectOwner on projectOwner.UserID = p.ProjectOwnerID
     WHERE p.ProjectOwnerID = ? 
@@ -128,7 +128,9 @@ app.get("/download-all-projects-data",
     // const jsonProjectData = JSON.parse(JSON.stringify(projectData2))
     const projectData3 = await fastcsv.writeToBuffer(projectData2, {
       headers: true,
-    })
+    }).catch((e:any)=>{
+        console.error(e)
+      })
     const projectIDs =  []
 
 
@@ -139,7 +141,7 @@ app.get("/download-all-projects-data",
     }
     const temp4: any = await db.query(
          `
-       SELECT p.ProjectName,p.ProjectID,u.FullName,u.UserID, u.UserType, u.StaffType 
+       SELECT p.ProjectName,p.ProjectID,u.FullName as photographerFullName,u.UserID, u.UserType, u.StaffType 
        FROM ProjectUserPhotographyLink pupl
        JOIN User u ON pupl.PhotographerID = u.UserID
        JOIN Project p on pupl.ProjectID = p.ProjectID
@@ -157,7 +159,9 @@ app.get("/download-all-projects-data",
     // const jsonPhotographersData = JSON.parse(JSON.stringify(photographersData2))
     const photographersData3 = await fastcsv.writeToBuffer(photographersData2, {
       headers: true,
-    })
+    }).catch((e:any)=>{
+        console.error(e)
+      })
     
     // ImagingPlatformsInstances
     const temp5: any = await db.query(
@@ -178,10 +182,12 @@ app.get("/download-all-projects-data",
     // const jsonimagingPlatformsData = JSON.parse(JSON.stringify(imagingPlatformsData2))
     const imagingPlatformsData3 = await fastcsv.writeToBuffer(imagingPlatformsData2, {
       headers: true,
-    })
+    }).catch((e:any)=>{
+        console.error(e)
+      })
 
     //MEDIA
-    const temp6: any = await db.query(`SELECT p.ProjectName,User.FullName, m.* 
+    const temp6: any = await db.query(`SELECT p.ProjectName,User.FullName as photographerFullName, m.* 
     FROM Media m 
     JOIN Project p on m.ProjectID = p.ProjectID
     JOIN User on User.UserID = m.PhotographerID
@@ -196,7 +202,9 @@ app.get("/download-all-projects-data",
     // const jsonMediaData2 = JSON.parse(JSON.stringify(mediaData2))
     const mediaData3 = await fastcsv.writeToBuffer(mediaData2, {
       headers: true,
-    })
+    }).catch((e:any)=>{
+        console.error(e)
+      })
 
     const zip = new AdmZip()
     // zip.addFile("media.csv", mediaData3)

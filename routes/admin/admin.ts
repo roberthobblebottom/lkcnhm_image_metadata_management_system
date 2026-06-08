@@ -374,16 +374,12 @@ router.post(
         message:
           "There is no media data that is soft deleted or another words, marked for deletion",
       })
-    var jsonMediaData
-    try {
-      jsonMediaData = JSON.parse(JSON.stringify(mediaData))
-    } catch (e) {
-      console.error("line 381, jsonMediaData. try catch block on error", e)
+   
 
-    }
-
-    const bufferMediaData = await fastcsv.writeToBuffer(jsonMediaData,
-      { headers: true })
+    const bufferMediaData = await fastcsv.writeToBuffer(mediaData,
+      { headers: true }).catch((e:any) =>{
+        console.error(e)
+      })
     const zip = new AdmZip()
     zip.addFile(
       "purged media data " + new Date().toISOString() + ".csv",
@@ -473,7 +469,9 @@ router.post(
 
     // const jsonProjectData = JSON.parse(JSON.stringify(projectData))
     const bufferProjectData = await fastcsv.writeToBuffer(projectData,
-      { headers: true, })
+      { headers: true, }).catch((e:any)=>{
+        console.error(e)
+      })
 
 
     // var jsonImagingPlatformInstanceData
@@ -487,7 +485,9 @@ router.post(
     //   JSON.stringify(imagingPlatformInstances)
     // )
     const bufferImagingPlatformInstanceData = await fastcsv.writeToBuffer(
-      imagingPlatformInstances, { headers: true, })
+      imagingPlatformInstances, { headers: true, }).catch((e:any)=>{
+        console.error(e)
+      })
     // var jsonProjectUserPhotographyLinkData
     // try {
     //   jsonProjectUserPhotographyLinkData = JSON.parse(JSON.stringify(projectUserPhotographyLinks))
@@ -499,7 +499,9 @@ router.post(
     //   JSON.stringify(projectUserPhotographyLinks)
     // )
     const bufferProjectUserPhotographyLinkData = await fastcsv.writeToBuffer(
-    projectUserPhotographyLinks, { headers: true })
+    projectUserPhotographyLinks, { headers: true }).catch((e:any)=>{
+        console.error(e)
+      })
     // var jsonMediaData
     // try {
     //   jsonMediaData = JSON.parse(JSON.stringify(medias))
@@ -509,7 +511,9 @@ router.post(
     // }
     // const jsonMediaData = JSON.parse(JSON.stringify(medias))
     const bufferMediaData = await fastcsv.writeToBuffer(medias,
-      { headers: true })
+      { headers: true }).catch((e:any)=>{
+        console.error(e)
+      })
 
     //Zipping
     const zip = new AdmZip()
@@ -586,7 +590,9 @@ router.post(
 //     }
     // const jsonUserData = JSON.parse(JSON.stringify(userData))
     const bufferUserData = await fastcsv.writeToBuffer(userData,
-      { headers: true, })
+      { headers: true, }).catch((e:any)=>{
+        console.error(e)
+      })
 
     //   var jsonProjectUserPhotographyLinkData
     // try {
@@ -609,7 +615,9 @@ router.post(
 
     const bufferProjectUserPhotographyLinkData = await fastcsv.writeToBuffer(
       projectUserPhotographyLinks, { headers: true, }
-    )
+    ).catch((e:any)=>{
+        console.error(e)
+      })
 
     //zipping
     const zip = new AdmZip()
@@ -677,7 +685,9 @@ router.post(
     const jsonMediaData2 = JSON.parse(JSON.stringify(mediaData2))
     const mediaData3 = await fastcsv.writeToBuffer(jsonMediaData2, {
       headers: true,
-    })
+    }).catch((e:any)=>{
+        console.error(e)
+      })
 
     //USER
     const temp4: any =
@@ -692,7 +702,9 @@ router.post(
     const userData = temp4[0]
     const userData2: Array<Object> = Array.from(userData)
     // const jsonUserData = JSON.parse(JSON.stringify(userData2))
-    const userData3 = await fastcsv.writeToBuffer(userData2, { headers: true, })
+    const userData3 = await fastcsv.writeToBuffer(userData2, { headers: true, }).catch((e:any)=>{
+        console.error(e)
+      })
 
     //PROJECT
     const temp3: any = await db.query(`SELECT * FROM Project`)
@@ -705,7 +717,9 @@ router.post(
     // const jsonProjectData = JSON.parse(JSON.stringify(projectData2))
     const projectData3 = await fastcsv.writeToBuffer(projectData2, {
       headers: true,
-    })
+    }).catch((e:any)=>{
+        console.error(e)
+      })
 
     //IMAGINGPLATFORMINSTANCE
     const temp2: any =
@@ -724,7 +738,9 @@ router.post(
     // )
     const imagingPlatformInstanceData3 = await fastcsv.writeToBuffer(
       imagingPlatformInstanceData2, { headers: true }
-    )
+    ).catch((e:any)=>{
+        console.error(e)
+      })
 
     //PROJECT USER PHOTOGRAPHY LINK
     const temp1: any = await db.query(`SELECT * FROM ProjectUserPhotographyLink`)
@@ -741,7 +757,9 @@ router.post(
     )
     const projectUserPhotographyLinkData3 = await fastcsv.writeToBuffer(
       jsonProjectUserPhotographyLinkData, { headers: true }
-    )
+    ).catch((e:any)=>{
+        console.error(e)
+      })
 
     //ENUM
     const EnumerationValuesString =
