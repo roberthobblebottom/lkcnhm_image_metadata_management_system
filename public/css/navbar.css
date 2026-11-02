@@ -1,69 +1,72 @@
 * {
   font-size: small;
 }
+
 .sidebar {
-    position: fixed;
-    left: 0;
-    top: 0;
-    height: 100%;
-    width: 250px;
-    background-color: #0f0015;
-    display: flex;
-    flex-direction: column;
-    padding: 20px 0;
-    border-top-right-radius: 15px;
-    border-bottom-right-radius: 15px;
-    color: white;
+  position: fixed;
+  left: 0;
+  top: 0;
+  height: 100%;
+  width: 250px;
+  background-color: #0f0015;
+  display: flex;
+  flex-direction: column;
+  padding: 20px 0;
+  border-top-right-radius: 15px;
+  border-bottom-right-radius: 15px;
+  color: white;
 
-      anchor-name: --sidebar;
-  }
-      .loginDetails{
-margin-left: 15px;
-margin-bottom: 10px;
-    }
-    
-    img {width: 220px; height: auto; margin-left:10px;}
-  .logo-text {
-    text-align: center;
-    font-size: 20px;
-    font-weight: bold;
-    margin-bottom: 50px;
-    color: #7e3ff2; /* Stylish purple */
-    letter-spacing: 2px;
-  }
+  anchor-name: --sidebar;
+}
 
-  .nav-links {
-    list-style: none;
-    padding: 0;
-    margin: 0;
-  }
-  
-  .nav-links li {
-    margin: 22px 0; /* More spacing between items */
-  }
-  
-  .nav-links li a {
-    text-decoration: none;
-    color: white;
-    padding: 12px 20px;
-    display: flex;
-    align-items: center;
-    border-radius: 10px;
-    transition: background 0.3s;
+.loginDetails {
+  margin-left: 15px;
+  margin-bottom: 10px;
+}
 
-    text-align: left !important;
-  }
-  
-  .nav-links li a:hover
-  {
-    background-color: #7e3ff2;
-  }
-  
-  .sidebar .nav-links li a {
-    display: flex;
-    align-items: center;
-  }
-  
-  .sidebar .nav-links li a i {
-    margin-right: 10px;
-  }  
+
+
+.app-name {
+  text-align: center;
+  font-size: 18px;
+  font-weight: bold;
+  color: white;
+  letter-spacing: 2px;
+  padding: 2%;
+}
+
+.nav-links {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.nav-links li {
+  margin: 22px 0;
+  /* More spacing between items */
+}
+
+.nav-links li a {
+  text-decoration: none;
+  color: white;
+  padding: 12px 20px;
+  display: flex;
+  align-items: center;
+  border-radius: 10px;
+  transition: background 0.3s;
+
+  text-align: left !important;
+}
+
+.nav-links li a:hover {
+  background-color: #7e3ff2;
+}
+
+.sidebar .nav-links li a {
+  display: flex;
+  align-items: center;
+}
+
+.sidebar .nav-links li a i {
+  margin-right: 10px;
+}
