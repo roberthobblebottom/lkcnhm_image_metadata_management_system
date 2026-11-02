@@ -46,51 +46,56 @@
 <body>
   <div class="main-con">
     <%- currentUser.UserType=='admin' ? include('../sidenavs/admin'): include('../sidenavs/user') %>
-      <div class="horizontal-panel">
-        <h2>
-          <%= currentUser.UserType=='admin' ? "All" : "Your" %> Image Metadata Records
-        </h2>
-        <% if (disableCreateMedia){ %>
-          You do not have any projects you can add media to.
-          <% }else{ %>
-            <a href="/media/upload-bulk-metadata/" class="btn btn-bulk"><i class="fa-solid fa-file-arrow-up"></i> Upload
-              <br>Bulk</a>
+      <div class="inner1">
+        <div class="horizontal-panel">
+          <h2>
+            <%= currentUser.UserType=='admin' ? "All" : "Your" %> Image Metadata Records
+          </h2>
+          <% if (disableCreateMedia){ %>
+            You do not have any projects you can add media to.
+            <% }else{ %>
+              <a href="/media/upload-bulk-metadata/" class="btn btn-bulk"><i class="fa-solid fa-file-arrow-up"></i>
+                Upload
+                <br>Bulk</a>
 
-            <a href="/media/create/" class="btn"><i class="fa-solid fa-plus"></i> Add <br> Single Entry </a>
-            <a class="btn-delete hidden" id="deletedSelected"><i class="fa-solid fa-user-plus"></i> Delete Selected</a>
-            <a class="btn-restore hidden" id="restoreSelected"><i class="fa-solid fa-trash-arrow-up"></i> Restore
-              Selected</a>
-            <a class="btn-edit hidden" id="editSelected"><i class="fa-solid fa-pen-to-square"></i> Edit Selected</a>
-            <a class="btn-restore hidden" id="deselectAll" onclick="deselectAll()"><i class="fa-regular fa-square"></i>
-              Deselect All</a>
+              <a href="/media/create/" class="btn"><i class="fa-solid fa-plus"></i> Add <br> Single Entry </a>
+              <a class="btn-delete hidden" id="deletedSelected"><i class="fa-solid fa-user-plus"></i> Delete
+                Selected</a>
+              <a class="btn-restore hidden" id="restoreSelected"><i class="fa-solid fa-trash-arrow-up"></i> Restore
+                Selected</a>
+              <a class="btn-edit hidden" id="editSelected"><i class="fa-solid fa-pen-to-square"></i> Edit Selected</a>
+              <a class="btn-restore hidden" id="deselectAll" onclick="deselectAll()"><i
+                  class="fa-regular fa-square"></i>
+                Deselect All</a>
 
 
-            <%}%>
-              <a href="/media/download-template" class="btn-restore btn">
-                <i class="fa-solid fa-file-arrow-down"></i> Download <br> Image Metadata Template
-              </a>
-              <a href="/media/download-pipeline-script" class="btn-restore btn">
-                <i class="fa-solid fa-file-arrow-down"></i> Download <br> Extraction Tool
-              </a>
+              <%}%>
+                <a href="/media/download-template" class="btn-restore btn">
+                  <i class="fa-solid fa-file-arrow-down"></i> Download <br> Image Metadata Template
+                </a>
+                <a href="/media/download-pipeline-script" class="btn-restore btn">
+                  <i class="fa-solid fa-file-arrow-down"></i> Download <br> Extraction Tool
+                </a>
+        </div>
+        <table id="dataTable" class="dataTable">
+          <thead>
+            <tr>
+              <th></th>
+              <th>ID</th>
+              <th>Project Name</th>
+              <th>Photographer</th>
+              <th>Morpho ID</th>
+              <th>Catalog ID</th>
+              <th>Resolution</th>
+              <th>Imaging Date</th>
+              <th>Is Deleted?</th>
+            </tr>
+          </thead>
+          <tbody>
+          </tbody>
+        </table>
+        <label id="numberOfSelected"></label>
       </div>
-      <table id="dataTable" class="dataTable">
-        <thead>
-          <tr>
-            <th></th>
-            <th>ID</th>
-            <th>Project Name</th>
-            <th>Photographer</th>
-            <th>Morpho ID</th>
-            <th>Catalog ID</th>
-            <th>Resolution</th>
-            <th>Imaging Date</th>
-            <th>Is Deleted?</th>
-          </tr>
-        </thead>
-        <tbody>
-        </tbody>
-      </table>
-      <label id="numberOfSelected"></label>
   </div>
 </body>
 

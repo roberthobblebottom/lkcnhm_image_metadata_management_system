@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <%- include('../sidenavs/admin') %>
 
@@ -13,87 +12,90 @@
   </head>
 
   <div class="main-con">
-    <div class="horizontal-panel">
-      <h2 class="page-title">User Base Management</h2>
-      <a href="/admin/user-management/create/" class="btn"><i class="fa-solid fa-user-plus"></i> Add User</a>
-    </div>
+    <div class="inner1">
+      <div class="horizontal-panel">
+        <h2 class="page-title">User Base Management</h2>
+        <a href="/admin/user-management/create/" class="btn"><i class="fa-solid fa-user-plus"></i> Add User</a>
+      </div>
 
-    <% if (users.length===0) { %>
-      <p class="no-data">No users found</p>
-      <% } else { %>
-        <table class="user-table" id="userTable">
-          <thead>
-            <tr>
-              <th>User ID</th>
-              <th>Email</th>
-              <th>User Type</th>
-              <th>Full Name</th>
-              <th>StaffType</th>
-              <th>Registered Date</th>
-              <th>Last Login</th>
-              <th>Is Deleted</th>
-              <th>Action</th>
-            </tr>
-          </thead>
-          <tbody>
-            <% users.forEach(user=> { %>
-              <tr id="row-<%= user.LoginUserID %>">
-                <td>
-                  <%= user.UserID %>
-                </td>
-                <td>
-                  <%= user.Email %>
-                </td>
-                <td>
-                  <%= user.UserType %>
-                </td>
-                <td>
-                  <%=user.FullName%>
-                </td>
-                <td>
-                  <%= user.StaffType %>
-                </td>
-                <td>
-                  <%= new Date(user.RegisteredDate).toLocaleDateString('en-IN', { day: '2-digit' , month: 'short' ,
-                    year: 'numeric' }) %>
-                </td>
-                <td>
-                  <%= user.LastLoginDate ? new Date(user.LastLoginDate).toLocaleDateString('en-IN') : '-' %>
-                </td>
-                <td class="<%= !user.IsDeleted  ? 'status-approved' :  'status-rejected'  %>">
-                  <%=!user.IsDeleted? 'No' : 'Yes' %>
-                </td>
-
-                <td class="horizontal-panel">
-                  <a href="/admin/user-management/view/<%= user.UserID %>" class="btn-view">
-                    <i class="fa-solid fa-magnifying-glass"></i> View
-                  </a>
-                  <a href="/admin/user-management/edit/<%= user.UserID %>"
-                    class="<%=user.IsDeleted?'disabled':'btn-edit'%>">
-                    <i class="fa-solid fa-pen-to-square"></i>
-                    Edit
-                  </a>
-                  <%if (!user.IsDeleted ){%>
-                    <div style="display:inline;">
-                      <button onclick="submit('delete','<%=user.UserID%>')" class="btn-delete">
-                        <i class="fa-solid fa-trash"></i>
-                        Delete</button>
-                    </div>
-                    <%} else {%>
-                      <div style="display:inline;">
-                        <button onclick="submit('restore','<%=user.UserID%>')" class="btn-restore"><i
-                            class="fa-solid fa-trash-arrow-up"></i> Restore</button>
-                      </div>
-                      <%}%>
-                </td>
+      <% if (users.length===0) { %>
+        <p class="no-data">No users found</p>
+        <% } else { %>
+          <table class="user-table" id="userTable">
+            <thead>
+              <tr>
+                <th>User ID</th>
+                <th>Email</th>
+                <th>User Type</th>
+                <th>Full Name</th>
+                <th>StaffType</th>
+                <th>Registered Date</th>
+                <th>Last Login</th>
+                <th>Is Deleted</th>
+                <th>Action</th>
               </tr>
-              <% }); %>
-          </tbody>
-        </table>
-        <% } %>
+            </thead>
+            <tbody>
+              <% users.forEach(user=> { %>
+                <tr id="row-<%= user.LoginUserID %>">
+                  <td>
+                    <%= user.UserID %>
+                  </td>
+                  <td>
+                    <%= user.Email %>
+                  </td>
+                  <td>
+                    <%= user.UserType %>
+                  </td>
+                  <td>
+                    <%=user.FullName%>
+                  </td>
+                  <td>
+                    <%= user.StaffType %>
+                  </td>
+                  <td>
+                    <%= new Date(user.RegisteredDate).toLocaleDateString('en-IN', { day: '2-digit' , month: 'short' ,
+                      year: 'numeric' }) %>
+                  </td>
+                  <td>
+                    <%= user.LastLoginDate ? new Date(user.LastLoginDate).toLocaleDateString('en-IN') : '-' %>
+                  </td>
+                  <td class="<%= !user.IsDeleted  ? 'status-approved' :  'status-rejected'  %>">
+                    <%=!user.IsDeleted? 'No' : 'Yes' %>
+                  </td>
+
+                  <td class="horizontal-panel">
+                    <a href="/admin/user-management/view/<%= user.UserID %>" class="btn-view">
+                      <i class="fa-solid fa-magnifying-glass"></i> View
+                    </a>
+                    <a href="/admin/user-management/edit/<%= user.UserID %>"
+                      class="<%=user.IsDeleted?'disabled':'btn-edit'%>">
+                      <i class="fa-solid fa-pen-to-square"></i>
+                      Edit
+                    </a>
+                    <%if (!user.IsDeleted ){%>
+                      <div style="display:inline;">
+                        <button onclick="submit('delete','<%=user.UserID%>')" class="btn-delete">
+                          <i class="fa-solid fa-trash"></i>
+                          Delete</button>
+                      </div>
+                      <%} else {%>
+                        <div style="display:inline;">
+                          <button onclick="submit('restore','<%=user.UserID%>')" class="btn-restore"><i
+                              class="fa-solid fa-trash-arrow-up"></i> Restore</button>
+                        </div>
+                        <%}%>
+                  </td>
+                </tr>
+                <% }); %>
+            </tbody>
+          </table>
+          <% } %>
+    </div>
   </div>
-
-
+  <style scoped>
+    .main-con {}
+  </style>
   <script>
     new DataTable('#userTable', { pageLength: 50, autoWidth: false })
 

@@ -2,7 +2,7 @@
        font-family: 'Segoe UI', sans-serif;
        padding: 2rem;
        font-size: small;
-       background: #f8fafc;
+       overflow: hidden;
    }
 
    /* Main Container */
@@ -23,8 +23,8 @@
        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
        position: absolute;
        position-anchor: --sidebar;
-       top:100px;
-       left:330px;
+       top: 100px;
+       left: 330px;
    }
 
    .form-group {
@@ -79,13 +79,15 @@
        margin-bottom: 0.5rem;
        float: left;
    }
-   .label2{
-   display: block;
+
+   .label2 {
+       display: block;
        font-size: small;
        font-weight: 600;
        color: #475569;
        float: left;
    }
+
    /* Required Field Indicator */
    [required]+label::after {
        content: '*';
@@ -115,6 +117,7 @@
    input[type="hidden"] {
        display: none;
    }
+
    select {
        width: 98%;
    }
@@ -135,7 +138,8 @@
        border-color: #e2e8f0;
        cursor: not-allowed;
    }
-textarea[readonly] {
+
+   textarea[readonly] {
        background-color: #f1f5f9;
        border-color: #e2e8f0;
        cursor: not-allowed;
@@ -147,20 +151,21 @@ textarea[readonly] {
        resize: vertical;
        line-height: 1.5;
    }
-   .choices__input{
-      font-size: 20px !important;
-     }
-     .choices__list--dropdown 
-     .choices__item--selectable.is-highlighted,
-      .choices__list[aria-expanded]
-       .choices__item--selectable.is-highlighted,
-       .choices__list--multiple .choices__item{
-      font-size: 20px !important;
-     }
-    .choices__list--dropdown .choices__item,
-     .choices__list[aria-expanded] .choices__item{
-      font-size:20px !important;
-    } 
+
+   .choices__input {
+       font-size: 20px !important;
+   }
+
+   .choices__list--dropdown .choices__item--selectable.is-highlighted,
+   .choices__list[aria-expanded] .choices__item--selectable.is-highlighted,
+   .choices__list--multiple .choices__item {
+       font-size: 20px !important;
+   }
+
+   .choices__list--dropdown .choices__item,
+   .choices__list[aria-expanded] .choices__item {
+       font-size: 20px !important;
+   }
 
    .btn-primary {
        background-color: #007bff;
@@ -227,11 +232,13 @@ textarea[readonly] {
        margin-top: 50px;
        margin-bottom: 50px;
    }
+
    /* Responsive Adjustments */
    @media (max-width: 768px) {
        form {
            padding: 1.5rem;
        }
+
        form h2 {
            font-size: 1.5rem;
        }
@@ -269,9 +276,10 @@ textarea[readonly] {
        font-size: small;
    }
 
-   .requirement-of-field{
-    color:red;
+   .requirement-of-field {
+       color: red;
    }
+
    .error-message {
        font-size: small;
        color: #e74c3c;

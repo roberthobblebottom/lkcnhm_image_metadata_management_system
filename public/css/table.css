@@ -1,17 +1,27 @@
 body {
   font-family: 'Inter', sans-serif;
-  background: #f8f9fc;
   color: #333;
-  display: flex;
+  background-image: none;
+  overflow: hidden;
 }
 
-.main-con {
-  margin-top: 100px;
-  margin-left: 280px;
+.inner1 {
+  border-radius: 16px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
 
+  background-color: white;
+  padding: 30px 20px;
+  max-width: 1400px;
+  margin: 0 auto;
+  margin-top: 5vh;
+  margin-left: 15vw;
+  min-height: 25%;
+  max-height: 50%;
 }
 
-
+.inner1 {
+  animation: fadeIn 0.5s ease-out;
+}
 
 /* Heading */
 h2 {
@@ -26,13 +36,12 @@ h2 {
 /* Table Styles */
 table {
   border-collapse: collapse;
-  background: white;
   border-radius: 8px;
   overflow: hidden;
   margin: 0 auto;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
   margin-top: 30px;
-  
+
 }
 
 /* Table Header */
@@ -186,5 +195,18 @@ a.disabled {
   a {
     padding: 6px 10px;
     font-size: 12px;
+  }
+}
+
+/* Animation Effects */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
   }
 }
