@@ -102,6 +102,10 @@ html {
   transform: scale(1.1);
 }
 
+.login-button-row {
+  width: 100%
+}
+
 button {
   width: 10vw;
 
@@ -113,7 +117,7 @@ button {
   font-size: small;
   font-weight: 600;
   cursor: pointer;
-  margin-left: 15vw;
+  float: right;
   transition: background 0.3s ease;
 }
 
